@@ -5,19 +5,19 @@ using OlivePlatform.Domain.Entities;
 
 namespace OlivePlatform.Domain.QueryRepositories;
 
-public interface IProductionBatchQueryRepository
+public interface IPressiongOperationQueryRepository
 {
-    Task<PagedResult<ProductionBatchForListResponse>> GetProductionBatches(
-        ProductionBatchesRequestFilter filter);
+    Task<PagedResult<PressingOperationForListResponse>> GetPressingOperations(
+        PressingOperationsRequestFilter filter);
 
-    Task<ProductionBatch?> GetByIdAsync(
+    Task<PressingOperation?> GetByIdAsync(
         int id,
         CancellationToken cancellationToken = default);
 
-    Task<IReadOnlyList<ProductionBatch>> GetAllAsync(
+    Task<IReadOnlyList<PressingOperation>> GetAllAsync(
         CancellationToken cancellationToken = default);
 
-    Task<ProductionBatch?> GetByBatchNumberAsync(
+    Task<PressingOperation?> GetByBatchNumberAsync(
         string batchNumber,
         CancellationToken cancellationToken = default);
 }

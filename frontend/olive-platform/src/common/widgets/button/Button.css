@@ -1,0 +1,177 @@
+/* ============================================================
+   BUTTON
+   ============================================================ */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 8px;
+
+  min-height: 40px;
+
+  padding: 0 16px;
+
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+
+  font-family: var(--font-body);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.1s ease;
+}
+
+/* ============================================================
+   PRIMARY
+   ============================================================ */
+
+.btn-primary {
+  color: #ffffff;
+  background: var(--color-olive-700);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--color-olive-800);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-primary:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+/* ============================================================
+   SECONDARY
+   ============================================================ */
+
+.btn-secondary {
+  color: var(--color-olive-900);
+
+  background: var(--color-olive-100);
+
+  border-color: var(--color-border);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: var(--color-surface-raised);
+
+  border-color: var(--color-border-strong);
+
+  box-shadow: var(--shadow-sm);
+}
+
+/* ============================================================
+   OUTLINE
+   ============================================================ */
+
+.btn-outline {
+  color: var(--color-olive-700);
+
+  background: transparent;
+
+  border-color: var(--color-olive-500);
+}
+
+.btn-outline:hover:not(:disabled) {
+  color: var(--color-olive-900);
+
+  background: var(--color-olive-100);
+
+  border-color: var(--color-olive-700);
+}
+
+/* ============================================================
+   DANGER
+   ============================================================ */
+
+.btn-danger {
+  color: #ffffff;
+
+  background: var(--color-danger);
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: #8f3026;
+
+  box-shadow: var(--shadow-sm);
+}
+
+/* ============================================================
+   GOLD
+   ============================================================ */
+
+.btn-gold {
+  color: var(--color-olive-900);
+
+  background: var(--color-gold-600);
+}
+
+.btn-gold:hover:not(:disabled) {
+  background: var(--color-gold-500);
+
+  box-shadow: var(--shadow-sm);
+}
+
+/* ============================================================
+   DISABLED
+   ============================================================ */
+
+.btn:disabled {
+  opacity: 0.5;
+
+  cursor: not-allowed;
+
+  box-shadow: none;
+}
+
+/* ============================================================
+   FOCUS
+   ============================================================ */
+
+.btn:focus-visible {
+  outline: 2px solid var(--color-gold-600);
+
+  outline-offset: 2px;
+}
+
+/* ============================================================
+   SIZES
+   ============================================================ */
+
+.btn-sm {
+  min-height: 34px;
+
+  padding: 0 12px;
+
+  font-size: var(--fs-xs);
+}
+
+.btn-md {
+  min-height: 40px;
+
+  padding: 0 16px;
+}
+
+.btn-lg {
+  min-height: 46px;
+
+  padding: 0 20px;
+
+  font-size: var(--fs-base);
+}
+
+/* ============================================================
+   FULL WIDTH
+   ============================================================ */
+
+.btn-full {
+  width: 100%;
+}

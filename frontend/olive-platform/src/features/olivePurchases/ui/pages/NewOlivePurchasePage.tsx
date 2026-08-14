@@ -1,13 +1,23 @@
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from "react-router-dom";
+
+import Button from "../../../../common/widgets/button/Button";
+import TextInput from "../../../../common/widgets/textInput/TextInput";
+import Select from "../../../../common/widgets/select/Select";
 
 export default function NewOlivePurchasePage() {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   return (
     <div className="feature-page">
 
+      {/* =====================================================
+          HEADER
+          ===================================================== */}
+
       <div className="page-header">
+
         <div className="page-header-content">
+
           <h1 className="page-title">
             Nouvel achat d’olives
           </h1>
@@ -15,59 +25,106 @@ export default function NewOlivePurchasePage() {
           <p className="page-description">
             Enregistrer un nouvel achat auprès d’un fournisseur.
           </p>
+
         </div>
+
       </div>
 
-      <div className="card form-card">
+
+      {/* =====================================================
+          FORM
+          ===================================================== */}
+
+      <div className="glass-card form-card">
 
         <div className="form-grid">
 
-          <div className="form-field">
-            <label>Numéro d’achat</label>
-            <input placeholder="ACH-2026-001" />
-          </div>
+          {/* Numéro d'achat */}
 
-          <div className="form-field">
-            <label>Fournisseur</label>
-            <input placeholder="Nom du fournisseur" />
-          </div>
+          <TextInput
+            label="Numéro d’achat"
+            placeholder="ACH-2026-001"
+          />
 
-          <div className="form-field">
-            <label>Date d’achat</label>
-            <input type="date" />
-          </div>
 
-          <div className="form-field">
-            <label>Statut</label>
+          {/* Fournisseur */}
 
-            <select defaultValue="draft">
-              <option value="draft">Brouillon</option>
-              <option value="pending">En attente</option>
-              <option value="approved">Approuvé</option>
-            </select>
-          </div>
+          <TextInput
+            label="Fournisseur"
+            placeholder="Nom du fournisseur"
+          />
+
+
+          {/* Date */}
+
+          <TextInput
+            label="Date d’achat"
+            type="date"
+          />
+
+
+          {/* Statut */}
+
+          <Select
+            label="Statut"
+            defaultValue="draft"
+            options={[
+              {
+                value: "draft",
+                label: "Brouillon",
+              },
+              {
+                value: "pending",
+                label: "En attente",
+              },
+              {
+                value: "approved",
+                label: "Approuvé",
+              },
+            ]}
+          />
 
         </div>
+
+
+        {/* Notes */}
 
         <div className="form-field">
-          <label>Notes</label>
-          <textarea rows={4} />
+
+          <label htmlFor="purchase-notes">
+            Notes
+          </label>
+
+          <textarea
+            id="purchase-notes"
+            rows={4}
+            placeholder="Ajouter une note..."
+          />
+
         </div>
 
+
+        {/* Actions */}
+
         <div className="form-actions">
-          <button
-            className="secondary-button"
-            onClick={() => navigate('/olive-purchases')}
+
+          <Button
+            variant="secondary"
+            onClick={() => navigate("/olive-purchases")}
           >
             Annuler
-          </button>
+          </Button>
 
-          <button className="primary-button">
+          <Button
+            variant="primary"
+          >
             Enregistrer
-          </button>
+          </Button>
+
         </div>
 
       </div>
+
     </div>
-  )
+  );
 }

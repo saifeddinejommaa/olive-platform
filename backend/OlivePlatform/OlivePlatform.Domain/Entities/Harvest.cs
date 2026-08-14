@@ -16,7 +16,7 @@ public class Harvest
 
     public Plot Plot { get; private set; } = null!;
 
-    public ICollection<ProductionBatchInput> ProductionInputs
-    { get;  set; } = new List<ProductionBatchInput>();
+    public ICollection<PressingOperationInput> ProductionInputs
+    { get;  set; } = new List<PressingOperationInput>();
 
 }

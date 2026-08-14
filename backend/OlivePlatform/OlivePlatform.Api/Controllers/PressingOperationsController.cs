@@ -8,13 +8,13 @@ namespace OlivePlatform.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class ProductionBatchesController : ControllerBase
+public class PressingOperationsController : ControllerBase
 {
-    private readonly IProductionBatchQueryRepository _queryRepository;
+    private readonly IPressiongOperationQueryRepository _queryRepository;
     private readonly IMediator _mediator;
 
-    public ProductionBatchesController(
-        IProductionBatchQueryRepository queryRepository,
+    public PressingOperationsController(
+        IPressiongOperationQueryRepository queryRepository,
         IMediator mediator)
     {
         _queryRepository = queryRepository;
@@ -23,9 +23,9 @@ public class ProductionBatchesController : ControllerBase
 
     [HttpGet]
     public async Task<IActionResult> GetAll(
-        [FromQuery] ProductionBatchesRequestFilter filter)
+        [FromQuery] PressingOperationsRequestFilter filter)
     {
-        return Ok(await _queryRepository.GetProductionBatches(filter));
+        return Ok(await _queryRepository.GetPressingOperations(filter));
     }
 
     [HttpGet("{id:int}")]
@@ -38,7 +38,7 @@ public class ProductionBatchesController : ControllerBase
 
     [HttpPost]
     public async Task<IActionResult> Create(
-        [FromBody] CreateProductionBatchCommand command)
+        [FromBody] CreatePressingOperationCommand command)
     {
         return Ok(await _mediator.Send(command));
     }
@@ -46,7 +46,7 @@ public class ProductionBatchesController : ControllerBase
     [HttpPut("{id:int}")]
     public async Task<IActionResult> Update(
         int id,
-        [FromBody] UpdateProductionBatchCommand command)
+        [FromBody] UpdatePressingOperationCommand command)
     {
         command.Id = id;
 

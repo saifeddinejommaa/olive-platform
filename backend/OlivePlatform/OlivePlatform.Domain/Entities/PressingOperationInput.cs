@@ -1,7 +1,7 @@
 ﻿
 namespace OlivePlatform.Domain.Entities;
 
-public class ProductionBatchInput
+public class PressingOperationInput
 {
     public int Id { get; set; }
     public int ProductionBatchId { get; private set; }
@@ -14,17 +14,17 @@ public class ProductionBatchInput
 
     public string? Notes { get; private set; }
 
-    public ProductionBatch ProductionBatch { get; private set; } = null!;
+    public PressingOperation ProductionBatch { get; private set; } = null!;
 
     public Harvest? Harvest { get; private set; }
 
     public OlivePurchaseItem? PurchaseItem { get; private set; }
 
-    private ProductionBatchInput()
+    private PressingOperationInput()
     {
     }
 
-    public ProductionBatchInput(
+    public PressingOperationInput(
         int productionBatchId,
         decimal quantityKg,
         int? harvestId = null,

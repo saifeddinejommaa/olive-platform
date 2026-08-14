@@ -4,9 +4,9 @@ using OlivePlatform.Domain.Repositories;
 namespace OlivePlatform.Domain.Interfaces.Repositories;
 
 public interface IProductionBatchRepository
-    : IRepository<ProductionBatch>
+    : IRepository<PressingOperation>
 {
-    Task<ProductionBatch?> GetByNumberAsync(
+    Task<PressingOperation?> GetByNumberAsync(
         string batchNumber,
         CancellationToken cancellationToken = default);
 

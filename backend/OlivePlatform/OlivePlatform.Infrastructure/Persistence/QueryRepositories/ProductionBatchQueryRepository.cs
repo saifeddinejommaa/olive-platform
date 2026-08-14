@@ -9,7 +9,7 @@ using System.Text;
 
 namespace OlivePlatform.Infrastructure.QueryRepositories;
 
-public class ProductionBatchQueryRepository : IProductionBatchQueryRepository
+public class ProductionBatchQueryRepository : IPressiongOperationQueryRepository
 {
     private readonly IDbConnection _dbConnection;
 
@@ -18,30 +18,113 @@ public class ProductionBatchQueryRepository : IProductionBatchQueryRepository
         _dbConnection = dbConnection;
     }
 
-    public async Task<PagedResult<ProductionBatchForListResponse>> GetProductionBatches(
-        ProductionBatchesRequestFilter filter)
+    public async Task<PagedResult<PressingOperationForListResponse>> GetPressingOperations(
+     PressingOperationsRequestFilter filter)
     {
         var sql = new StringBuilder(
             """
-            SELECT
-                COUNT(*) OVER() AS Total,
+        SELECT DISTINCT
+            COUNT(*) OVER() AS Total,
 
-                p.id AS Id,
-                p.batch_number AS BatchNumber,
-                p.production_date AS ProductionDate,
-                p.start_time AS StartTime,
-                p.end_time AS EndTime,
-                p.status_id AS Status,
-                p.olive_quantity_kg AS OliveQuantityKg,
-                p.oil_quantity_liters AS OilQuantityLiters,
-                p.yield_percentage AS YieldPercentage
+            p.id AS Id,
+            p.operation_number AS OperationNumber,
+            p.pressing_date AS PressingDate,
+            p.start_time AS StartTime,
+            p.end_time AS EndTime,
+            p.status_id AS Status,
+            p.oil_quantity_liters AS OilQuantityLiters,
+            p.yield_percentage AS YieldPercentage
 
-            FROM production_batches p
+        FROM pressing_operations p
 
-            WHERE 1 = 1
-            """);
+        LEFT JOIN pressing_operation_inputs poi
+            ON poi.pressing_operation_id = p.id
+
+        LEFT JOIN harvests h
+            ON h.id = poi.harvest_id
+
+        LEFT JOIN olive_purchase_items opi
+            ON opi.id = poi.purchase_item_id
+
+        LEFT JOIN olive_purchases op
+            ON op.id = opi.purchase_id
+
+        WHERE 1 = 1
+        """);
 
         var parameters = new DynamicParameters();
+
+        // ========================================================
+        // PRESSING NUMBER
+        // ========================================================
+
+        if (!string.IsNullOrWhiteSpace(filter.PressingNumber))
+        {
+            sql.Append(
+                """
+            
+            AND p.operation_number ILIKE @PressingNumber
+            """);
+
+            parameters.Add(
+                "PressingNumber",
+                $"%{filter.PressingNumber}%");
+        }
+
+        // ========================================================
+        // PRESSING DATE
+        // ========================================================
+
+        if (filter.PressingDate.HasValue)
+        {
+            sql.Append(
+                """
+            
+            AND p.pressing_date = @PressingDate
+            """);
+
+            parameters.Add(
+                "PressingDate",
+                filter.PressingDate.Value);
+        }
+
+        // ========================================================
+        // HARVEST NUMBER
+        // ========================================================
+
+        if (!string.IsNullOrWhiteSpace(filter.HarvestNumber))
+        {
+            sql.Append(
+                """
+            
+            AND h.harvest_number ILIKE @HarvestNumber
+            """);
+
+            parameters.Add(
+                "HarvestNumber",
+                $"%{filter.HarvestNumber}%");
+        }
+
+        // ========================================================
+        // PURCHASE NUMBER
+        // ========================================================
+
+        if (!string.IsNullOrWhiteSpace(filter.PurchaseNumber))
+        {
+            sql.Append(
+                """
+            
+            AND op.purchase_number ILIKE @PurchaseNumber
+            """);
+
+            parameters.Add(
+                "PurchaseNumber",
+                $"%{filter.PurchaseNumber}%");
+        }
+
+        // ========================================================
+        // PAGINATION
+        // ========================================================
 
         parameters.Add(
             "PageSize",
@@ -51,87 +134,21 @@ public class ProductionBatchQueryRepository : IProductionBatchQueryRepository
             "Offset",
             (filter.PageNumber - 1) * filter.PageSize);
 
-        // ----------------------------------------------------
-        // BatchNumber
-        // ----------------------------------------------------
-
-        if (!string.IsNullOrWhiteSpace(filter.BatchNumber))
-        {
-            sql.Append(
-                """
-                
-                AND p.batch_number ILIKE @BatchNumber
-                """);
-
-            parameters.Add(
-                "BatchNumber",
-                $"%{filter.BatchNumber}%");
-        }
-
-        // ----------------------------------------------------
-        // Status
-        // ----------------------------------------------------
-
-        if (!string.IsNullOrWhiteSpace(filter.Status))
-        {
-            sql.Append(
-                """
-                
-                AND p.status::text = @Status
-                """);
-
-            parameters.Add(
-                "Status",
-                filter.Status);
-        }
-
-        // ----------------------------------------------------
-        // Production Date
-        // ----------------------------------------------------
-
-        if (filter.FromDate.HasValue)
-        {
-            sql.Append(
-                """
-                
-                AND p.production_date >= @ProductionDateFrom
-                """);
-
-            parameters.Add(
-                "ProductionDateFrom",
-                filter.FromDate.Value);
-        }
-
-        if (filter.ToDate.HasValue)
-        {
-            sql.Append(
-                """
-                
-                AND p.production_date <= @ProductionDateTo
-                """);
-
-            parameters.Add(
-                "ProductionDateTo",
-                filter.ToDate.Value);
-        }
-
-        // ----------------------------------------------------
-        // Pagination
-        // ----------------------------------------------------
-
         sql.Append(
             """
-            
-            ORDER BY p.production_date DESC, p.batch_number
+        
+        ORDER BY
+            p.pressing_date DESC,
+            p.operation_number
 
-            LIMIT @PageSize
-            OFFSET @Offset
-            """);
+        LIMIT @PageSize
+        OFFSET @Offset
+        """);
 
         using var connection = _dbConnection;
 
         var result =
-            await connection.QueryAsync<ProductionBatchForListResponse>(
+            await connection.QueryAsync<PressingOperationForListResponse>(
                 sql.ToString(),
                 parameters);
 
@@ -140,7 +157,7 @@ public class ProductionBatchQueryRepository : IProductionBatchQueryRepository
         var total =
             items.FirstOrDefault()?.Total ?? 0;
 
-        return new PagedResult<ProductionBatchForListResponse>
+        return new PagedResult<PressingOperationForListResponse>
         {
             PageNumber = filter.PageNumber,
             PageSize = filter.PageSize,
@@ -153,7 +170,7 @@ public class ProductionBatchQueryRepository : IProductionBatchQueryRepository
     // GET BY ID
     // ============================================================
 
-    public async Task<ProductionBatch?> GetByIdAsync(
+    public async Task<PressingOperation?> GetByIdAsync(
         int id,
         CancellationToken cancellationToken = default)
     {
@@ -161,8 +178,8 @@ public class ProductionBatchQueryRepository : IProductionBatchQueryRepository
             """
             SELECT
                 id AS Id,
-                batch_number AS BatchNumber,
-                production_date AS ProductionDate,
+                operation_number AS OperationNumber,
+                pressing_date AS PressingDate,
                 start_time AS StartTime,
                 end_time AS EndTime,
                 status AS Status,
@@ -173,14 +190,14 @@ public class ProductionBatchQueryRepository : IProductionBatchQueryRepository
                 created_at AS CreatedAt,
                 updated_at AS UpdatedAt
 
-            FROM production_batches
+            FROM pressing_operations
 
             WHERE id = @Id
             """;
 
         using var connection = _dbConnection;
 
-        return await connection.QuerySingleOrDefaultAsync<ProductionBatch>(
+        return await connection.QuerySingleOrDefaultAsync<PressingOperation>(
             sql,
             new
             {
@@ -192,15 +209,15 @@ public class ProductionBatchQueryRepository : IProductionBatchQueryRepository
     // GET ALL
     // ============================================================
 
-    public async Task<IReadOnlyList<ProductionBatch>> GetAllAsync(
+    public async Task<IReadOnlyList<PressingOperation>> GetAllAsync(
         CancellationToken cancellationToken = default)
     {
         const string sql =
             """
             SELECT
                 id AS Id,
-                batch_number AS BatchNumber,
-                production_date AS ProductionDate,
+                operation_number AS OperationNumber,
+                pressing_date AS PressingDate,
                 start_time AS StartTime,
                 end_time AS EndTime,
                 status AS Status,
@@ -211,7 +228,7 @@ public class ProductionBatchQueryRepository : IProductionBatchQueryRepository
                 created_at AS CreatedAt,
                 updated_at AS UpdatedAt
 
-            FROM production_batches
+            FROM pressing_operations
 
             ORDER BY production_date DESC, batch_number
             """;
@@ -219,7 +236,7 @@ public class ProductionBatchQueryRepository : IProductionBatchQueryRepository
         using var connection = _dbConnection;
 
         var result =
-            await connection.QueryAsync<ProductionBatch>(sql);
+            await connection.QueryAsync<PressingOperation>(sql);
 
         return result.ToList();
     }
@@ -228,7 +245,7 @@ public class ProductionBatchQueryRepository : IProductionBatchQueryRepository
     // GET BY BATCH NUMBER
     // ============================================================
 
-    public async Task<ProductionBatch?> GetByBatchNumberAsync(
+    public async Task<PressingOperation?> GetByBatchNumberAsync(
         string batchNumber,
         CancellationToken cancellationToken = default)
     {
@@ -236,8 +253,8 @@ public class ProductionBatchQueryRepository : IProductionBatchQueryRepository
             """
             SELECT
                 id AS Id,
-                batch_number AS BatchNumber,
-                production_date AS ProductionDate,
+                operation_number AS OperationNumber,
+                pressing_date AS PressingDate,
                 start_time AS StartTime,
                 end_time AS EndTime,
                 status AS Status,
@@ -248,14 +265,14 @@ public class ProductionBatchQueryRepository : IProductionBatchQueryRepository
                 created_at AS CreatedAt,
                 updated_at AS UpdatedAt
 
-            FROM production_batches
+            FROM pressing_operations
 
             WHERE batch_number = @BatchNumber
             """;
 
         using var connection = _dbConnection;
 
-        return await connection.QuerySingleOrDefaultAsync<ProductionBatch>(
+        return await connection.QuerySingleOrDefaultAsync<PressingOperation>(
             sql,
             new
             {

@@ -26,7 +26,7 @@ import WorkersPage from './features/workers/ui/pages/WorkersPage'
 import HarvestsPage from './features/haverts/ui/pages/HarvestsPage'
 
 // Production
-import ProductionBatchesPage from './features/production/ui/pages/ProductionBatchesPage'
+import ProductionBatchesPage from './features/production/ui/pages/PressingOperationsPage'
 
 // Oil Movements
 import OilMovementsPage from './features/oilMovements/ui/pages/OilMovementsPage'

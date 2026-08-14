@@ -23,8 +23,8 @@ public class OlivePlatformAppDbContext : DbContext
     public DbSet<LabAnalysis> LabAnalyses => Set<LabAnalysis>();
     public DbSet<LabAnalysisResult> LabAnalysisResults => Set<LabAnalysisResult>();
 
-    public DbSet<ProductionBatch> ProductionBatches => Set<ProductionBatch>();
-    public DbSet<ProductionBatchInput> ProductionBatchInputs => Set<ProductionBatchInput>();
+    public DbSet<PressingOperation> ProductionBatches => Set<PressingOperation>();
+    public DbSet<PressingOperationInput> ProductionBatchInputs => Set<PressingOperationInput>();
     public DbSet<OilBatch> OilBatches => Set<OilBatch>();
 
     public DbSet<Tank> Tanks => Set<Tank>();

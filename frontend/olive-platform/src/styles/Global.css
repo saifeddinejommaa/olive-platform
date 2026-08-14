@@ -132,3 +132,182 @@ button, input, select, textarea {
     transition-duration: 0.001ms !important;
   }
 }
+
+/* ============================================================
+   FILTERS
+   ============================================================ */
+
+.filters {
+  width: 100%;
+  margin-bottom: 28px;
+
+  padding: 24px;
+
+  background: var(--color-surface-raised);
+
+  border: 1px solid var(--color-border);
+
+  border-radius: var(--radius-lg);
+
+  box-shadow: var(--shadow-sm);
+
+  box-sizing: border-box;
+}
+
+
+/* ============================================================
+   FILTER HEADER
+   ============================================================ */
+
+.filters-header {
+  width: 100%;
+
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+
+  margin-bottom: 22px;
+
+  text-align: left;
+}
+
+.filters-header h3 {
+  margin: 0;
+
+  font-size: var(--fs-md);
+
+  font-weight: 600;
+
+  color: var(--color-ink);
+}
+
+.filters-header span {
+  display: block;
+
+  margin-top: 4px;
+
+  color: var(--color-muted);
+
+  font-size: var(--fs-xs);
+}
+
+
+/* ============================================================
+   FILTER CONTENT
+   ============================================================ */
+
+.filters-content {
+  width: 100%;
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(5, minmax(0, 1fr));
+
+  gap: 18px;
+
+  align-items: start;
+
+  justify-items: stretch;
+
+  text-align: left;
+}
+
+
+/* ============================================================
+   FILTER ITEM
+   ============================================================ */
+
+.filter-item {
+  width: 100%;
+
+  min-width: 0;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: stretch;
+
+  justify-content: flex-start;
+}
+
+
+/* Empêche les composants internes
+   de rester centrés */
+
+.filter-item > * {
+  width: 100%;
+}
+
+
+/* ============================================================
+   FILTER FOOTER
+   ============================================================ */
+
+.filters-footer {
+  width: 100%;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: flex-end;
+
+  gap: 12px;
+
+  margin-top: 24px;
+
+  padding-top: 20px;
+
+  border-top: 1px solid var(--color-border);
+}
+
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
+@media (max-width: 1200px) {
+
+  .filters-content {
+    grid-template-columns:
+      repeat(3, minmax(0, 1fr));
+  }
+
+}
+
+
+@media (max-width: 800px) {
+
+  .filters-content {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+}
+
+
+@media (max-width: 550px) {
+
+  .filters {
+    padding: 18px;
+  }
+
+  .filters-content {
+    grid-template-columns: 1fr;
+
+    gap: 14px;
+  }
+
+  .filters-footer {
+    flex-direction: column-reverse;
+
+    align-items: stretch;
+  }
+
+  .filters-footer .btn {
+    width: 100%;
+  }
+
+}

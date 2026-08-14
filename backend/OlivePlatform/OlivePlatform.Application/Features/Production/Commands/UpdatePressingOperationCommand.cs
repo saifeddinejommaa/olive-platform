@@ -4,7 +4,7 @@ using OlivePlatform.Domain.Interfaces.Repositories;
 
 namespace OlivePlatform.Application.Features.ProductionBatches.Commands;
 
-public class UpdateProductionBatchCommand : IRequest<bool>
+public class UpdatePressingOperationCommand : IRequest<bool>
 {
     public int Id { get; set; }
 
@@ -28,7 +28,7 @@ public class UpdateProductionBatchCommand : IRequest<bool>
 }
 
 public class UpdateProductionBatchCommandHandler
-    : IRequestHandler<UpdateProductionBatchCommand, bool>
+    : IRequestHandler<UpdatePressingOperationCommand, bool>
 {
     private readonly IProductionBatchRepository _repository;
 
@@ -39,28 +39,27 @@ public class UpdateProductionBatchCommandHandler
     }
 
     public async Task<bool> Handle(
-        UpdateProductionBatchCommand request,
+        UpdatePressingOperationCommand request,
         CancellationToken cancellationToken)
     {
-        var productionBatch = await _repository.GetByIdAsync(
+        var pressingOperation = await _repository.GetByIdAsync(
             request.Id,
             cancellationToken);
 
-        if (productionBatch is null)
+        if (pressingOperation is null)
             return false;
 
-        productionBatch.BatchNumber = request.BatchNumber;
-        productionBatch.ProductionDate = request.ProductionDate;
-        productionBatch.StartTime = request.StartTime;
-        productionBatch.EndTime = request.EndTime;
-        productionBatch.Status = (ProductionStatus)request.Status;
-        productionBatch.OliveQuantityKg = request.OliveQuantityKg;
-        productionBatch.OilQuantityLiters = request.OilQuantityLiters;
-        productionBatch.YieldPercentage = request.YieldPercentage;
-        productionBatch.Notes = request.Notes;
+        pressingOperation.BatchNumber = request.BatchNumber;
+        pressingOperation.ProductionDate = request.ProductionDate;
+        pressingOperation.StartTime = request.StartTime;
+        pressingOperation.EndTime = request.EndTime;
+        pressingOperation.Status = (ProductionStatus)request.Status;
+        pressingOperation.OilQuantityLiters = request.OilQuantityLiters;
+        pressingOperation.YieldPercentage = request.YieldPercentage;
+        pressingOperation.Notes = request.Notes;
 
         await _repository.UpdateAsync(
-            productionBatch,
+            pressingOperation,
             cancellationToken);
 
         return true;

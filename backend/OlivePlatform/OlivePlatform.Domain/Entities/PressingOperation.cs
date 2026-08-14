@@ -2,19 +2,19 @@
 
 namespace OlivePlatform.Domain.Entities;
 
-public class ProductionBatch
+public class PressingOperation
 {
     public int Id { get; set; }
+
     public string BatchNumber { get; set; } = null!;
 
     public DateOnly ProductionDate { get; set; }
 
     public DateTimeOffset? StartTime { get; set; }
+
     public DateTimeOffset? EndTime { get; set; }
 
     public ProductionStatus Status { get; set; }
-
-    public decimal? OliveQuantityKg { get; set; }
 
     public decimal? OilQuantityLiters { get; set; }
 
@@ -22,11 +22,23 @@ public class ProductionBatch
 
     public string? Notes { get; set; }
 
-    public ICollection<ProductionBatchInput> Inputs { get; set; }
-        = new List<ProductionBatchInput>();
+    // ============================================================
+    // Inputs
+    // ============================================================
+
+    public ICollection<PressingOperationInput> Inputs { get; set; }
+        = new List<PressingOperationInput>();
+
+    // ============================================================
+    // Production d'huile
+    // ============================================================
 
     public ICollection<OilBatch> OilBatches { get; set; }
         = new List<OilBatch>();
+
+    // ============================================================
+    // Domain methods
+    // ============================================================
 
     public void Start()
     {
@@ -34,11 +46,10 @@ public class ProductionBatch
         StartTime = DateTimeOffset.UtcNow;
     }
 
-    public void Complete(
-        decimal oliveQuantityKg,
-        decimal oilQuantityLiters)
+    public void Complete(decimal oilQuantityLiters)
     {
-        OliveQuantityKg = oliveQuantityKg;
+        var oliveQuantityKg = Inputs.Sum(x => x.QuantityKg);
+
         OilQuantityLiters = oilQuantityLiters;
 
         if (oliveQuantityKg > 0)

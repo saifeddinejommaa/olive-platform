@@ -1,5 +1,8 @@
 import { useState } from 'react'
 import DataTable from '../../../../common/widgets/tables/OrdersTable'
+import Button from '../../../../common/widgets/button/Button'
+import TextInput from '../../../../common/widgets/textInput/TextInput'
+import Select from '../../../../common/widgets/select/Select'
 
 type Worker = {
   id: number
@@ -72,20 +75,42 @@ export default function WorkersPage() {
         </div>
       </div>
 
-      <div className="filters card">
-        <input placeholder="Code..." />
-        <input placeholder="Nom..." />
-        <input placeholder="Type..." />
+      <div className="filters">
 
-        <select defaultValue="">
-          <option value="">Tous</option>
-          <option value="true">Actifs</option>
-          <option value="false">Inactifs</option>
-        </select>
+        <TextInput
+          placeholder="Code..."
+        />
 
-        <button className="secondary-button">
+        <TextInput
+          placeholder="Nom..."
+        />
+
+        <TextInput
+          placeholder="Type..."
+        />
+
+        <Select
+          defaultValue=""
+          options={[
+            {
+              value: '',
+              label: 'Tous',
+            },
+            {
+              value: 'true',
+              label: 'Actifs',
+            },
+            {
+              value: 'false',
+              label: 'Inactifs',
+            },
+          ]}
+        />
+
+        <Button variant="secondary">
           Rechercher
-        </button>
+        </Button>
+
       </div>
 
       <DataTable

@@ -2,15 +2,15 @@
 
 namespace OlivePlatform.Application.Features.Production.Responses;
 
-public class ProductionBatchForListResponse
+public class PressingOperationForListResponse
 {
     public int Total { get; set; }
 
     public int Id { get; set; }
 
-    public string BatchNumber { get; set; } = null!;
+    public string OperationNumber { get; set; } = null!;
 
-    public DateOnly ProductionDate { get; set; }
+    public DateOnly PressingDate { get; set; }
 
     public ProductionStatus Status { get; set; }
 

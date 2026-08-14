@@ -14,8 +14,8 @@ public class OlivePurchaseItem
     public OlivePurchase Purchase { get; private set; } = null!;
     public OliveVariety? Variety { get; private set; }
 
-    public ICollection<ProductionBatchInput> ProductionInputs
-    { get; private set; } = new List<ProductionBatchInput>();
+    public ICollection<PressingOperationInput> ProductionInputs
+    { get; private set; } = new List<PressingOperationInput>();
 
     private OlivePurchaseItem()
     {

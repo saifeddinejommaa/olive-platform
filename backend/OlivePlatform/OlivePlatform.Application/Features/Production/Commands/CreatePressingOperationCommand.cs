@@ -5,7 +5,7 @@ using OlivePlatform.Domain.Interfaces.Repositories;
 
 namespace OlivePlatform.Application.Features.ProductionBatches.Commands;
 
-public class CreateProductionBatchCommand : IRequest<int>
+public class CreatePressingOperationCommand : IRequest<int>
 {
     public string BatchNumber { get; set; } = null!;
 
@@ -27,7 +27,7 @@ public class CreateProductionBatchCommand : IRequest<int>
 }
 
 public class CreateProductionBatchCommandHandler
-    : IRequestHandler<CreateProductionBatchCommand, int>
+    : IRequestHandler<CreatePressingOperationCommand, int>
 {
     private readonly IProductionBatchRepository _repository;
 
@@ -38,26 +38,25 @@ public class CreateProductionBatchCommandHandler
     }
 
     public async Task<int> Handle(
-        CreateProductionBatchCommand request,
+        CreatePressingOperationCommand request,
         CancellationToken cancellationToken)
     {
-        var productionBatch = new ProductionBatch
+        var pressingOperation = new PressingOperation
         {
             BatchNumber = request.BatchNumber,
             ProductionDate = request.ProductionDate,
             StartTime = request.StartTime,
             EndTime = request.EndTime,
             Status = (ProductionStatus)request.Status,
-            OliveQuantityKg = request.OliveQuantityKg,
             OilQuantityLiters = request.OilQuantityLiters,
             YieldPercentage = request.YieldPercentage,
             Notes = request.Notes
         };
 
         await _repository.AddAsync(
-            productionBatch,
+            pressingOperation,
             cancellationToken);
 
-        return productionBatch.Id;
+        return pressingOperation.Id;
     }
 }
