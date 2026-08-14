@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="OlivePlatform.Api/OlivePlatform.Api.csproj" />
+  <Project Path="OlivePlatform.Application/OlivePlatform.Application.csproj" />
+  <Project Path="OlivePlatform.Domain/OlivePlatform.Domain.csproj" />
+  <Project Path="OlivePlatform.Infrastructure/OlivePlatform.Infrastructure.csproj" />
+</Solution>
