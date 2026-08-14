@@ -1,0 +1,134 @@
+/* ============================================================
+   OLIVE PLATFORM — Design tokens
+   Palette inspirée de la chaîne réelle de l'huilerie :
+   feuille d'olivier, huile fraîche, pierre calcaire tunisienne,
+   verre de laboratoire.
+   ============================================================ */
+
+:root {
+  /* --- Couleurs de marque --- */
+  --color-ink: #1F2A18;           /* texte principal, presque noir à sous-ton olive */
+  --color-olive-900: #29331B;
+  --color-olive-800: #3A4526;
+  --color-olive-700: #4B5D2C;      /* vert olivier mature — couleur primaire */
+  --color-olive-600: #5C7236;
+  --color-olive-500: #74904A;
+  --color-olive-100: #E4E9D6;
+
+  --color-gold-700: #9C7A1F;
+  --color-gold-600: #C89B3C;       /* or de l'huile fraîche — accent principal */
+  --color-gold-500: #D9AE55;
+  --color-gold-100: #F3E6C4;
+
+  --color-rust-600: #A23B2E;       /* alerte / suppression, usage rare */
+  --color-rust-100: #F3DAD6;
+
+  --color-teal-700: #2E5C55;       /* vert-bleu labo, usage rare (statuts "analysé") */
+  --color-teal-100: #DCEAE7;
+
+  /* --- Neutres / surfaces --- */
+  --color-bg: #EFF1E6;             /* pierre calcaire pâle, plus verte/froide qu'un crème classique */
+  --color-surface: #FCFCF8;
+  --color-surface-raised: #FFFFFF;
+  --color-border: #DADFCB;
+  --color-border-strong: #C3CBA9;
+  --color-muted: #6B7460;
+
+  /* --- Statuts sémantiques --- */
+  --color-success: #4B7A3D;
+  --color-success-bg: #E3EEDD;
+  --color-warning: #B9832A;
+  --color-warning-bg: #F6EAD2;
+  --color-danger: #A23B2E;
+  --color-danger-bg: #F3DAD6;
+  --color-info: #2E5C55;
+  --color-info-bg: #DCEAE7;
+
+  /* --- Typographie --- */
+  --font-display: "Fraunces", "Iowan Old Style", serif;
+  --font-body: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+
+  --fs-xs: 0.75rem;
+  --fs-sm: 0.8125rem;
+  --fs-base: 0.9375rem;
+  --fs-md: 1.0625rem;
+  --fs-lg: 1.375rem;
+  --fs-xl: 1.75rem;
+  --fs-2xl: 2.25rem;
+
+  /* --- Espacement / rayon --- */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+
+  --shadow-sm: 0 1px 2px rgba(31, 42, 24, 0.06);
+  --shadow-md: 0 4px 16px rgba(31, 42, 24, 0.08);
+  --shadow-lg: 0 12px 32px rgba(31, 42, 24, 0.14);
+
+  --sidebar-width: 248px;
+  --topbar-height: 64px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  font-size: var(--fs-base);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  color: var(--color-olive-900);
+  margin: 0;
+}
+
+a {
+  color: inherit;
+}
+
+button, input, select, textarea {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-gold-600);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: var(--color-gold-100);
+}
+
+.mono {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
