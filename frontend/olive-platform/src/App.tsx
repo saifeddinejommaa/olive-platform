@@ -36,9 +36,18 @@ import InvoicesPage from './features/invoices/pages/InvoicesPage'
 
 // Settings
 import SettingsPage from './features/settings/pages/SettingsPage'
+import { useEffect } from 'react'
+import { useConstantsStore } from './features/appConstants/ConstantsStore'
 
 
 function App() {
+
+ const {fetchConstants} = useConstantsStore();
+
+  useEffect(() => {
+    fetchConstants();
+  }, []);
+
   return (
     <BrowserRouter>
       <Routes>

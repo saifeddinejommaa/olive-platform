@@ -75,11 +75,6 @@ export default function InvoicesPage() {
         filters.toDate || null,
     }
 
-    console.log(
-      'Filtres envoyés au backend :',
-      request
-    )
-
     setPageNumber(1)
 
     // Appel API ici

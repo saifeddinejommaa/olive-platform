@@ -47,13 +47,6 @@ export default function OlivePurchasesPage() {
   }
 
   const handleSearch = () => {
-    console.log('Filtres envoyés au backend :', {
-      purchaseNumber: filters.purchaseNumber || null,
-      supplierName: filters.supplierName || null,
-      fromDate: filters.fromDate || null,
-      toDate: filters.toDate || null,
-      status: filters.status || null,
-    })
 
     setPageNumber(1)
 

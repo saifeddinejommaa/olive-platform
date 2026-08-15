@@ -96,11 +96,6 @@ export default function PaymentsPage() {
   ];
 
   const handleSearch = () => {
-    console.log({
-      paymentNumber,
-      invoiceId,
-      paymentMethod,
-    });
 
     setPageNumber(1);
 

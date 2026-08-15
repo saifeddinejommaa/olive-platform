@@ -55,11 +55,6 @@ export default function HarvestsPage() {
       qualityGrade: filters.qualityGrade || null,
     }
 
-    console.log(
-      'Filtres envoyés au backend :',
-      request
-    )
-
     setPageNumber(1)
 
     // Appel API ici

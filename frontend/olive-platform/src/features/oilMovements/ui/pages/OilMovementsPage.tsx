@@ -121,12 +121,6 @@ export default function OilMovementsPage() {
   ];
 
   const handleSearch = () => {
-    console.log({
-      movementNumber,
-      movementType,
-      oilBatchNumber,
-      tankCode,
-    });
 
     setPageNumber(1);
 

@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import DataTable from '../../../../common/widgets/tables/OrdersTable'
 import Button from '../../../../common/widgets/button/Button'
 import TextInput from '../../../../common/widgets/textInput/TextInput'
+import { usePressingOperationsStore } from '../stores/pressingOperationStore'
 
 type PressingOperation = {
   id: number
@@ -19,27 +20,18 @@ type PressingOperationFilters = {
   purchaseNumber: string
 }
 
-const mockPressingOperations: PressingOperation[] = []
-
 export default function PressingOperationsPage() {
+   const { PressingOperations, fetcPressingOperations,filters, setFilter } = usePressingOperationsStore ();
+  useEffect(() => {
+    fetcPressingOperations();
+  }, []);
   const [pageNumber, setPageNumber] = useState(1)
-
-  const [filters, setFilters] =
-    useState<PressingOperationFilters>({
-      pressingNumber: '',
-      pressingDate: '',
-      harvestNumber: '',
-      purchaseNumber: '',
-    })
 
   const updateFilter = (
     field: keyof PressingOperationFilters,
     value: string
   ) => {
-    setFilters((previous) => ({
-      ...previous,
-      [field]: value,
-    }))
+    setFilter(field, value);
   }
 
   const handleSearch = () => {
@@ -57,23 +49,16 @@ export default function PressingOperationsPage() {
         filters.purchaseNumber || null,
     }
 
-    console.log(
-      'Filtres envoyés au backend :',
-      request
-    )
-
     setPageNumber(1)
 
     // Appel API ici
   }
 
   const handleReset = () => {
-    setFilters({
-      pressingNumber: '',
-      pressingDate: '',
-      harvestNumber: '',
-      purchaseNumber: '',
-    })
+    setFilter('pressingNumber', '');
+    setFilter('pressingDate', '');
+    setFilter('harvestNumber', '');
+    setFilter('purchaseNumber', '');
 
     setPageNumber(1)
   }
@@ -236,11 +221,11 @@ export default function PressingOperationsPage() {
       {/* TABLE */}
 
       <DataTable
-        data={mockPressingOperations}
+        data={PressingOperations?.items ?? []}
         columns={columns}
         pageNumber={pageNumber}
         pageSize={10}
-        totalCount={mockPressingOperations.length}
+        totalCount={PressingOperations?.totalCount ?? 0}
         onPageChange={setPageNumber}
       />
 
