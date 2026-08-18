@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import DataTable from '../../../../common/widgets/tables/OrdersTable'
 import Button from '../../../../common/widgets/button/Button'
 import TextInput from '../../../../common/widgets/textInput/TextInput'
@@ -6,7 +6,7 @@ import { usePressingOperationsStore } from '../stores/pressingOperationStore'
 
 type PressingOperation = {
   id: number
-  pressingNumber: string
+  operationNumber: string
   pressingDate: string
   status: string
   oilQuantityLiters: number | null
@@ -14,79 +14,106 @@ type PressingOperation = {
 }
 
 type PressingOperationFilters = {
-  pressingNumber: string
+  operationNumber: string
   pressingDate: string
   harvestNumber: string
   purchaseNumber: string
-}
+} 
 
 export default function PressingOperationsPage() {
-   const { PressingOperations, fetcPressingOperations,filters, setFilter } = usePressingOperationsStore ();
+
+  const {
+    PressingOperations,
+    filters,
+    loading,
+    setFilter,
+    fetcPressingOperations,
+  } = usePressingOperationsStore()
+
+  // ============================================================
+  // INITIAL LOAD
+  // ============================================================
+
   useEffect(() => {
-    fetcPressingOperations();
-  }, []);
-  const [pageNumber, setPageNumber] = useState(1)
+    fetcPressingOperations()
+  }, [])
+
+  // ============================================================
+  // FILTER
+  // ============================================================
 
   const updateFilter = (
     field: keyof PressingOperationFilters,
     value: string
   ) => {
-    setFilter(field, value);
+    setFilter(field, value)
   }
 
-  const handleSearch = () => {
-    const request = {
-      pressingNumber:
-        filters.pressingNumber || null,
+  // ============================================================
+  // SEARCH
+  // ============================================================
 
-      pressingDate:
-        filters.pressingDate || null,
-
-      harvestNumber:
-        filters.harvestNumber || null,
-
-      purchaseNumber:
-        filters.purchaseNumber || null,
-    }
-
-    setPageNumber(1)
-
-    // Appel API ici
+  const handleSearch = async () => {
+    console.log('Searching pressing operations with filters:', filters)
+    await fetcPressingOperations()
   }
 
-  const handleReset = () => {
-    setFilter('pressingNumber', '');
-    setFilter('pressingDate', '');
-    setFilter('harvestNumber', '');
-    setFilter('purchaseNumber', '');
+  // ============================================================
+  // RESET
+  // ============================================================
 
-    setPageNumber(1)
+  const handleReset = async () => {
+    setFilter('pressingNumber', '')
+    setFilter('pressingDate', '')
+    setFilter('harvestNumber', '')
+    setFilter('purchaseNumber', '')
+
+    await fetcPressingOperations()
   }
+
+  // ============================================================
+  // PAGINATION
+  // ============================================================
+
+  const handlePageChange = async (pageNumber: number) => {
+    setFilter('pageNumber', pageNumber)
+    await fetcPressingOperations()
+  }
+
+  // ============================================================
+  // COLUMNS
+  // ============================================================
 
   const columns = [
     {
-      key: 'pressingNumber' as keyof PressingOperation,
+      key: 'operationNumber' as keyof PressingOperation,
       label: 'N° Pression',
     },
+
     {
       key: 'pressingDate' as keyof PressingOperation,
       label: 'Date',
     },
+
     {
       key: 'status' as keyof PressingOperation,
       label: 'Statut',
     },
+
     {
       key: 'oilQuantityLiters' as keyof PressingOperation,
       label: 'Huile produite',
+
       render: (item: PressingOperation) =>
         item.oilQuantityLiters !== null
           ? `${item.oilQuantityLiters.toLocaleString()} L`
           : '—',
     },
+
     {
       key: 'yieldPercentage' as keyof PressingOperation,
       label: 'Rendement',
+
       render: (item: PressingOperation) =>
         item.yieldPercentage !== null
           ? `${item.yieldPercentage}%`
@@ -119,6 +146,7 @@ export default function PressingOperationsPage() {
       <div className="filters">
 
         <div className="filters-header">
+
           <div>
             <h3>Filtres de recherche</h3>
 
@@ -126,6 +154,7 @@ export default function PressingOperationsPage() {
               Rechercher une opération de pression
             </span>
           </div>
+
         </div>
 
         <div className="filters-content">
@@ -136,10 +165,10 @@ export default function PressingOperationsPage() {
             <TextInput
               label="N° Pression"
               placeholder="PRESS-2026-001"
-              value={filters.pressingNumber}
+              value={filters.operationNumber}
               onChange={(event) =>
                 updateFilter(
-                  'pressingNumber',
+                  'operationNumber',
                   event.target.value
                 )
               }
@@ -211,7 +240,9 @@ export default function PressingOperationsPage() {
             variant="primary"
             onClick={handleSearch}
           >
-            Rechercher
+            {loading
+              ? 'Recherche...'
+              : 'Rechercher'}
           </Button>
 
         </div>
@@ -223,10 +254,10 @@ export default function PressingOperationsPage() {
       <DataTable
         data={PressingOperations?.items ?? []}
         columns={columns}
-        pageNumber={pageNumber}
-        pageSize={10}
+        pageNumber={PressingOperations?.pageNumber ?? 1}
+        pageSize={PressingOperations?.pageSize ?? 10}
         totalCount={PressingOperations?.totalCount ?? 0}
-        onPageChange={setPageNumber}
+        onPageChange={handlePageChange}
       />
 
     </div>

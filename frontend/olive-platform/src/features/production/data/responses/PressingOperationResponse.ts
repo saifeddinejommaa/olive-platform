@@ -1,6 +1,6 @@
 export type PressingOperationResponse = {
   id: number
-  pressingNumber: string
+  operationNumber: string
   pressingDate: string
   startTime: string | null
   endTime: string | null

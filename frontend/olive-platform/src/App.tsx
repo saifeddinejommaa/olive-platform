@@ -23,7 +23,7 @@ import TanksPage from './features/tanks/ui/pages/TanksPages'
 import WorkersPage from './features/workers/ui/pages/WorkersPage'
 
 // Harvests
-import HarvestsPage from './features/haverts/ui/pages/HarvestsPage'
+import HarvestsPage from './features/harvests/ui/pages/HarvestsPage'
 
 // Production
 import ProductionBatchesPage from './features/production/ui/pages/PressingOperationsPage'
@@ -38,6 +38,7 @@ import InvoicesPage from './features/invoices/pages/InvoicesPage'
 import SettingsPage from './features/settings/pages/SettingsPage'
 import { useEffect } from 'react'
 import { useConstantsStore } from './features/appConstants/ConstantsStore'
+import NewPressingOperationPage from './features/production/ui/pages/NewPressingOperationPage'
 
 
 function App() {
@@ -47,6 +48,8 @@ function App() {
   useEffect(() => {
     fetchConstants();
   }, []);
+
+  console.log('App.tsx Appconstants', useConstantsStore().Appconstants)
 
   return (
     <BrowserRouter>
@@ -131,6 +134,11 @@ function App() {
           <Route
             path="/production"
             element={<ProductionBatchesPage />}
+          />
+
+          <Route
+            path="/production/new"
+            element={<NewPressingOperationPage />}
           />
 
 

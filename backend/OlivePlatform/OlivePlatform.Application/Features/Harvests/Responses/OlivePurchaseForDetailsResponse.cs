@@ -39,7 +39,7 @@ public class OlivePurchaseItemResponse
 
     public decimal PricePerKg { get; set; }
 
-    public decimal TotalAmount { get; set; }
+    public int TotalAmount { get; set; }
 }
 
 public class OliveSampleSummaryResponse

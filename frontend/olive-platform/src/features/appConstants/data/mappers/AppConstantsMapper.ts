@@ -5,14 +5,13 @@ import type { AppConstantsResponse } from "../responses/AppConstantsResponse";
 
 export function mapConstantsResponseToModel(response: AppConstantsResponse) : AppConstants {
     return  {
-        OliveVarieties: mapConstantItemResponseToModel(response.OliveVarieties),
-        PurchaseStatuses: mapConstantItemResponseToModel(response.PurchaseStatuses),
-        SampleStatuses: mapConstantItemResponseToModel(response.SampleStatuses),
-        ProductionStatuses: mapConstantItemResponseToModel(response.ProductionStatuses),
-        OilMovementTypes: mapConstantItemResponseToModel(response.OilMovementTypes),
-        InvoiceTypes: mapConstantItemResponseToModel(response.InvoiceTypes),
-        InvoiceStatuses: mapConstantItemResponseToModel(response.InvoiceStatuses),
-        PaymentMethods: mapConstantItemResponseToModel(response.PaymentMethods),
+        oliveVarieties: mapConstantItemResponseToModel(response.oliveVarieties),
+        sampleStatuses: mapConstantItemResponseToModel(response.sampleStatuses),
+        productionStatuses: mapConstantItemResponseToModel(response.productionStatuses),
+        oilMovementTypes: mapConstantItemResponseToModel(response.oilMovementTypes),
+        invoiceTypes: mapConstantItemResponseToModel(response.invoiceTypes),
+        invoiceStatuses: mapConstantItemResponseToModel(response.invoiceStatuses),
+        paymentMethods: mapConstantItemResponseToModel(response.paymentMethods),
     }
 }
 

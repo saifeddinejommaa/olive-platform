@@ -14,9 +14,6 @@ public interface IHarvestQueryRepository
         int id,
         CancellationToken cancellationToken = default);
 
-    Task<IReadOnlyList<Harvest>> GetAllAsync(
-        CancellationToken cancellationToken = default);
-
     Task<IReadOnlyList<Harvest>> GetByPlotIdAsync(
         int plotId,
         CancellationToken cancellationToken = default);

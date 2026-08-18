@@ -7,7 +7,7 @@ export type ProductionStatus =
 export type PressingOperation = {
   id: number
 
-  pressingNumber: string
+  operationNumber: string
 
   pressingDate: string
 

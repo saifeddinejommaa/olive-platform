@@ -58,7 +58,7 @@ public class ProductionBatchQueryRepository : IPressiongOperationQueryRepository
         // PRESSING NUMBER
         // ========================================================
 
-        if (!string.IsNullOrWhiteSpace(filter.PressingNumber))
+        if (!string.IsNullOrWhiteSpace(filter.OperationNumber))
         {
             sql.Append(
                 """
@@ -68,7 +68,7 @@ public class ProductionBatchQueryRepository : IPressiongOperationQueryRepository
 
             parameters.Add(
                 "PressingNumber",
-                $"%{filter.PressingNumber}%");
+                $"%{filter.OperationNumber}%");
         }
 
         // ========================================================
@@ -85,7 +85,7 @@ public class ProductionBatchQueryRepository : IPressiongOperationQueryRepository
 
             parameters.Add(
                 "PressingDate",
-                filter.PressingDate.Value);
+                filter.PressingDate.Value.ToDateTime(TimeOnly.MinValue));
         }
 
         // ========================================================

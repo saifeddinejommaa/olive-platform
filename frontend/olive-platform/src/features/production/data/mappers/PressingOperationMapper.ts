@@ -7,7 +7,7 @@ export function PressingOperationMapper(
     ): PressingOperation {
         return {
             id: response.id,
-            pressingNumber: response.pressingNumber,
+            operationNumber: response.operationNumber,
             pressingDate: response.pressingDate,
             startTime: response.startTime,
             endTime: response.endTime,

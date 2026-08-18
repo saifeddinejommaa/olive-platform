@@ -22,7 +22,7 @@ export const usePressingOperationsStore = create<PressingOperations>((set, get) 
         harvestNumber: '',
         purchaseNumber: '',
         pressingDate: '',
-        pressingNumber: '',
+        operationNumber: '',
         pageNumber: 1,
         pageSize: 10
     },
@@ -39,7 +39,7 @@ export const usePressingOperationsStore = create<PressingOperations>((set, get) 
             harvestNumber: '',
             purchaseNumber: '',
             pressingDate: '',
-            pressingNumber: '',
+            operationNumber: '',
             pageNumber: 1,
             pageSize: 10
         }
@@ -47,6 +47,7 @@ export const usePressingOperationsStore = create<PressingOperations>((set, get) 
 
     fetcPressingOperations: async () => {
         set({ loading: true });
+        console.log('Fetching pressing operations with filters:', get().filters);
         try {
             const data = await GetPressingOperations(get().filters);
             set({ PressingOperations: data });
