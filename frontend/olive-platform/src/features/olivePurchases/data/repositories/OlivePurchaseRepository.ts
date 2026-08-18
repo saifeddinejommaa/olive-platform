@@ -25,7 +25,7 @@ export const OlivePurchaseRepository = {
   getPurchaseItemsById: async (id: number,filters?: OlivePurchaseItemsFilter) => {
         const params = buildQueryParams(filters as any);
 
-    const httpResponse = await http<ApiResponse<PagedResult<OlivePurchaseItemResponse>>>(`${API_BASE_URL}olivepurchases/items/${id}?${params.toString()}`);
+    const httpResponse = await http<ApiResponse<PagedResult<OlivePurchaseItemResponse>>>(`${API_BASE_URL}olivepurchases/purchaseitems/${id}?${params.toString()}`);
 
     return {
       pageNumber: httpResponse.Response.pageNumber,

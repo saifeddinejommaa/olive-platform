@@ -1,28 +1,53 @@
-import { useEffect, useState } from "react";
-import { GetOlivePurchaseItems } from "../../domain/usecases/GetOlivePurchaseItems";
-import type { OlivePurchaseItem } from "../../domain/entities/OlivePurchaseItem";
+import { useEffect, useState } from "react"
+import { GetOlivePurchaseItems } from "../../domain/usecases/GetOlivePurchaseItems"
+import type { OlivePurchaseItem } from "../../domain/entities/OlivePurchaseItem"
 
-export function UseOlivePurchaseAutoComplete(purchaseId: number) {
-  const [results, setResults] = useState<OlivePurchaseItem[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
+export function UseOlivePurchaseItems(
+  purchaseId: number | null
+) {
+  const [
+    results,
+    setResults,
+  ] = useState<OlivePurchaseItem[]>([])
+
+  const [
+    loading,
+    setLoading,
+  ] = useState(false)
 
   useEffect(() => {
-    console.log("query", purchaseId)
-    if (!purchaseId || purchaseId<0) {
-      setResults([]);
-      return;
+    if (!purchaseId) {
+      setResults([])
+      setLoading(false)
+      return
     }
 
-    const timeout = setTimeout(async () => {
-      setLoading(true);
-      const data = await GetOlivePurchaseItems(purchaseId,{pageNumber: 1, pageSize: 50 });
-      console.log("data", data)
-      setResults(data.items);
-      setLoading(false);
-    }, 300);
+    const loadItems = async () => {
+      setLoading(true)
 
-    return () => clearTimeout(timeout);
-  }, [purchaseId]);
+      try {
+        const data = await GetOlivePurchaseItems(
+          purchaseId,
+          {
+            pageNumber: 1,
+            pageSize: 50,
+          }
+        )
 
-  return { results, loading };
+        setResults(data.items)
+      } catch (error) {
+        console.error(error)
+        setResults([])
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadItems()
+  }, [purchaseId])
+
+  return {
+    results,
+    loading,
+  }
 }

@@ -58,6 +58,54 @@ export default function PressingOperationInputItem({
     onSelectSource,
 }: PressingOperationInputItemProps) {
 
+    // ==========================================================
+    // CHANGE SOURCE
+    // ==========================================================
+
+   const handleChangeSource = (
+    sourceType: InputSourceType
+) => {
+
+    // Changement de source :
+    // on efface toutes les anciennes références.
+
+    onUpdate(
+        input.id,
+        'reference',
+        ''
+    )
+
+    onUpdate(
+        input.id,
+        'harvestId',
+        null
+    )
+
+    onUpdate(
+        input.id,
+        'purchaseItemId',
+        null
+    )
+
+    // IMPORTANT :
+    // on remet la quantité à zéro.
+    onUpdate(
+        input.id,
+        'quantityKg',
+        0
+    )
+
+    // Enfin on change le type de source.
+    onChangeSource(
+        input.id,
+        sourceType
+    )
+}
+
+    // ==========================================================
+    // REFERENCE CHANGE
+    // ==========================================================
+
     const handleReferenceChange = (
         value: string
     ) => {
@@ -78,6 +126,12 @@ export default function PressingOperationInputItem({
                 null
             )
 
+            onUpdate(
+                input.id,
+                'purchaseItemId',
+                null
+            )
+
         } else {
 
             onUpdate(
@@ -85,8 +139,44 @@ export default function PressingOperationInputItem({
                 'purchaseItemId',
                 null
             )
+
         }
     }
+
+    // ==========================================================
+    // SOURCE SELECTION
+    // ==========================================================
+
+    const handleSelectSource = (
+        source: SourceOption
+    ) => {
+
+        onSelectSource(
+            input.id,
+            source
+        )
+
+        // ======================================================
+        // AUTOMATIC QUANTITY
+        // ======================================================
+
+        if (
+            source.quantityKg !== undefined
+        ) {
+
+            onUpdate(
+                input.id,
+                'quantityKg',
+                source.quantityKg
+            )
+
+        }
+
+    }
+
+    // ==========================================================
+    // RENDER
+    // ==========================================================
 
     return (
         <div
@@ -101,34 +191,50 @@ export default function PressingOperationInputItem({
             }}
         >
 
+            {/* ==================================================
+                SOURCE TYPE
+            ================================================== */}
+
             <SourceTypeSelector
-                value={input.sourceType}
-                onChange={(sourceType) =>
-                    onChangeSource(
-                        input.id,
-                        sourceType
-                    )
+                value={
+                    input.sourceType
+                }
+                onChange={
+                    handleChangeSource
                 }
             />
 
+            {/* ==================================================
+                SOURCE REFERENCE
+            ================================================== */}
+
             <SourceReference
-                sourceType={input.sourceType}
-                value={input.reference}
+                sourceType={
+                    input.sourceType
+                }
+
+                value={
+                    input.reference
+                }
+
                 error={
                     errors[
-                    `input-${index}`
+                        `input-${index}`
                     ]
                 }
+
                 onChange={
                     handleReferenceChange
                 }
-                onSelect={(source) =>
-                    onSelectSource(
-                        input.id,
-                        source
-                    )
+
+                onSelect={
+                    handleSelectSource
                 }
             />
+
+            {/* ==================================================
+                QUANTITY
+            ================================================== */}
 
             <div>
 
@@ -136,8 +242,12 @@ export default function PressingOperationInputItem({
                     label="Quantité d'olives (kg)"
                     type="number"
                     placeholder="500"
-                    value={input.quantityKg}
-                    onChange={(event) =>
+                    value={
+                        input.quantityKg
+                    }
+                    onChange={(
+                        event
+                    ) =>
                         onUpdate(
                             input.id,
                             'quantityKg',
@@ -149,29 +259,24 @@ export default function PressingOperationInputItem({
                 {errors[
                     `quantity-${index}`
                 ] && (
-                        <span className="field-error">
-                            {
-                                errors[
+
+                    <span
+                        className="field-error"
+                    >
+                        {
+                            errors[
                                 `quantity-${index}`
-                                ]
-                            }
-                        </span>
-                    )}
+                            ]
+                        }
+                    </span>
+
+                )}
 
             </div>
 
-            <TextInput
-                label="Notes"
-                placeholder="Informations complémentaires..."
-                value={input.notes}
-                onChange={(event) =>
-                    onUpdate(
-                        input.id,
-                        'notes',
-                        event.target.value
-                    )
-                }
-            />
+            {/* ==================================================
+                REMOVE
+            ================================================== */}
 
             <div
                 style={{
@@ -184,7 +289,9 @@ export default function PressingOperationInputItem({
                 <Button
                     variant="secondary"
                     onClick={() =>
-                        onRemove(input.id)
+                        onRemove(
+                            input.id
+                        )
                     }
                 >
                     Supprimer
