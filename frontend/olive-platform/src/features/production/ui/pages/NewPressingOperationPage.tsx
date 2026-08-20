@@ -15,7 +15,6 @@ import { useCreatePressingOperation } from '../hooks/UseCreatePressingOperation'
 import type { CreatePressingOperationParams } from '../../domain/params/CreatePressingOperationParams'
 
 type NewPressingOperationForm = {
-  operationNumber: string
   pressingDate: string
   statusId: number
   notes: string
@@ -23,7 +22,6 @@ type NewPressingOperationForm = {
 }
 
 const initialForm: NewPressingOperationForm = {
-  operationNumber: '',
   pressingDate: new Date().toISOString().split('T')[0],
   statusId: 0,
   notes: '',
@@ -142,10 +140,6 @@ export default function NewPressingOperationPage() {
   const validate = useCallback(() => {
     const validationErrors: Record<string, string> = {}
 
-    if (!form.operationNumber.trim()) {
-      validationErrors.operationNumber = 'Le numéro de pression est obligatoire.'
-    }
-
     if (!form.pressingDate) {
       validationErrors.pressingDate = 'La date de pression est obligatoire.'
     }
@@ -182,7 +176,6 @@ export default function NewPressingOperationPage() {
 
       const request: CreatePressingOperationParams = {
         createdAt: new Date(`${form.pressingDate}T00:00:00`).toISOString(),
-        operationReference: form.operationNumber,
         status: form.statusId,
         notes: form.notes || null,
         startTime: null,
@@ -238,16 +231,6 @@ export default function NewPressingOperationPage() {
         </div>
 
         <div className="filters-content">
-          <div className="filter-item">
-            <TextInput
-              label="N° Pression"
-              placeholder="PRESS-2026-001"
-              value={form.operationNumber}
-              onChange={event => updateForm('operationNumber', event.target.value)}
-            />
-            {errors.operationNumber && <span className="field-error">{errors.operationNumber}</span>}
-          </div>
-
           <div className="filter-item">
             <TextInput
               label="Date de pression"

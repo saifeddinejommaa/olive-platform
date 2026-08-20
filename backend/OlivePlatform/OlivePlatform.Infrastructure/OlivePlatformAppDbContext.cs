@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using OlivePlatform.Domain.Entities;
+using YourProject.Domain.Entities;
 
 namespace OlivePlatform.Infrastructure;
 
@@ -38,10 +39,37 @@ public class OlivePlatformAppDbContext : DbContext
 
     public DbSet<Worker> Workers => Set<Worker>();
     public DbSet<WorkSession> WorkSessions => Set<WorkSession>();
+    public DbSet<DocumentCounter> DocumentCounters { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<PressingOperation>()
+        .HasIndex(x => x.OperationNumber)
+        .IsUnique();
+
+        modelBuilder.Entity<DocumentCounter>(entity =>
+        {
+            entity.HasKey(x => x.Id);
+
+            entity.Property(x => x.DocumentType)
+                .IsRequired()
+                .HasMaxLength(50);
+
+            entity.Property(x => x.Year)
+                .IsRequired();
+
+            entity.Property(x => x.LastNumber)
+                .IsRequired();
+
+            entity.HasIndex(x => new
+            {
+                x.DocumentType,
+                x.Year
+            })
+            .IsUnique();
+        });
 
         modelBuilder.ApplyConfigurationsFromAssembly(
             typeof(OlivePlatformAppDbContext).Assembly);

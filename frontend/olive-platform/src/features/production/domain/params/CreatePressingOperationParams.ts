@@ -1,7 +1,6 @@
 import type { CreatePressingOperationInputParams } from "./CreatePressingOperationInputParams"
 
 export type CreatePressingOperationParams = {
-  operationReference: string
 
   createdAt: string,
 

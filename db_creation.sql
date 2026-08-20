@@ -16,6 +16,24 @@ CREATE TABLE purchase_status (
     is_active BOOLEAN NOT NULL DEFAULT TRUE
 );
 
+-- ============================================================
+-- 1.1. DOCUMENT COUNTERS
+-- ============================================================
+
+CREATE TABLE document_counters (
+    id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+
+    document_type VARCHAR(50) NOT NULL,
+
+    year INTEGER NOT NULL,
+
+    last_number INTEGER NOT NULL DEFAULT 0
+        CHECK (last_number >= 0),
+
+    CONSTRAINT uq_document_counters_document_type_year
+        UNIQUE (document_type, year)
+);
+
 -- ------------------------------------------------------------
 -- Sample Status
 -- ------------------------------------------------------------

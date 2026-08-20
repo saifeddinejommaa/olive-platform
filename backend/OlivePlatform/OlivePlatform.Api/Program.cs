@@ -7,7 +7,9 @@ using OlivePlatform.Api.Middleware;
 using OlivePlatform.Application;
 using OlivePlatform.Application.Common;
 using OlivePlatform.Infrastructure;
+using OlivePlatform.Infrastructure.Services;
 using System.Data;
+using YourProject.Application.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -57,6 +59,10 @@ builder.Services.AddDbContext<OlivePlatformAppDbContext>(
     {
         options.UseNpgsql(connectionString);
     });
+
+builder.Services.AddScoped<
+    IDocumentNumberService,
+    DocumentNumberService>();
 
 // ============================================================
 // Dapper
