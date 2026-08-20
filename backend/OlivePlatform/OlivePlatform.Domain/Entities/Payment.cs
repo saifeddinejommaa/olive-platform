@@ -22,6 +22,4 @@ public class Payment
     public string? Reference { get;  set; }
     public string? Notes { get;  set; }
 
-    public Invoice? Invoice { get;  set; }
-
 }

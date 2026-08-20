@@ -1,69 +1,32 @@
 ﻿using OlivePlatform.Domain.Enums;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace OlivePlatform.Domain.Entities;
 
+[Table("pressing_operations")]
 public class PressingOperation
 {
+    [Column("id")]
     public int Id { get; set; }
 
-    public string BatchNumber { get; set; } = null!;
+    [Column("operation_number")]
+    public string OperationNumber { get; set; } = null!;
 
-    public DateOnly ProductionDate { get; set; }
+    [Column("start_time")]
+    public DateTime? StartTime { get; set; }
 
-    public DateTimeOffset? StartTime { get; set; }
+    [Column("end_time")]
+    public DateTime? EndTime { get; set; }
 
-    public DateTimeOffset? EndTime { get; set; }
-
+    [Column("status_id")]
     public ProductionStatus Status { get; set; }
 
+    [Column("oil_quantity_liters")]
     public decimal? OilQuantityLiters { get; set; }
 
-    public decimal? YieldPercentage { get; set; }
-
+    [Column("notes")]
     public string? Notes { get; set; }
 
-    // ============================================================
-    // Inputs
-    // ============================================================
-
-    public ICollection<PressingOperationInput> Inputs { get; set; }
-        = new List<PressingOperationInput>();
-
-    // ============================================================
-    // Production d'huile
-    // ============================================================
-
-    public ICollection<OilBatch> OilBatches { get; set; }
-        = new List<OilBatch>();
-
-    // ============================================================
-    // Domain methods
-    // ============================================================
-
-    public void Start()
-    {
-        Status = ProductionStatus.InProgress;
-        StartTime = DateTimeOffset.UtcNow;
-    }
-
-    public void Complete(decimal oilQuantityLiters)
-    {
-        var oliveQuantityKg = Inputs.Sum(x => x.QuantityKg);
-
-        OilQuantityLiters = oilQuantityLiters;
-
-        if (oliveQuantityKg > 0)
-        {
-            YieldPercentage =
-                oilQuantityLiters / oliveQuantityKg * 100;
-        }
-
-        EndTime = DateTimeOffset.UtcNow;
-        Status = ProductionStatus.Completed;
-    }
-
-    public void Cancel()
-    {
-        Status = ProductionStatus.Cancelled;
-    }
+    [Column("created_at")]
+    public DateTime CreatedAt { get; set; }
 }

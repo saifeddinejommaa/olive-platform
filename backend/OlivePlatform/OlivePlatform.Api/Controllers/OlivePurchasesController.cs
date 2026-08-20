@@ -36,7 +36,7 @@ public class OlivePurchasesController : ControllerBase
 
         return result is null ? NotFound() : Ok(result);
     }
-    [HttpGet("PurchaseItems/{purchaseId:int}", Name = nameof(GetPurchaseItems))]
+    [HttpGet("items/{purchaseId:int}", Name = nameof(GetPurchaseItems))]
     public async Task<IActionResult> GetPurchaseItems(int purchaseId, [FromQuery] OlivePurchaseItemsRequestFilter filter)
     {
         var result = await _queryRepository.GetOlivePurchaseItems(purchaseId, filter);

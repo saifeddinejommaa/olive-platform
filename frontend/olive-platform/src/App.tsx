@@ -48,9 +48,6 @@ function App() {
   useEffect(() => {
     fetchConstants();
   }, []);
-
-  console.log('App.tsx Appconstants', useConstantsStore().Appconstants)
-
   return (
     <BrowserRouter>
       <Routes>

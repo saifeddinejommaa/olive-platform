@@ -59,9 +59,9 @@ public class UpdateInvoiceCommandHandler
         invoice.TaxAmount = request.TaxAmount;
         invoice.Status = (InvoiceStatus)request.Status;
         invoice.Notes = request.Notes;
-
-        invoice.Items.Clear();
         /*
+        invoice.Items.Clear();
+        
         foreach (var item in request.Items)
         {
             invoice.Items.Add(new InvoiceItem

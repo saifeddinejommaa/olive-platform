@@ -31,6 +31,8 @@ public class OlivePurchaseItemResponse
 {
     public int Id { get; set; }
 
+    public required string Reference { get; set; }
+
     public int? VarietyId { get; set; }
 
     public string? VarietyName { get; set; }

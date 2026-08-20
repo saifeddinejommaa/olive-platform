@@ -1,22 +1,16 @@
-export type ProductionStatus =
-  | 'planned'
-  | 'in_progress'
-  | 'completed'
-  | 'cancelled'
+import type { ProductionStatus } from "./ProductionStatus"
 
 export type PressingOperation = {
   id: number
 
   operationNumber: string
-
-  pressingDate: string
-
-  startTime: string | null
-  endTime: string | null
+  createdAt : Date
+  startTime: Date | null
+  endTime: Date | null
 
   status: ProductionStatus
 
   oilQuantityLiters: number | null
 
-  yieldPercentage: number | null
+  notes : string | null
 }

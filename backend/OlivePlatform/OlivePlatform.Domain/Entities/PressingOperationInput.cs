@@ -1,42 +1,26 @@
 ﻿
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace OlivePlatform.Domain.Entities;
 
+[Table("pressing_operation_inputs")]
 public class PressingOperationInput
 {
+    [Column("id")]
     public int Id { get; set; }
-    public int ProductionBatchId { get; private set; }
 
-    public int? HarvestId { get; private set; }
+    [Column("pressing_operation_id")]
+    public int PressingOperationId { get;  set; }
 
-    public int? PurchaseItemId { get; private set; }
+    [Column("harvest_id")]
+    public int? HarvestId { get;  set; }
 
-    public decimal QuantityKg { get; private set; }
+    [Column("purchase_item_id")]
+    public int? PurchaseItemId { get;  set; }
 
-    public string? Notes { get; private set; }
+    [Column("quantity_kg")]
+    public decimal QuantityKg { get;  set; }
 
-    public PressingOperation ProductionBatch { get; private set; } = null!;
-
-    public Harvest? Harvest { get; private set; }
-
-    public OlivePurchaseItem? PurchaseItem { get; private set; }
-
-    private PressingOperationInput()
-    {
-    }
-
-    public PressingOperationInput(
-        int productionBatchId,
-        decimal quantityKg,
-        int? harvestId = null,
-        int? purchaseItemId = null)
-    {
-        if (harvestId is null && purchaseItemId is null)
-            throw new ArgumentException(
-                "Either HarvestId or PurchaseItemId must be provided.");
-
-        ProductionBatchId = productionBatchId;
-        QuantityKg = quantityKg;
-        HarvestId = harvestId;
-        PurchaseItemId = purchaseItemId;
-    }
+    [Column("created_at")]
+    public DateTime CreatedAt { get; set; }
 }

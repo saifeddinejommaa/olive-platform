@@ -16,8 +16,4 @@ public interface IPressiongOperationQueryRepository
 
     Task<IReadOnlyList<PressingOperation>> GetAllAsync(
         CancellationToken cancellationToken = default);
-
-    Task<PressingOperation?> GetByBatchNumberAsync(
-        string batchNumber,
-        CancellationToken cancellationToken = default);
 }

@@ -1,104 +1,121 @@
-import { useState } from 'react'
+import { useEffect } from 'react'
 import DataTable from '../../../../common/widgets/tables/OrdersTable'
 import Button from '../../../../common/widgets/button/Button'
 import TextInput from '../../../../common/widgets/textInput/TextInput'
 import Select from '../../../../common/widgets/select/Select'
 
-type OlivePurchase = {
-  id: number
-  purchaseNumber: string
-  supplierName: string
-  purchaseDate: string
-  status: string
-  quantityKg: number
-  pricePerKg: number
-  totalAmount: number
-}
+import type { OlivePurchase } from '../../domain/entities/OlivePurchase'
+import type { OlivePurchasesFilter } from '../../domain/entities/OlivePurchaseFilter'
 
-type OlivePurchaseFilters = {
-  purchaseNumber: string
-  supplierName: string
-  fromDate: string
-  toDate: string
-  status: string
-}
-
-const mockOlivePurchases: OlivePurchase[] = []
+import { useOlivePurchasesStore } from '../stores/OlivePurchaseStore'
+import { useConstantsStore } from '../../../appConstants/ConstantsStore'
 
 export default function OlivePurchasesPage() {
-  const [pageNumber, setPageNumber] = useState(1)
+  const {
+    olivePurchases,
+    loading,
+    error,
+    filters,
+    setFilter,
+    clearFilters,
+    fetchOlivePurchases,
+  } = useOlivePurchasesStore()
 
-  const [filters, setFilters] = useState<OlivePurchaseFilters>({
-    purchaseNumber: '',
-    supplierName: '',
-    fromDate: '',
-    toDate: '',
-    status: '',
-  })
+  const {
+    Appconstants,
+    loading: constantsLoading,
+    fetchConstants,
+  } = useConstantsStore()
 
+  /**
+   * Chargement des constantes
+   */
+  useEffect(() => {
+    fetchConstants()
+  }, [fetchConstants])
+
+  /**
+   * Chargement initial des achats
+   */
+  useEffect(() => {
+    fetchOlivePurchases()
+  }, [fetchOlivePurchases])
+
+  /**
+   * Modification d'un filtre
+   */
   const updateFilter = (
-    field: keyof OlivePurchaseFilters,
-    value: string
+    field: keyof OlivePurchasesFilter,
+    value: string | number
   ) => {
-    setFilters((previous) => ({
-      ...previous,
-      [field]: value,
-    }))
+    setFilter(field, value)
   }
 
-  const handleSearch = () => {
+  /**
+   * Recherche
+   */
+  const handleSearch = async () => {
+    setFilter('pageNumber', 1)
 
-    setPageNumber(1)
-
-    // Ici tu feras ton appel API
+    await fetchOlivePurchases()
   }
 
-  const handleReset = () => {
-    setFilters({
-      purchaseNumber: '',
-      supplierName: '',
-      fromDate: '',
-      toDate: '',
-      status: '',
-    })
+  /**
+   * Réinitialisation des filtres
+   */
+  const handleReset = async () => {
+    clearFilters()
 
-    setPageNumber(1)
+    await fetchOlivePurchases()
   }
+
+  /**
+   * Pagination
+   */
+  const handlePageChange = async (page: number) => {
+    setFilter('pageNumber', page)
+
+    await fetchOlivePurchases()
+  }
+
+  /**
+   * Options des statuts
+   */
+  const statusOptions = [
+    {
+      value: '',
+      label: 'Tous les statuts',
+    },
+
+    ...Appconstants.purchaseStatuses.map((status) => ({
+      value: String(status.id),
+      label: status.label,
+    })),
+  ]
 
   const columns = [
     {
       key: 'purchaseNumber' as keyof OlivePurchase,
       label: 'N° Achat',
     },
+
     {
       key: 'supplierName' as keyof OlivePurchase,
       label: 'Fournisseur',
     },
+
     {
       key: 'purchaseDate' as keyof OlivePurchase,
       label: 'Date',
+      render: (item: OlivePurchase) =>
+        new Date(item.purchaseDate).toLocaleDateString(
+          'fr-FR'
+        ),
     },
+
     {
       key: 'status' as keyof OlivePurchase,
       label: 'Statut',
-    },
-    {
-      key: 'quantityKg' as keyof OlivePurchase,
-      label: 'Quantité',
-      render: (item: OlivePurchase) =>
-        `${item.quantityKg.toLocaleString()} kg`,
-    },
-    {
-      key: 'pricePerKg' as keyof OlivePurchase,
-      label: 'Prix / kg',
-      render: (item: OlivePurchase) =>
-        `${item.pricePerKg.toLocaleString()} €`,
-    },
-    {
-      key: 'totalAmount' as keyof OlivePurchase,
-      label: 'Montant total',
-      render: (item: OlivePurchase) =>
-        `${item.totalAmount.toLocaleString()} €`,
     },
   ]
 
@@ -117,7 +134,8 @@ export default function OlivePurchasesPage() {
           </h1>
 
           <p className="page-description">
-            Gestion des achats d’olives auprès des fournisseurs.
+            Gestion des achats d’olives auprès des
+            fournisseurs.
           </p>
 
         </div>
@@ -130,134 +148,146 @@ export default function OlivePurchasesPage() {
 
       <div className="filters">
 
-  <div className="filters-header">
-    <div>
-      <h3>Filtres de recherche</h3>
+        <div className="filters-header">
+          <div>
+            <h3>Filtres de recherche</h3>
 
-      <span>
-        Rechercher un achat d’olives
-      </span>
-    </div>
-  </div>
+            <span>
+              Rechercher un achat d’olives
+            </span>
+          </div>
+        </div>
 
-  <div className="filters-content">
 
-    <div className="filter-item">
-      <TextInput
-        label="N° Achat"
-        placeholder="ACH-2026-001"
-        value={filters.purchaseNumber}
-        onChange={(event) =>
-          updateFilter(
-            'purchaseNumber',
-            event.target.value
-          )
-        }
-      />
-    </div>
+        <div className="filters-content">
 
-    <div className="filter-item">
-      <TextInput
-        label="Fournisseur"
-        placeholder="Nom du fournisseur"
-        value={filters.supplierName}
-        onChange={(event) =>
-          updateFilter(
-            'supplierName',
-            event.target.value
-          )
-        }
-      />
-    </div>
+          {/* N° ACHAT */}
 
-    <div className="filter-item">
-      <TextInput
-        label="Du"
-        type="date"
-        value={filters.fromDate}
-        onChange={(event) =>
-          updateFilter(
-            'fromDate',
-            event.target.value
-          )
-        }
-      />
-    </div>
+          <div className="filter-item">
+            <TextInput
+              label="N° Achat"
+              placeholder="ACH-2026-001"
+              value={filters.purchaseNumber}
+              onChange={(event) =>
+                updateFilter(
+                  'purchaseNumber',
+                  event.target.value
+                )
+              }
+            />
+          </div>
 
-    <div className="filter-item">
-      <TextInput
-        label="Au"
-        type="date"
-        value={filters.toDate}
-        onChange={(event) =>
-          updateFilter(
-            'toDate',
-            event.target.value
-          )
-        }
-      />
-    </div>
 
-    <div className="filter-item">
-      <Select
-        label="Statut"
-        value={filters.status}
-        onChange={(event) =>
-          updateFilter(
-            'status',
-            event.target.value
-          )
-        }
-        options={[
-          {
-            value: '',
-            label: 'Tous les statuts',
-          },
-          {
-            value: 'draft',
-            label: 'Brouillon',
-          },
-          {
-            value: 'pending',
-            label: 'En attente',
-          },
-          {
-            value: 'approved',
-            label: 'Approuvé',
-          },
-          {
-            value: 'received',
-            label: 'Reçu',
-          },
-          {
-            value: 'cancelled',
-            label: 'Annulé',
-          },
-        ]}
-      />
-    </div>
+          {/* FOURNISSEUR */}
 
-  </div>
+          <div className="filter-item">
+            <TextInput
+              label="Fournisseur"
+              placeholder="Nom du fournisseur"
+              value={filters.supplierName}
+              onChange={(event) =>
+                updateFilter(
+                  'supplierName',
+                  event.target.value
+                )
+              }
+            />
+          </div>
 
-  <div className="filters-footer">
 
-    <Button
-      variant="secondary"
-      onClick={handleReset}
-    >
-      Réinitialiser
-    </Button>
+          {/* DATE DEBUT */}
 
-    <Button
-      variant="primary"
-      onClick={handleSearch}
-    >
-      Rechercher
-    </Button>
+          <div className="filter-item">
+            <TextInput
+              label="Du"
+              type="date"
+              value={filters.fromDate}
+              onChange={(event) =>
+                updateFilter(
+                  'fromDate',
+                  event.target.value
+                )
+              }
+            />
+          </div>
 
-  </div>
 
-</div>
+          {/* DATE FIN */}
+
+          <div className="filter-item">
+            <TextInput
+              label="Au"
+              type="date"
+              value={filters.toDate}
+              onChange={(event) =>
+                updateFilter(
+                  'toDate',
+                  event.target.value
+                )
+              }
+            />
+          </div>
+
+
+          {/* STATUT */}
+
+          <div className="filter-item">
+            <Select
+              label="Statut"
+              value={filters.status}
+              onChange={(event) =>
+                updateFilter(
+                  'status',
+                  event.target.value
+                )
+              }
+              options={statusOptions}
+            />
+          </div>
+
+        </div>
+
+
+        {/* =====================================================
+            FILTER FOOTER
+            ===================================================== */}
+
+        <div className="filters-footer">
+
+          <Button
+            variant="secondary"
+            onClick={handleReset}
+            disabled={loading}
+          >
+            Réinitialiser
+          </Button>
+
+          <Button
+            variant="primary"
+            onClick={handleSearch}
+            disabled={
+              loading || constantsLoading
+            }
+          >
+            {loading
+              ? 'Recherche...'
+              : 'Rechercher'}
+          </Button>
+
+        </div>
+
+      </div>
+
+
+      {/* =====================================================
+          ERROR
+          ===================================================== */}
+
+      {error && (
+        <div className="error-message">
+          {error}
+        </div>
+      )}
 
 
       {/* =====================================================
@@ -265,13 +295,26 @@ export default function OlivePurchasesPage() {
           ===================================================== */}
 
       <DataTable
-        data={mockOlivePurchases}
+        data={olivePurchases.items}
         columns={columns}
-        pageNumber={pageNumber}
-        pageSize={10}
-        totalCount={mockOlivePurchases.length}
-        onPageChange={setPageNumber}
+        pageNumber={olivePurchases.pageNumber}
+        pageSize={olivePurchases.pageSize}
+        totalCount={olivePurchases.totalCount}
+        onPageChange={handlePageChange}
       />
+
+
+      {/* =====================================================
+          LOADING
+          ===================================================== */}
+
+      {(loading || constantsLoading) && (
+        <div className="loading">
+          {constantsLoading
+            ? 'Chargement des constantes...'
+            : 'Chargement des achats d’olives...'}
+        </div>
+      )}
 
     </div>
   )

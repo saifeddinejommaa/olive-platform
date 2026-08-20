@@ -12,6 +12,7 @@ export function mapConstantsResponseToModel(response: AppConstantsResponse) : Ap
         invoiceTypes: mapConstantItemResponseToModel(response.invoiceTypes),
         invoiceStatuses: mapConstantItemResponseToModel(response.invoiceStatuses),
         paymentMethods: mapConstantItemResponseToModel(response.paymentMethods),
+        purchaseStatuses: mapConstantItemResponseToModel(response.purchaseStatuses)
     }
 }
 

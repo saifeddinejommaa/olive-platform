@@ -10,7 +10,6 @@ export const AppConstantsRepository = {
       `${API_BASE_URL}appconstants`
     );
       const constantsResponse = httpResponse.Response;
-    console.log('AppConstantsRepository getAll constantsResponse', constantsResponse)   
     return mapConstantsResponseToModel(constantsResponse);
   },
 };

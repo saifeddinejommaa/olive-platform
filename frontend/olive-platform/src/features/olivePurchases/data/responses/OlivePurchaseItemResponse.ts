@@ -2,6 +2,8 @@
 export type OlivePurchaseItemResponse = {
   id: number
 
+  reference: string
+
   purchaseId: number
 
   varietyId: number | null

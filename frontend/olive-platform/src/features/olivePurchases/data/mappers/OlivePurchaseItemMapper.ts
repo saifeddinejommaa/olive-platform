@@ -1,3 +1,4 @@
+import type { OliveVarieties } from "../../../shared/entities/OliveVarieties"
 import type { OlivePurchaseItemResponse } from "../responses/OlivePurchaseItemResponse"
 
 export function OlivePurchaseItemMapper(
@@ -6,9 +7,11 @@ export function OlivePurchaseItemMapper(
     return {
         id: response.id,
 
+        reference: response.reference,
+
         purchaseId: response.purchaseId,
 
-        varietyId: response.varietyId,
+        variety: response.varietyId as OliveVarieties,
 
         description: response.description,
 

@@ -19,7 +19,6 @@ export async function http<T>(
   const { method = "GET", body, headers = {} } = options;
 
   const isGet = method.toUpperCase() === "GET";
-
   const response = await fetch(url, {
     method,
     headers: {

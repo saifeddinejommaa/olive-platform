@@ -471,6 +471,8 @@ public class OlivePurchaseQueryRepository : IOlivePurchaseQueryRepository
 
             opi.id AS Id,
 
+            opi.reference AS Reference,
+
             opi.purchase_id AS PurchaseId,
 
             opi.variety_id AS VarietyId,

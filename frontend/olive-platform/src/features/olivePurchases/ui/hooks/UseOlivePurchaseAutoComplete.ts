@@ -7,7 +7,6 @@ export function UseOlivePurchaseAutoComplete(serialNumber: string) {
   const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
-    console.log("query", serialNumber)
     if (!serialNumber || serialNumber.length < 2) {
       setResults([]);
       return;
@@ -16,7 +15,6 @@ export function UseOlivePurchaseAutoComplete(serialNumber: string) {
     const timeout = setTimeout(async () => {
       setLoading(true);
       const data = await GetOlivePurchases({ purchaseNumber: serialNumber, pageNumber: 1, pageSize: 10 });
-      console.log("data", data)
       setResults(data.items);
       setLoading(false);
     }, 300);

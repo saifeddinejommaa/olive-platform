@@ -14,10 +14,4 @@ public class Tank
     public string Status { get;  set; }
 
     public string? Notes { get;  set; }
-
-    public ICollection<OilMovement> SourceMovements { get; private set; }
-        = new List<OilMovement>();
-
-    public ICollection<OilMovement> DestinationMovements { get; private set; }
-        = new List<OilMovement>();
 }

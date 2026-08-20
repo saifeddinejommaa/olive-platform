@@ -217,6 +217,8 @@ CREATE TABLE olive_purchase_items (
         REFERENCES olive_purchases(id)
         ON DELETE CASCADE,
 
+    reference VARCHAR(100) NOT NULL,
+
     variety_id INTEGER
         REFERENCES olive_varieties(id)
         ON DELETE RESTRICT,
@@ -236,7 +238,10 @@ CREATE TABLE olive_purchase_items (
 
     notes TEXT,
 
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT uq_olive_purchase_item_reference
+        UNIQUE (purchase_id, reference)
 );
 
 

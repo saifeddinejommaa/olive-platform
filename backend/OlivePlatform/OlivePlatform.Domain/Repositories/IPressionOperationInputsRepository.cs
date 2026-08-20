@@ -3,9 +3,12 @@ using OlivePlatform.Domain.Repositories;
 
 namespace OlivePlatform.Domain.Interfaces.Repositories;
 
-public interface IProductionBatchInputRepository
+public interface IPressionOperationInputsRepository
     : IRepository<PressingOperationInput>
 {
+
+    Task<PressingOperationInput> CreateAsync(PressingOperationInput input);
+
     Task<IReadOnlyList<PressingOperationInput>>
         GetByProductionBatchIdAsync(
             int productionBatchId,

@@ -1,10 +1,13 @@
+import type { OliveVarieties } from "../../../shared/entities/OliveVarieties"
 
 export type OlivePurchaseItem = {
   id: number
+  
+  reference: string
 
   purchaseId: number
 
-  varietyId: number | null
+  variety: OliveVarieties
 
   description: string | null
 

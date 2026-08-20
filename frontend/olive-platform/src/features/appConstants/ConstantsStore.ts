@@ -19,6 +19,7 @@ const initialConstants: AppConstants = {
   invoiceTypes: [],
   invoiceStatuses: [],
   paymentMethods: [],
+  purchaseStatuses: []
 };
 
 export const useConstantsStore =

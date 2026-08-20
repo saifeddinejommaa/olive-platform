@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using OlivePlatform.Application.Features.Production.Requests;
 using OlivePlatform.Domain.Entities;
 using OlivePlatform.Domain.Enums;
 using OlivePlatform.Domain.Interfaces.Repositories;
@@ -7,9 +8,11 @@ namespace OlivePlatform.Application.Features.ProductionBatches.Commands;
 
 public class CreatePressingOperationCommand : IRequest<int>
 {
-    public string BatchNumber { get; set; } = null!;
+    public required List<NewPressingOperationInputRequest> Inputs { get; set; }
 
-    public DateOnly ProductionDate { get; set; }
+    public required string OperationReference { get; set; }
+
+    public DateTime CreatedAt { get; set; }
 
     public DateTime? StartTime { get; set; }
 
@@ -21,18 +24,16 @@ public class CreatePressingOperationCommand : IRequest<int>
 
     public decimal? OilQuantityLiters { get; set; }
 
-    public decimal? YieldPercentage { get; set; }
-
     public string? Notes { get; set; }
 }
 
 public class CreateProductionBatchCommandHandler
     : IRequestHandler<CreatePressingOperationCommand, int>
 {
-    private readonly IProductionBatchRepository _repository;
+    private readonly IPressionOperationsRepository _repository;
 
     public CreateProductionBatchCommandHandler(
-        IProductionBatchRepository repository)
+        IPressionOperationsRepository repository)
     {
         _repository = repository;
     }
@@ -43,18 +44,34 @@ public class CreateProductionBatchCommandHandler
     {
         var pressingOperation = new PressingOperation
         {
-            BatchNumber = request.BatchNumber,
-            ProductionDate = request.ProductionDate,
+            OperationNumber = request.OperationReference,
             StartTime = request.StartTime,
             EndTime = request.EndTime,
             Status = (ProductionStatus)request.Status,
             OilQuantityLiters = request.OilQuantityLiters,
-            YieldPercentage = request.YieldPercentage,
-            Notes = request.Notes
+            CreatedAt = request.CreatedAt,
+            Notes = request.Notes,
         };
 
         await _repository.AddAsync(
-            pressingOperation,
+           pressingOperation,
+           cancellationToken);
+
+        var operationId = pressingOperation.Id;
+
+        var inputs = request.Inputs
+           .Select(input => new PressingOperationInput
+           {
+               PressingOperationId = operationId,
+               HarvestId = input.HarvestId,
+               PurchaseItemId = input.PurchaseItemId,
+               QuantityKg = input.QuantityKg,
+               CreatedAt = request.CreatedAt,
+           })
+           .ToList();
+
+        await _repository.AddInputsAsync(
+            inputs,
             cancellationToken);
 
         return pressingOperation.Id;

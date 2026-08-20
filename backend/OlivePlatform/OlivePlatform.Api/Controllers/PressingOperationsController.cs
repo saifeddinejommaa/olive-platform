@@ -36,7 +36,7 @@ public class PressingOperationsController : ControllerBase
         return result is null ? NotFound() : Ok(result);
     }
 
-    [HttpPost]
+    [HttpPost("create")]
     public async Task<IActionResult> Create(
         [FromBody] CreatePressingOperationCommand command)
     {

@@ -8,9 +8,7 @@ public class UpdatePressingOperationCommand : IRequest<bool>
 {
     public int Id { get; set; }
 
-    public string BatchNumber { get; set; } = null!;
-
-    public DateOnly ProductionDate { get; set; }
+    public string OperationNumber { get; set; } = null!;
 
     public DateTime? StartTime { get; set; }
 
@@ -30,10 +28,10 @@ public class UpdatePressingOperationCommand : IRequest<bool>
 public class UpdateProductionBatchCommandHandler
     : IRequestHandler<UpdatePressingOperationCommand, bool>
 {
-    private readonly IProductionBatchRepository _repository;
+    private readonly IPressionOperationsRepository _repository;
 
     public UpdateProductionBatchCommandHandler(
-        IProductionBatchRepository repository)
+        IPressionOperationsRepository repository)
     {
         _repository = repository;
     }
@@ -49,13 +47,11 @@ public class UpdateProductionBatchCommandHandler
         if (pressingOperation is null)
             return false;
 
-        pressingOperation.BatchNumber = request.BatchNumber;
-        pressingOperation.ProductionDate = request.ProductionDate;
+        pressingOperation.OperationNumber = request.OperationNumber;
         pressingOperation.StartTime = request.StartTime;
         pressingOperation.EndTime = request.EndTime;
         pressingOperation.Status = (ProductionStatus)request.Status;
         pressingOperation.OilQuantityLiters = request.OilQuantityLiters;
-        pressingOperation.YieldPercentage = request.YieldPercentage;
         pressingOperation.Notes = request.Notes;
 
         await _repository.UpdateAsync(

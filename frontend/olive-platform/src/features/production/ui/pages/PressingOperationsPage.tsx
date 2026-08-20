@@ -3,44 +3,24 @@ import DataTable from '../../../../common/widgets/tables/OrdersTable'
 import Button from '../../../../common/widgets/button/Button'
 import TextInput from '../../../../common/widgets/textInput/TextInput'
 import { usePressingOperationsStore } from '../stores/pressingOperationStore'
-
-type PressingOperation = {
-  id: number
-  operationNumber: string
-  pressingDate: string
-  status: string
-  oilQuantityLiters: number | null
-  yieldPercentage: number | null
-}
-
-type PressingOperationFilters = {
-  operationNumber: string
-  pressingDate: string
-  harvestNumber: string
-  purchaseNumber: string
-} 
+import type { PressingOperation } from '../../domain/entities/PressingOperation'
+import type { PressingOperationFilters } from '../../domain/entities/PressingOperationFilters'
+import { formatDateTime } from '../../../shared/utils/DatesUtils'
+import { productionStatusConfig } from '../../../shared/status/ProductionStatusConfig'
+import { renderStatus } from '../../../shared/utils/StatusUtils'
 
 export default function PressingOperationsPage() {
-
   const {
     PressingOperations,
     filters,
     loading,
     setFilter,
-    fetcPressingOperations,
+    fetchPressingOperations,
   } = usePressingOperationsStore()
 
-  // ============================================================
-  // INITIAL LOAD
-  // ============================================================
-
   useEffect(() => {
-    fetcPressingOperations()
+    fetchPressingOperations()
   }, [])
-
-  // ============================================================
-  // FILTER
-  // ============================================================
 
   const updateFilter = (
     field: keyof PressingOperationFilters,
@@ -49,18 +29,9 @@ export default function PressingOperationsPage() {
     setFilter(field, value)
   }
 
-  // ============================================================
-  // SEARCH
-  // ============================================================
-
   const handleSearch = async () => {
-    console.log('Searching pressing operations with filters:', filters)
-    await fetcPressingOperations()
+    await fetchPressingOperations()
   }
-
-  // ============================================================
-  // RESET
-  // ============================================================
 
   const handleReset = async () => {
     setFilter('pressingNumber', '')
@@ -68,188 +39,118 @@ export default function PressingOperationsPage() {
     setFilter('harvestNumber', '')
     setFilter('purchaseNumber', '')
 
-    await fetcPressingOperations()
+    await fetchPressingOperations()
   }
-
-  // ============================================================
-  // PAGINATION
-  // ============================================================
 
   const handlePageChange = async (pageNumber: number) => {
     setFilter('pageNumber', pageNumber)
-    await fetcPressingOperations()
+    await fetchPressingOperations()
   }
-
-  // ============================================================
-  // COLUMNS
-  // ============================================================
 
   const columns = [
     {
       key: 'operationNumber' as keyof PressingOperation,
       label: 'N° Pression',
     },
-
     {
-      key: 'pressingDate' as keyof PressingOperation,
+      key: 'createdAt' as keyof PressingOperation,
       label: 'Date',
+      render: (item: PressingOperation) => formatDateTime(item.createdAt),
     },
-
     {
       key: 'status' as keyof PressingOperation,
       label: 'Statut',
+      render: (item: PressingOperation) =>
+        renderStatus(item.status, productionStatusConfig),
     },
-
     {
       key: 'oilQuantityLiters' as keyof PressingOperation,
       label: 'Huile produite',
-
       render: (item: PressingOperation) =>
         item.oilQuantityLiters !== null
           ? `${item.oilQuantityLiters.toLocaleString()} L`
-          : '—',
-    },
-
-    {
-      key: 'yieldPercentage' as keyof PressingOperation,
-      label: 'Rendement',
-
-      render: (item: PressingOperation) =>
-        item.yieldPercentage !== null
-          ? `${item.yieldPercentage}%`
           : '—',
     },
   ]
 
   return (
     <div className="feature-page">
-
-      {/* HEADER */}
-
       <div className="page-header">
         <div className="page-header-content">
-
           <h1 className="page-title">
             Opérations de pression
           </h1>
 
           <p className="page-description">
-            Gestion des opérations de pression des olives
-            et de la production d’huile.
+            Gestion des opérations de pression des olives et de la production d’huile.
           </p>
-
         </div>
       </div>
 
-      {/* FILTERS */}
-
       <div className="filters">
-
         <div className="filters-header">
-
           <div>
             <h3>Filtres de recherche</h3>
-
-            <span>
-              Rechercher une opération de pression
-            </span>
+            <span>Rechercher une opération de pression</span>
           </div>
-
         </div>
 
         <div className="filters-content">
-
-          {/* N° PRESSION */}
-
           <div className="filter-item">
             <TextInput
               label="N° Pression"
               placeholder="PRESS-2026-001"
               value={filters.operationNumber}
-              onChange={(event) =>
-                updateFilter(
-                  'operationNumber',
-                  event.target.value
-                )
+              onChange={event =>
+                updateFilter('operationNumber', event.target.value)
               }
             />
           </div>
-
-          {/* DATE */}
 
           <div className="filter-item">
             <TextInput
               label="Date de pression"
               type="date"
               value={filters.pressingDate}
-              onChange={(event) =>
-                updateFilter(
-                  'pressingDate',
-                  event.target.value
-                )
+              onChange={event =>
+                updateFilter('pressingDate', event.target.value)
               }
             />
           </div>
-
-          {/* N° RÉCOLTE */}
 
           <div className="filter-item">
             <TextInput
               label="N° Récolte"
               placeholder="HARV-2026-001"
               value={filters.harvestNumber}
-              onChange={(event) =>
-                updateFilter(
-                  'harvestNumber',
-                  event.target.value
-                )
+              onChange={event =>
+                updateFilter('harvestNumber', event.target.value)
               }
             />
           </div>
-
-          {/* N° ACHAT */}
 
           <div className="filter-item">
             <TextInput
               label="N° Achat"
               placeholder="ACH-2026-001"
               value={filters.purchaseNumber}
-              onChange={(event) =>
-                updateFilter(
-                  'purchaseNumber',
-                  event.target.value
-                )
+              onChange={event =>
+                updateFilter('purchaseNumber', event.target.value)
               }
             />
           </div>
-
         </div>
 
-        {/* FOOTER */}
-
         <div className="filters-footer">
-
-          <Button
-            variant="secondary"
-            onClick={handleReset}
-          >
+          <Button variant="secondary" onClick={handleReset}>
             Réinitialiser
           </Button>
 
-          <Button
-            variant="primary"
-            onClick={handleSearch}
-          >
-            {loading
-              ? 'Recherche...'
-              : 'Rechercher'}
+          <Button variant="primary" onClick={handleSearch}>
+            {loading ? 'Recherche...' : 'Rechercher'}
           </Button>
-
         </div>
-
       </div>
-
-      {/* TABLE */}
 
       <DataTable
         data={PressingOperations?.items ?? []}
@@ -259,7 +160,6 @@ export default function PressingOperationsPage() {
         totalCount={PressingOperations?.totalCount ?? 0}
         onPageChange={handlePageChange}
       />
-
     </div>
   )
 }

@@ -9,11 +9,11 @@ using System.Text;
 
 namespace OlivePlatform.Infrastructure.QueryRepositories;
 
-public class ProductionBatchQueryRepository : IPressiongOperationQueryRepository
+public class PressingOperationQueryRepository : IPressiongOperationQueryRepository
 {
     private readonly IDbConnection _dbConnection;
 
-    public ProductionBatchQueryRepository(IDbConnection dbConnection)
+    public PressingOperationQueryRepository(IDbConnection dbConnection)
     {
         _dbConnection = dbConnection;
     }
@@ -28,12 +28,11 @@ public class ProductionBatchQueryRepository : IPressiongOperationQueryRepository
 
             p.id AS Id,
             p.operation_number AS OperationNumber,
-            p.pressing_date AS PressingDate,
             p.start_time AS StartTime,
+            p.created_at AS CreatedAt,
             p.end_time AS EndTime,
             p.status_id AS Status,
-            p.oil_quantity_liters AS OilQuantityLiters,
-            p.yield_percentage AS YieldPercentage
+            p.oil_quantity_liters AS OilQuantityLiters
 
         FROM pressing_operations p
 
@@ -69,23 +68,6 @@ public class ProductionBatchQueryRepository : IPressiongOperationQueryRepository
             parameters.Add(
                 "PressingNumber",
                 $"%{filter.OperationNumber}%");
-        }
-
-        // ========================================================
-        // PRESSING DATE
-        // ========================================================
-
-        if (filter.PressingDate.HasValue)
-        {
-            sql.Append(
-                """
-            
-            AND p.pressing_date = @PressingDate
-            """);
-
-            parameters.Add(
-                "PressingDate",
-                filter.PressingDate.Value.ToDateTime(TimeOnly.MinValue));
         }
 
         // ========================================================
@@ -138,7 +120,6 @@ public class ProductionBatchQueryRepository : IPressiongOperationQueryRepository
             """
         
         ORDER BY
-            p.pressing_date DESC,
             p.operation_number
 
         LIMIT @PageSize

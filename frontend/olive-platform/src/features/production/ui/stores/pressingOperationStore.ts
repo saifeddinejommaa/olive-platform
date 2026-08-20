@@ -12,7 +12,7 @@ type PressingOperations = {
 
     setFilter: (key: string, value: any) => void;
     clearFilters: () => void;
-    fetcPressingOperations: () => Promise<void>;
+    fetchPressingOperations: () => Promise<void>;
 };
 
 export const usePressingOperationsStore = create<PressingOperations>((set, get) => ({
@@ -45,9 +45,8 @@ export const usePressingOperationsStore = create<PressingOperations>((set, get) 
         }
     }),
 
-    fetcPressingOperations: async () => {
+    fetchPressingOperations: async () => {
         set({ loading: true });
-        console.log('Fetching pressing operations with filters:', get().filters);
         try {
             const data = await GetPressingOperations(get().filters);
             set({ PressingOperations: data });

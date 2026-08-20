@@ -18,9 +18,4 @@ public class OilBatch
 
     public string? Notes { get; private set; }
 
-    public PressingOperation ProductionBatch { get; private set; } = null!;
-
-    public ICollection<OilMovement> Movements { get; private set; }
-        = new List<OilMovement>();
-
 }

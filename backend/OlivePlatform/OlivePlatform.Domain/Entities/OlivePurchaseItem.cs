@@ -3,6 +3,7 @@
 public class OlivePurchaseItem
 {
     public int Id { get; set; }
+    public string Reference { get; set; }
     public int PurchaseId { get; private set; }
     public int? VarietyId { get; private set; }
 
@@ -13,28 +14,4 @@ public class OlivePurchaseItem
 
     public OlivePurchase Purchase { get; private set; } = null!;
     public OliveVariety? Variety { get; private set; }
-
-    public ICollection<PressingOperationInput> ProductionInputs
-    { get; private set; } = new List<PressingOperationInput>();
-
-    private OlivePurchaseItem()
-    {
-    }
-
-    public OlivePurchaseItem(
-        int purchaseId,
-        decimal agreedQuantityKg,
-        decimal pricePerKg,
-        int? varietyId = null)
-    {
-        PurchaseId = purchaseId;
-        AgreedQuantityKg = agreedQuantityKg;
-        PricePerKg = pricePerKg;
-        VarietyId = varietyId;
-    }
-
-    public decimal GetTotalAmount()
-    {
-        return AgreedQuantityKg * PricePerKg;
-    }
 }

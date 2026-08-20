@@ -1,106 +1,122 @@
-import { useState } from 'react'
+import { useEffect } from 'react'
+
 import DataTable from '../../../../common/widgets/tables/OrdersTable'
 import Button from '../../../../common/widgets/button/Button'
 import TextInput from '../../../../common/widgets/textInput/TextInput'
 import Select from '../../../../common/widgets/select/Select'
 
-type Harvest = {
-  id: number
-  harvestNumber: string
-  plotId: number | null
-  harvestDate: string
-  qualityGrade: string | null
-  quantityKg: number
-}
+import type { Harvest } from '../../domain/entities/Harvest'
+import type { HarvestFilters } from '../../domain/entities/HarvestsFilters'
 
-type HarvestFilters = {
-  harvestNumber: string
-  plotId: string
-  fromDate: string
-  toDate: string
-  qualityGrade: string
-}
-
-const mockHarvests: Harvest[] = []
+import { useHarvestsStore } from '../stores/HarvestsStore'
 
 export default function HarvestsPage() {
-  const [pageNumber, setPageNumber] = useState(1)
+  const {
+    harvests,
+    loading,
+    error,
+    filters,
+    setFilter,
+    clearFilters,
+    fetchHarvests,
+  } = useHarvestsStore()
 
-  const [filters, setFilters] = useState<HarvestFilters>({
-    harvestNumber: '',
-    plotId: '',
-    fromDate: '',
-    toDate: '',
-    qualityGrade: '',
-  })
+  /**
+   * Chargement initial
+   */
+  useEffect(() => {
+    fetchHarvests()
+  }, [])
 
+  /**
+   * Modification d'un filtre
+   */
   const updateFilter = (
     field: keyof HarvestFilters,
-    value: string
+    value: string | number | null
   ) => {
-    setFilters((previous) => ({
-      ...previous,
-      [field]: value,
-    }))
+    setFilter(field, value)
   }
 
-  const handleSearch = () => {
-    const request = {
-      harvestNumber: filters.harvestNumber || null,
-      plotId: filters.plotId
-        ? Number(filters.plotId)
-        : null,
-      fromDate: filters.fromDate || null,
-      toDate: filters.toDate || null,
-      qualityGrade: filters.qualityGrade || null,
-    }
+  /**
+   * Recherche
+   */
+  const handleSearch = async () => {
 
-    setPageNumber(1)
+    setFilter('pageNumber', 1)
 
-    // Appel API ici
+    await fetchHarvests()
   }
 
-  const handleReset = () => {
-    setFilters({
-      harvestNumber: '',
-      plotId: '',
-      fromDate: '',
-      toDate: '',
-      qualityGrade: '',
-    })
+  /**
+   * Réinitialisation
+   */
+  const handleReset = async () => {
+    clearFilters()
 
-    setPageNumber(1)
+    await fetchHarvests()
   }
 
+  /**
+   * Pagination
+   */
+  const handlePageChange = async (page: number) => {
+
+    setFilter('pageNumber', page)
+
+    await fetchHarvests()
+  }
+
+  /**
+   * Colonnes
+   */
   const columns = [
     {
       key: 'harvestNumber' as keyof Harvest,
       label: 'N° Récolte',
     },
+
     {
       key: 'plotId' as keyof Harvest,
       label: 'Parcelle',
+      render: (item: Harvest) =>
+        item.plotId ?? '-',
     },
+
     {
       key: 'harvestDate' as keyof Harvest,
       label: 'Date',
+      render: (item: Harvest) =>
+        item.harvestDate
+          ? new Date(
+              item.harvestDate
+            ).toLocaleDateString('fr-FR')
+          : '-',
     },
+
     {
       key: 'qualityGrade' as keyof Harvest,
       label: 'Qualité',
+      render: (item: Harvest) =>
+        item.qualityGrade ?? '-',
     },
+
     {
       key: 'quantityKg' as keyof Harvest,
       label: 'Quantité',
       render: (item: Harvest) =>
-        `${item.quantityKg.toLocaleString()} kg`,
+        `${item.quantityKg.toLocaleString(
+          'fr-FR'
+        )} kg`,
     },
   ]
 
   return (
     <div className="feature-page">
 
-      {/* HEADER */}
+      {/* =====================================================
+          HEADER
+          ===================================================== */}
 
       <div className="page-header">
         <div className="page-header-content">
@@ -110,19 +126,21 @@ export default function HarvestsPage() {
           </h1>
 
           <p className="page-description">
-            Gestion des récoltes d’olives et suivi de leur qualité.
+            Gestion des récoltes d’olives et suivi de
+            leur qualité.
           </p>
 
         </div>
       </div>
 
 
-      {/* FILTERS */}
+      {/* =====================================================
+          FILTERS
+          ===================================================== */}
 
       <div className="filters">
 
         <div className="filters-header">
-
           <div>
 
             <h3>
@@ -134,7 +152,6 @@ export default function HarvestsPage() {
             </span>
 
           </div>
-
         </div>
 
 
@@ -147,7 +164,9 @@ export default function HarvestsPage() {
             <TextInput
               label="N° Récolte"
               placeholder="REC-2026-001"
-              value={filters.harvestNumber}
+              value={
+                filters.harvestNumber
+              }
               onChange={(event) =>
                 updateFilter(
                   'harvestNumber',
@@ -167,11 +186,17 @@ export default function HarvestsPage() {
               label="Parcelle"
               placeholder="ID parcelle"
               type="number"
-              value={filters.plotId}
+              value={
+                filters.plotId !== null
+                  ? String(filters.plotId)
+                  : ''
+              }
               onChange={(event) =>
                 updateFilter(
                   'plotId',
                   event.target.value
+                    ? Number(event.target.value)
+                    : null
                 )
               }
             />
@@ -186,7 +211,9 @@ export default function HarvestsPage() {
             <TextInput
               label="Du"
               type="date"
-              value={filters.fromDate}
+              value={
+                filters.fromDate
+              }
               onChange={(event) =>
                 updateFilter(
                   'fromDate',
@@ -205,7 +232,9 @@ export default function HarvestsPage() {
             <TextInput
               label="Au"
               type="date"
-              value={filters.toDate}
+              value={
+                filters.toDate
+              }
               onChange={(event) =>
                 updateFilter(
                   'toDate',
@@ -223,7 +252,9 @@ export default function HarvestsPage() {
 
             <Select
               label="Qualité"
-              value={filters.qualityGrade}
+              value={
+                filters.qualityGrade
+              }
               onChange={(event) =>
                 updateFilter(
                   'qualityGrade',
@@ -255,13 +286,16 @@ export default function HarvestsPage() {
         </div>
 
 
-        {/* FOOTER */}
+        {/* =====================================================
+            FOOTER
+            ===================================================== */}
 
         <div className="filters-footer">
 
           <Button
             variant="secondary"
             onClick={handleReset}
+            disabled={loading}
           >
             Réinitialiser
           </Button>
@@ -269,8 +303,11 @@ export default function HarvestsPage() {
           <Button
             variant="primary"
             onClick={handleSearch}
+            disabled={loading}
           >
-            Rechercher
+            {loading
+              ? 'Recherche...'
+              : 'Rechercher'}
           </Button>
 
         </div>
@@ -278,16 +315,48 @@ export default function HarvestsPage() {
       </div>
 
 
-      {/* TABLE */}
+      {/* =====================================================
+          ERROR
+          ===================================================== */}
+
+      {error && (
+        <div className="error-message">
+          {error}
+        </div>
+      )}
+
+
+      {/* =====================================================
+          TABLE
+          ===================================================== */}
 
       <DataTable
-        data={mockHarvests}
+        data={harvests.items}
         columns={columns}
-        pageNumber={pageNumber}
-        pageSize={10}
-        totalCount={mockHarvests.length}
-        onPageChange={setPageNumber}
+        pageNumber={
+          harvests.pageNumber
+        }
+        pageSize={
+          harvests.pageSize
+        }
+        totalCount={
+          harvests.totalCount
+        }
+        onPageChange={
+          handlePageChange
+        }
       />
+
+
+      {/* =====================================================
+          LOADING
+          ===================================================== */}
+
+      {loading && (
+        <div className="loading">
+          Chargement des récoltes...
+        </div>
+      )}
 
     </div>
   )

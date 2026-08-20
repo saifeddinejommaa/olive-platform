@@ -16,7 +16,4 @@ public class Harvest
 
     public Plot Plot { get; private set; } = null!;
 
-    public ICollection<PressingOperationInput> ProductionInputs
-    { get;  set; } = new List<PressingOperationInput>();
-
 }
