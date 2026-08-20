@@ -7,7 +7,6 @@ export function CreatePressingOperationMapper(
 ): CreatePressingOperationRequest {
 
   return {
-    operationReference: data.operationReference,
     createdAt : data.createdAt,
     startTime:
       data.startTime,

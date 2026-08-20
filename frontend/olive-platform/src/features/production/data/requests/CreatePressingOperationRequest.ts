@@ -1,5 +1,4 @@
 export type CreatePressingOperationRequest = {
-  operationReference : string,
   createdAt:string,
   startTime: string | null
   endTime: string | null

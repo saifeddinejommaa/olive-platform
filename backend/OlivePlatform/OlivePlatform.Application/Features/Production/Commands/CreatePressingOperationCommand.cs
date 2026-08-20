@@ -3,14 +3,14 @@ using OlivePlatform.Application.Features.Production.Requests;
 using OlivePlatform.Domain.Entities;
 using OlivePlatform.Domain.Enums;
 using OlivePlatform.Domain.Interfaces.Repositories;
+using YourProject.Application.Constants;
+using YourProject.Application.Services;
 
 namespace OlivePlatform.Application.Features.ProductionBatches.Commands;
 
 public class CreatePressingOperationCommand : IRequest<int>
 {
     public required List<NewPressingOperationInputRequest> Inputs { get; set; }
-
-    public required string OperationReference { get; set; }
 
     public DateTime CreatedAt { get; set; }
 
@@ -31,20 +31,31 @@ public class CreateProductionBatchCommandHandler
     : IRequestHandler<CreatePressingOperationCommand, int>
 {
     private readonly IPressionOperationsRepository _repository;
+    private readonly IDocumentNumberService _documentNumberService;
 
     public CreateProductionBatchCommandHandler(
-        IPressionOperationsRepository repository)
+        IPressionOperationsRepository repository,
+        IDocumentNumberService documentNumberService)
     {
         _repository = repository;
+        _documentNumberService = documentNumberService;
     }
 
     public async Task<int> Handle(
         CreatePressingOperationCommand request,
         CancellationToken cancellationToken)
     {
+        var year = request.CreatedAt.Year;
+        var operationNumber =
+           await _documentNumberService.GenerateAsync(
+               DocumentTypes.Pressing,
+               DocumentPrefixes.Pressing,
+               year,
+               cancellationToken);
+
         var pressingOperation = new PressingOperation
         {
-            OperationNumber = request.OperationReference,
+            OperationNumber = operationNumber,
             StartTime = request.StartTime,
             EndTime = request.EndTime,
             Status = (ProductionStatus)request.Status,
