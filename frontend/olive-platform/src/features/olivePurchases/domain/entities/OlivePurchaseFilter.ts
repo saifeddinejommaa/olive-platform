@@ -8,4 +8,5 @@ export type OlivePurchasesFilter =
     fromDate?: string
     toDate?: string
     status?: PurchaseStatus
+    toPressing?:boolean
   }

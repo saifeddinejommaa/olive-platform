@@ -39,6 +39,8 @@ public class OlivePurchaseItemResponse
 
     public decimal AgreedQuantityKg { get; set; }
 
+    public decimal RemainingQuantityKg { get; set; }
+
     public decimal PricePerKg { get; set; }
 
     public int TotalAmount { get; set; }

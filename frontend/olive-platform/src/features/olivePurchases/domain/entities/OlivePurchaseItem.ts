@@ -2,7 +2,7 @@ import type { OliveVarieties } from "../../../shared/entities/OliveVarieties"
 
 export type OlivePurchaseItem = {
   id: number
-  
+
   reference: string
 
   purchaseId: number
@@ -12,6 +12,10 @@ export type OlivePurchaseItem = {
   description: string | null
 
   agreedQuantityKg: number
+
+  pressedQuantityKg: number
+
+  remainingQuantityKg: number
 
   pricePerKg: number
 

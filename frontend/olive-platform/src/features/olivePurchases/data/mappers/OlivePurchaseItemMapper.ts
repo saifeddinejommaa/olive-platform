@@ -17,6 +17,10 @@ export function OlivePurchaseItemMapper(
 
         agreedQuantityKg: response.agreedQuantityKg,
 
+        pressedQuantityKg: response.pressedQuantityKg,
+
+        remainingQuantityKg: response.remainingQuantityKg,
+
         pricePerKg: response.pricePerKg,
 
         totalAmount: response.totalAmount,
