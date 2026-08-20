@@ -146,23 +146,6 @@ public class OilBatchQueryRepository : IOilBatchQueryRepository
         }
 
         // ----------------------------------------------------
-        // Production Date To
-        // ----------------------------------------------------
-
-        if (filter.ToDate.HasValue)
-        {
-            sql.Append(
-                """
-
-                AND ob.production_date <= @ProductionDateTo
-                """);
-
-            parameters.Add(
-                "ProductionDateTo",
-                filter.ToDate.Value);
-        }
-
-        // ----------------------------------------------------
         // Pagination
         // ----------------------------------------------------
 

@@ -31,6 +31,8 @@ public class OlivePurchaseItemResponse
 {
     public int Id { get; set; }
 
+    public required string Reference { get; set; }
+
     public int? VarietyId { get; set; }
 
     public string? VarietyName { get; set; }
@@ -39,7 +41,7 @@ public class OlivePurchaseItemResponse
 
     public decimal PricePerKg { get; set; }
 
-    public decimal TotalAmount { get; set; }
+    public int TotalAmount { get; set; }
 }
 
 public class OliveSampleSummaryResponse

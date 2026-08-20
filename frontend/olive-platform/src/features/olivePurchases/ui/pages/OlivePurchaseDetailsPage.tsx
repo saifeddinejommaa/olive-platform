@@ -1,4 +1,5 @@
 import { useNavigate, useParams } from 'react-router-dom'
+import Button from '../../../../common/widgets/button/Button'
 
 export default function OlivePurchaseDetailsPage() {
   const { id } = useParams()
@@ -18,12 +19,12 @@ export default function OlivePurchaseDetailsPage() {
           </p>
         </div>
 
-        <button
-          className="secondary-button"
+        <Button
+          variant="secondary"
           onClick={() => navigate('/olive-purchases')}
         >
           Retour
-        </button>
+        </Button>
       </div>
 
       <div className="card details-card">

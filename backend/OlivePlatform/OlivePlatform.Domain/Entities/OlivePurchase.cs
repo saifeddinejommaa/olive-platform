@@ -17,10 +17,4 @@ public class OlivePurchase
 
     public string? Notes { get;   set; }
 
-    public ICollection<OlivePurchaseItem> Items { get;  set; }
-        = new List<OlivePurchaseItem>();
-
-    public ICollection<OliveSample> Samples { get;  set; }
-        = new List<OliveSample>();
-
 }

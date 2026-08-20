@@ -1,124 +1,320 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useEffect } from 'react'
 import DataTable from '../../../../common/widgets/tables/OrdersTable'
+import Button from '../../../../common/widgets/button/Button'
+import TextInput from '../../../../common/widgets/textInput/TextInput'
+import Select from '../../../../common/widgets/select/Select'
 
-type OlivePurchase = {
-  id: number
-  purchaseNumber: string
-  supplierName: string
-  purchaseDate: string
-  status: string
-  totalQuantityKg: number
-  totalAmount: number
-  itemsCount: number
-}
+import type { OlivePurchase } from '../../domain/entities/OlivePurchase'
+import type { OlivePurchasesFilter } from '../../domain/entities/OlivePurchaseFilter'
 
-const mockPurchases: OlivePurchase[] = []
+import { useOlivePurchasesStore } from '../stores/OlivePurchaseStore'
+import { useConstantsStore } from '../../../appConstants/ConstantsStore'
 
 export default function OlivePurchasesPage() {
-  const navigate = useNavigate()
+  const {
+    olivePurchases,
+    loading,
+    error,
+    filters,
+    setFilter,
+    clearFilters,
+    fetchOlivePurchases,
+  } = useOlivePurchasesStore()
 
-  const [pageNumber, setPageNumber] = useState(1)
-  const pageSize = 10
+  const {
+    Appconstants,
+    loading: constantsLoading,
+    fetchConstants,
+  } = useConstantsStore()
+
+  /**
+   * Chargement des constantes
+   */
+  useEffect(() => {
+    fetchConstants()
+  }, [fetchConstants])
+
+  /**
+   * Chargement initial des achats
+   */
+  useEffect(() => {
+    fetchOlivePurchases()
+  }, [fetchOlivePurchases])
+
+  /**
+   * Modification d'un filtre
+   */
+  const updateFilter = (
+    field: keyof OlivePurchasesFilter,
+    value: string | number
+  ) => {
+    setFilter(field, value)
+  }
+
+  /**
+   * Recherche
+   */
+  const handleSearch = async () => {
+    setFilter('pageNumber', 1)
+
+    await fetchOlivePurchases()
+  }
+
+  /**
+   * Réinitialisation des filtres
+   */
+  const handleReset = async () => {
+    clearFilters()
+
+    await fetchOlivePurchases()
+  }
+
+  /**
+   * Pagination
+   */
+  const handlePageChange = async (page: number) => {
+    setFilter('pageNumber', page)
+
+    await fetchOlivePurchases()
+  }
+
+  /**
+   * Options des statuts
+   */
+  const statusOptions = [
+    {
+      value: '',
+      label: 'Tous les statuts',
+    },
+
+    ...Appconstants.purchaseStatuses.map((status) => ({
+      value: String(status.id),
+      label: status.label,
+    })),
+  ]
 
   const columns = [
     {
       key: 'purchaseNumber' as keyof OlivePurchase,
       label: 'N° Achat',
     },
+
     {
       key: 'supplierName' as keyof OlivePurchase,
       label: 'Fournisseur',
     },
+
     {
       key: 'purchaseDate' as keyof OlivePurchase,
       label: 'Date',
+      render: (item: OlivePurchase) =>
+        new Date(item.purchaseDate).toLocaleDateString(
+          'fr-FR'
+        ),
     },
+
     {
       key: 'status' as keyof OlivePurchase,
       label: 'Statut',
-      render: (item: OlivePurchase) => (
-        <span className="status-badge">
-          {item.status}
-        </span>
-      ),
-    },
-    {
-      key: 'totalQuantityKg' as keyof OlivePurchase,
-      label: 'Quantité',
-      render: (item: OlivePurchase) =>
-        `${item.totalQuantityKg.toLocaleString()} kg`,
-    },
-    {
-      key: 'totalAmount' as keyof OlivePurchase,
-      label: 'Montant',
-      render: (item: OlivePurchase) =>
-        `${item.totalAmount.toLocaleString()} €`,
-    },
-    {
-      key: 'itemsCount' as keyof OlivePurchase,
-      label: 'Articles',
     },
   ]
 
   return (
     <div className="feature-page">
 
+      {/* =====================================================
+          HEADER
+          ===================================================== */}
+
       <div className="page-header">
         <div className="page-header-content">
+
           <h1 className="page-title">
             Achats d’olives
           </h1>
 
           <p className="page-description">
-            Gestion des achats d’olives auprès des fournisseurs.
+            Gestion des achats d’olives auprès des
+            fournisseurs.
           </p>
+
+        </div>
+      </div>
+
+
+      {/* =====================================================
+          FILTERS
+          ===================================================== */}
+
+      <div className="filters">
+
+        <div className="filters-header">
+          <div>
+            <h3>Filtres de recherche</h3>
+
+            <span>
+              Rechercher un achat d’olives
+            </span>
+          </div>
         </div>
 
-        <button
-          className="primary-button"
-          onClick={() => navigate('/olive-purchases/new')}
-        >
-          + Nouvel achat
-        </button>
+
+        <div className="filters-content">
+
+          {/* N° ACHAT */}
+
+          <div className="filter-item">
+            <TextInput
+              label="N° Achat"
+              placeholder="ACH-2026-001"
+              value={filters.purchaseNumber}
+              onChange={(event) =>
+                updateFilter(
+                  'purchaseNumber',
+                  event.target.value
+                )
+              }
+            />
+          </div>
+
+
+          {/* FOURNISSEUR */}
+
+          <div className="filter-item">
+            <TextInput
+              label="Fournisseur"
+              placeholder="Nom du fournisseur"
+              value={filters.supplierName}
+              onChange={(event) =>
+                updateFilter(
+                  'supplierName',
+                  event.target.value
+                )
+              }
+            />
+          </div>
+
+
+          {/* DATE DEBUT */}
+
+          <div className="filter-item">
+            <TextInput
+              label="Du"
+              type="date"
+              value={filters.fromDate}
+              onChange={(event) =>
+                updateFilter(
+                  'fromDate',
+                  event.target.value
+                )
+              }
+            />
+          </div>
+
+
+          {/* DATE FIN */}
+
+          <div className="filter-item">
+            <TextInput
+              label="Au"
+              type="date"
+              value={filters.toDate}
+              onChange={(event) =>
+                updateFilter(
+                  'toDate',
+                  event.target.value
+                )
+              }
+            />
+          </div>
+
+
+          {/* STATUT */}
+
+          <div className="filter-item">
+            <Select
+              label="Statut"
+              value={filters.status}
+              onChange={(event) =>
+                updateFilter(
+                  'status',
+                  event.target.value
+                )
+              }
+              options={statusOptions}
+            />
+          </div>
+
+        </div>
+
+
+        {/* =====================================================
+            FILTER FOOTER
+            ===================================================== */}
+
+        <div className="filters-footer">
+
+          <Button
+            variant="secondary"
+            onClick={handleReset}
+            disabled={loading}
+          >
+            Réinitialiser
+          </Button>
+
+          <Button
+            variant="primary"
+            onClick={handleSearch}
+            disabled={
+              loading || constantsLoading
+            }
+          >
+            {loading
+              ? 'Recherche...'
+              : 'Rechercher'}
+          </Button>
+
+        </div>
+
       </div>
 
-      <div className="filters card">
-        <input
-          type="text"
-          placeholder="N° achat..."
-        />
 
-        <input
-          type="text"
-          placeholder="Fournisseur..."
-        />
+      {/* =====================================================
+          ERROR
+          ===================================================== */}
 
-        <select defaultValue="">
-          <option value="">Tous les statuts</option>
-          <option value="draft">Brouillon</option>
-          <option value="pending">En attente</option>
-          <option value="approved">Approuvé</option>
-          <option value="received">Reçu</option>
-          <option value="cancelled">Annulé</option>
-        </select>
+      {error && (
+        <div className="error-message">
+          {error}
+        </div>
+      )}
 
-        <button className="secondary-button">
-          Rechercher
-        </button>
-      </div>
+
+      {/* =====================================================
+          TABLE
+          ===================================================== */}
 
       <DataTable
-        data={mockPurchases}
+        data={olivePurchases.items}
         columns={columns}
-        pageNumber={pageNumber}
-        pageSize={pageSize}
-        totalCount={mockPurchases.length}
-        onPageChange={setPageNumber}
-        onRowClick={(item) =>
-          navigate(`/olive-purchases/${item.id}`)
-        }
+        pageNumber={olivePurchases.pageNumber}
+        pageSize={olivePurchases.pageSize}
+        totalCount={olivePurchases.totalCount}
+        onPageChange={handlePageChange}
       />
+
+
+      {/* =====================================================
+          LOADING
+          ===================================================== */}
+
+      {(loading || constantsLoading) && (
+        <div className="loading">
+          {constantsLoading
+            ? 'Chargement des constantes...'
+            : 'Chargement des achats d’olives...'}
+        </div>
+      )}
 
     </div>
   )

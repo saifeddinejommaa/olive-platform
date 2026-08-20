@@ -16,22 +16,5 @@ namespace OlivePlatform.Domain.Entities
         public string? Notes { get; private set; }
 
         public Plot Plot { get; private set; } = null!;
-        public OliveVariety Variety { get; private set; } = null!;
-
-        private PlotVariety()
-        {
-        }
-
-        public PlotVariety(
-            int plotId,
-            int varietyId,
-            int? numberOfTrees = null,
-            decimal? percentage = null)
-        {
-            PlotId = plotId;
-            VarietyId = varietyId;
-            NumberOfTrees = numberOfTrees;
-            Percentage = percentage;
-        }
     }
 }

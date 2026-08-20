@@ -9,23 +9,4 @@ public class ExpenseCategory
     public int? ParentId { get; private set; }
 
     public string? Description { get; private set; }
-
-    public ExpenseCategory? Parent { get; private set; }
-
-    public ICollection<ExpenseCategory> Children { get; private set; }
-        = new List<ExpenseCategory>();
-
-    private ExpenseCategory()
-    {
-    }
-
-    public ExpenseCategory(
-        string code,
-        string name,
-        int? parentId = null)
-    {
-        Code = code;
-        Name = name;
-        ParentId = parentId;
-    }
 }

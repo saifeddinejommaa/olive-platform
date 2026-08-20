@@ -29,7 +29,7 @@ CREATE TABLE sample_status (
 );
 
 -- ------------------------------------------------------------
--- Production Status
+-- Production / Pressing Operation Status
 -- ------------------------------------------------------------
 
 CREATE TABLE production_status (
@@ -88,6 +88,7 @@ CREATE TABLE payment_method (
     is_active BOOLEAN NOT NULL DEFAULT TRUE
 );
 
+
 -- ============================================================
 -- 2. AGRICULTURE
 -- ============================================================
@@ -119,6 +120,7 @@ CREATE TABLE plots (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+
 CREATE TABLE olive_varieties (
     id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 
@@ -128,6 +130,7 @@ CREATE TABLE olive_varieties (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
 
 CREATE TABLE plot_varieties (
     id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -159,6 +162,7 @@ CREATE TABLE plot_varieties (
     UNIQUE (plot_id, variety_id)
 );
 
+
 CREATE TABLE harvests (
     id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 
@@ -174,11 +178,13 @@ CREATE TABLE harvests (
         CHECK (quantity_kg > 0),
 
     quality_grade VARCHAR(100),
+
     notes TEXT,
 
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
 
 -- ============================================================
 -- 3. ACHATS D'OLIVES
@@ -203,12 +209,15 @@ CREATE TABLE olive_purchases (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+
 CREATE TABLE olive_purchase_items (
     id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 
     purchase_id INTEGER NOT NULL
         REFERENCES olive_purchases(id)
         ON DELETE CASCADE,
+
+    reference VARCHAR(100) NOT NULL,
 
     variety_id INTEGER
         REFERENCES olive_varieties(id)
@@ -229,8 +238,12 @@ CREATE TABLE olive_purchase_items (
 
     notes TEXT,
 
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT uq_olive_purchase_item_reference
+        UNIQUE (purchase_id, reference)
 );
+
 
 -- ============================================================
 -- 4. LABORATOIRE
@@ -265,6 +278,7 @@ CREATE TABLE olive_samples (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+
 CREATE TABLE lab_analyses (
     id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 
@@ -292,6 +306,7 @@ CREATE TABLE lab_analyses (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+
 CREATE TABLE lab_analysis_results (
     id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 
@@ -317,29 +332,38 @@ CREATE TABLE lab_analysis_results (
     )
 );
 
+
 -- ============================================================
--- 5. PRODUCTION
+-- 5. PRESSAGE
 -- ============================================================
 
-CREATE TABLE production_batches (
+-- Une pressing_operation représente UNE opération de pression.
+--
+-- La quantité d'olives entrante n'est PAS stockée ici.
+-- Elle est calculée à partir de pressing_operation_inputs.
+--
+-- Une opération peut avoir plusieurs inputs, mais chaque input
+-- doit provenir d'une seule source :
+--
+--     harvest_id       OU
+--     purchase_item_id
+--
+-- jamais les deux.
+
+CREATE TABLE pressing_operations (
     id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 
-    batch_number VARCHAR(50) NOT NULL UNIQUE,
+    operation_number VARCHAR(50) NOT NULL UNIQUE,
 
-    production_date DATE NOT NULL,
+    pressing_date DATE NOT NULL,
 
     start_time TIMESTAMPTZ,
+
     end_time TIMESTAMPTZ,
 
     status_id INTEGER NOT NULL
         REFERENCES production_status(id)
         ON DELETE RESTRICT,
-
-    olive_quantity_kg NUMERIC(14,3)
-        CHECK (
-            olive_quantity_kg IS NULL
-            OR olive_quantity_kg >= 0
-        ),
 
     oil_quantity_liters NUMERIC(14,3)
         CHECK (
@@ -359,11 +383,12 @@ CREATE TABLE production_batches (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE TABLE production_batch_inputs (
+
+CREATE TABLE pressing_operation_inputs (
     id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 
-    production_batch_id INTEGER NOT NULL
-        REFERENCES production_batches(id)
+    pressing_operation_id INTEGER NOT NULL
+        REFERENCES pressing_operations(id)
         ON DELETE CASCADE,
 
     harvest_id INTEGER
@@ -381,19 +406,26 @@ CREATE TABLE production_batch_inputs (
 
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
+    -- Une ligne vient obligatoirement d'une seule source.
     CHECK (
-        harvest_id IS NOT NULL
-        OR purchase_item_id IS NOT NULL
+        (harvest_id IS NOT NULL AND purchase_item_id IS NULL)
+        OR
+        (harvest_id IS NULL AND purchase_item_id IS NOT NULL)
     )
 );
+
+
+-- ============================================================
+-- 6. LOTS D'HUILE
+-- ============================================================
 
 CREATE TABLE oil_batches (
     id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 
     batch_number VARCHAR(50) NOT NULL UNIQUE,
 
-    production_batch_id INTEGER NOT NULL
-        REFERENCES production_batches(id)
+    pressing_operation_id INTEGER NOT NULL
+        REFERENCES pressing_operations(id)
         ON DELETE RESTRICT,
 
     production_date DATE NOT NULL,
@@ -411,8 +443,9 @@ CREATE TABLE oil_batches (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+
 -- ============================================================
--- 6. STOCK / CITERNES
+-- 7. STOCK / CITERNES
 -- ============================================================
 
 CREATE TABLE tanks (
@@ -436,6 +469,7 @@ CREATE TABLE tanks (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
 
 CREATE TABLE oil_movements (
     id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -477,8 +511,9 @@ CREATE TABLE oil_movements (
     )
 );
 
+
 -- ============================================================
--- 7. FINANCE
+-- 8. FINANCE
 -- ============================================================
 
 CREATE TABLE expense_categories (
@@ -496,6 +531,7 @@ CREATE TABLE expense_categories (
 
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
 
 CREATE TABLE invoices (
     id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -535,6 +571,7 @@ CREATE TABLE invoices (
     UNIQUE (invoice_type_id, invoice_number)
 );
 
+
 CREATE TABLE invoice_items (
     id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 
@@ -560,6 +597,7 @@ CREATE TABLE invoice_items (
 
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
 
 CREATE TABLE payments (
     id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -590,8 +628,9 @@ CREATE TABLE payments (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+
 -- ============================================================
--- 8. TRAVAILLEURS
+-- 9. TRAVAILLEURS
 -- ============================================================
 
 CREATE TABLE workers (
@@ -618,6 +657,7 @@ CREATE TABLE workers (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
 
 CREATE TABLE work_sessions (
     id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -649,8 +689,9 @@ CREATE TABLE work_sessions (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+
 -- ============================================================
--- 9. INDEXES
+-- 10. INDEXES
 -- ============================================================
 
 CREATE INDEX idx_plot_varieties_plot_id
@@ -659,11 +700,13 @@ ON plot_varieties(plot_id);
 CREATE INDEX idx_plot_varieties_variety_id
 ON plot_varieties(variety_id);
 
+
 CREATE INDEX idx_harvests_plot_id
 ON harvests(plot_id);
 
 CREATE INDEX idx_harvests_date
 ON harvests(harvest_date);
+
 
 CREATE INDEX idx_olive_purchases_status_id
 ON olive_purchases(status_id);
@@ -674,11 +717,13 @@ ON olive_purchase_items(purchase_id);
 CREATE INDEX idx_purchase_items_variety_id
 ON olive_purchase_items(variety_id);
 
+
 CREATE INDEX idx_olive_samples_purchase_id
 ON olive_samples(purchase_id);
 
 CREATE INDEX idx_olive_samples_status_id
 ON olive_samples(status_id);
+
 
 CREATE INDEX idx_lab_analyses_sample_id
 ON lab_analyses(sample_id);
@@ -686,20 +731,39 @@ ON lab_analyses(sample_id);
 CREATE INDEX idx_lab_results_analysis_id
 ON lab_analysis_results(analysis_id);
 
-CREATE INDEX idx_production_batches_status_id
-ON production_batches(status_id);
 
-CREATE INDEX idx_production_inputs_batch_id
-ON production_batch_inputs(production_batch_id);
+-- ------------------------------------------------------------
+-- Pressing Operations
+-- ------------------------------------------------------------
 
-CREATE INDEX idx_production_inputs_harvest_id
-ON production_batch_inputs(harvest_id);
+CREATE INDEX idx_pressing_operations_status_id
+ON pressing_operations(status_id);
 
-CREATE INDEX idx_production_inputs_purchase_item_id
-ON production_batch_inputs(purchase_item_id);
+CREATE INDEX idx_pressing_operations_date
+ON pressing_operations(pressing_date);
 
-CREATE INDEX idx_oil_batches_production_batch_id
-ON oil_batches(production_batch_id);
+
+CREATE INDEX idx_pressing_operation_inputs_operation_id
+ON pressing_operation_inputs(pressing_operation_id);
+
+CREATE INDEX idx_pressing_operation_inputs_harvest_id
+ON pressing_operation_inputs(harvest_id);
+
+CREATE INDEX idx_pressing_operation_inputs_purchase_item_id
+ON pressing_operation_inputs(purchase_item_id);
+
+
+-- ------------------------------------------------------------
+-- Oil Batches
+-- ------------------------------------------------------------
+
+CREATE INDEX idx_oil_batches_pressing_operation_id
+ON oil_batches(pressing_operation_id);
+
+
+-- ------------------------------------------------------------
+-- Oil Movements
+-- ------------------------------------------------------------
 
 CREATE INDEX idx_oil_movements_type_id
 ON oil_movements(movement_type_id);
@@ -713,6 +777,11 @@ ON oil_movements(source_tank_id);
 CREATE INDEX idx_oil_movements_destination_tank_id
 ON oil_movements(destination_tank_id);
 
+
+-- ------------------------------------------------------------
+-- Invoices
+-- ------------------------------------------------------------
+
 CREATE INDEX idx_invoices_date
 ON invoices(invoice_date);
 
@@ -725,6 +794,11 @@ ON invoices(status_id);
 CREATE INDEX idx_invoice_items_invoice_id
 ON invoice_items(invoice_id);
 
+
+-- ------------------------------------------------------------
+-- Payments
+-- ------------------------------------------------------------
+
 CREATE INDEX idx_payments_invoice_id
 ON payments(invoice_id);
 
@@ -733,6 +807,11 @@ ON payments(payment_method_id);
 
 CREATE INDEX idx_payments_date
 ON payments(payment_date);
+
+
+-- ------------------------------------------------------------
+-- Workers
+-- ------------------------------------------------------------
 
 CREATE INDEX idx_work_sessions_worker_id
 ON work_sessions(worker_id);
@@ -743,8 +822,9 @@ ON work_sessions(plot_id);
 CREATE INDEX idx_work_sessions_date
 ON work_sessions(work_date);
 
+
 -- ============================================================
--- 10. UPDATED_AT FUNCTION
+-- 11. UPDATED_AT FUNCTION
 -- ============================================================
 
 CREATE OR REPLACE FUNCTION update_updated_at_column()
@@ -755,8 +835,9 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+
 -- ============================================================
--- 11. UPDATED_AT TRIGGERS
+-- 12. UPDATED_AT TRIGGERS
 -- ============================================================
 
 CREATE TRIGGER trg_plots_updated_at
@@ -764,58 +845,69 @@ BEFORE UPDATE ON plots
 FOR EACH ROW
 EXECUTE FUNCTION update_updated_at_column();
 
+
 CREATE TRIGGER trg_olive_varieties_updated_at
 BEFORE UPDATE ON olive_varieties
 FOR EACH ROW
 EXECUTE FUNCTION update_updated_at_column();
+
 
 CREATE TRIGGER trg_harvests_updated_at
 BEFORE UPDATE ON harvests
 FOR EACH ROW
 EXECUTE FUNCTION update_updated_at_column();
 
+
 CREATE TRIGGER trg_olive_purchases_updated_at
 BEFORE UPDATE ON olive_purchases
 FOR EACH ROW
 EXECUTE FUNCTION update_updated_at_column();
+
 
 CREATE TRIGGER trg_olive_samples_updated_at
 BEFORE UPDATE ON olive_samples
 FOR EACH ROW
 EXECUTE FUNCTION update_updated_at_column();
 
+
 CREATE TRIGGER trg_lab_analyses_updated_at
 BEFORE UPDATE ON lab_analyses
 FOR EACH ROW
 EXECUTE FUNCTION update_updated_at_column();
 
-CREATE TRIGGER trg_production_batches_updated_at
-BEFORE UPDATE ON production_batches
+
+CREATE TRIGGER trg_pressing_operations_updated_at
+BEFORE UPDATE ON pressing_operations
 FOR EACH ROW
 EXECUTE FUNCTION update_updated_at_column();
+
 
 CREATE TRIGGER trg_oil_batches_updated_at
 BEFORE UPDATE ON oil_batches
 FOR EACH ROW
 EXECUTE FUNCTION update_updated_at_column();
 
+
 CREATE TRIGGER trg_tanks_updated_at
 BEFORE UPDATE ON tanks
 FOR EACH ROW
 EXECUTE FUNCTION update_updated_at_column();
+
 
 CREATE TRIGGER trg_invoices_updated_at
 BEFORE UPDATE ON invoices
 FOR EACH ROW
 EXECUTE FUNCTION update_updated_at_column();
 
+
 CREATE TRIGGER trg_workers_updated_at
 BEFORE UPDATE ON workers
 FOR EACH ROW
 EXECUTE FUNCTION update_updated_at_column();
 
+
 -- ============================================================
--- 12. DONNÉES DE RÉFÉRENCE
+-- 13. DONNÉES DE RÉFÉRENCE
 -- ============================================================
 
 -- ------------------------------------------------------------
@@ -831,6 +923,7 @@ VALUES
 ('received', 'Received', 'Purchase has been fully received'),
 ('cancelled', 'Cancelled', 'Purchase has been cancelled');
 
+
 -- ------------------------------------------------------------
 -- Sample Status
 -- ------------------------------------------------------------
@@ -842,16 +935,18 @@ VALUES
 ('approved', 'Approved', 'Analysis has been approved'),
 ('rejected', 'Rejected', 'Sample or analysis has been rejected');
 
+
 -- ------------------------------------------------------------
--- Production Status
+-- Production / Pressing Operation Status
 -- ------------------------------------------------------------
 
 INSERT INTO production_status (code, name, description)
 VALUES
-('planned', 'Planned', 'Production is planned'),
-('in_progress', 'In Progress', 'Production is currently running'),
-('completed', 'Completed', 'Production is completed'),
-('cancelled', 'Cancelled', 'Production has been cancelled');
+('planned', 'Planned', 'Pressing operation is planned'),
+('in_progress', 'In Progress', 'Pressing operation is currently running'),
+('completed', 'Completed', 'Pressing operation is completed'),
+('cancelled', 'Cancelled', 'Pressing operation has been cancelled');
+
 
 -- ------------------------------------------------------------
 -- Oil Movement Type
@@ -859,12 +954,13 @@ VALUES
 
 INSERT INTO oil_movement_type (code, name, description)
 VALUES
-('production_in', 'Production In', 'Oil entering stock from production'),
+('production_in', 'Production In', 'Oil entering stock from pressing'),
 ('transfer_in', 'Transfer In', 'Oil transferred into a tank'),
 ('transfer_out', 'Transfer Out', 'Oil transferred out of a tank'),
 ('sale_out', 'Sale Out', 'Oil leaving stock because of a sale'),
 ('loss', 'Loss', 'Oil lost from stock'),
 ('adjustment', 'Adjustment', 'Manual stock adjustment');
+
 
 -- ------------------------------------------------------------
 -- Invoice Type
@@ -874,6 +970,7 @@ INSERT INTO invoice_type (code, name, description)
 VALUES
 ('purchase', 'Purchase', 'Supplier purchase invoice'),
 ('sale', 'Sale', 'Customer sales invoice');
+
 
 -- ------------------------------------------------------------
 -- Invoice Status
@@ -887,6 +984,7 @@ VALUES
 ('paid', 'Paid', 'Invoice has been fully paid'),
 ('cancelled', 'Cancelled', 'Invoice has been cancelled');
 
+
 -- ------------------------------------------------------------
 -- Payment Method
 -- ------------------------------------------------------------
@@ -897,5 +995,6 @@ VALUES
 ('bank_transfer', 'Bank Transfer', 'Bank transfer'),
 ('check', 'Check', 'Payment by check'),
 ('other', 'Other', 'Other payment method');
+
 
 COMMIT;

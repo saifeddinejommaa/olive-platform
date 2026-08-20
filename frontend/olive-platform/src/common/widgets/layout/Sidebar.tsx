@@ -48,11 +48,11 @@ const menuSections: MenuSection[] = [
     icon: "⚙️",
     items: [
       {
-        label: "Lots de production",
+        label: "Opérations de pression",
         path: "/production",
       },
       {
-        label: "Nouveau lot",
+        label: "Nouvelle opération de pression",
         path: "/production/new",
       },
     ],

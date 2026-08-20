@@ -14,7 +14,5 @@ namespace OlivePlatform.Application.Features.OilBatches.Requests
         public string? Status { get; set; }
 
         public DateOnly? FromDate { get; set; }
-
-        public DateOnly? ToDate { get; set; }
     }
 }

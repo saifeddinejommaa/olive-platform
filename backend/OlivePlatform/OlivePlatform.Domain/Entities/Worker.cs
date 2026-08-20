@@ -14,12 +14,4 @@ public class Worker
     public decimal? DailyRate { get;  set; }
 
     public bool IsActive { get;  set; }
-
-    public ICollection<WorkSession> WorkSessions { get;  set; }
-        = new List<WorkSession>();
-
-    public void Deactivate()
-    {
-        IsActive = false;
-    }
 }

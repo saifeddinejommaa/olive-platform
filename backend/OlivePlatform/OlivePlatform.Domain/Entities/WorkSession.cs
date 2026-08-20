@@ -18,24 +18,4 @@ public class WorkSession
     public decimal? Amount { get; private set; }
 
     public string? Notes { get; private set; }
-
-    public Worker Worker { get; private set; } = null!;
-
-    public Plot? Plot { get; private set; }
-
-    private WorkSession()
-    {
-    }
-
-    public WorkSession(
-        int workerId,
-        DateOnly workDate,
-        string workType,
-        int? plotId = null)
-    {
-        WorkerId = workerId;
-        PlotId = plotId;
-        WorkDate = workDate;
-        WorkType = workType;
-    }
 }

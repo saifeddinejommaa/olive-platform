@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using Microsoft.EntityFrameworkCore;
 using OlivePlatform.Application.Common;
 using OlivePlatform.Application.Features.OlivePurchases.Requests;
 using OlivePlatform.Application.Features.OlivePurchases.Responses;
@@ -453,5 +454,95 @@ public class OlivePurchaseQueryRepository : IOlivePurchaseQueryRepository
             {
                 PurchaseNumber = purchaseNumber
             });
+    }
+
+    // ============================================================
+    // GET OLIVE PURCHASE ITEMS - PAGINATED
+    // ============================================================
+
+    public async Task<PagedResult<OlivePurchaseItemResponse>> GetOlivePurchaseItems(
+        int purchaseId,
+        OlivePurchaseItemsRequestFilter filter)
+    {
+        var sql = new StringBuilder(
+            """
+        SELECT
+            COUNT(*) OVER() AS Total,
+
+            opi.id AS Id,
+
+            opi.reference AS Reference,
+
+            opi.purchase_id AS PurchaseId,
+
+            opi.variety_id AS VarietyId,
+
+            ov.name AS VarietyName,
+
+            opi.description AS Description,
+
+            opi.agreed_quantity_kg AS AgreedQuantityKg,
+
+            opi.price_per_kg AS PricePerKg,
+
+            opi.total_amount AS TotalAmount,
+
+            opi.notes AS Notes
+
+        FROM olive_purchase_items opi
+
+        LEFT JOIN olive_varieties ov
+            ON ov.id = opi.variety_id
+
+        WHERE opi.purchase_id = @PurchaseId
+        """);
+
+        var parameters = new DynamicParameters();
+
+        parameters.Add(
+            "PurchaseId",
+            purchaseId);
+
+        parameters.Add(
+            "PageSize",
+            filter.PageSize);
+
+        parameters.Add(
+            "Offset",
+            (filter.PageNumber - 1) * filter.PageSize);
+
+
+        // ========================================================
+        // PAGINATION
+        // ========================================================
+
+        sql.Append(
+            """
+
+        ORDER BY opi.id DESC
+
+        LIMIT @PageSize
+        OFFSET @Offset
+        """);
+
+        using var connection = _dbConnection;
+
+        var result =
+            await connection.QueryAsync<OlivePurchaseItemResponse>(
+                sql.ToString(),
+                parameters);
+
+        var items = result.ToList();
+
+        var total =
+            items.FirstOrDefault()?.TotalAmount ?? 0;
+
+        return new PagedResult<OlivePurchaseItemResponse>
+        {
+            PageNumber = filter.PageNumber,
+            PageSize = filter.PageSize,
+            TotalCount = total,
+            Items = items
+        };
     }
 }

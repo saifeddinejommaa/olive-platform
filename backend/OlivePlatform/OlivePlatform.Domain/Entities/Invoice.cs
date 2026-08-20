@@ -24,10 +24,4 @@ public class Invoice
 
     public string? Notes { get; set; }
 
-    public ICollection<InvoiceItem> Items { get; set; }
-        = new List<InvoiceItem>();
-
-    public ICollection<Payment> Payments { get; set; }
-        = new List<Payment>();
-
 }

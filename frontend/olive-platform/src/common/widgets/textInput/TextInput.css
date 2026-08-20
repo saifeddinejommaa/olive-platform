@@ -1,0 +1,146 @@
+/* ============================================================
+   TEXT INPUT
+   ============================================================ */
+
+.text-input-field {
+  width: 100%;
+}
+
+
+/* ============================================================
+   LABEL
+   ============================================================ */
+
+.text-input-label {
+  display: block;
+
+  margin-bottom: 7px;
+
+  color: var(--color-olive-900);
+
+  font-size: var(--fs-sm);
+
+  font-weight: 600;
+}
+
+.text-input-required {
+  margin-left: 4px;
+
+  color: var(--color-danger);
+}
+
+
+/* ============================================================
+   INPUT
+   ============================================================ */
+
+.text-input {
+  width: 100%;
+
+  min-height: 42px;
+
+  padding: 0 12px;
+
+  border: 1px solid var(--color-border);
+
+  border-radius: var(--radius-md);
+
+  background: var(--color-surface-raised);
+
+  color: var(--color-ink);
+
+  font-family: var(--font-body);
+
+  font-size: var(--fs-sm);
+
+  outline: none;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+}
+
+
+/* ============================================================
+   PLACEHOLDER
+   ============================================================ */
+
+.text-input::placeholder {
+  color: var(--color-muted);
+
+  opacity: 0.65;
+}
+
+
+/* ============================================================
+   FOCUS
+   ============================================================ */
+
+.text-input:focus {
+  border-color: var(--color-olive-500);
+
+  box-shadow:
+    0 0 0 3px rgba(116, 144, 74, 0.12);
+}
+
+
+/* ============================================================
+   HOVER
+   ============================================================ */
+
+.text-input:hover:not(:focus):not(:disabled) {
+  border-color: var(--color-border-strong);
+}
+
+
+/* ============================================================
+   DISABLED
+   ============================================================ */
+
+.text-input:disabled {
+  background: var(--color-bg);
+
+  color: var(--color-muted);
+
+  cursor: not-allowed;
+
+  opacity: 0.7;
+}
+
+
+/* ============================================================
+   ERROR
+   ============================================================ */
+
+.text-input-error {
+  border-color: var(--color-danger);
+}
+
+.text-input-error:focus {
+  border-color: var(--color-danger);
+
+  box-shadow:
+    0 0 0 3px rgba(162, 59, 46, 0.1);
+}
+
+.text-input-error-message {
+  margin-top: 5px;
+
+  color: var(--color-danger);
+
+  font-size: var(--fs-xs);
+}
+
+
+/* ============================================================
+   HINT
+   ============================================================ */
+
+.text-input-hint {
+  margin-top: 5px;
+
+  color: var(--color-muted);
+
+  font-size: var(--fs-xs);
+}

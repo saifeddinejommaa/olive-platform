@@ -1,4 +1,5 @@
 import React from "react";
+import Button from "../button/Button";
 
 type Column<T> = {
   key: keyof T;
@@ -74,12 +75,13 @@ export default function DataTable<T>({
       </table>
        </div>
       <div className="pagination">
-        <button
+        <Button
+          variant="secondary"
           disabled={pageNumber <= 1}
           onClick={() => onPageChange(pageNumber - 1)}
         >
           Prev
-        </button>
+        </Button>
 
         <span>
           Page {pageNumber} / {totalPages}
@@ -87,12 +89,13 @@ export default function DataTable<T>({
           {totalCount} items
         </span>
 
-        <button
+        <Button
+          variant="secondary"
           disabled={pageNumber >= totalPages}
           onClick={() => onPageChange(pageNumber + 1)}
         >
           Next
-        </button>
+        </Button>
       </div>
     </div>
   );

@@ -1,0 +1,261 @@
+/* ============================================================
+   TEXT EDITOR
+   ============================================================ */
+
+.text-editor-field {
+  width: 100%;
+}
+
+
+/* ============================================================
+   LABEL
+   ============================================================ */
+
+.text-editor-label {
+  display: block;
+
+  margin-bottom: 7px;
+
+  color: var(--color-olive-900);
+
+  font-size: var(--fs-sm);
+
+  font-weight: 600;
+}
+
+.text-editor-required {
+  margin-left: 4px;
+
+  color: var(--color-danger);
+}
+
+
+/* ============================================================
+   EDITOR CONTAINER
+   ============================================================ */
+
+.text-editor {
+  overflow: hidden;
+
+  background: var(--color-surface-raised);
+
+  border: 1px solid var(--color-border);
+
+  border-radius: var(--radius-md);
+
+  box-shadow: var(--shadow-sm);
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.text-editor:focus-within {
+  border-color: var(--color-olive-500);
+
+  box-shadow:
+    0 0 0 3px rgba(116, 144, 74, 0.12);
+}
+
+
+/* ============================================================
+   TOOLBAR
+   ============================================================ */
+
+.text-editor-toolbar {
+  min-height: 44px;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 4px;
+
+  padding: 6px 8px;
+
+  background: var(--color-surface);
+
+  border-bottom: 1px solid var(--color-border);
+}
+
+
+/* ============================================================
+   TOOLS
+   ============================================================ */
+
+.editor-tool {
+  width: 32px;
+  height: 32px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+
+  border: none;
+
+  border-radius: var(--radius-sm);
+
+  background: transparent;
+
+  color: var(--color-muted);
+
+  font-family: var(--font-body);
+
+  font-size: var(--fs-sm);
+
+  cursor: pointer;
+
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+}
+
+.editor-tool:hover:not(:disabled) {
+  background: var(--color-olive-100);
+
+  color: var(--color-olive-900);
+}
+
+.editor-tool:active:not(:disabled) {
+  background: var(--color-border);
+}
+
+.editor-tool:disabled {
+  opacity: 0.4;
+
+  cursor: not-allowed;
+}
+
+
+/* ============================================================
+   DIVIDER
+   ============================================================ */
+
+.editor-divider {
+  width: 1px;
+
+  height: 22px;
+
+  margin: 0 5px;
+
+  background: var(--color-border);
+}
+
+
+/* ============================================================
+   CONTENT
+   ============================================================ */
+
+.text-editor-content {
+  min-height: 160px;
+
+  padding: 14px 16px;
+
+  outline: none;
+
+  color: var(--color-ink);
+
+  font-family: var(--font-body);
+
+  font-size: var(--fs-base);
+
+  line-height: 1.6;
+
+  cursor: text;
+}
+
+.text-editor-content:empty::before {
+  content: attr(data-placeholder);
+
+  color: var(--color-muted);
+
+  opacity: 0.65;
+
+  pointer-events: none;
+}
+
+
+/* ============================================================
+   CONTENT ELEMENTS
+   ============================================================ */
+
+.text-editor-content p {
+  margin: 0 0 8px;
+}
+
+.text-editor-content ul,
+.text-editor-content ol {
+  margin: 8px 0;
+
+  padding-left: 24px;
+}
+
+.text-editor-content a {
+  color: var(--color-olive-700);
+
+  text-decoration: underline;
+}
+
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+
+.text-editor-footer {
+  display: flex;
+
+  align-items: center;
+  justify-content: space-between;
+
+  min-height: 20px;
+
+  margin-top: 5px;
+
+  font-size: var(--fs-xs);
+}
+
+.text-editor-counter {
+  margin-left: auto;
+
+  color: var(--color-muted);
+}
+
+
+/* ============================================================
+   ERROR
+   ============================================================ */
+
+.text-editor-error {
+  border-color: var(--color-danger);
+}
+
+.text-editor-error:focus-within {
+  border-color: var(--color-danger);
+
+  box-shadow:
+    0 0 0 3px rgba(162, 59, 46, 0.1);
+}
+
+.text-editor-error-message {
+  color: var(--color-danger);
+
+  font-size: var(--fs-xs);
+}
+
+
+/* ============================================================
+   DISABLED
+   ============================================================ */
+
+.text-editor-disabled {
+  background: var(--color-bg);
+
+  opacity: 0.65;
+}
+
+.text-editor-disabled .text-editor-content {
+  cursor: not-allowed;
+}
