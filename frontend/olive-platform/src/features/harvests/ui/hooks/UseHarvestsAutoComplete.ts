@@ -14,7 +14,7 @@ export function useHarvestsAutocomplete(serialNumber: string) {
 
     const timeout = setTimeout(async () => {
       setLoading(true);
-      const data = await GetHarvests({ harvestNumber: serialNumber, pageNumber: 1, pageSize: 10 });
+      const data = await GetHarvests({ toPressing:true, harvestNumber: serialNumber, pageNumber: 1, pageSize: 10 });
       setResults(data.items);
       setLoading(false);
     }, 300);

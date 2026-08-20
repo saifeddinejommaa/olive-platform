@@ -39,6 +39,8 @@ import SettingsPage from './features/settings/pages/SettingsPage'
 import { useEffect } from 'react'
 import { useConstantsStore } from './features/appConstants/ConstantsStore'
 import NewPressingOperationPage from './features/production/ui/pages/NewPressingOperationPage'
+import { ToastContainer } from 'react-toastify'
+import PressingOperationDetailsPage from './features/production/ui/pages/PressingOperationsDetailsPage'
 
 
 function App() {
@@ -49,6 +51,7 @@ function App() {
     fetchConstants();
   }, []);
   return (
+    <>
     <BrowserRouter>
       <Routes>
 
@@ -137,6 +140,10 @@ function App() {
             path="/production/new"
             element={<NewPressingOperationPage />}
           />
+          <Route
+            path="/production/pressing-operations/:id"
+            element={<PressingOperationDetailsPage />}
+          />
 
 
           {/* ================================================== */}
@@ -172,6 +179,12 @@ function App() {
 
       </Routes>
     </BrowserRouter>
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        newestOnTop
+      />
+    </>
   )
 }
 

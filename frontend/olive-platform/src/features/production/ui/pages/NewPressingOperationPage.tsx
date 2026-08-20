@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 
@@ -29,21 +29,62 @@ const initialForm: NewPressingOperationForm = {
 }
 
 export default function NewPressingOperationPage() {
-  const { createPressingOperationAction, error } = useCreatePressingOperation()
   const navigate = useNavigate()
+  const { createPressingOperationAction, error } = useCreatePressingOperation()
+  const { Appconstants, loading: constantsLoading } = useConstantsStore()
+
   const [form, setForm] = useState<NewPressingOperationForm>(initialForm)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [saving, setSaving] = useState(false)
-
-  const { Appconstants, loading: constantsLoading } = useConstantsStore()
 
   const statusOptions = Appconstants.productionStatuses.map(status => ({
     value: status.id.toString(),
     label: status.label,
   }))
 
-  const updateForm = useCallback(<K extends keyof NewPressingOperationForm>(field: K, value: NewPressingOperationForm[K]) => {
+  const getValidationErrors = useCallback((): Record<string, string> => {
+    const validationErrors: Record<string, string> = {}
+
+    if (!form.pressingDate) {
+      validationErrors.pressingDate = 'La date de pression est obligatoire.'
+    }
+
+    if (!form.statusId) {
+      validationErrors.statusId = 'Le statut est obligatoire.'
+    }
+
+    if (form.inputs.length === 0) {
+      validationErrors.inputs = 'Ajoutez au moins une source d’olives.'
+    }
+
+    form.inputs.forEach(input => {
+      if (input.sourceType === 'harvest') {
+        if (!input.harvestId) {
+          validationErrors[`input-${input.id}`] = 'Sélectionnez une récolte valide.'
+        }
+      } else if (!input.purchaseItemId) {
+        validationErrors[`input-${input.id}`] = 'Sélectionnez un achat valide.'
+      }
+
+      if (!input.quantityKg || Number(input.quantityKg) <= 0) {
+        validationErrors[`quantity-${input.id}`] = 'La quantité doit être supérieure à 0.'
+      }
+    })
+
+    return validationErrors
+  }, [form])
+
+  const isFormValid = useMemo(
+    () => Object.keys(getValidationErrors()).length === 0,
+    [getValidationErrors],
+  )
+
+  const updateForm = useCallback(<K extends keyof NewPressingOperationForm>(
+    field: K,
+    value: NewPressingOperationForm[K],
+  ) => {
     setForm(previous => ({ ...previous, [field]: value }))
+
     setErrors(previous => {
       if (!previous[field]) return previous
       const next = { ...previous }
@@ -72,7 +113,11 @@ export default function NewPressingOperationPage() {
   }, [])
 
   const removeInput = useCallback((id: string) => {
-    setForm(previous => ({ ...previous, inputs: previous.inputs.filter(input => input.id !== id) }))
+    setForm(previous => ({
+      ...previous,
+      inputs: previous.inputs.filter(input => input.id !== id),
+    }))
+
     setErrors(previous => {
       const next = { ...previous }
       delete next[`input-${id}`]
@@ -81,10 +126,16 @@ export default function NewPressingOperationPage() {
     })
   }, [])
 
-  const updateInput = useCallback((id: string, field: keyof PressingOperationInput, value: string | number | null) => {
+  const updateInput = useCallback((
+    id: string,
+    field: keyof PressingOperationInput,
+    value: string | number | null,
+  ) => {
     setForm(previous => ({
       ...previous,
-      inputs: previous.inputs.map(input => input.id === id ? { ...input, [field]: value } : input),
+      inputs: previous.inputs.map(input =>
+        input.id === id ? { ...input, [field]: value } : input,
+      ),
     }))
 
     setErrors(previous => {
@@ -98,14 +149,18 @@ export default function NewPressingOperationPage() {
   const changeInputSource = useCallback((id: string, sourceType: InputSourceType) => {
     setForm(previous => ({
       ...previous,
-      inputs: previous.inputs.map(input => input.id === id ? {
-        ...input,
-        sourceType,
-        harvestId: null,
-        purchaseItemId: null,
-        reference: '',
-        quantityKg: '',
-      } : input),
+      inputs: previous.inputs.map(input =>
+        input.id === id
+          ? {
+              ...input,
+              sourceType,
+              harvestId: null,
+              purchaseItemId: null,
+              reference: '',
+              quantityKg: '',
+            }
+          : input,
+      ),
     }))
 
     setErrors(previous => {
@@ -123,10 +178,20 @@ export default function NewPressingOperationPage() {
         if (input.id !== id) return input
 
         if (input.sourceType === 'harvest') {
-          return { ...input, harvestId: source.id, purchaseItemId: null, reference: source.reference }
+          return {
+            ...input,
+            harvestId: source.id,
+            purchaseItemId: null,
+            reference: source.reference,
+          }
         }
 
-        return { ...input, harvestId: null, purchaseItemId: source.id, reference: source.reference }
+        return {
+          ...input,
+          harvestId: null,
+          purchaseItemId: source.id,
+          reference: source.reference,
+        }
       }),
     }))
 
@@ -137,39 +202,14 @@ export default function NewPressingOperationPage() {
     })
   }, [])
 
-  const validate = useCallback(() => {
-    const validationErrors: Record<string, string> = {}
-
-    if (!form.pressingDate) {
-      validationErrors.pressingDate = 'La date de pression est obligatoire.'
-    }
-
-    if (!form.statusId) {
-      validationErrors.statusId = 'Le statut est obligatoire.'
-    }
-
-    if (form.inputs.length === 0) {
-      validationErrors.inputs = 'Ajoutez au moins une source d’olives.'
-    }
-
-    form.inputs.forEach(input => {
-      if (input.sourceType === 'harvest') {
-        if (!input.harvestId) validationErrors[`input-${input.id}`] = 'Sélectionnez une récolte valide.'
-      } else {
-        if (!input.purchaseItemId) validationErrors[`input-${input.id}`] = 'Sélectionnez un achat valide.'
-      }
-
-      if (!input.quantityKg || Number(input.quantityKg) <= 0) {
-        validationErrors[`quantity-${input.id}`] = 'La quantité doit être supérieure à 0.'
-      }
-    })
-
-    setErrors(validationErrors)
-    return Object.keys(validationErrors).length === 0
-  }, [form])
-
   const handleSubmit = useCallback(async () => {
-    if (!validate()) return
+    const validationErrors = getValidationErrors()
+
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors)
+      toast.error('Veuillez corriger les erreurs du formulaire.')
+      return
+    }
 
     try {
       setSaving(true)
@@ -180,7 +220,10 @@ export default function NewPressingOperationPage() {
         notes: form.notes || null,
         startTime: null,
         endTime: null,
-        oliveQuantityKg: form.inputs.reduce((total, input) => total + Number(input.quantityKg || 0), 0),
+        oliveQuantityKg: form.inputs.reduce(
+          (total, input) => total + Number(input.quantityKg || 0),
+          0,
+        ),
         oilQuantityLiters: null,
         inputs: form.inputs.map(input => ({
           harvestId: input.sourceType === 'harvest' ? input.harvestId : null,
@@ -189,28 +232,25 @@ export default function NewPressingOperationPage() {
         })),
       }
 
-      console.log('sending request', request)
-
       const success = await createPressingOperationAction(request)
 
       if (success) {
-        toast.success('Opération créée avec succès')
+        toast.success('Opération créée avec succès.')
         navigate('/production')
         return
       }
 
-      toast.error(error ?? 'Impossible de créer l’opération.')
-    } catch (exception) {
-      console.error(exception)
+      toast.error(error ?? 'Impossible de créer l’opération de pression.')
+    } catch {
+      toast.error('Une erreur est survenue lors de la création de l’opération.')
       setErrors({ general: 'Impossible de créer l’opération de pression.' })
     } finally {
       setSaving(false)
     }
-  }, [form, validate, createPressingOperationAction, error, navigate])
+  }, [form, getValidationErrors, createPressingOperationAction, error, navigate])
 
   const handleCancel = useCallback(() => {
-    if (saving) return
-    navigate('/production')
+    if (!saving) navigate('/production')
   }, [saving, navigate])
 
   return (
@@ -218,7 +258,9 @@ export default function NewPressingOperationPage() {
       <div className="page-header">
         <div className="page-header-content">
           <h1 className="page-title">Nouvelle opération de pression</h1>
-          <p className="page-description">Créer une nouvelle opération de pression et définir les olives utilisées.</p>
+          <p className="page-description">
+            Créer une nouvelle opération de pression et définir les olives utilisées.
+          </p>
         </div>
       </div>
 
@@ -284,7 +326,11 @@ export default function NewPressingOperationPage() {
           Annuler
         </Button>
 
-        <Button variant="primary" onClick={handleSubmit} disabled={saving || constantsLoading}>
+        <Button
+          variant="primary"
+          onClick={handleSubmit}
+          disabled={saving || constantsLoading || !isFormValid}
+        >
           {saving ? 'Création...' : 'Créer la pression'}
         </Button>
       </div>
