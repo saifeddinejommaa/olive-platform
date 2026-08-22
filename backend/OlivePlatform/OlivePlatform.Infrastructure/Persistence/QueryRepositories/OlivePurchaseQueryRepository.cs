@@ -1,5 +1,4 @@
 ﻿using Dapper;
-using Microsoft.EntityFrameworkCore;
 using OlivePlatform.Application.Common;
 using OlivePlatform.Application.Features.OlivePurchases.Requests;
 using OlivePlatform.Application.Features.OlivePurchases.Responses;
@@ -151,6 +150,44 @@ public class OlivePurchaseQueryRepository : IOlivePurchaseQueryRepository
         }
 
         // ========================================================
+        // To Pressing
+        // ========================================================
+
+        if (filter.ToPressing == true)
+        {
+            sql.Append(
+                """
+
+        AND EXISTS (
+            SELECT 1
+            FROM olive_purchase_items item
+
+            WHERE item.purchase_id = op.id
+
+            AND (
+                item.agreed_quantity_kg
+                -
+                COALESCE(
+                    (
+                        SELECT SUM(poi.quantity_kg)
+                        FROM pressing_operation_inputs poi
+
+                        INNER JOIN pressing_operations po
+                            ON po.id = poi.pressing_operation_id
+
+                        INNER JOIN production_status pstatus
+                            ON pstatus.id = po.status_id
+
+                        WHERE poi.purchase_item_id = item.id
+                    ),
+                    0
+                )
+            ) > 0
+        )
+        """);
+        }
+
+        // ========================================================
         // GROUP BY
         // ========================================================
 
@@ -249,29 +286,51 @@ public class OlivePurchaseQueryRepository : IOlivePurchaseQueryRepository
             """;
 
         const string itemsSql =
-            """
-            SELECT
-                opi.id AS Id,
+             """
+             SELECT
+                 opi.id AS Id,
 
-                opi.variety_id AS VarietyId,
+                 opi.variety_id AS VarietyId,
 
-                ov.name AS VarietyName,
+                 ov.name AS VarietyName,
 
-                opi.agreed_quantity_kg AS AgreedQuantityKg,
+                 opi.agreed_quantity_kg AS AgreedQuantityKg,
 
-                opi.price_per_kg AS PricePerKg,
+                 COALESCE(
+                     (
+                         SELECT SUM(po_input.quantity_kg)
+                         FROM pressing_operation_inputs po_input
+                         WHERE po_input.purchase_item_id = opi.id
+                     ),
+                     0
+                 ) AS PressedQuantityKg,
 
-                opi.total_amount AS TotalAmount
+                 (
+                     opi.agreed_quantity_kg
+                     -
+                     COALESCE(
+                         (
+                             SELECT SUM(po_input.quantity_kg)
+                             FROM pressing_operation_inputs po_input
+                             WHERE po_input.purchase_item_id = opi.id
+                         ),
+                         0
+                     )
+                 ) AS RemainingQuantityKg,
 
-            FROM olive_purchase_items opi
+                 opi.price_per_kg AS PricePerKg,
 
-            LEFT JOIN olive_varieties ov
-                ON ov.id = opi.variety_id
+                 opi.total_amount AS TotalAmount
 
-            WHERE opi.purchase_id = @PurchaseId
+             FROM olive_purchase_items opi
 
-            ORDER BY opi.id
-            """;
+             LEFT JOIN olive_varieties ov
+                 ON ov.id = opi.variety_id
+
+             WHERE opi.purchase_id = @PurchaseId
+
+             ORDER BY opi.id
+             """;
 
         const string samplesSql =
             """
@@ -487,7 +546,23 @@ public class OlivePurchaseQueryRepository : IOlivePurchaseQueryRepository
 
             opi.total_amount AS TotalAmount,
 
-            opi.notes AS Notes
+            opi.notes AS Notes,
+
+            (opi.agreed_quantity_kg
+                -
+                COALESCE(
+                    (
+                        SELECT SUM(poi.quantity_kg)
+                        FROM pressing_operation_inputs poi
+                        INNER JOIN pressing_operations po
+                            ON po.id = poi.pressing_operation_id
+                        INNER JOIN production_status ps
+                            ON ps.id = po.status_id
+                        WHERE poi.purchase_item_id = opi.id
+                    ),
+                    0
+                )
+            ) AS RemainingQuantityKg
 
         FROM olive_purchase_items opi
 

@@ -6,4 +6,5 @@ export type HarvestFilters = PaginationFilter & {
     fromDate?: string
     toDate?: string
     qualityGrade?: string
+    toPressing? : boolean
 }

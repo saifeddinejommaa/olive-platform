@@ -143,6 +143,44 @@ public class HarvestQueryRepository : IHarvestQueryRepository
                 $"%{filter.QualityGrade}%");
         }
 
+        // ========================================================
+        // To Pressing
+        // ========================================================
+
+        if (filter.ToPressing == true)
+        {
+            sql.Append(
+                """
+
+        AND EXISTS (
+            SELECT 1
+            FROM olive_purchase_items item
+
+            WHERE item.purchase_id = h.id
+
+            AND (
+                item.agreed_quantity_kg
+                -
+                COALESCE(
+                    (
+                        SELECT SUM(poi.quantity_kg)
+                        FROM pressing_operation_inputs poi
+
+                        INNER JOIN pressing_operations po
+                            ON po.id = poi.pressing_operation_id
+
+                        INNER JOIN production_status pstatus
+                            ON pstatus.id = po.status_id
+
+                        WHERE poi.purchase_item_id = item.id
+                    ),
+                    0
+                )
+            ) > 0
+        )
+        """);
+        }
+
         // ----------------------------------------------------
         // Pagination
         // ----------------------------------------------------

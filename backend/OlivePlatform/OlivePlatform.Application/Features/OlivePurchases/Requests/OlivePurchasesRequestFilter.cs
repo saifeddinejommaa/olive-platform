@@ -14,5 +14,6 @@ namespace OlivePlatform.Application.Features.OlivePurchases.Requests
         public DateOnly? ToDate { get; set; }
 
         public PurchaseStatus? Status { get; set; }
+        public bool? ToPressing { get; set; }
     }
 }

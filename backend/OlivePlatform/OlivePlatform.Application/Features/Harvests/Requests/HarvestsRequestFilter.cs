@@ -13,5 +13,7 @@ namespace OlivePlatform.Application.Features.Harvests.Requests
         public DateOnly? ToDate { get; set; }
 
         public string? QualityGrade { get; set; }
+
+        public bool? ToPressing { get; set; }
     }
 }

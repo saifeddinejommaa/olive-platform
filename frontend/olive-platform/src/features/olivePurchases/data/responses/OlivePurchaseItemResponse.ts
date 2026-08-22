@@ -12,6 +12,10 @@ export type OlivePurchaseItemResponse = {
 
   agreedQuantityKg: number
 
+  pressedQuantityKg: number
+
+  remainingQuantityKg: number
+
   pricePerKg: number
 
   totalAmount: number | null

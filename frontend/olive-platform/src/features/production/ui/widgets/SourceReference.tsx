@@ -102,6 +102,7 @@ export default function SourceReference({
 
   const handleToggleItem = (itemId: number) => {
     setSelectedItemIds(current => {
+      console.log(current)
       const alreadySelected = current.includes(itemId)
       const next = alreadySelected
         ? current.filter(id => id !== itemId)
@@ -109,7 +110,7 @@ export default function SourceReference({
 
       const selectedItems = purchaseItems.filter(item => next.includes(item.id))
       const quantityKg = selectedItems.reduce(
-        (total, item) => total + Number(item.agreedQuantityKg ?? 0),
+        (total, item) => total + Number(item.remainingQuantityKg ?? 0),
         0
       )
 

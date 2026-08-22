@@ -36,6 +36,9 @@ builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddSwaggerGen();
 
+builder.Services.ConfigureInfrastructureServices(
+    builder.Configuration);
+
 // ============================================================
 // Routes
 // ============================================================
