@@ -29,11 +29,9 @@ public class PressingOperationsController : ControllerBase
     }
 
     [HttpGet("{id:int}")]
-    public async Task<IActionResult> GetById(int id)
+    public async Task<IActionResult> GetDetails(int id)
     {
-        var result = await _queryRepository.GetByIdAsync(id);
-
-        return result is null ? NotFound() : Ok(result);
+        return Ok(await _queryRepository.GetPressingOperationDetails(id));
     }
 
     [HttpPost("create")]
@@ -42,6 +40,8 @@ public class PressingOperationsController : ControllerBase
     {
         return Ok(await _mediator.Send(command));
     }
+
+
 
     [HttpPut("{id:int}")]
     public async Task<IActionResult> Update(

@@ -148,116 +148,102 @@ public class PressingOperationQueryRepository : IPressiongOperationQueryReposito
     }
 
     // ============================================================
-    // GET BY ID
+    // GET PRESSING OPERATION DETAILS
     // ============================================================
 
-    public async Task<PressingOperation?> GetByIdAsync(
-        int id,
-        CancellationToken cancellationToken = default)
+    public async Task<PressingOperationDetailsResponse> GetPressingOperationDetails(int id, CancellationToken cancellationToken = default)
     {
-        const string sql =
-            """
+        const string sql = $"""
             SELECT
-                id AS Id,
-                operation_number AS OperationNumber,
-                pressing_date AS PressingDate,
-                start_time AS StartTime,
-                end_time AS EndTime,
-                status AS Status,
-                olive_quantity_kg AS OliveQuantityKg,
-                oil_quantity_liters AS OilQuantityLiters,
-                yield_percentage AS YieldPercentage,
-                notes AS Notes,
-                created_at AS CreatedAt,
-                updated_at AS UpdatedAt
+                po.id {nameof(PressingOperationDetailsResponse.Id)},
+                po.operation_number {nameof(PressingOperationDetailsResponse.OperationNumber)},
+                po.status_id {nameof(PressingOperationDetailsResponse.Status)},
+                po.created_at {nameof(PressingOperationDetailsResponse.CreatedAt)},
+                po.oil_quantity_liters {nameof(PressingOperationDetailsResponse.OilQuantityLiters)},
+                po.start_time {nameof(PressingOperationDetailsResponse.StartTime)},
+                po.end_time {nameof(PressingOperationDetailsResponse.EndTime)},
 
-            FROM pressing_operations
+                COALESCE(
+                    SUM(poi.quantity_kg),
+                    0
+                ) AS {nameof(PressingOperationDetailsResponse.OliveQuantityKg)},
 
-            WHERE id = @Id
+                COALESCE(
+                    json_agg(
+                        json_build_object(
+                            '{nameof(PressingOperationInputResponse.Id)}', poi.id ,
+
+                            '{nameof(PressingOperationInputResponse.SourceType)}',
+                                CASE
+                                    WHEN poi.harvest_id IS NOT NULL THEN 1
+                                    WHEN poi.purchase_item_id IS NOT NULL THEN 2
+                                END, 
+
+                            '{nameof(PressingOperationInputResponse.SourceId)}',
+                                CASE
+                                    WHEN poi.harvest_id IS NOT NULL
+                                        THEN poi.harvest_id
+                                    WHEN poi.purchase_item_id IS NOT NULL
+                                        THEN poi.purchase_item_id
+                                END, 
+
+                            '{nameof(PressingOperationInputResponse.SourceReference)}',
+                                CASE
+                                    WHEN poi.harvest_id IS NOT NULL
+                                        THEN h.harvest_number
+                                    WHEN poi.purchase_item_id IS NOT NULL
+                                        THEN opi.reference
+                                END, 
+
+                            '{nameof(PressingOperationInputResponse.QuantityKg)}',
+                                CASE
+                                    WHEN poi.harvest_id IS NOT NULL
+                                        THEN h.quantity_kg
+                                    WHEN poi.purchase_item_id IS NOT NULL
+                                        THEN opi.agreed_quantity_kg
+                                END, 
+
+                            '{nameof(PressingOperationInputResponse.PressedQuantityKg)}',
+                                poi.quantity_kg, 
+
+                            '{nameof(PressingOperationInputResponse.OliveVarietyId)}',
+                                opi.variety_id
+                        )
+                        ORDER BY poi.id
+                    ) FILTER (WHERE poi.id IS NOT NULL),
+                    '[]'::json
+                ) AS  {nameof(PressingOperationDetailsResponse.Inputs)}
+
+            FROM pressing_operations po
+
+            LEFT JOIN pressing_operation_inputs poi
+                ON poi.pressing_operation_id = po.id
+
+            LEFT JOIN harvests h
+                ON h.id = poi.harvest_id
+
+            LEFT JOIN olive_purchase_items opi
+                ON opi.id = poi.purchase_item_id
+
+            WHERE po.id = 11
+
+            GROUP BY
+                po.id,
+                po.operation_number,
+                po.status_id,
+                po.created_at,
+                po.oil_quantity_liters,
+                po.start_time,
+                po.end_time;
             """;
 
         using var connection = _dbConnection;
 
-        return await connection.QuerySingleOrDefaultAsync<PressingOperation>(
+        var result = await connection.QuerySingleOrDefaultAsync<PressingOperationDetailsResponse>(
             sql,
-            new
-            {
-                Id = id
-            });
+            new { Id = id });
+
+        return result;
     }
-
-    // ============================================================
-    // GET ALL
-    // ============================================================
-
-    public async Task<IReadOnlyList<PressingOperation>> GetAllAsync(
-        CancellationToken cancellationToken = default)
-    {
-        const string sql =
-            """
-            SELECT
-                id AS Id,
-                operation_number AS OperationNumber,
-                pressing_date AS PressingDate,
-                start_time AS StartTime,
-                end_time AS EndTime,
-                status AS Status,
-                olive_quantity_kg AS OliveQuantityKg,
-                oil_quantity_liters AS OilQuantityLiters,
-                yield_percentage AS YieldPercentage,
-                notes AS Notes,
-                created_at AS CreatedAt,
-                updated_at AS UpdatedAt
-
-            FROM pressing_operations
-
-            ORDER BY production_date DESC, batch_number
-            """;
-
-        using var connection = _dbConnection;
-
-        var result =
-            await connection.QueryAsync<PressingOperation>(sql);
-
-        return result.ToList();
-    }
-
-    // ============================================================
-    // GET BY BATCH NUMBER
-    // ============================================================
-
-    public async Task<PressingOperation?> GetByBatchNumberAsync(
-        string batchNumber,
-        CancellationToken cancellationToken = default)
-    {
-        const string sql =
-            """
-            SELECT
-                id AS Id,
-                operation_number AS OperationNumber,
-                pressing_date AS PressingDate,
-                start_time AS StartTime,
-                end_time AS EndTime,
-                status AS Status,
-                olive_quantity_kg AS OliveQuantityKg,
-                oil_quantity_liters AS OilQuantityLiters,
-                yield_percentage AS YieldPercentage,
-                notes AS Notes,
-                created_at AS CreatedAt,
-                updated_at AS UpdatedAt
-
-            FROM pressing_operations
-
-            WHERE batch_number = @BatchNumber
-            """;
-
-        using var connection = _dbConnection;
-
-        return await connection.QuerySingleOrDefaultAsync<PressingOperation>(
-            sql,
-            new
-            {
-                BatchNumber = batchNumber
-            });
-    }
+ 
 }
