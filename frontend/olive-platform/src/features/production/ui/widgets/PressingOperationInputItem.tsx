@@ -1,15 +1,14 @@
-import Button from '../../../../common/widgets/button/Button'
 import TextInput from '../../../../common/widgets/textInput/TextInput'
 
 import SourceReference, {
-    type SourceOption,
+  type SourceOption,
 } from './SourceReference'
 
 import SourceTypeSelector from './SourceTypeSelector'
 
 import type {
-    PressingOperationInput,
-    InputSourceType,
+  PressingOperationInput,
+  InputSourceType,
 } from './InputTypes'
 
 // ============================================================
@@ -17,31 +16,27 @@ import type {
 // ============================================================
 
 type PressingOperationInputItemProps = {
-    input: PressingOperationInput
+  input: PressingOperationInput
 
-    index: number
+  index: number
 
-    errors: Record<string, string>
+  errors: Record<string, string>
 
-    onRemove: (
-        id: string
-    ) => void
+  onUpdate: (
+    id: string,
+    field: keyof PressingOperationInput,
+    value: string | number | null
+  ) => void
 
-    onUpdate: (
-        id: string,
-        field: keyof PressingOperationInput,
-        value: string | number | null
-    ) => void
+  onChangeSource: (
+    id: string,
+    sourceType: InputSourceType
+  ) => void
 
-    onChangeSource: (
-        id: string,
-        sourceType: InputSourceType
-    ) => void
-
-    onSelectSource: (
-        id: string,
-        source: SourceOption
-    ) => void
+  onSelectSource: (
+    id: string,
+    source: SourceOption
+  ) => void
 }
 
 // ============================================================
@@ -49,256 +44,207 @@ type PressingOperationInputItemProps = {
 // ============================================================
 
 export default function PressingOperationInputItem({
-    input,
-    index,
-    errors,
-    onRemove,
-    onUpdate,
-    onChangeSource,
-    onSelectSource,
+  input,
+  index,
+  errors,
+  onUpdate,
+  onChangeSource,
+  onSelectSource,
 }: PressingOperationInputItemProps) {
 
-    // ==========================================================
-    // CHANGE SOURCE
-    // ==========================================================
+  // ==========================================================
+  // CHANGE SOURCE TYPE
+  // ==========================================================
 
-   const handleChangeSource = (
+  const handleChangeSource = (
     sourceType: InputSourceType
-) => {
+  ) => {
 
-    // Changement de source :
-    // on efface toutes les anciennes références.
+    // On remet à zéro les informations liées
+    // à l'ancienne source.
 
     onUpdate(
-        input.id,
-        'reference',
-        ''
+      input.id,
+      'reference',
+      ''
     )
 
     onUpdate(
+      input.id,
+      'harvestId',
+      null
+    )
+
+    onUpdate(
+      input.id,
+      'purchaseItemId',
+      null
+    )
+
+    onUpdate(
+      input.id,
+      'quantityKg',
+      ''
+    )
+
+    // Puis on change le type de source.
+    onChangeSource(
+      input.id,
+      sourceType
+    )
+  }
+
+  // ==========================================================
+  // REFERENCE CHANGE
+  // ==========================================================
+
+  const handleReferenceChange = (
+    value: string
+  ) => {
+
+    onUpdate(
+      input.id,
+      'reference',
+      value
+    )
+
+    // Si l'utilisateur modifie manuellement
+    // la référence, on supprime l'identifiant
+    // précédemment sélectionné.
+
+    if (input.sourceType === 'harvest') {
+
+      onUpdate(
         input.id,
         'harvestId',
         null
-    )
+      )
 
-    onUpdate(
+      onUpdate(
         input.id,
         'purchaseItemId',
         null
+      )
+
+    } else {
+
+      onUpdate(
+        input.id,
+        'purchaseItemId',
+        null
+      )
+
+      onUpdate(
+        input.id,
+        'harvestId',
+        null
+      )
+    }
+  }
+
+  // ==========================================================
+  // SOURCE SELECTION
+  // ==========================================================
+
+  const handleSelectSource = (
+    source: SourceOption
+  ) => {
+
+    onSelectSource(
+      input.id,
+      source
     )
 
-    // IMPORTANT :
-    // on remet la quantité à zéro.
-    onUpdate(
+    // Si la source possède une quantité disponible,
+    // on la récupère automatiquement.
+
+    if (
+      source.quantityKg !== undefined
+    ) {
+
+      onUpdate(
         input.id,
         'quantityKg',
-        0
-    )
-
-    // Enfin on change le type de source.
-    onChangeSource(
-        input.id,
-        sourceType
-    )
-}
-
-    // ==========================================================
-    // REFERENCE CHANGE
-    // ==========================================================
-
-    const handleReferenceChange = (
-        value: string
-    ) => {
-
-        onUpdate(
-            input.id,
-            'reference',
-            value
-        )
-
-        if (
-            input.sourceType === 'harvest'
-        ) {
-
-            onUpdate(
-                input.id,
-                'harvestId',
-                null
-            )
-
-            onUpdate(
-                input.id,
-                'purchaseItemId',
-                null
-            )
-
-        } else {
-
-            onUpdate(
-                input.id,
-                'purchaseItemId',
-                null
-            )
-
-        }
+        source.quantityKg
+      )
     }
+  }
 
-    // ==========================================================
-    // SOURCE SELECTION
-    // ==========================================================
+  // ==========================================================
+  // RENDER
+  // ==========================================================
 
-    const handleSelectSource = (
-        source: SourceOption
-    ) => {
+  return (
+    <div
+      style={{
+        gridColumn: '1 / -1',
+        border: '1px solid #ddd',
+        borderRadius: '8px',
+        padding: '20px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '16px',
+      }}
+    >
 
-        onSelectSource(
-            input.id,
-            source
-        )
+      {/* ======================================================
+          SOURCE TYPE
+      ====================================================== */}
 
-        // ======================================================
-        // AUTOMATIC QUANTITY
-        // ======================================================
+      <SourceTypeSelector
+        value={input.sourceType}
+        onChange={handleChangeSource}
+      />
 
-        if (
-            source.quantityKg !== undefined
-        ) {
+      {/* ======================================================
+          SOURCE REFERENCE
+      ====================================================== */}
 
-            onUpdate(
-                input.id,
-                'quantityKg',
-                source.quantityKg
-            )
-
+      <SourceReference
+        sourceType={input.sourceType}
+        value={input.reference}
+        error={
+          errors[`input-${input.id}`] ??
+          errors[`input-${index}`]
         }
+        onChange={handleReferenceChange}
+        onSelect={handleSelectSource}
+      />
 
-    }
+      {/* ======================================================
+          QUANTITY
+      ====================================================== */}
 
-    // ==========================================================
-    // RENDER
-    // ==========================================================
+      <div>
 
-    return (
-        <div
-            style={{
-                gridColumn: '1 / -1',
-                border: '1px solid #ddd',
-                borderRadius: '8px',
-                padding: '20px',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '16px',
-            }}
-        >
+        <TextInput
+          label="Quantité d'olives (kg)"
+          type="number"
+          placeholder="500"
+          value={input.quantityKg}
+          onChange={event =>
+            onUpdate(
+              input.id,
+              'quantityKg',
+              event.target.value
+            )
+          }
+        />
 
-            {/* ==================================================
-                SOURCE TYPE
-            ================================================== */}
+        {(errors[`quantity-${input.id}`] ??
+          errors[`quantity-${index}`]) && (
 
-            <SourceTypeSelector
-                value={
-                    input.sourceType
-                }
-                onChange={
-                    handleChangeSource
-                }
-            />
+          <span className="field-error">
+            {
+              errors[`quantity-${input.id}`] ??
+              errors[`quantity-${index}`]
+            }
+          </span>
 
-            {/* ==================================================
-                SOURCE REFERENCE
-            ================================================== */}
+        )}
 
-            <SourceReference
-                sourceType={
-                    input.sourceType
-                }
+      </div>
 
-                value={
-                    input.reference
-                }
-
-                error={
-                    errors[
-                        `input-${index}`
-                    ]
-                }
-
-                onChange={
-                    handleReferenceChange
-                }
-
-                onSelect={
-                    handleSelectSource
-                }
-            />
-
-            {/* ==================================================
-                QUANTITY
-            ================================================== */}
-
-            <div>
-
-                <TextInput
-                    label="Quantité d'olives (kg)"
-                    type="number"
-                    placeholder="500"
-                    value={
-                        input.quantityKg
-                    }
-                    onChange={(
-                        event
-                    ) =>
-                        onUpdate(
-                            input.id,
-                            'quantityKg',
-                            event.target.value
-                        )
-                    }
-                />
-
-                {errors[
-                    `quantity-${index}`
-                ] && (
-
-                    <span
-                        className="field-error"
-                    >
-                        {
-                            errors[
-                                `quantity-${index}`
-                            ]
-                        }
-                    </span>
-
-                )}
-
-            </div>
-
-            {/* ==================================================
-                REMOVE
-            ================================================== */}
-
-            <div
-                style={{
-                    display: 'flex',
-                    justifyContent: 'flex-end',
-                    marginTop: '4px',
-                }}
-            >
-
-                <Button
-                    variant="secondary"
-                    onClick={() =>
-                        onRemove(
-                            input.id
-                        )
-                    }
-                >
-                    Supprimer
-                </Button>
-
-            </div>
-
-        </div>
-    )
+    </div>
+  )
 }

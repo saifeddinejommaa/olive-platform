@@ -21,9 +21,9 @@ type NewPressingOperationInputsWidgetProps = {
 
   errors: Record<string, string>
 
-  onAdd: () => void
+  onAdd?: () => void
 
-  onRemove: (
+  onRemove?: (
     id: string
   ) => void
 
@@ -38,6 +38,8 @@ type NewPressingOperationInputsWidgetProps = {
     id: string,
     source: SourceOption
   ) => void
+
+  showAddButton?: boolean
 }
 
 // ============================================================
@@ -48,10 +50,10 @@ export default function NewPressingOperationInputsWidget({
   inputs,
   errors,
   onAdd,
-  onRemove,
   onUpdate,
   onChangeSource,
   onSelectSource,
+  showAddButton = true,
 }: NewPressingOperationInputsWidgetProps) {
 
   return (
@@ -65,24 +67,17 @@ export default function NewPressingOperationInputsWidget({
           <PressingOperationInputsEmptyState />
         )}
 
-        {inputs.map(
-          (input, index) => (
-            <PressingOperationInputItem
-              key={input.id}
-              input={input}
-              index={index}
-              errors={errors}
-              onRemove={onRemove}
-              onUpdate={onUpdate}
-              onChangeSource={
-                onChangeSource
-              }
-              onSelectSource={
-                onSelectSource
-              }
-            />
-          )
-        )}
+        {inputs.map((input, index) => (
+          <PressingOperationInputItem
+            key={input.id}
+            input={input}
+            index={index}
+            errors={errors}
+            onUpdate={onUpdate}
+            onChangeSource={onChangeSource}
+            onSelectSource={onSelectSource}
+          />
+        ))}
 
         {errors.inputs && (
           <div
@@ -99,9 +94,11 @@ export default function NewPressingOperationInputsWidget({
           inputs={inputs}
         />
 
-        <PressingOperationInputsFooter
-          onAdd={onAdd}
-        />
+        {showAddButton && onAdd && (
+          <PressingOperationInputsFooter
+            onAdd={onAdd}
+          />
+        )}
 
       </div>
 
