@@ -3,7 +3,7 @@ using OlivePlatform.Domain.Interfaces.Repositories;
 
 namespace OlivePlatform.Infrastructure.Persistence.Repositories
 {
-    public class PressingOperationRepository : IPressionOperationsRepository
+    public class PressingOperationRepository : IPressingOperationsRepository
     {
         private readonly OlivePlatformAppDbContext _context;
 

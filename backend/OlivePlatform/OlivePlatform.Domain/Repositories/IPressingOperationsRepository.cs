@@ -3,7 +3,7 @@ using OlivePlatform.Domain.Repositories;
 
 namespace OlivePlatform.Domain.Interfaces.Repositories;
 
-public interface IPressionOperationsRepository
+public interface IPressingOperationsRepository
     : IRepository<PressingOperation>
 {
     Task AddInputsAsync(

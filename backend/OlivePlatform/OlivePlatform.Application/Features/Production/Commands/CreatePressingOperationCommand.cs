@@ -30,11 +30,11 @@ public class CreatePressingOperationCommand : IRequest<int>
 public class CreateProductionBatchCommandHandler
     : IRequestHandler<CreatePressingOperationCommand, int>
 {
-    private readonly IPressionOperationsRepository _repository;
+    private readonly IPressingOperationsRepository _repository;
     private readonly IDocumentNumberService _documentNumberService;
 
     public CreateProductionBatchCommandHandler(
-        IPressionOperationsRepository repository,
+        IPressingOperationsRepository repository,
         IDocumentNumberService documentNumberService)
     {
         _repository = repository;

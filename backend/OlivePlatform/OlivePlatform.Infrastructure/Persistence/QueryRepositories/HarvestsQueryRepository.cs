@@ -173,6 +173,7 @@ public class HarvestQueryRepository : IHarvestQueryRepository
                             ON pstatus.id = po.status_id
 
                         WHERE poi.purchase_item_id = item.id
+                            AND poi.status = 0
                     ),
                     0
                 )

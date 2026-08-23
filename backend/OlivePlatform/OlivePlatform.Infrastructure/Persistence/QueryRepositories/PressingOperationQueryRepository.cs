@@ -2,7 +2,6 @@
 using OlivePlatform.Application.Common;
 using OlivePlatform.Application.Features.Production.Requests;
 using OlivePlatform.Application.Features.Production.Responses;
-using OlivePlatform.Domain.Entities;
 using OlivePlatform.Domain.QueryRepositories;
 using System.Data;
 using System.Text;
@@ -225,7 +224,7 @@ public class PressingOperationQueryRepository : IPressiongOperationQueryReposito
             LEFT JOIN olive_purchase_items opi
                 ON opi.id = poi.purchase_item_id
 
-            WHERE po.id = 11
+            WHERE po.id = @Id
 
             GROUP BY
                 po.id,

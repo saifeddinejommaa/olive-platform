@@ -1,3 +1,5 @@
+import type { PressingOperationInputStatus } from "./PressingOperationInputStatus"
+
 export type InputSourceType = 'harvest' | 'purchase'
 
 export type PressingOperationInput = {
@@ -6,4 +8,5 @@ export type PressingOperationInput = {
   purchaseItemId: number | null
   reference: string
   quantityKg: string | number
+  status: PressingOperationInputStatus
 }
