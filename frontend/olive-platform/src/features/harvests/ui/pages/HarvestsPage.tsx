@@ -10,6 +10,7 @@ import { useConstantsStore } from '../../../appConstants/ConstantsStore'
 import { getOliveVarietyLabel } from '../../../appConstants/helper/AppConstantsHelper'
 import { renderStatus } from '../../../shared/utils/StatusUtils'
 import { productionStatusConfig } from '../../../shared/status/ProductionStatusConfig'
+import EditIcon from '@mui/icons-material/Edit';
 
 export default function HarvestsPage() {
   const {
@@ -53,6 +54,11 @@ export default function HarvestsPage() {
     await fetchHarvests()
   }
 
+  const handleOpenDetails = (id: number) => {
+    window.open(`/harvests/harvest-operation/${id}`, '_blank', 'noopener,noreferrer')
+  }
+
+
   const columns = [
     {
       key: 'reference' as keyof Harvest,
@@ -90,6 +96,27 @@ export default function HarvestsPage() {
       label: 'Statut',
       render: (item: Harvest) =>
         renderStatus(item.status,productionStatusConfig),
+    },
+
+    {
+      key: 'id' as keyof Harvest,
+      label: 'Actions',
+      render: (item: Harvest) => (
+        <button
+          type="button"
+          title="Modifier l'opération"
+          aria-label="Modifier l'opération"
+          onClick={() => handleOpenDetails(item.id)}
+          style={{
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            padding: '6px',
+          }}
+        >
+          <EditIcon fontSize="small" sx={{ color: 'var(--color-olive-900)' }} />
+        </button>
+      ),
     },
   ]
 
