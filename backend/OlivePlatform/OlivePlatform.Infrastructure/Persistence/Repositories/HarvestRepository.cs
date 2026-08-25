@@ -7,10 +7,13 @@ namespace OlivePlatform.Infrastructure.Persistence.Repositories;
 public class HarvestRepository
     : Repository<Harvest>, IHarvestRepository
 {
+
+    private readonly OlivePlatformAppDbContext _context;
     public HarvestRepository(
         OlivePlatformAppDbContext context)
         : base(context)
     {
+        _context = context;
     }
 
     public async Task<IReadOnlyList<Harvest>>
@@ -30,8 +33,17 @@ public class HarvestRepository
     {
         return await DbSet
             .FirstOrDefaultAsync(
-                x => x.HarvestNumber == harvestNumber,
+                x => x.Reference == harvestNumber,
                 cancellationToken);
+    }
+
+    public async Task AddAsync(Harvest entity, CancellationToken cancellationToken = default)
+    {
+        await _context.Harvests.AddAsync(
+         entity,
+         cancellationToken);
+
+        await _context.SaveChangesAsync(cancellationToken);
     }
 
     public async Task<bool> ExistsByNumberAsync(
@@ -41,7 +53,7 @@ public class HarvestRepository
     {
         return await DbSet.AnyAsync(
             x =>
-                x.HarvestNumber == harvestNumber &&
+                x.Reference == harvestNumber &&
                 (!excludeId.HasValue || x.Id != excludeId.Value),
             cancellationToken);
     }

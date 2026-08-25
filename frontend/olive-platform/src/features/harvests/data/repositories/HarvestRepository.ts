@@ -4,6 +4,7 @@ import type { PagedResult } from "../../../../core/PagedResult";
 import { buildQueryParams } from "../../../../core/QueryUtils";
 import type { Harvest } from "../../domain/entities/Harvest";
 import type { HarvestFilters } from "../../domain/entities/HarvestsFilters";
+import type { CreateHarvestParams } from "../../domain/params/CreateHarvestParams";
 import { HarvestMapper } from "../mappers/HarvestMapper";
 import type { HarvestResponse } from "../responses/HarvestResponse";
 
@@ -23,4 +24,15 @@ export const HarvestRepository = {
     getAssetId: (id: number) => {
       return http<ApiResponse<Harvest>>(`${API_BASE_URL}harvests/${id}`);
     },
+    
+    create: (params: CreateHarvestParams) => {
+    return  http<ApiResponse<number>>(
+          `${API_BASE_URL}harvests`,
+          {
+            method: "POST",
+            body: params,
+          }
+        );
+
+     }
 };

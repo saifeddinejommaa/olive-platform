@@ -25,6 +25,6 @@ public class PressingOperationInput
     [Column("created_at")]
     public DateTime CreatedAt { get; set; }
 
-    [Column("pressing_operation_inputs")]
+    [Column("status")]
     public PressingOperationInputStatus Status { get; set; }
 }

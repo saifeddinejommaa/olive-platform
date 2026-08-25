@@ -1,6 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using MediatR;
+using Microsoft.AspNetCore.Mvc;
+using OlivePlatform.Application.Features.Harvests.Commands.CloseHarvest;
+using OlivePlatform.Application.Features.Harvests.Commands.CreateHarvest;
+using OlivePlatform.Application.Features.Harvests.Commands.StartHarvest;
+using OlivePlatform.Application.Features.Harvests.Commands.UpdateHarvest;
 using OlivePlatform.Application.Features.Harvests.Requests;
-using OlivePlatform.Application.Features.Invoices.Requests;
 using OlivePlatform.Domain.Entities;
 using OlivePlatform.Domain.QueryRepositories;
 
@@ -11,12 +15,15 @@ namespace OlivePlatform.Api.Controllers;
 public class HarvestsController : ControllerBase
 {
     private readonly IHarvestQueryRepository _harvestQueryRepository;
+    private readonly IMediator _mediator;
 
     public HarvestsController(
-        IHarvestQueryRepository harvestQueryRepository)
+        IHarvestQueryRepository harvestQueryRepository,
+        IMediator mediator)
     {
         _harvestQueryRepository =
             harvestQueryRepository;
+        _mediator = mediator;
     }
 
     // GET: api/Harvest
@@ -51,20 +58,61 @@ public class HarvestsController : ControllerBase
         return Ok(harvest);
     }
 
-    // GET: api/Harvest/plot/5
-    [HttpGet("plot/{plotId:int}")]
-    [ProducesResponseType(
-        typeof(IReadOnlyList<Harvest>),
-        StatusCodes.Status200OK)]
-    public async Task<ActionResult<IReadOnlyList<Harvest>>> GetByPlotId(
-        int plotId,
+    [HttpPost]
+    public async Task<IActionResult> Create(
+        [FromBody] CreateHarvestCommand command,
         CancellationToken cancellationToken)
     {
-        var harvests =
-            await _harvestQueryRepository.GetByPlotIdAsync(
-                plotId,
-                cancellationToken);
+        var id = await _mediator.Send(command, cancellationToken);
 
-        return Ok(harvests);
+        return CreatedAtAction(
+            nameof(GetById),
+            new { id },
+            new { id });
     }
+
+    [HttpPut("{id:int}")]
+    public async Task<IActionResult> Update(
+        int id,
+        [FromBody] UpdateHarvestCommand command,
+        CancellationToken cancellationToken)
+    {
+        command.Id = id;
+
+        await _mediator.Send(command, cancellationToken);
+
+        return NoContent();
+    }
+
+    [HttpPost("{id:int}/start")]
+    public async Task<IActionResult> Start(
+        int id,
+        CancellationToken cancellationToken)
+    {
+        await _mediator.Send(
+            new StartHarvestCommand
+            {
+                Id = id
+            },
+            cancellationToken);
+
+        return NoContent();
+    }
+
+    [HttpPost("{id:int}/close")]
+    public async Task<IActionResult> Close(
+        int id,
+        [FromBody] CloseHarvestCommand command,
+        CancellationToken cancellationToken)
+    {
+        command.Id = id;
+
+        await _mediator.Send(
+            command,
+            cancellationToken);
+
+        return NoContent();
+    }
+
+
 }

@@ -19,19 +19,30 @@ import type { InputSourceType, PressingOperationInput } from '../widgets/InputTy
 import NewPressingOperationInputsWidget from '../widgets/NewPressingOperationInputsWidget'
 import { usePressingOperationDetailsStore } from '../stores/PressingOperationDetailsStore'
 import './PressingOperationDetailsPage.css'
-import { getTodayDate, toDateTime } from '../../../shared/utils/DatesUtils'
+import { toDateTime } from '../../../shared/utils/DatesUtils'
 
 export default function PressingOperationDetailsPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const { operation: storeOperation, loading, error: storeError, fetchOperation, clear } = usePressingOperationDetailsStore()
+
+  const {
+    operation: storeOperation,
+    loading,
+    error: storeError,
+    saving,
+    starting,
+    completing,
+    cancelling,
+    fetchOperation,
+    updateOperation: updateOperationStore,
+    startOperation: startOperationStore,
+    completeOperation: completeOperationStore,
+    cancelOperation: cancelOperationStore,
+    clear,
+  } = usePressingOperationDetailsStore()
 
   const [operation, setOperation] = useState<PressingOperationDetails | null>(null)
   const [originalOperation, setOriginalOperation] = useState<PressingOperationDetails | null>(null)
-  const [saving, setSaving] = useState(false)
-  const [starting, setStarting] = useState(false)
-  const [finishing, setFinishing] = useState(false)
-  const [abandoning, setAbandoning] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [dirty, setDirty] = useState(false)
   const [showAddInput, setShowAddInput] = useState(false)
@@ -45,6 +56,7 @@ export default function PressingOperationDetailsPage() {
     }
 
     const operationId = Number(id)
+
     if (Number.isNaN(operationId)) {
       setError('Identifiant de l’opération invalide.')
       return
@@ -102,6 +114,7 @@ export default function PressingOperationDetailsPage() {
   const canEditInputs = isPlanned === true
   const canEditOperation = !isCompleted && !isAbandoned
   const canEditOil = isInProgress === true
+  const isBusy = saving || starting || completing || cancelling
 
   const handleBack = useCallback(() => navigate('/production'), [navigate])
 
@@ -113,10 +126,7 @@ export default function PressingOperationDetailsPage() {
   const updateInputQuantity = useCallback((inputId: number, quantityKg: number) => {
     setOperation(previous => {
       if (!previous) return previous
-      return {
-        ...previous,
-        inputs: previous.inputs.map(input => input.id === inputId ? { ...input, quantityKg } : input),
-      }
+      return { ...previous, inputs: previous.inputs.map(input => input.id === inputId ? { ...input, quantityKg } : input) }
     })
     setDirty(true)
   }, [])
@@ -176,23 +186,9 @@ export default function PressingOperationDetailsPage() {
 
       const quantity = source.quantityKg !== undefined ? String(source.quantityKg) : previous.quantityKg
 
-      if (previous.sourceType === 'harvest') {
-        return {
-          ...previous,
-          harvestId: source.id,
-          purchaseItemId: null,
-          reference: source.reference,
-          quantityKg: quantity,
-        }
-      }
-
-      return {
-        ...previous,
-        harvestId: null,
-        purchaseItemId: source.id,
-        reference: source.reference,
-        quantityKg: quantity,
-      }
+      return previous.sourceType === 'harvest'
+        ? { ...previous, harvestId: source.id, purchaseItemId: null, reference: source.reference, quantityKg: quantity }
+        : { ...previous, harvestId: null, purchaseItemId: source.id, reference: source.reference, quantityKg: quantity }
     })
 
     setNewInputErrors(previous => {
@@ -208,10 +204,12 @@ export default function PressingOperationDetailsPage() {
 
     const validationErrors: Record<string, string> = {}
 
-    if (newInput.sourceType === 'harvest') {
-      if (!newInput.harvestId) validationErrors.input = 'Sélectionnez une récolte valide.'
-    } else {
-      if (!newInput.purchaseItemId) validationErrors.input = 'Sélectionnez un achat valide.'
+    if (newInput.sourceType === 'harvest' && !newInput.harvestId) {
+      validationErrors.input = 'Sélectionnez une récolte valide.'
+    }
+
+    if (newInput.sourceType === 'purchase' && !newInput.purchaseItemId) {
+      validationErrors.input = 'Sélectionnez un achat valide.'
     }
 
     if (!newInput.quantityKg || Number(newInput.quantityKg) <= 0) {
@@ -233,11 +231,7 @@ export default function PressingOperationDetailsPage() {
       purchaseItemId: newInput.sourceType === 'purchase' ? newInput.purchaseItemId : null,
     }
 
-    setOperation(previous => previous ? {
-      ...previous,
-      inputs: [...previous.inputs, convertedInput],
-    } : previous)
-
+    setOperation(previous => previous ? { ...previous, inputs: [...previous.inputs, convertedInput] } : previous)
     setDirty(true)
     setShowAddInput(false)
     setNewInput(null)
@@ -246,13 +240,7 @@ export default function PressingOperationDetailsPage() {
   }, [operation, newInput])
 
   const handleRemoveInput = useCallback((inputId: number) => {
-    setOperation(previous => {
-      if (!previous) return previous
-      return {
-        ...previous,
-        inputs: previous.inputs.filter(input => input.id !== inputId),
-      }
-    })
+    setOperation(previous => previous ? { ...previous, inputs: previous.inputs.filter(input => input.id !== inputId) } : previous)
     setDirty(true)
   }, [])
 
@@ -260,43 +248,15 @@ export default function PressingOperationDetailsPage() {
     if (!operation) return
 
     try {
-      setSaving(true)
-
-      console.log('SAVE OPERATION', {
-        id: operation.id,
-        pressingDate: operation.pressingDate,
-        startTime: operation.startTime,
-        endTime: operation.endTime,
-        notes: operation.notes,
-        oilQuantityLiters: operation.oilQuantityLiters,
-        oliveQuantityKg,
-        yieldPercentage,
-        inputs: operation.inputs.map(input => ({
-          id: input.id,
-          harvestId: input.harvestId,
-          purchaseItemId: input.purchaseItemId,
-          quantityKg: input.quantityKg,
-        })),
-      })
-
-      await new Promise(resolve => setTimeout(resolve, 500))
-
-      const savedOperation: PressingOperationDetails = {
-        ...operation,
-        oliveQuantityKg,
-        inputs: operation.inputs.map(input => ({ ...input })),
-      }
-
-      setOriginalOperation(savedOperation)
-      setOperation(savedOperation)
+      setError(null)
+      await updateOperationStore(operation)
       setDirty(false)
       toast.success('Opération enregistrée avec succès.')
-    } catch {
-      setError('Impossible d’enregistrer les modifications.')
-    } finally {
-      setSaving(false)
+    } catch (error) {
+      console.error('Erreur lors de la sauvegarde :', error)
+      toast.error('Impossible d’enregistrer les modifications.')
     }
-  }, [operation, oliveQuantityKg, yieldPercentage])
+  }, [operation, updateOperationStore])
 
   const handleCancel = useCallback(() => {
     if (!originalOperation) return
@@ -316,28 +276,14 @@ export default function PressingOperationDetailsPage() {
     if (!operation) return
 
     try {
-      setStarting(true)
-      await new Promise(resolve => setTimeout(resolve, 500))
-
-      const startDate = operation.startTime ? operation.startTime.slice(0, 10) : getTodayDate()
-      const startTime = toDateTime(startDate)
-
-      const updatedOperation = {
-        ...operation,
-        status: ProductionStatus.InProgress,
-        startTime,
-      }
-
-      setOperation(updatedOperation)
-      setOriginalOperation(updatedOperation)
-      setDirty(false)
+      setError(null)
+      await startOperationStore(operation.id)
       toast.success('La pression a été lancée.')
-    } catch {
-      setError('Impossible de lancer l’opération de pression.')
-    } finally {
-      setStarting(false)
+    } catch (error) {
+      console.error('Erreur lors du lancement :', error)
+      toast.error('Impossible de lancer l’opération de pression.')
     }
-  }, [operation])
+  }, [operation, startOperationStore])
 
   const handleAbandon = useCallback(async () => {
     if (!operation) return
@@ -346,50 +292,34 @@ export default function PressingOperationDetailsPage() {
     if (!confirmed) return
 
     try {
-      setAbandoning(true)
-      await new Promise(resolve => setTimeout(resolve, 500))
-
-      const abandonedOperation = {
-        ...operation,
-        status: ProductionStatus.Cancelled,
-      }
-
-      setOperation(abandonedOperation)
-      setOriginalOperation(abandonedOperation)
-      setDirty(false)
+      setError(null)
+      await cancelOperationStore(operation.id)
       toast.success('La pression a été abandonnée.')
-    } catch {
-      setError('Impossible d’abandonner l’opération de pression.')
-    } finally {
-      setAbandoning(false)
+    } catch (error) {
+      console.error('Erreur lors de l’abandon :', error)
+      toast.error('Impossible d’abandonner l’opération de pression.')
     }
-  }, [operation])
+  }, [operation, cancelOperationStore])
 
   const handleFinish = useCallback(async () => {
     if (!operation) return
 
-    try {
-      setFinishing(true)
-      await new Promise(resolve => setTimeout(resolve, 500))
+    const oilQuantity = Number(operation.oilQuantityLiters)
 
-      const endTime = toDateTime(getTodayDate())
-
-      const completedOperation = {
-        ...operation,
-        status: ProductionStatus.Completed,
-        endTime,
-      }
-
-      setOperation(completedOperation)
-      setOriginalOperation(completedOperation)
-      setDirty(false)
-      toast.success('La pression a été clôturée.')
-    } catch {
-      setError('Impossible de clôturer l’opération de pression.')
-    } finally {
-      setFinishing(false)
+    if (!Number.isFinite(oilQuantity) || oilQuantity <= 0) {
+      toast.error('Veuillez renseigner une quantité d’huile produite valide.')
+      return
     }
-  }, [operation])
+
+    try {
+      setError(null)
+      await completeOperationStore(operation.id, oilQuantity)
+      toast.success('La pression a été clôturée.')
+    } catch (error) {
+      console.error('Erreur lors de la clôture :', error)
+      toast.error('Impossible de clôturer l’opération de pression.')
+    }
+  }, [operation, completeOperationStore])
 
   if (loading) {
     return (
@@ -432,25 +362,25 @@ export default function PressingOperationDetailsPage() {
         </div>
 
         <div className="pressing-page-actions">
-          <Button variant="secondary" onClick={handleBack} disabled={saving || starting || finishing || abandoning}>
+          <Button variant="secondary" onClick={handleBack} disabled={isBusy}>
             <ArrowBackIcon fontSize="small" /> Retour
           </Button>
 
           {isPlanned && (
             <>
-              <Button variant="secondary" onClick={handleAbandon} disabled={saving || starting || abandoning}>
-                <BlockIcon fontSize="small" /> {abandoning ? 'Abandon...' : 'Abandonner la pression'}
+              <Button variant="secondary" onClick={handleAbandon} disabled={saving || starting || cancelling}>
+                <BlockIcon fontSize="small" /> {cancelling ? 'Abandon...' : 'Abandonner la pression'}
               </Button>
 
-              <Button variant="primary" onClick={handleStart} disabled={saving || starting || abandoning}>
+              <Button variant="primary" onClick={handleStart} disabled={saving || starting || cancelling}>
                 <PlayArrowIcon fontSize="small" /> {starting ? 'Lancement...' : 'Lancer la pression'}
               </Button>
             </>
           )}
 
           {isInProgress && (
-            <Button variant="primary" onClick={handleFinish} disabled={saving || finishing}>
-              <CheckIcon fontSize="small" /> {finishing ? 'Clôture...' : 'Clôturer la pression'}
+            <Button variant="primary" onClick={handleFinish} disabled={saving || completing}>
+              <CheckIcon fontSize="small" /> {completing ? 'Clôture...' : 'Clôturer la pression'}
             </Button>
           )}
         </div>
@@ -467,7 +397,12 @@ export default function PressingOperationDetailsPage() {
         <div className="filters-content">
           <div className="filter-item">
             <label>Date de planification</label>
-            <TextInput type="date" value={operation.pressingDate ? operation.pressingDate.slice(0, 10) : ''} disabled={!canEditOperation || saving} onChange={event => updateOperation('pressingDate', toDateTime(event.target.value) as PressingOperationDetails['pressingDate'])} />
+            <TextInput
+              type="date"
+              value={operation.pressingDate ? operation.pressingDate.slice(0, 10) : ''}
+              disabled={!canEditOperation || saving}
+              onChange={event => updateOperation('pressingDate', toDateTime(event.target.value) as PressingOperationDetails['pressingDate'])}
+            />
           </div>
 
           <div className="filter-item">
@@ -482,7 +417,12 @@ export default function PressingOperationDetailsPage() {
 
           <div className="filter-item">
             <label>Huile produite</label>
-            <TextInput type="number" value={operation.oilQuantityLiters ?? ''} disabled={!canEditOil || saving} onChange={event => updateOperation('oilQuantityLiters', event.target.value === '' ? null : Number(event.target.value))} />
+            <TextInput
+              type="number"
+              value={operation.oilQuantityLiters ?? ''}
+              disabled={!canEditOil || saving}
+              onChange={event => updateOperation('oilQuantityLiters', event.target.value === '' ? null : Number(event.target.value))}
+            />
           </div>
 
           <div className="filter-item">
@@ -492,7 +432,7 @@ export default function PressingOperationDetailsPage() {
 
           <div className="filter-item">
             <label>Date de lancement</label>
-            <TextInput type="date" value={operation.startTime ? operation.startTime.slice(0, 10) : ''} disabled={!isPlanned || saving} onChange={event => updateOperation('startTime', toDateTime(event.target.value))} />
+            <TextInput type="date" value={operation.startTime ? operation.startTime.slice(0, 10) : ''} disabled onChange={() => undefined} />
           </div>
 
           <div className="filter-item">
@@ -502,7 +442,12 @@ export default function PressingOperationDetailsPage() {
 
           <div className="filter-item filter-item-full">
             <label>Notes</label>
-            <TextEditor value={operation.notes ?? ''} placeholder="Notes concernant l'opération..." onChange={value => updateOperation('notes', value)} disabled={!canEditOperation || saving} />
+            <TextEditor
+              value={operation.notes ?? ''}
+              placeholder="Notes concernant l'opération..."
+              onChange={value => updateOperation('notes', value)}
+              disabled={!canEditOperation || saving}
+            />
           </div>
         </div>
       </div>
@@ -545,7 +490,12 @@ export default function PressingOperationDetailsPage() {
                       <td className="pressing-table-cell">{input.sourceReference}</td>
                       <td className="pressing-table-cell pressing-table-quantity">
                         <div className="pressing-quantity-input">
-                          <TextInput type="number" value={input.quantityKg} disabled={!canEditInputs || saving} onChange={event => updateInputQuantity(input.id, Number(event.target.value))} />
+                          <TextInput
+                            type="number"
+                            value={input.quantityKg}
+                            disabled={!canEditInputs || saving}
+                            onChange={event => updateInputQuantity(input.id, Number(event.target.value))}
+                          />
                           <span>kg</span>
                         </div>
                       </td>
@@ -586,24 +536,19 @@ export default function PressingOperationDetailsPage() {
               onAdd={() => undefined}
               onRemove={() => undefined}
               onUpdate={(inputId, field, value) => {
-                if (inputId !== newInput.id) return
-                handleUpdateNewInput(field, value)
+                if (inputId === newInput.id) handleUpdateNewInput(field, value)
               }}
               onChangeSource={(inputId, sourceType) => {
-                if (inputId !== newInput.id) return
-                handleChangeNewInputSource(sourceType)
+                if (inputId === newInput.id) handleChangeNewInputSource(sourceType)
               }}
               onSelectSource={(inputId, source) => {
-                if (inputId !== newInput.id) return
-                handleSelectNewInputSource(source)
+                if (inputId === newInput.id) handleSelectNewInputSource(source)
               }}
               showAddButton={false}
             />
 
             <div className="filters-footer pressing-new-input-footer">
-              <Button variant="secondary" onClick={handleCancelAddInput} disabled={saving}>
-                Annuler
-              </Button>
+              <Button variant="secondary" onClick={handleCancelAddInput} disabled={saving}>Annuler</Button>
 
               <Button variant="primary" onClick={handleConfirmAddInput} disabled={saving || !newInput}>
                 <AddIcon fontSize="small" /> Ajouter la source
@@ -617,11 +562,11 @@ export default function PressingOperationDetailsPage() {
 
       {canEditOperation && (
         <div className="filters-footer">
-          <Button variant="secondary" onClick={handleCancel} disabled={!dirty || saving}>
+          <Button variant="secondary" onClick={handleCancel} disabled={!dirty || saving || isBusy}>
             Annuler
           </Button>
 
-          <Button variant="primary" onClick={handleSave} disabled={!dirty || saving}>
+          <Button variant="primary" onClick={handleSave} disabled={!dirty || saving || isBusy}>
             {saving ? 'Enregistrement...' : 'Enregistrer'}
           </Button>
         </div>

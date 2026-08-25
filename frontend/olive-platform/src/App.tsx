@@ -41,6 +41,7 @@ import { useConstantsStore } from './features/appConstants/ConstantsStore'
 import NewPressingOperationPage from './features/production/ui/pages/NewPressingOperationPage'
 import { ToastContainer } from 'react-toastify'
 import PressingOperationDetailsPage from './features/production/ui/pages/PressingOperationsDetailsPage'
+import CreateHarvestPage from './features/harvests/ui/pages/NewHarvestPage'
 
 
 function App() {
@@ -124,6 +125,10 @@ function App() {
           <Route
             path="/harvests"
             element={<HarvestsPage />}
+          />
+          <Route
+            path="/harvests/new"
+            element={<CreateHarvestPage />}
           />
 
 

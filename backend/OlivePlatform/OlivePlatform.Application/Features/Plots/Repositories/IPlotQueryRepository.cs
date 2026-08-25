@@ -1,7 +1,7 @@
 ﻿using OlivePlatform.Application.Common;
 using OlivePlatform.Application.Features.Plots.Responses;
 
-namespace OlivePlatform.Domain.QueryRepositories;
+namespace OlivePlatform.Application.Features.Plots.Repositories;
 
 public interface IPlotQueryRepository
 {

@@ -18,7 +18,7 @@ public class ReferenceDataQueryRepository
         CancellationToken cancellationToken = default)
     {
         const string sql = """
-            SELECT id AS Id, name AS Name
+            SELECT id AS Id, label AS Name
             FROM olive_varieties
             ORDER BY name;
 
@@ -32,10 +32,10 @@ public class ReferenceDataQueryRepository
             WHERE is_active = TRUE
             ORDER BY name;
 
-            SELECT id AS Id, code AS Code, name AS Name
+            SELECT id AS Id, label AS Code
             FROM production_status
             WHERE is_active = TRUE
-            ORDER BY name;
+            ORDER BY label;
 
             SELECT id AS Id, code AS Code, name AS Name
             FROM oil_movement_type
