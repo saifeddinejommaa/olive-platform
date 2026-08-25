@@ -1,9 +1,10 @@
-﻿using OlivePlatform.Domain.Entities;
+﻿using Microsoft.EntityFrameworkCore;
+using OlivePlatform.Domain.Entities;
 using OlivePlatform.Domain.Interfaces.Repositories;
 
 namespace OlivePlatform.Infrastructure.Persistence.Repositories
 {
-    public class PressingOperationRepository : IPressionOperationsRepository
+    public class PressingOperationRepository : IPressingOperationsRepository
     {
         private readonly OlivePlatformAppDbContext _context;
 
@@ -30,15 +31,18 @@ namespace OlivePlatform.Infrastructure.Persistence.Repositories
             await _context.SaveChangesAsync(cancellationToken);
         }
 
-        public Task<PressingOperation?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
+        public async Task<PressingOperation?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            return await _context.PressingOperations
+                .FirstOrDefaultAsync(
+                    x => x.Id == id,
+                    cancellationToken);
         }
 
 
-        public Task UpdateAsync(PressingOperation entity, CancellationToken cancellationToken = default)
+        public async Task UpdateAsync(PressingOperation entity, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            await _context.SaveChangesAsync(cancellationToken);
         }
     }
 }

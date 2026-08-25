@@ -1,901 +1,509 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-
-import EditIcon from '@mui/icons-material/Edit'
+import { toast } from 'react-toastify'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import PlayArrowIcon from '@mui/icons-material/PlayArrow'
 import CheckIcon from '@mui/icons-material/Check'
 import AddIcon from '@mui/icons-material/Add'
-import DeleteIcon from '@mui/icons-material/Delete'
-
+import BlockIcon from '@mui/icons-material/Block'
 import Button from '../../../../common/widgets/button/Button'
 import TextInput from '../../../../common/widgets/textInput/TextInput'
 import TextEditor from '../../../../common/widgets/textEditor/TextEditor'
-
-import { formatDateTime } from '../../../shared/utils/DatesUtils'
 import { renderStatus } from '../../../shared/utils/StatusUtils'
 import { productionStatusConfig } from '../../../shared/status/ProductionStatusConfig'
 import { ProductionStatus } from '../../domain/entities/ProductionStatus'
-
-type PressingOperationInputDetails = {
-  id: number
-  sourceType: 'harvest' | 'purchase'
-  reference: string
-  quantityKg: number
-  harvestId: number | null
-  purchaseItemId: number | null
-}
-
-type PressingOperationDetails = {
-  id: number
-  operationNumber: string
-  pressingDate: string
-  status: ProductionStatus
-  oliveQuantityKg: number
-  oilQuantityLiters: number | null
-  startTime: string | null
-  endTime: string | null
-  notes: string | null
-  inputs: PressingOperationInputDetails[]
-}
-
-const mockOperation: PressingOperationDetails = {
-  id: 11,
-  operationNumber: 'PRESS-2026-0011',
-  pressingDate: '2026-08-22T00:00:00',
-  status: ProductionStatus.Planned,
-  oliveQuantityKg: 18500,
-  oilQuantityLiters: 3825,
-  startTime: null,
-  endTime: null,
-  notes:
-    'Opération réalisée avec les olives récoltées sur les parcelles Nord et un lot acheté auprès du fournisseur local.',
-  inputs: [
-    {
-      id: 1,
-      sourceType: 'harvest',
-      reference: 'REC-2026-0042',
-      quantityKg: 6500,
-      harvestId: 42,
-      purchaseItemId: null,
-    },
-    {
-      id: 2,
-      sourceType: 'harvest',
-      reference: 'REC-2026-0043',
-      quantityKg: 5800,
-      harvestId: 43,
-      purchaseItemId: null,
-    },
-    {
-      id: 3,
-      sourceType: 'purchase',
-      reference: 'LOT-1231',
-      quantityKg: 4200,
-      harvestId: null,
-      purchaseItemId: 1,
-    },
-    {
-      id: 4,
-      sourceType: 'purchase',
-      reference: 'LOT-1232',
-      quantityKg: 2000,
-      harvestId: null,
-      purchaseItemId: 2,
-    },
-  ],
-}
+import type { PressingOperationDetails } from '../../domain/entities/PressingOperationDetails'
+import type { PressingOperationInputDetails } from '../../domain/entities/PressingOperationInputDetails'
+import type { SourceOption } from '../widgets/SourceReference'
+import type { InputSourceType, PressingOperationInput } from '../widgets/InputTypes'
+import NewPressingOperationInputsWidget from '../widgets/NewPressingOperationInputsWidget'
+import { usePressingOperationDetailsStore } from '../stores/PressingOperationDetailsStore'
+import './PressingOperationDetailsPage.css'
+import { toDateTime } from '../../../shared/utils/DatesUtils'
 
 export default function PressingOperationDetailsPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
 
-  const [operation, setOperation] =
-    useState<PressingOperationDetails | null>(null)
+  const {
+    operation: storeOperation,
+    loading,
+    error: storeError,
+    saving,
+    starting,
+    completing,
+    cancelling,
+    fetchOperation,
+    updateOperation: updateOperationStore,
+    startOperation: startOperationStore,
+    completeOperation: completeOperationStore,
+    cancelOperation: cancelOperationStore,
+    clear,
+  } = usePressingOperationDetailsStore()
 
-  const [originalOperation, setOriginalOperation] =
-    useState<PressingOperationDetails | null>(null)
-
-  const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
-  const [starting, setStarting] = useState(false)
-  const [finishing, setFinishing] = useState(false)
-
+  const [operation, setOperation] = useState<PressingOperationDetails | null>(null)
+  const [originalOperation, setOriginalOperation] = useState<PressingOperationDetails | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [dirty, setDirty] = useState(false)
-
-  /*
-   * ------------------------------------------------------------
-   * LOAD
-   * ------------------------------------------------------------
-   */
+  const [showAddInput, setShowAddInput] = useState(false)
+  const [newInput, setNewInput] = useState<PressingOperationInput | null>(null)
+  const [newInputErrors, setNewInputErrors] = useState<Record<string, string>>({})
 
   useEffect(() => {
+    if (!id) {
+      setError('Identifiant de l’opération invalide.')
+      return
+    }
+
+    const operationId = Number(id)
+
+    if (Number.isNaN(operationId)) {
+      setError('Identifiant de l’opération invalide.')
+      return
+    }
+
     const loadOperation = async () => {
-      if (!id) {
-        setError('Identifiant de l’opération invalide.')
-        setLoading(false)
-        return
-      }
-
       try {
-        setLoading(true)
-        setError(null)
-
-        // MOCK TEMPORAIRE
-        await new Promise(resolve => setTimeout(resolve, 500))
-
-        const data = {
-          ...mockOperation,
-          id: Number(id),
-          inputs: mockOperation.inputs.map(input => ({
-            ...input,
-          })),
-        }
-
-        setOperation(data)
-        setOriginalOperation(data)
-        setDirty(false)
-      } catch {
-        setError(
-          'Impossible de récupérer les détails de l’opération.',
-        )
-      } finally {
-        setLoading(false)
+        await fetchOperation(operationId)
+      } catch (err) {
+        console.error('Erreur lors du chargement de l’opération :', err)
+        toast.error('Impossible de charger l’opération. Une erreur API est survenue.')
       }
     }
 
     loadOperation()
-  }, [id])
+    return () => clear()
+  }, [id, fetchOperation, clear])
 
-  /*
-   * ------------------------------------------------------------
-   * DERIVED VALUES
-   * ------------------------------------------------------------
-   */
+  useEffect(() => {
+    if (!storeOperation) return
+
+    const data: PressingOperationDetails = {
+      ...storeOperation,
+      inputs: storeOperation.inputs.map(input => ({ ...input })),
+    }
+
+    setOperation(data)
+    setOriginalOperation({ ...data, inputs: data.inputs.map(input => ({ ...input })) })
+    setDirty(false)
+    setError(null)
+  }, [storeOperation])
+
+  useEffect(() => {
+    if (storeError) setError(storeError)
+  }, [storeError])
+
+  useEffect(() => {
+    if (error) toast.error(error)
+  }, [error])
 
   const oliveQuantityKg = useMemo(() => {
     if (!operation) return 0
-
-    return operation.inputs.reduce(
-      (total, input) => total + Number(input.quantityKg || 0),
-      0,
-    )
+    return operation.inputs.reduce((total, input) => total + Number(input.quantityKg || 0), 0)
   }, [operation])
 
   const yieldPercentage = useMemo(() => {
-    if (
-      !operation ||
-      oliveQuantityKg <= 0 ||
-      operation.oilQuantityLiters === null
-    ) {
-      return null
-    }
-
-    return (
-      (operation.oilQuantityLiters / oliveQuantityKg) *
-      100
-    ).toFixed(2)
+    if (!operation || oliveQuantityKg <= 0 || operation.oilQuantityLiters === null || operation.oilQuantityLiters === undefined) return ''
+    return ((Number(operation.oilQuantityLiters) / oliveQuantityKg) * 100).toFixed(2)
   }, [operation, oliveQuantityKg])
 
-  const canEditInputs =
-    operation?.status === ProductionStatus.Planned
+  const isPlanned = operation?.status === ProductionStatus.Planned
+  const isInProgress = operation?.status === ProductionStatus.InProgress
+  const isCompleted = operation?.status === ProductionStatus.Completed
+  const isAbandoned = operation?.status === ProductionStatus.Cancelled
+  const canEditInputs = isPlanned === true
+  const canEditOperation = !isCompleted && !isAbandoned
+  const canEditOil = isInProgress === true
+  const isBusy = saving || starting || completing || cancelling
 
-  const canEditOperation =
-    operation?.status !== ProductionStatus.Completed
+  const handleBack = useCallback(() => navigate('/production'), [navigate])
 
-  /*
-   * ------------------------------------------------------------
-   * NAVIGATION
-   * ------------------------------------------------------------
-   */
-
-  const handleBack = useCallback(() => {
-    navigate('/production')
-  }, [navigate])
-
-  /*
-   * ------------------------------------------------------------
-   * UPDATE GENERAL FIELD
-   * ------------------------------------------------------------
-   */
-
-  const updateOperation = useCallback(
-    <K extends keyof PressingOperationDetails>(
-      field: K,
-      value: PressingOperationDetails[K],
-    ) => {
-      setOperation(previous =>
-        previous
-          ? {
-              ...previous,
-              [field]: value,
-            }
-          : null,
-      )
-
-      setDirty(true)
-    },
-    [],
-  )
-
-  /*
-   * ------------------------------------------------------------
-   * UPDATE INPUT
-   * ------------------------------------------------------------
-   */
-
-  const updateInputQuantity = useCallback(
-    (inputId: number, quantityKg: number) => {
-      setOperation(previous => {
-        if (!previous) return previous
-
-        return {
-          ...previous,
-          inputs: previous.inputs.map(input =>
-            input.id === inputId
-              ? {
-                  ...input,
-                  quantityKg,
-                }
-              : input,
-          ),
-        }
-      })
-
-      setDirty(true)
-    },
-    [],
-  )
-
-  /*
-   * ------------------------------------------------------------
-   * ADD INPUT
-   * ------------------------------------------------------------
-   */
-
-  const handleAddInput = useCallback(() => {
-    setOperation(previous => {
-      if (!previous) return previous
-
-      const newInput: PressingOperationInputDetails = {
-        id: Date.now(),
-        sourceType: 'harvest',
-        reference: 'Nouvelle source',
-        quantityKg: 0,
-        harvestId: null,
-        purchaseItemId: null,
-      }
-
-      return {
-        ...previous,
-        inputs: [...previous.inputs, newInput],
-      }
-    })
-
+  const updateOperation = useCallback(<K extends keyof PressingOperationDetails>(field: K, value: PressingOperationDetails[K]) => {
+    setOperation(previous => previous ? { ...previous, [field]: value } : null)
     setDirty(true)
   }, [])
 
-  /*
-   * ------------------------------------------------------------
-   * REMOVE INPUT
-   * ------------------------------------------------------------
-   */
+  const updateInputQuantity = useCallback((inputId: number, quantityKg: number) => {
+    setOperation(previous => {
+      if (!previous) return previous
+      return { ...previous, inputs: previous.inputs.map(input => input.id === inputId ? { ...input, quantityKg } : input) }
+    })
+    setDirty(true)
+  }, [])
+
+  const handleOpenAddInput = useCallback(() => {
+    const input: PressingOperationInput = {
+      id: crypto.randomUUID(),
+      sourceType: 'harvest',
+      harvestId: null,
+      purchaseItemId: null,
+      reference: '',
+      quantityKg: '',
+      notes: '',
+    }
+
+    setNewInput(input)
+    setNewInputErrors({})
+    setShowAddInput(true)
+  }, [])
+
+  const handleCancelAddInput = useCallback(() => {
+    setShowAddInput(false)
+    setNewInput(null)
+    setNewInputErrors({})
+  }, [])
+
+  const handleUpdateNewInput = useCallback((field: keyof PressingOperationInput, value: string | number | null) => {
+    setNewInput(previous => previous ? {
+      ...previous,
+      [field]: field === 'quantityKg' ? String(value ?? '') : value,
+    } : null)
+
+    setNewInputErrors(previous => {
+      const next = { ...previous }
+      if (field === 'reference') delete next.input
+      if (field === 'quantityKg') delete next.quantity
+      return next
+    })
+  }, [])
+
+  const handleChangeNewInputSource = useCallback((sourceType: InputSourceType) => {
+    setNewInput(previous => previous ? {
+      ...previous,
+      sourceType,
+      harvestId: null,
+      purchaseItemId: null,
+      reference: '',
+      quantityKg: '',
+    } : null)
+
+    setNewInputErrors({})
+  }, [])
+
+  const handleSelectNewInputSource = useCallback((source: SourceOption) => {
+    setNewInput(previous => {
+      if (!previous) return previous
+
+      const quantity = source.quantityKg !== undefined ? String(source.quantityKg) : previous.quantityKg
+
+      return previous.sourceType === 'harvest'
+        ? { ...previous, harvestId: source.id, purchaseItemId: null, reference: source.reference, quantityKg: quantity }
+        : { ...previous, harvestId: null, purchaseItemId: source.id, reference: source.reference, quantityKg: quantity }
+    })
+
+    setNewInputErrors(previous => {
+      const next = { ...previous }
+      delete next.input
+      delete next.quantity
+      return next
+    })
+  }, [])
+
+  const handleConfirmAddInput = useCallback(() => {
+    if (!operation || !newInput) return
+
+    const validationErrors: Record<string, string> = {}
+
+    if (newInput.sourceType === 'harvest' && !newInput.harvestId) {
+      validationErrors.input = 'Sélectionnez une récolte valide.'
+    }
+
+    if (newInput.sourceType === 'purchase' && !newInput.purchaseItemId) {
+      validationErrors.input = 'Sélectionnez un achat valide.'
+    }
+
+    if (!newInput.quantityKg || Number(newInput.quantityKg) <= 0) {
+      validationErrors.quantity = 'La quantité doit être supérieure à 0.'
+    }
+
+    if (Object.keys(validationErrors).length > 0) {
+      setNewInputErrors(validationErrors)
+      toast.error('Veuillez corriger les erreurs de la source.')
+      return
+    }
+
+    const convertedInput: PressingOperationInputDetails = {
+      id: Date.now() + Math.floor(Math.random() * 10000),
+      sourceType: newInput.sourceType,
+      sourceReference: newInput.reference,
+      quantityKg: Number(newInput.quantityKg),
+      harvestId: newInput.sourceType === 'harvest' ? newInput.harvestId : null,
+      purchaseItemId: newInput.sourceType === 'purchase' ? newInput.purchaseItemId : null,
+    }
+
+    setOperation(previous => previous ? { ...previous, inputs: [...previous.inputs, convertedInput] } : previous)
+    setDirty(true)
+    setShowAddInput(false)
+    setNewInput(null)
+    setNewInputErrors({})
+    toast.success('Source ajoutée à l’opération.')
+  }, [operation, newInput])
 
   const handleRemoveInput = useCallback((inputId: number) => {
-    setOperation(previous => {
-      if (!previous) return previous
-
-      return {
-        ...previous,
-        inputs: previous.inputs.filter(
-          input => input.id !== inputId,
-        ),
-      }
-    })
-
+    setOperation(previous => previous ? { ...previous, inputs: previous.inputs.filter(input => input.id !== inputId) } : previous)
     setDirty(true)
   }, [])
-
-  /*
-   * ------------------------------------------------------------
-   * SAVE
-   * ------------------------------------------------------------
-   */
 
   const handleSave = useCallback(async () => {
     if (!operation) return
 
     try {
-      setSaving(true)
-
-      // TODO API
-      console.log('SAVE OPERATION', {
-        id: operation.id,
-        pressingDate: operation.pressingDate,
-        notes: operation.notes,
-        oilQuantityLiters: operation.oilQuantityLiters,
-        inputs: operation.inputs.map(input => ({
-          id: input.id,
-          harvestId: input.harvestId,
-          purchaseItemId: input.purchaseItemId,
-          quantityKg: input.quantityKg,
-        })),
-      })
-
-      await new Promise(resolve => setTimeout(resolve, 500))
-
-      setOriginalOperation({
-        ...operation,
-        oliveQuantityKg,
-      })
-
+      setError(null)
+      await updateOperationStore(operation)
       setDirty(false)
-    } catch {
-      setError(
-        'Impossible d’enregistrer les modifications.',
-      )
-    } finally {
-      setSaving(false)
+      toast.success('Opération enregistrée avec succès.')
+    } catch (error) {
+      console.error('Erreur lors de la sauvegarde :', error)
+      toast.error('Impossible d’enregistrer les modifications.')
     }
-  }, [operation, oliveQuantityKg])
-
-  /*
-   * ------------------------------------------------------------
-   * CANCEL CHANGES
-   * ------------------------------------------------------------
-   */
+  }, [operation, updateOperationStore])
 
   const handleCancel = useCallback(() => {
     if (!originalOperation) return
 
     setOperation({
       ...originalOperation,
-      inputs: originalOperation.inputs.map(input => ({
-        ...input,
-      })),
+      inputs: originalOperation.inputs.map(input => ({ ...input })),
     })
 
+    setShowAddInput(false)
+    setNewInput(null)
+    setNewInputErrors({})
     setDirty(false)
   }, [originalOperation])
-
-  /*
-   * ------------------------------------------------------------
-   * START PRESSING
-   * ------------------------------------------------------------
-   */
 
   const handleStart = useCallback(async () => {
     if (!operation) return
 
     try {
-      setStarting(true)
-
-      // TODO API
-      // await startPressingOperation(operation.id)
-
-      await new Promise(resolve => setTimeout(resolve, 500))
-
-      const startTime = new Date().toISOString()
-
-      setOperation(previous =>
-        previous
-          ? {
-              ...previous,
-              status: ProductionStatus.InProgress,
-              startTime,
-            }
-          : null,
-      )
-
-      setOriginalOperation(previous =>
-        previous
-          ? {
-              ...previous,
-              status: ProductionStatus.InProgress,
-              startTime,
-            }
-          : null,
-      )
-
-      setDirty(false)
-    } catch {
-      setError(
-        'Impossible de lancer l’opération de pression.',
-      )
-    } finally {
-      setStarting(false)
+      setError(null)
+      await startOperationStore(operation.id)
+      toast.success('La pression a été lancée.')
+    } catch (error) {
+      console.error('Erreur lors du lancement :', error)
+      toast.error('Impossible de lancer l’opération de pression.')
     }
-  }, [operation])
+  }, [operation, startOperationStore])
 
-  /*
-   * ------------------------------------------------------------
-   * FINISH PRESSING
-   * ------------------------------------------------------------
-   */
+  const handleAbandon = useCallback(async () => {
+    if (!operation) return
+
+    const confirmed = window.confirm('Voulez-vous vraiment abandonner cette opération de pression ?')
+    if (!confirmed) return
+
+    try {
+      setError(null)
+      await cancelOperationStore(operation.id)
+      toast.success('La pression a été abandonnée.')
+    } catch (error) {
+      console.error('Erreur lors de l’abandon :', error)
+      toast.error('Impossible d’abandonner l’opération de pression.')
+    }
+  }, [operation, cancelOperationStore])
 
   const handleFinish = useCallback(async () => {
     if (!operation) return
 
-    try {
-      setFinishing(true)
+    const oilQuantity = Number(operation.oilQuantityLiters)
 
-      // TODO API
-      // await completePressingOperation(operation.id)
-
-      await new Promise(resolve => setTimeout(resolve, 500))
-
-      const endTime = new Date().toISOString()
-
-      setOperation(previous =>
-        previous
-          ? {
-              ...previous,
-              status: ProductionStatus.Completed,
-              endTime,
-            }
-          : null,
-      )
-
-      setOriginalOperation(previous =>
-        previous
-          ? {
-              ...previous,
-              status: ProductionStatus.Completed,
-              endTime,
-            }
-          : null,
-      )
-
-      setDirty(false)
-    } catch {
-      setError(
-        'Impossible de terminer l’opération de pression.',
-      )
-    } finally {
-      setFinishing(false)
+    if (!Number.isFinite(oilQuantity) || oilQuantity <= 0) {
+      toast.error('Veuillez renseigner une quantité d’huile produite valide.')
+      return
     }
-  }, [operation])
 
-  /*
-   * ------------------------------------------------------------
-   * LOADING
-   * ------------------------------------------------------------
-   */
+    try {
+      setError(null)
+      await completeOperationStore(operation.id, oilQuantity)
+      toast.success('La pression a été clôturée.')
+    } catch (error) {
+      console.error('Erreur lors de la clôture :', error)
+      toast.error('Impossible de clôturer l’opération de pression.')
+    }
+  }, [operation, completeOperationStore])
 
   if (loading) {
     return (
       <div className="feature-page">
         <div className="page-header">
           <div className="page-header-content">
-            <h1 className="page-title">
-              Opération de pression
-            </h1>
-
-            <p className="page-description">
-              Chargement des détails...
-            </p>
+            <h1 className="page-title">Opération de pression</h1>
+            <p className="page-description">Chargement des détails...</p>
           </div>
         </div>
       </div>
     )
   }
-
-  /*
-   * ------------------------------------------------------------
-   * ERROR
-   * ------------------------------------------------------------
-   */
 
   if (error || !operation) {
     return (
       <div className="feature-page">
         <div className="page-header">
           <div className="page-header-content">
-            <h1 className="page-title">
-              Opération de pression
-            </h1>
-
-            <p className="page-description">
-              {error ?? 'Opération introuvable.'}
-            </p>
+            <h1 className="page-title">Opération de pression</h1>
+            <p className="page-description">{error ?? 'Opération introuvable.'}</p>
           </div>
         </div>
 
         <div className="filters-footer">
-          <Button
-            variant="secondary"
-            onClick={handleBack}
-          >
-            <ArrowBackIcon fontSize="small" />
-            Retour
+          <Button variant="secondary" onClick={handleBack}>
+            <ArrowBackIcon fontSize="small" /> Retour
           </Button>
         </div>
       </div>
     )
   }
 
-  /*
-   * ------------------------------------------------------------
-   * RENDER
-   * ------------------------------------------------------------
-   */
-
   return (
     <div className="feature-page">
-      {/* HEADER */}
-
       <div className="page-header">
         <div className="page-header-content">
-          <h1 className="page-title">
-            Opération {operation.operationNumber}
-          </h1>
-
-          <p className="page-description">
-            Gestion de l'opération de pression.
-          </p>
+          <h1 className="page-title">Opération {operation.operationNumber}</h1>
+          <p className="page-description">Gestion de l'opération de pression.</p>
         </div>
 
-        <div
-          style={{
-            display: 'flex',
-            gap: '10px',
-          }}
-        >
-          <Button
-            variant="secondary"
-            onClick={handleBack}
-            disabled={saving || starting || finishing}
-          >
-            <ArrowBackIcon fontSize="small" />
-            Retour
+        <div className="pressing-page-actions">
+          <Button variant="secondary" onClick={handleBack} disabled={isBusy}>
+            <ArrowBackIcon fontSize="small" /> Retour
           </Button>
 
-          {operation.status === ProductionStatus.Planned && (
-            <Button
-              variant="primary"
-              onClick={handleStart}
-              disabled={saving || starting}
-            >
-              <PlayArrowIcon fontSize="small" />
+          {isPlanned && (
+            <>
+              <Button variant="secondary" onClick={handleAbandon} disabled={saving || starting || cancelling}>
+                <BlockIcon fontSize="small" /> {cancelling ? 'Abandon...' : 'Abandonner la pression'}
+              </Button>
 
-              {starting
-                ? 'Lancement...'
-                : 'Lancer la pression'}
-            </Button>
+              <Button variant="primary" onClick={handleStart} disabled={saving || starting || cancelling}>
+                <PlayArrowIcon fontSize="small" /> {starting ? 'Lancement...' : 'Lancer la pression'}
+              </Button>
+            </>
           )}
 
-          {operation.status ===
-            ProductionStatus.InProgress && (
-            <Button
-              variant="primary"
-              onClick={handleFinish}
-              disabled={saving || finishing}
-            >
-              <CheckIcon fontSize="small" />
-
-              {finishing
-                ? 'Finalisation...'
-                : 'Terminer la pression'}
+          {isInProgress && (
+            <Button variant="primary" onClick={handleFinish} disabled={saving || completing}>
+              <CheckIcon fontSize="small" /> {completing ? 'Clôture...' : 'Clôturer la pression'}
             </Button>
           )}
         </div>
       </div>
-
-      {/* GENERAL INFORMATION */}
 
       <div className="filters">
         <div className="filters-header">
           <div>
             <h3>Informations générales</h3>
-
-            <span>
-              Informations relatives à l'opération de
-              pression
-            </span>
+            <span>Informations relatives à l'opération de pression</span>
           </div>
         </div>
 
         <div className="filters-content">
-          {/* OPERATION NUMBER */}
-
           <div className="filter-item">
-            <label>N° Pression</label>
-
-            <div>
-              {operation.operationNumber}
-            </div>
-          </div>
-
-          {/* DATE */}
-
-          <div className="filter-item">
-            <label>Date de pression</label>
-
+            <label>Date de planification</label>
             <TextInput
               type="date"
-              value={operation.pressingDate.slice(
-                0,
-                10,
-              )}
+              value={operation.pressingDate ? operation.pressingDate.slice(0, 10) : ''}
               disabled={!canEditOperation || saving}
-              onChange={event =>
-                updateOperation(
-                  'pressingDate',
-                  event.target.value,
-                )
-              }
+              onChange={event => updateOperation('pressingDate', toDateTime(event.target.value) as PressingOperationDetails['pressingDate'])}
             />
           </div>
-
-          {/* STATUS */}
 
           <div className="filter-item">
             <label>Statut</label>
-
-            <div>
-              {renderStatus(
-                operation.status,
-                productionStatusConfig,
-              )}
-            </div>
+            <div>{renderStatus(operation.status, productionStatusConfig)}</div>
           </div>
-
-          {/* OLIVE QUANTITY */}
 
           <div className="filter-item">
             <label>Quantité d'olives</label>
-
-            <div>
-              {oliveQuantityKg.toLocaleString(
-                'fr-FR',
-              )}{' '}
-              kg
-            </div>
+            <TextInput type="number" value={oliveQuantityKg} disabled onChange={() => undefined} />
           </div>
-
-          {/* OIL */}
 
           <div className="filter-item">
             <label>Huile produite</label>
-
             <TextInput
               type="number"
-              value={
-                operation.oilQuantityLiters ?? ''
-              }
-              disabled={!canEditOperation || saving}
-              onChange={event =>
-                updateOperation(
-                  'oilQuantityLiters',
-                  event.target.value === ''
-                    ? null
-                    : Number(event.target.value),
-                )
-              }
+              value={operation.oilQuantityLiters ?? ''}
+              disabled={!canEditOil || saving}
+              onChange={event => updateOperation('oilQuantityLiters', event.target.value === '' ? null : Number(event.target.value))}
             />
           </div>
 
-          {/* YIELD */}
-
           <div className="filter-item">
             <label>Rendement</label>
-
-            <div>
-              {yieldPercentage !== null
-                ? `${yieldPercentage} %`
-                : '—'}
-            </div>
+            <TextInput type="text" value={yieldPercentage ? `${yieldPercentage} %` : ''} disabled onChange={() => undefined} />
           </div>
-
-          {/* START */}
 
           <div className="filter-item">
-            <label>Début</label>
-
-            <div>
-              {operation.startTime
-                ? formatDateTime(
-                    new Date(operation.startTime),
-                  )
-                : '—'}
-            </div>
+            <label>Date de lancement</label>
+            <TextInput type="date" value={operation.startTime ? operation.startTime.slice(0, 10) : ''} disabled onChange={() => undefined} />
           </div>
-
-          {/* END */}
 
           <div className="filter-item">
-            <label>Fin</label>
-
-            <div>
-              {operation.endTime
-                ? formatDateTime(
-                    new Date(operation.endTime),
-                  )
-                : '—'}
-            </div>
+            <label>Date de fin</label>
+            <TextInput type="date" value={operation.endTime ? operation.endTime.slice(0, 10) : ''} disabled onChange={() => undefined} />
           </div>
 
-          {/* NOTES */}
-
-          <div
-            className="filter-item"
-            style={{
-              gridColumn: '1 / -1',
-            }}
-          >
+          <div className="filter-item filter-item-full">
             <label>Notes</label>
-
             <TextEditor
               value={operation.notes ?? ''}
               placeholder="Notes concernant l'opération..."
-              onChange={value =>
-                updateOperation('notes', value)
-              }
+              onChange={value => updateOperation('notes', value)}
               disabled={!canEditOperation || saving}
             />
           </div>
         </div>
       </div>
 
-      {/* INPUTS */}
-
-      <div className="filters">
+      <div className={`filters ${isInProgress ? 'pressing-inputs-disabled' : ''}`}>
         <div className="filters-header">
           <div>
             <h3>Olives utilisées</h3>
-
-            <span>
-              Sources d'olives utilisées pour cette
-              opération de pression
-            </span>
+            <span>Sources d'olives utilisées pour cette opération de pression</span>
           </div>
 
-          {canEditInputs && (
-            <Button
-              variant="secondary"
-              onClick={handleAddInput}
-              disabled={saving}
-            >
-              <AddIcon fontSize="small" />
-              Ajouter
-            </Button>
+          {canEditInputs && !showAddInput && (
+            <div className="pressing-add-button">
+              <Button variant="secondary" onClick={handleOpenAddInput} disabled={saving}>
+                <AddIcon fontSize="small" /> Ajouter
+              </Button>
+            </div>
           )}
         </div>
 
         <div className="filters-content">
           {operation.inputs.length === 0 ? (
-            <div>
-              Aucune source d'olives.
-            </div>
+            <div className="pressing-empty-inputs">Aucune source d'olives.</div>
           ) : (
-            <div
-              style={{
-                gridColumn: '1 / -1',
-                overflowX: 'auto',
-              }}
-            >
-              <table
-                style={{
-                  width: '100%',
-                  borderCollapse: 'collapse',
-                }}
-              >
+            <div className="pressing-table-container">
+              <table className="pressing-inputs-table">
                 <thead>
                   <tr>
-                    <th
-                      style={{
-                        textAlign: 'left',
-                        padding: '10px',
-                      }}
-                    >
-                      Type
-                    </th>
-
-                    <th
-                      style={{
-                        textAlign: 'left',
-                        padding: '10px',
-                      }}
-                    >
-                      Référence
-                    </th>
-
-                    <th
-                      style={{
-                        textAlign: 'right',
-                        padding: '10px',
-                      }}
-                    >
-                      Quantité
-                    </th>
-
-                    {canEditInputs && (
-                      <th
-                        style={{
-                          width: '60px',
-                        }}
-                      />
-                    )}
+                    <th className="pressing-table-cell-left">Type</th>
+                    <th className="pressing-table-cell-left">Référence</th>
+                    <th className="pressing-table-cell-right">Quantité</th>
+                    {canEditInputs && <th className="pressing-table-actions-header" />}
                   </tr>
                 </thead>
 
                 <tbody>
                   {operation.inputs.map(input => (
                     <tr key={input.id}>
-                      <td
-                        style={{
-                          padding: '10px',
-                        }}
-                      >
-                        {input.sourceType === 'harvest'
-                          ? 'Récolte'
-                          : 'Achat'}
-                      </td>
-
-                      <td
-                        style={{
-                          padding: '10px',
-                        }}
-                      >
-                        {input.reference}
-                      </td>
-
-                      <td
-                        style={{
-                          padding: '10px',
-                          textAlign: 'right',
-                        }}
-                      >
-                        <div
-                          style={{
-                            display: 'flex',
-                            justifyContent:
-                              'flex-end',
-                            alignItems: 'center',
-                            gap: '5px',
-                          }}
-                        >
+                      <td className="pressing-table-cell">{input.sourceType === 'harvest' ? 'Récolte' : 'Achat'}</td>
+                      <td className="pressing-table-cell">{input.sourceReference}</td>
+                      <td className="pressing-table-cell pressing-table-quantity">
+                        <div className="pressing-quantity-input">
                           <TextInput
                             type="number"
-                            value={
-                              input.quantityKg
-                            }
-                            disabled={
-                              !canEditInputs ||
-                              saving
-                            }
-                            onChange={event =>
-                              updateInputQuantity(
-                                input.id,
-                                Number(
-                                  event.target.value,
-                                ),
-                              )
-                            }
+                            value={input.quantityKg}
+                            disabled={!canEditInputs || saving}
+                            onChange={event => updateInputQuantity(input.id, Number(event.target.value))}
                           />
-
                           <span>kg</span>
                         </div>
                       </td>
 
                       {canEditInputs && (
-                        <td
-                          style={{
-                            padding: '10px',
-                            textAlign: 'center',
-                          }}
-                        >
-                          <Button
-                            variant="secondary"
-                            onClick={() =>
-                              handleRemoveInput(
-                                input.id,
-                              )
-                            }
-                            disabled={saving}
-                          >
-                            <DeleteIcon fontSize="small" />
+                        <td className="pressing-table-cell pressing-table-remove">
+                          <Button variant="secondary" onClick={() => handleRemoveInput(input.id)} disabled={saving}>
+                            Supprimer
                           </Button>
                         </td>
                       )}
@@ -905,75 +513,61 @@ export default function PressingOperationDetailsPage() {
 
                 <tfoot>
                   <tr>
-                    <td
-                      colSpan={
-                        canEditInputs ? 2 : 2
-                      }
-                      style={{
-                        padding: '15px 10px',
-                        fontWeight: 'bold',
-                      }}
-                    >
-                      Total
-                    </td>
-
-                    <td
-                      style={{
-                        padding: '15px 10px',
-                        textAlign: 'right',
-                        fontWeight: 'bold',
-                      }}
-                    >
-                      {oliveQuantityKg.toLocaleString(
-                        'fr-FR',
-                      )}{' '}
-                      kg
-                    </td>
-
-                    {canEditInputs && (
-                      <td />
-                    )}
+                    <td colSpan={2} className="pressing-table-total-label">Total</td>
+                    <td className="pressing-table-total-value">{oliveQuantityKg.toLocaleString('fr-FR')} kg</td>
+                    {canEditInputs && <td />}
                   </tr>
                 </tfoot>
               </table>
             </div>
           )}
         </div>
+
+        {showAddInput && newInput && canEditInputs && (
+          <div className="pressing-new-input">
+            <div className="pressing-new-input-header">
+              <h3>Nouvelle source</h3>
+              <span>Sélectionnez la récolte ou l'achat à utiliser pour cette pression.</span>
+            </div>
+
+            <NewPressingOperationInputsWidget
+              inputs={[newInput]}
+              errors={newInputErrors}
+              onAdd={() => undefined}
+              onRemove={() => undefined}
+              onUpdate={(inputId, field, value) => {
+                if (inputId === newInput.id) handleUpdateNewInput(field, value)
+              }}
+              onChangeSource={(inputId, sourceType) => {
+                if (inputId === newInput.id) handleChangeNewInputSource(sourceType)
+              }}
+              onSelectSource={(inputId, source) => {
+                if (inputId === newInput.id) handleSelectNewInputSource(source)
+              }}
+              showAddButton={false}
+            />
+
+            <div className="filters-footer pressing-new-input-footer">
+              <Button variant="secondary" onClick={handleCancelAddInput} disabled={saving}>Annuler</Button>
+
+              <Button variant="primary" onClick={handleConfirmAddInput} disabled={saving || !newInput}>
+                <AddIcon fontSize="small" /> Ajouter la source
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* ERROR */}
-
-      {error && (
-        <div
-          className="field-error"
-          style={{
-            marginTop: '15px',
-          }}
-        >
-          {error}
-        </div>
-      )}
-
-      {/* FOOTER */}
+      {error && <div className="field-error pressing-error">{error}</div>}
 
       {canEditOperation && (
         <div className="filters-footer">
-          <Button
-            variant="secondary"
-            onClick={handleCancel}
-            disabled={!dirty || saving}
-          >
+          <Button variant="secondary" onClick={handleCancel} disabled={!dirty || saving || isBusy}>
             Annuler
           </Button>
 
-          <Button
-            variant="primary"
-            onClick={handleSave}
-            disabled={!dirty || saving}
-          >
-            {saving
-              ? 'Enregistrement...'
-              : 'Enregistrer'}
+          <Button variant="primary" onClick={handleSave} disabled={!dirty || saving || isBusy}>
+            {saving ? 'Enregistrement...' : 'Enregistrer'}
           </Button>
         </div>
       )}

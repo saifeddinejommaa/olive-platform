@@ -1,19 +1,9 @@
-import {
-  OliveVarieties,
-  type OliveVarieties as OliveVariety,
-} from '../../shared/entities/OliveVarieties'
+import { useConstantsStore } from '../ConstantsStore'
 
-export function getOliveVarietyLabel(
-  variety: OliveVariety
-): string {
+export function getOliveVarietyLabel(varietyId: number): string {
+  const { Appconstants } = useConstantsStore.getState()
 
-  const entry =
-    Object.entries(
-      OliveVarieties
-    ).find(
-      ([, value]) =>
-        value === variety
-    )
-
-  return entry?.[0] ?? 'Inconnue'
+  return Appconstants.oliveVarieties.find(
+    variety => variety.id === varietyId
+  )?.label ?? 'Inconnue'
 }

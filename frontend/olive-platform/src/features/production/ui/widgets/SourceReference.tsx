@@ -20,7 +20,7 @@ export type SourceOption = {
   id: number
   reference: string
   purchaseItemIds?: number[]
-  quantityKg?: number
+  quantityKg?: number | null
 }
 
 export default function SourceReference({
@@ -82,7 +82,7 @@ export default function SourceReference({
   const handleSelectHarvest = (harvest: Harvest) => {
     onSelect({
       id: harvest.id,
-      reference: harvest.harvestNumber,
+      reference: harvest.reference,
       quantityKg : harvest.quantityKg
     })
   }
@@ -156,7 +156,7 @@ export default function SourceReference({
       {isHarvest && (
         <Autocomplete
           useSearch={useHarvestsAutocomplete}
-          getLabel={harvest => harvest.harvestNumber}
+          getLabel={harvest => harvest.reference}
           onSelect={handleSelectHarvest}
           placeholder="Rechercher une récolte..."
           width={400}

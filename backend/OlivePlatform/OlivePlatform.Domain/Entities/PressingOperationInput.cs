@@ -1,4 +1,5 @@
 ﻿
+using OlivePlatform.Domain.Enums;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace OlivePlatform.Domain.Entities;
@@ -23,4 +24,7 @@ public class PressingOperationInput
 
     [Column("created_at")]
     public DateTime CreatedAt { get; set; }
+
+    [Column("status")]
+    public PressingOperationInputStatus Status { get; set; }
 }

@@ -1,28 +1,36 @@
-﻿namespace OlivePlatform.Domain.Entities
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace OlivePlatform.Domain.Entities
 {
+    [Table("plots")]
     public class Plot
     {
+        [Column("id")]
         public int Id { get; set; }
-        public string Code { get;  set; } = null!;
-        public string? Name { get;  set; }
 
-        public decimal AreaHectares { get;  set; }
-        public int NumberOfTrees { get;  set; }
+        [Column("reference")]
+        public string Reference { get; set; } = null!;
 
-        public int? PlantingYear { get;  set; }
+        [Column("name")]
+        public string Name { get; set; } = null!;
 
-        public string? Location { get;  set; }
-        public string? Notes { get;  set; }
+        [Column("area_hectares")]
+        public decimal AreaHectares { get; set; }
 
-        public bool IsActive { get;  set; }
 
-        public ICollection<PlotVariety> Varieties { get;  set; }
-            = new List<PlotVariety>();
+        [Column("planting_year")]
+        public int PlantingYear { get; set; }
 
-        public ICollection<Harvest> Harvests { get;  set; }
-            = new List<Harvest>();
+        [Column("location")]
+        public string Location { get; set; }
 
-        public ICollection<WorkSession> WorkSessions { get;  set; }
-            = new List<WorkSession>();
+        [Column("number_of_trees")]
+        public int NumberOfTrees { get; set; }
+
+        [Column("notes")]
+        public string? Notes { get; set; }
+
+        [Column("created_at")]
+        public DateTime CreatedAt { get; set; }
     }
 }

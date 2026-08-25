@@ -1,7 +1,7 @@
 ﻿using Dapper;
 using OlivePlatform.Application.Common;
+using OlivePlatform.Application.Features.Plots.Repositories;
 using OlivePlatform.Application.Features.Plots.Responses;
-using OlivePlatform.Domain.QueryRepositories;
 using System.Data;
 using System.Text;
 
@@ -25,13 +25,12 @@ public class PlotQueryRepository : IPlotQueryRepository
                 COUNT(*) OVER() AS {nameof(PlotForListResponse.Total)},
 
                 p.id AS {nameof(PlotForListResponse.Id)},
-                p.code AS {nameof(PlotForListResponse.Code)},
+                p.reference AS {nameof(PlotForListResponse.Reference)},
                 p.name AS {nameof(PlotForListResponse.Name)},
                 p.area_hectares AS {nameof(PlotForListResponse.AreaHectares)},
                 p.number_of_trees AS {nameof(PlotForListResponse.NumberOfTrees)},
                 p.planting_year AS {nameof(PlotForListResponse.PlantingYear)},
-                p.location AS {nameof(PlotForListResponse.Location)},
-                p.is_active AS {nameof(PlotForListResponse.IsActive)}
+                p.location AS {nameof(PlotForListResponse.Location)}
 
             FROM public.plots p
 
@@ -56,17 +55,17 @@ public class PlotQueryRepository : IPlotQueryRepository
         // Code filter
         // ----------------------------------------------------
 
-        if (!string.IsNullOrWhiteSpace(filter.Code))
+        if (!string.IsNullOrWhiteSpace(filter.Reference))
         {
             sql.Append(
                 """
                 
-                AND p.code ILIKE @Code
+                AND p.reference ILIKE @Code
                 """);
 
             parameters.Add(
                 "Code",
-                $"%{filter.Code.Trim()}%");
+                $"%{filter.Reference.Trim()}%");
         }
 
         // ----------------------------------------------------
@@ -110,7 +109,7 @@ public class PlotQueryRepository : IPlotQueryRepository
         sql.Append(
             """
             
-            ORDER BY p.code
+            ORDER BY p.reference
             LIMIT @PageSize
             OFFSET @Offset
             """);

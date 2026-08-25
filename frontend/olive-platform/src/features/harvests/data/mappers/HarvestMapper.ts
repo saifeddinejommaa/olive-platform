@@ -1,29 +1,44 @@
+import type { ProductionStatus } from "../../../production/domain/entities/ProductionStatus";
+import type { OliveVarieties } from "../../../shared/entities/OliveVarieties";
 import type { Harvest } from "../../domain/entities/Harvest";
 import type { HarvestResponse } from "../responses/HarvestResponse";
 
 
 export function HarvestMapper(
-      response: HarvestResponse
-    ): Harvest {
-      return {
-        id: response.id,
+  response: HarvestResponse
+): Harvest {
+  return {
+    id: response.id,
 
-      harvestNumber:
-        response.harvestNumber,
+    reference:
+      response.reference,
 
-      plotId:
-        response.plotId,
+    plotId:
+      response.plotId,
 
-      harvestDate:
-        response.harvestDate,
+    harvestDate:
+      response.harvestDate,
 
-      quantityKg:
-        response.quantityKg,
+    quantityKg:
+      response.quantityKg,
 
-      qualityGrade:
-        response.qualityGrade,
+    harvestedTrees: response.harvestedTrees,
 
-      notes:
-        response.notes,
-    }
+    plannedTrees: response.plannedTrees,
+
+    variety: response.varietyId as OliveVarieties,
+
+    notes:response.notes,
+
+    createdAt: response.createdAt,
+
+    status: response.status as ProductionStatus,
+
+    startTime: response.startTime,
+
+    endTime: response.endTime,
+
+    updatedAt:response.updatedAt
+
+  }
 }

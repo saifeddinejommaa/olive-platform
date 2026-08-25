@@ -27,17 +27,6 @@ public class PlotForDetailsResponse
         = [];
 }
 
-public class PlotVarietyResponse
-{
-    public int VarietyId { get; set; }
-
-    public string VarietyName { get; set; } = null!;
-
-    public int? NumberOfTrees { get; set; }
-
-    public decimal? Percentage { get; set; }
-}
-
 public class HarvestSummaryResponse
 {
     public int Id { get; set; }

@@ -27,21 +27,27 @@ public class HarvestQueryRepository : IHarvestQueryRepository
         HarvestsRequestFilter filter)
     {
         var sql = new StringBuilder(
-            """
+            $"""
             SELECT
-                COUNT(*) OVER() AS Total,
+                COUNT(*) OVER() {nameof(HarvestForListResponse.Total)},
 
-                h.id AS Id,
-                h.harvest_number AS HarvestNumber,
-
-                h.plot_id AS PlotId,
-
-                h.harvest_date AS HarvestDate,
-                h.quantity_kg AS QuantityKg,
-                h.quality_grade AS QualityGrade,
-                h.notes AS Notes
+                h.id AS {nameof(HarvestForListResponse.Id)},
+                h.reference AS {nameof(HarvestForListResponse.Reference)},
+                p.name AS {nameof(HarvestForListResponse.PlotName)},
+                h.harvest_date AS {nameof(HarvestForListResponse.HarvestDate)},
+                h.quantity_kg AS {nameof(HarvestForListResponse.QuantityKg)},
+                h.planned_trees AS {nameof(HarvestForListResponse.PlannedTrees)},
+                h.harvested_trees AS {nameof(HarvestForListResponse.HarvestedTrees)},
+                h.variety_id AS {nameof(HarvestForListResponse.VarietyId)},
+                h.notes AS {nameof(HarvestForListResponse.Notes)},
+                h.status AS {nameof(HarvestForListResponse.Status)},
+                h.start_time AS {nameof(HarvestForListResponse.StartTime)},
+                h.end_time AS {nameof(HarvestForListResponse.EndTime)},
+                h.created_at AS {nameof(HarvestForListResponse.CreatedAt)},
+                h.updated_at AS {nameof(HarvestForListResponse.UpdatedAt)}
 
             FROM harvests h
+            INNER JOIN plots p ON p.id = h.plot_id
 
             WHERE 1 = 1
             """);
@@ -66,7 +72,7 @@ public class HarvestQueryRepository : IHarvestQueryRepository
             sql.Append(
                 """
 
-                AND h.harvest_number ILIKE @HarvestNumber
+                AND h.reference ILIKE @HarvestNumber
                 """);
 
             parameters.Add(
@@ -125,24 +131,6 @@ public class HarvestQueryRepository : IHarvestQueryRepository
                 filter.ToDate.Value);
         }
 
-        // ----------------------------------------------------
-        // Quality Grade
-        // ----------------------------------------------------
-
-        if (!string.IsNullOrWhiteSpace(
-            filter.QualityGrade))
-        {
-            sql.Append(
-                """
-
-                AND h.quality_grade ILIKE @QualityGrade
-                """);
-
-            parameters.Add(
-                "QualityGrade",
-                $"%{filter.QualityGrade}%");
-        }
-
         // ========================================================
         // To Pressing
         // ========================================================
@@ -173,6 +161,7 @@ public class HarvestQueryRepository : IHarvestQueryRepository
                             ON pstatus.id = po.status_id
 
                         WHERE poi.purchase_item_id = item.id
+                            AND poi.status = 0
                     ),
                     0
                 )
@@ -190,7 +179,7 @@ public class HarvestQueryRepository : IHarvestQueryRepository
 
             ORDER BY
                 h.harvest_date DESC,
-                h.harvest_number
+                h.reference
 
             LIMIT @PageSize
             OFFSET @Offset

@@ -1,20 +1,29 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 
 namespace OlivePlatform.Domain.Entities
 {
+    [Table("plot_varieties")]
     public class PlotVariety 
     {
+        [Column("id")]
         public int Id { get; set; }
-        public int PlotId { get; private set; }
-        public int VarietyId { get; private set; }
 
-        public int? NumberOfTrees { get; private set; }
-        public decimal? Percentage { get; private set; }
+        [Column("plot_id")]
+        public int PlotId { get; set; }
 
-        public string? Notes { get; private set; }
+        [Column("variety_id")]
+        public int VarietyId { get; set; }
 
-        public Plot Plot { get; private set; } = null!;
+        [Column("number_of_trees")]
+        public int NumberOfTrees { get; set; }
+
+        [Column("percentage")]
+        public decimal Percentage { get; set; }
+
+        [Column("notes")]
+        public string? Notes { get; set; }
+
+        [Column("created_at")]
+        public DateTime CreatedAt { get; set; }
     }
 }

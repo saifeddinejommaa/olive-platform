@@ -19,7 +19,7 @@ public class OliveVarietyRepository
     {
         return await DbSet
             .FirstOrDefaultAsync(
-                x => x.Name == name,
+                x => x.Label == name,
                 cancellationToken);
     }
 
@@ -30,7 +30,7 @@ public class OliveVarietyRepository
     {
         return await DbSet.AnyAsync(
             x =>
-                x.Name == name &&
+                x.Label == name &&
                 (!excludeId.HasValue || x.Id != excludeId.Value),
             cancellationToken);
     }

@@ -3,18 +3,16 @@ using OlivePlatform.Domain.Repositories;
 
 namespace OlivePlatform.Domain.Interfaces.Repositories;
 
-public interface IPressionOperationInputsRepository
+public interface IPressingOperationInputsRepository
     : IRepository<PressingOperationInput>
 {
 
-    Task<PressingOperationInput> CreateAsync(PressingOperationInput input);
-
     Task<IReadOnlyList<PressingOperationInput>>
-        GetByProductionBatchIdAsync(
-            int productionBatchId,
+        GetByPressingOperationIdAsync(
+            int pressingOperationId,
             CancellationToken cancellationToken = default);
 
-    Task DeleteByProductionBatchIdAsync(
-        int productionBatchId,
+    Task DeleteByPressingOperationIdAsync(
+        int pressingOperationId,
         CancellationToken cancellationToken = default);
 }

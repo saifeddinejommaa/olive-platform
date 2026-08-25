@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using OlivePlatform.Application.Features.Production.Commands;
 using OlivePlatform.Application.Features.Production.Requests;
 using OlivePlatform.Application.Features.ProductionBatches.Commands;
 using OlivePlatform.Domain.QueryRepositories;
@@ -43,10 +44,40 @@ public class PressingOperationsController : ControllerBase
 
 
 
-    [HttpPut("{id:int}")]
+    [HttpPut("update")]
     public async Task<IActionResult> Update(
         int id,
         [FromBody] UpdatePressingOperationCommand command)
+    {
+        command.Id = id;
+
+        return Ok(await _mediator.Send(command));
+    }
+
+    [HttpPut("start")]
+    public async Task<IActionResult> Start(
+        int id,
+        [FromBody] StartPressingOperationCommand command)
+    {
+        command.Id = id;
+
+        return Ok(await _mediator.Send(command));
+    }
+
+    [HttpPut("close")]
+    public async Task<IActionResult> Close(
+        int id,
+        [FromBody] ClosePressingOperationCommand command)
+    {
+        command.Id = id;
+
+        return Ok(await _mediator.Send(command));
+    }
+
+    [HttpPut("cancel")]
+    public async Task<IActionResult> Cancel(
+        int id,
+        [FromBody] CancelPressingOperationCommand command)
     {
         command.Id = id;
 
