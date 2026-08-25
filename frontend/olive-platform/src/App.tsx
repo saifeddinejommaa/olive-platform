@@ -42,6 +42,7 @@ import NewPressingOperationPage from './features/production/ui/pages/NewPressing
 import { ToastContainer } from 'react-toastify'
 import PressingOperationDetailsPage from './features/production/ui/pages/PressingOperationsDetailsPage'
 import CreateHarvestPage from './features/harvests/ui/pages/NewHarvestPage'
+import HarvestDetailsPage from './features/harvests/ui/pages/HarvestDetailsPage'
 
 
 function App() {
@@ -129,6 +130,10 @@ function App() {
           <Route
             path="/harvests/new"
             element={<CreateHarvestPage />}
+          />
+          <Route
+            path="harvests/harvest-operation/:id"
+            element={<HarvestDetailsPage />}
           />
 
 

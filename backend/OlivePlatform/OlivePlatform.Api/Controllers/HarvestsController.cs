@@ -5,7 +5,9 @@ using OlivePlatform.Application.Features.Harvests.Commands.CreateHarvest;
 using OlivePlatform.Application.Features.Harvests.Commands.StartHarvest;
 using OlivePlatform.Application.Features.Harvests.Commands.UpdateHarvest;
 using OlivePlatform.Application.Features.Harvests.Requests;
+using OlivePlatform.Application.Features.ProductionBatches.Commands;
 using OlivePlatform.Domain.Entities;
+using OlivePlatform.Domain.Interfaces.Repositories;
 using OlivePlatform.Domain.QueryRepositories;
 
 namespace OlivePlatform.Api.Controllers;
@@ -15,14 +17,17 @@ namespace OlivePlatform.Api.Controllers;
 public class HarvestsController : ControllerBase
 {
     private readonly IHarvestQueryRepository _harvestQueryRepository;
+    private readonly IHarvestRepository _harvestRepository;
     private readonly IMediator _mediator;
 
     public HarvestsController(
         IHarvestQueryRepository harvestQueryRepository,
+        IHarvestRepository harvestRepository,
         IMediator mediator)
     {
         _harvestQueryRepository =
             harvestQueryRepository;
+        _harvestRepository = harvestRepository;
         _mediator = mediator;
     }
 
@@ -34,7 +39,6 @@ public class HarvestsController : ControllerBase
         return Ok(await _harvestQueryRepository.GetHarvests(filter));
     }
 
-    // GET: api/Harvest/5
     [HttpGet("{id:int}")]
     [ProducesResponseType(
         typeof(Harvest),
@@ -46,7 +50,7 @@ public class HarvestsController : ControllerBase
         CancellationToken cancellationToken)
     {
         var harvest =
-            await _harvestQueryRepository.GetByIdAsync(
+            await _harvestRepository.GetByIdAsync(
                 id,
                 cancellationToken);
 
@@ -89,12 +93,12 @@ public class HarvestsController : ControllerBase
         int id,
         CancellationToken cancellationToken)
     {
-        await _mediator.Send(
-            new StartHarvestCommand
-            {
-                Id = id
-            },
-            cancellationToken);
+        var command = new StartHarvestCommand
+        {
+            Id = id
+        };
+
+        await _mediator.Send(command);
 
         return NoContent();
     }

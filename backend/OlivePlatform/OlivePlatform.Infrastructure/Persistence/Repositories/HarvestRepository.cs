@@ -4,14 +4,12 @@ using OlivePlatform.Domain.Interfaces.Repositories;
 
 namespace OlivePlatform.Infrastructure.Persistence.Repositories;
 
-public class HarvestRepository
-    : Repository<Harvest>, IHarvestRepository
+public class HarvestRepository : IHarvestRepository
 {
-
     private readonly OlivePlatformAppDbContext _context;
+
     public HarvestRepository(
         OlivePlatformAppDbContext context)
-        : base(context)
     {
         _context = context;
     }
@@ -21,7 +19,7 @@ public class HarvestRepository
             int plotId,
             CancellationToken cancellationToken = default)
     {
-        return await DbSet
+        return await _context.Harvests
             .Where(x => x.PlotId == plotId)
             .OrderByDescending(x => x.HarvestDate)
             .ToListAsync(cancellationToken);
@@ -31,7 +29,7 @@ public class HarvestRepository
         string harvestNumber,
         CancellationToken cancellationToken = default)
     {
-        return await DbSet
+        return await _context.Harvests
             .FirstOrDefaultAsync(
                 x => x.Reference == harvestNumber,
                 cancellationToken);
@@ -51,10 +49,23 @@ public class HarvestRepository
         int? excludeId = null,
         CancellationToken cancellationToken = default)
     {
-        return await DbSet.AnyAsync(
+        return await _context.Harvests.AnyAsync(
             x =>
                 x.Reference == harvestNumber &&
                 (!excludeId.HasValue || x.Id != excludeId.Value),
             cancellationToken);
+    }
+
+    public async Task UpdateAsync(Harvest entity, CancellationToken cancellationToken = default)
+    {
+        await _context.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task<Harvest?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
+    {
+        return await _context.Harvests
+           .FirstOrDefaultAsync(
+               x => x.Id == id,
+               cancellationToken);
     }
 }

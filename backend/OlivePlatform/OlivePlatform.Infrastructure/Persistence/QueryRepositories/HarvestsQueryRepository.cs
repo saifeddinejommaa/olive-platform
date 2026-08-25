@@ -215,10 +215,10 @@ public class HarvestQueryRepository : IHarvestQueryRepository
         CancellationToken cancellationToken = default)
     {
         const string sql =
-            """
+            $"""
             SELECT
                 h.id AS Id,
-                h.harvest_number AS HarvestNumber,
+                h.reference AS HarvestNumber,
 
                 h.plot_id AS PlotId,
 
