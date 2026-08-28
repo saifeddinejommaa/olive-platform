@@ -15,6 +15,8 @@ import { getOliveVarietyLabel } from '../../../appConstants/helper/AppConstantsH
 import { renderStatus } from '../../../shared/utils/StatusUtils'
 import { productionStatusConfig } from '../../../shared/status/ProductionStatusConfig'
 
+import type { HarvestStockParams } from '../../domain/params/HarvestStockParams'
+
 type HarvestForm = {
   plotId: number
   varietyId: number
@@ -27,7 +29,9 @@ type HarvestForm = {
 const getCurrentDateTimeLocal = () => {
   const now = new Date()
   const offset = now.getTimezoneOffset()
-  const localDate = new Date(now.getTime() - offset * 60 * 1000)
+  const localDate = new Date(
+    now.getTime() - offset * 60 * 1000,
+  )
 
   return localDate.toISOString().slice(0, 16)
 }
@@ -55,14 +59,35 @@ export default function HarvestDetailsPage() {
   } = useConstantsStore()
 
   const [form, setForm] = useState<HarvestForm | null>(null)
-  const [errors, setErrors] = useState<Record<string, string>>({})
 
-  const [completeDrawerOpen, setCompleteDrawerOpen] = useState(false)
+  const [errors, setErrors] = useState<
+    Record<string, string>
+  >({})
+
+  const [completeDrawerOpen, setCompleteDrawerOpen] =
+    useState(false)
+
   const [harvestedTrees, setHarvestedTrees] = useState(0)
+
   const [quantityKg, setQuantityKg] = useState(0)
+
   const [completionDate, setCompletionDate] = useState(
     getCurrentDateTimeLocal(),
   )
+
+  /**
+   * Stocks utilisés uniquement lors de la clôture.
+   *
+   * Ce sont des HarvestStockParams car ce sont
+   * les données envoyées au backend.
+   */
+  const [stocks, setStocks] = useState<
+    HarvestStockParams[]
+  >([
+    {
+      quantityKg: 0,
+    },
+  ])
 
   useEffect(() => {
     if (!id) return
@@ -83,8 +108,8 @@ export default function HarvestDetailsPage() {
       plannedTrees: harvest.plannedTrees ?? 0,
       harvestDate: harvest.harvestDate
         ? new Date(harvest.harvestDate)
-          .toISOString()
-          .split('T')[0]
+            .toISOString()
+            .split('T')[0]
         : '',
       notes: harvest.notes ?? '',
       quantityKg: harvest.quantityKg ?? 0,
@@ -120,9 +145,9 @@ export default function HarvestDetailsPage() {
       setForm(previous =>
         previous
           ? {
-            ...previous,
-            [field]: value,
-          }
+              ...previous,
+              [field]: value,
+            }
           : previous,
       )
 
@@ -130,6 +155,7 @@ export default function HarvestDetailsPage() {
         if (!previous[field]) return previous
 
         const next = { ...previous }
+
         delete next[field]
 
         return next
@@ -175,6 +201,7 @@ export default function HarvestDetailsPage() {
       toast.error(
         'Veuillez corriger les erreurs du formulaire.',
       )
+
       return
     }
 
@@ -215,13 +242,31 @@ export default function HarvestDetailsPage() {
     }
   }, [harvest, start, error])
 
+  /**
+   * Ouverture du drawer de clôture.
+   *
+   * Si des stocks existent déjà, on ne les reprend pas ici :
+   * une récolte InProgress n'est pas encore clôturée.
+   *
+   * On initialise un nouveau stock avec la quantité totale.
+   */
   const handleOpenCompleteDrawer = useCallback(() => {
     if (!harvest) return
 
     setHarvestedTrees(harvest.harvestedTrees ?? 0)
+
     setQuantityKg(harvest.quantityKg ?? 0)
+
+    setStocks([
+      {
+        quantityKg: harvest.quantityKg ?? 0,
+      },
+    ])
+
     setCompletionDate(getCurrentDateTimeLocal())
+
     setErrors({})
+
     setCompleteDrawerOpen(true)
   }, [harvest])
 
@@ -229,9 +274,93 @@ export default function HarvestDetailsPage() {
     if (saving) return
 
     setCompleteDrawerOpen(false)
+
     setErrors({})
   }, [saving])
 
+  /**
+   * Ajoute une nouvelle ligne de stock.
+   */
+  const handleAddStock = useCallback(() => {
+    setStocks(previous => [
+      ...previous,
+      {
+        quantityKg: 0,
+      },
+    ])
+  }, [])
+
+  /**
+   * Supprime une ligne de stock.
+   */
+  const handleRemoveStock = useCallback(
+    (index: number) => {
+      setStocks(previous =>
+        previous.filter(
+          (_, currentIndex) => currentIndex !== index,
+        ),
+      )
+
+      setErrors(previous => {
+        const next = { ...previous }
+
+        delete next[`stock_${index}_quantityKg`]
+
+        return next
+      })
+    },
+    [],
+  )
+
+  /**
+   * Modification de la quantité d'un stock.
+   */
+  const handleStockQuantityChange = useCallback(
+    (index: number, quantity: number) => {
+      setStocks(previous =>
+        previous.map((stock, currentIndex) =>
+          currentIndex === index
+            ? {
+                ...stock,
+                quantityKg: quantity,
+              }
+            : stock,
+        ),
+      )
+
+      setErrors(previous => {
+        const next = { ...previous }
+
+        delete next[`stock_${index}_quantityKg`]
+        delete next.stocks
+
+        return next
+      })
+    },
+    [],
+  )
+
+  /**
+   * Total des quantités affectées aux stocks.
+   */
+  const totalStocksQuantity = useMemo(
+    () =>
+      stocks.reduce(
+        (total, stock) => total + stock.quantityKg,
+        0,
+      ),
+    [stocks],
+  )
+
+  /**
+   * Quantité restante à affecter.
+   */
+  const remainingQuantity =
+    quantityKg - totalStocksQuantity
+
+  /**
+   * Clôture de la récolte.
+   */
   const handleComplete = useCallback(async () => {
     if (!harvest) return
 
@@ -242,9 +371,9 @@ export default function HarvestDetailsPage() {
         "Le nombre d'arbres récoltés ne peut pas être négatif."
     }
 
-    if (quantityKg < 0) {
+    if (quantityKg <= 0) {
       validationErrors.quantityKg =
-        "La quantité d'olives ne peut pas être négative."
+        "La quantité d'olives doit être supérieure à 0."
     }
 
     if (!completionDate) {
@@ -252,8 +381,52 @@ export default function HarvestDetailsPage() {
         'La date et l’heure de clôture sont obligatoires.'
     }
 
+    if (stocks.length === 0) {
+      validationErrors.stocks =
+        'Au moins un stock doit être renseigné.'
+    }
+
+    /**
+     * Validation de chaque stock.
+     */
+    stocks.forEach((stock, index) => {
+      if (stock.quantityKg <= 0) {
+        validationErrors[
+          `stock_${index}_quantityKg`
+        ] =
+          'La quantité doit être supérieure à 0.'
+      }
+    })
+
+    /**
+     * La somme des stocks doit être exactement
+     * égale à la quantité récoltée.
+     */
+    if (
+      stocks.length > 0 &&
+      Math.abs(
+        totalStocksQuantity - quantityKg,
+      ) > 0.001
+    ) {
+      validationErrors.stocks =
+        `La somme des stocks (${totalStocksQuantity.toLocaleString(
+          'fr-FR',
+          {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          },
+        )} kg) doit être égale à la quantité récoltée (${quantityKg.toLocaleString(
+          'fr-FR',
+          {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          },
+        )} kg).`
+    }
+
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors)
+
       return
     }
 
@@ -263,9 +436,11 @@ export default function HarvestDetailsPage() {
         quantityKg,
         harvestedTrees,
         completionDate,
+        stocks,
       )
 
       setCompleteDrawerOpen(false)
+
       setErrors({})
 
       toast.success(
@@ -281,6 +456,8 @@ export default function HarvestDetailsPage() {
     harvestedTrees,
     quantityKg,
     completionDate,
+    stocks,
+    totalStocksQuantity,
     complete,
     error,
   ])
@@ -342,11 +519,16 @@ export default function HarvestDetailsPage() {
 
   return (
     <div className="feature-page">
+      {/* ================================================= */}
+      {/* HEADER                                            */}
+      {/* ================================================= */}
+
       <div className="page-header">
         <div className="page-header-content">
           <h1 className="page-title">
             Récolte {harvest.reference}
           </h1>
+
           <div>
             {renderStatus(
               harvest.status,
@@ -398,6 +580,10 @@ export default function HarvestDetailsPage() {
         </div>
       </div>
 
+      {/* ================================================= */}
+      {/* INFORMATIONS GENERALES                            */}
+      {/* ================================================= */}
+
       <div className="filters">
         <div className="filters-header">
           <div>
@@ -410,15 +596,17 @@ export default function HarvestDetailsPage() {
         </div>
 
         <div className="filters-content">
+          {/* Référence */}
           <div className="filter-item">
             <TextInput
               label="Référence"
               value={harvest.reference ?? ''}
               disabled
-              onChange={() => { }}
+              onChange={() => {}}
             />
           </div>
 
+          {/* Variété */}
           <div className="filter-item">
             <Select
               label="Variété"
@@ -444,6 +632,7 @@ export default function HarvestDetailsPage() {
                 saving
               }
             />
+            
 
             {errors.varietyId && (
               <span className="field-error">
@@ -452,6 +641,7 @@ export default function HarvestDetailsPage() {
             )}
           </div>
 
+          {/* Date */}
           <div className="filter-item">
             <TextInput
               label="Date de récolte"
@@ -478,6 +668,7 @@ export default function HarvestDetailsPage() {
             )}
           </div>
 
+          {/* Arbres planifiés */}
           <div className="filter-item">
             <TextInput
               label="Arbres planifiés"
@@ -505,29 +696,34 @@ export default function HarvestDetailsPage() {
             )}
           </div>
 
+          {/* Arbres récoltés */}
           <div className="filter-item">
             <TextInput
               label="Arbres récoltés"
               type="number"
               value={harvest.harvestedTrees ?? 0}
               disabled
-              onChange={() => { }}
+              onChange={() => {}}
             />
           </div>
 
+          {/* Quantité récoltée */}
           <div className="filter-item">
             <TextInput
               label="Olives récoltées (kg)"
               type="number"
               value={harvest.quantityKg ?? 0}
               disabled
-              onChange={() => { }}
+              onChange={() => {}}
             />
           </div>
 
+          {/* Notes */}
           <div
             className="filter-item"
-            style={{ gridColumn: '1 / -1' }}
+            style={{
+              gridColumn: '1 / -1',
+            }}
           >
             <label>Notes</label>
 
@@ -546,6 +742,59 @@ export default function HarvestDetailsPage() {
           </div>
         </div>
       </div>
+
+      {/* ================================================= */}
+      {/* STOCKS EXISTANTS                                  */}
+      {/* ================================================= */}
+
+      {isCompleted && (
+        <div className="filters">
+          <div className="filters-header">
+            <div>
+              <h3>Stocks</h3>
+
+              <span>
+                Stocks créés lors de la clôture de la
+                récolte
+              </span>
+            </div>
+          </div>
+
+          {harvest && harvest.stocks &&
+          harvest.stocks.length > 0 ? (
+            <div className="filters-content">
+              {harvest.stocks.map(
+                (stock, index) => (
+                  <div
+                    className="filter-item"
+                    key={stock.id}
+                  >
+                    <TextInput
+                      label={`Stock ${index + 1}`}
+                      type="number"
+                      value={stock.quantityKg}
+                      disabled
+                      onChange={() => {}}
+                    />
+                  </div>
+                ),
+              )}
+            </div>
+          ) : (
+            <div
+              style={{
+                padding: '20px',
+              }}
+            >
+              Aucun stock associé à cette récolte.
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ================================================= */}
+      {/* FOOTER                                            */}
+      {/* ================================================= */}
 
       <div className="filters-footer">
         <Button
@@ -577,10 +826,14 @@ export default function HarvestDetailsPage() {
         )}
       </div>
 
+      {/* ================================================= */}
+      {/* DRAWER CLOTURE                                    */}
+      {/* ================================================= */}
+
       <Drawer
         open={completeDrawerOpen}
         title="Clôturer la récolte"
-        description="Renseignez les informations finales de la récolte."
+        description="Renseignez les informations finales de la récolte et répartissez la quantité dans les stocks."
         onClose={handleCloseCompleteDrawer}
         footer={
           <>
@@ -611,6 +864,7 @@ export default function HarvestDetailsPage() {
             gap: '20px',
           }}
         >
+          {/* Référence */}
           <div
             style={{
               padding: '16px',
@@ -618,13 +872,20 @@ export default function HarvestDetailsPage() {
               background: '#f8f9fa',
             }}
           >
-            <strong>Référence du lot</strong>
+            <strong>
+              Référence de la récolte
+            </strong>
 
-            <div style={{ marginTop: '4px' }}>
+            <div
+              style={{
+                marginTop: '4px',
+              }}
+            >
               {harvest.reference ?? '-'}
             </div>
           </div>
 
+          {/* Variété */}
           <div
             style={{
               padding: '16px',
@@ -634,18 +895,27 @@ export default function HarvestDetailsPage() {
           >
             <strong>Variété</strong>
 
-            <div style={{ marginTop: '4px' }}>
-              {getOliveVarietyLabel(harvest.variety)}
+            <div
+              style={{
+                marginTop: '4px',
+              }}
+            >
+              {getOliveVarietyLabel(
+                harvest.variety,
+              )}
             </div>
           </div>
 
+          {/* Date de clôture */}
           <div className="filter-item">
             <TextInput
               label="Date et heure de clôture"
               type="datetime-local"
               value={completionDate}
               onChange={event =>
-                setCompletionDate(event.target.value)
+                setCompletionDate(
+                  event.target.value,
+                )
               }
               disabled={saving}
             />
@@ -657,6 +927,7 @@ export default function HarvestDetailsPage() {
             )}
           </div>
 
+          {/* Arbres récoltés */}
           <div className="filter-item">
             <TextInput
               label="Arbres récoltés"
@@ -688,6 +959,7 @@ export default function HarvestDetailsPage() {
               )}
           </div>
 
+          {/* Quantité totale */}
           <div className="filter-item">
             <TextInput
               label="Olives récoltées (kg)"
@@ -708,6 +980,216 @@ export default function HarvestDetailsPage() {
                 {errors.quantityKg}
               </span>
             )}
+          </div>
+
+          {/* ================================================= */}
+          {/* STOCKS A CREER                                    */}
+          {/* ================================================= */}
+
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '12px',
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                gap: '12px',
+              }}
+            >
+              <div>
+                <strong>
+                  Répartition des stocks
+                </strong>
+
+                <div
+                  style={{
+                    marginTop: '4px',
+                  }}
+                >
+                  Répartissez la quantité récoltée
+                  entre les stocks.
+                </div>
+              </div>
+
+              <Button
+                variant="secondary"
+                onClick={handleAddStock}
+                disabled={saving}
+              >
+                + Ajouter un stock
+              </Button>
+            </div>
+
+            {errors.stocks && (
+              <span className="field-error">
+                {errors.stocks}
+              </span>
+            )}
+
+            {stocks.map((stock, index) => (
+              <div
+                key={index}
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns:
+                    '1fr auto',
+                  gap: '12px',
+                  alignItems: 'start',
+                  padding: '16px',
+                  border: '1px solid #e5e7eb',
+                  borderRadius: '8px',
+                }}
+              >
+                <div className="filter-item">
+                  <TextInput
+                    label={`Stock ${index + 1} - Quantité (kg)`}
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={stock.quantityKg}
+                    onChange={event =>
+                      handleStockQuantityChange(
+                        index,
+                        Number(
+                          event.target.value,
+                        ),
+                      )
+                    }
+                    disabled={saving}
+                  />
+
+                  {errors[
+                    `stock_${index}_quantityKg`
+                  ] && (
+                    <span className="field-error">
+                      {
+                        errors[
+                          `stock_${index}_quantityKg`
+                        ]
+                      }
+                    </span>
+                  )}
+                </div>
+
+                <div
+                  style={{
+                    paddingTop: '24px',
+                  }}
+                >
+                  <Button
+                    variant="secondary"
+                    onClick={() =>
+                      handleRemoveStock(
+                        index,
+                      )
+                    }
+                    disabled={
+                      saving ||
+                      stocks.length === 1
+                    }
+                  >
+                    Supprimer
+                  </Button>
+                </div>
+              </div>
+            ))}
+
+            {/* ================================================= */}
+            {/* RESUME STOCKS                                    */}
+            {/* ================================================= */}
+
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '8px',
+                padding: '16px',
+                borderRadius: '8px',
+                background: '#f8f9fa',
+              }}
+            >
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent:
+                    'space-between',
+                }}
+              >
+                <span>
+                  Quantité récoltée
+                </span>
+
+                <strong>
+                  {quantityKg.toLocaleString(
+                    'fr-FR',
+                    {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    },
+                  )}{' '}
+                  kg
+                </strong>
+              </div>
+
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent:
+                    'space-between',
+                }}
+              >
+                <span>
+                  Quantité dans les stocks
+                </span>
+
+                <strong>
+                  {totalStocksQuantity.toLocaleString(
+                    'fr-FR',
+                    {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    },
+                  )}{' '}
+                  kg
+                </strong>
+              </div>
+
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent:
+                    'space-between',
+                  paddingTop: '8px',
+                  marginTop: '4px',
+                  borderTop:
+                    '1px solid #e5e7eb',
+                }}
+              >
+                <span>
+                  {remainingQuantity >= 0
+                    ? 'Reste à répartir'
+                    : 'Dépassement'}
+                </span>
+
+                <strong>
+                  {Math.abs(
+                    remainingQuantity,
+                  ).toLocaleString(
+                    'fr-FR',
+                    {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    },
+                  )}{' '}
+                  kg
+                </strong>
+              </div>
+            </div>
           </div>
         </div>
       </Drawer>

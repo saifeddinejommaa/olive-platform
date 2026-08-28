@@ -1,8 +1,8 @@
 ﻿using Dapper;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using OlivePlatform.Application.Features.Harvests.Responses;
 using OlivePlatform.Application.Features.Production.Responses;
-using System.Data;
 
 namespace OlivePlatform.Infrastructure
 {
@@ -21,6 +21,9 @@ namespace OlivePlatform.Infrastructure
         {
             SqlMapper.AddTypeHandler(
                 new JsonObjectTypeHandler<List<PressingOperationInputResponse>>());
+
+            SqlMapper.AddTypeHandler(
+                new JsonObjectTypeHandler<List<HarvestStockForListResponse>>());
         }
     }
 }

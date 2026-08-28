@@ -1,11 +1,10 @@
-import { HarvestRepository } from "../../data/repositories/HarvestRepository";
+
+import { HarvestRepository } from '../../data/repositories/HarvestRepository'
+import type { CompleteHarvestParams } from '../params/CompleteHarvestParams'
 
 export async function completeHarvest(
   id: number,
-  quantityKg: number,
-  harvestedTrees: number
+  params:CompleteHarvestParams,
 ) {
-  return HarvestRepository.complete(id, {harvestedTrees:harvestedTrees,
-    quantityKg:quantityKg,
-  })
+  return HarvestRepository.complete(id, params)
 }

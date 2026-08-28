@@ -5,7 +5,6 @@ using OlivePlatform.Application.Features.Harvests.Commands.CreateHarvest;
 using OlivePlatform.Application.Features.Harvests.Commands.StartHarvest;
 using OlivePlatform.Application.Features.Harvests.Commands.UpdateHarvest;
 using OlivePlatform.Application.Features.Harvests.Requests;
-using OlivePlatform.Application.Features.ProductionBatches.Commands;
 using OlivePlatform.Domain.Entities;
 using OlivePlatform.Domain.Interfaces.Repositories;
 using OlivePlatform.Domain.QueryRepositories;
@@ -17,21 +16,17 @@ namespace OlivePlatform.Api.Controllers;
 public class HarvestsController : ControllerBase
 {
     private readonly IHarvestQueryRepository _harvestQueryRepository;
-    private readonly IHarvestRepository _harvestRepository;
     private readonly IMediator _mediator;
 
     public HarvestsController(
         IHarvestQueryRepository harvestQueryRepository,
-        IHarvestRepository harvestRepository,
         IMediator mediator)
     {
         _harvestQueryRepository =
             harvestQueryRepository;
-        _harvestRepository = harvestRepository;
         _mediator = mediator;
     }
 
-    // GET: api/Harvest
     [HttpGet]
     public async Task<IActionResult> GetAll(
         [FromQuery] HarvestsRequestFilter filter)
@@ -40,17 +35,12 @@ public class HarvestsController : ControllerBase
     }
 
     [HttpGet("{id:int}")]
-    [ProducesResponseType(
-        typeof(Harvest),
-        StatusCodes.Status200OK)]
-    [ProducesResponseType(
-        StatusCodes.Status404NotFound)]
     public async Task<ActionResult<Harvest>> GetById(
         int id,
         CancellationToken cancellationToken)
     {
         var harvest =
-            await _harvestRepository.GetByIdAsync(
+            await _harvestQueryRepository.GetHarvestDetails(
                 id,
                 cancellationToken);
 
@@ -60,6 +50,24 @@ public class HarvestsController : ControllerBase
         }
 
         return Ok(harvest);
+    }
+
+    [HttpGet("{id:int}/stocks")]
+    public async Task<ActionResult> GetHarvestStocks(
+        int id,
+        HarvestStocksRequestFilter filter,
+        CancellationToken cancellationToken)
+    {
+        var stocks =
+            await _harvestQueryRepository.GetHarvestStocks(id,filter,
+                cancellationToken);
+
+        if (stocks is null)
+        {
+            return NotFound();
+        }
+
+        return Ok(stocks);
     }
 
     [HttpPost]
@@ -98,7 +106,7 @@ public class HarvestsController : ControllerBase
             Id = id
         };
 
-        await _mediator.Send(command);
+        await _mediator.Send(command,cancellationToken);
 
         return NoContent();
     }
@@ -111,9 +119,7 @@ public class HarvestsController : ControllerBase
     {
         command.Id = id;
 
-        await _mediator.Send(
-            command,
-            cancellationToken);
+        await _mediator.Send(command,cancellationToken);
 
         return NoContent();
     }

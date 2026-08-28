@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 
 import type { Harvest } from '../../domain/entities/Harvest'
+import type { HarvestStock } from '../../domain/entities/HarvestStock'
 import type { UpdateHarvestParams } from '../../domain/params/UpdateHarvestParams'
 
 import { getHarvest } from '../../domain/usecases/GetHarvest'
@@ -8,6 +9,8 @@ import { updateHarvest } from '../../domain/usecases/UpdateHarvest'
 import { startHarvest } from '../../domain/usecases/StartHarvest'
 import { completeHarvest } from '../../domain/usecases/CompleteHarvest'
 import { cancelHarvest } from '../../domain/usecases/CancelHarvest'
+import type { HarvestStockParams } from '../../domain/params/HarvestStockParams'
+import type { CompleteHarvestParams } from '../../domain/params/CompleteHarvestParams'
 
 type HarvestDetailsState = {
   harvest: Harvest | null
@@ -28,10 +31,11 @@ type HarvestDetailsState = {
     id: number,
     quantityKg: number,
     harvestedTrees: number,
-    completeDate: string
-  ) => Promise<Harvest>
+    completeDate: string,
+    stocks: HarvestStockParams[],
+  ) => Promise<void>
 
-  cancel: (id: number) => Promise<Harvest>
+  cancel: (id: number) => Promise<void>
 
   clear: () => void
 }
@@ -135,6 +139,8 @@ export const useHarvestDetailsStore =
       id,
       quantityKg,
       harvestedTrees,
+      completeDate,
+      stocks,
     ) => {
       try {
         set({
@@ -142,17 +148,25 @@ export const useHarvestDetailsStore =
           error: null,
         })
 
-        const harvest = await completeHarvest(
+        console.log()
+        const params: CompleteHarvestParams = {
+          quantityKg: quantityKg,
+          harvestedTrees: harvestedTrees,
+          completeDate: completeDate,
+          stocks: stocks,
+        }
+
+         await completeHarvest(
           id,
-          quantityKg,
-          harvestedTrees,
+          params
         )
 
         set({
-          harvest,
+          saving: false,
+          loading: false
         })
 
-        return harvest
+        
       } catch (error) {
         console.error(error)
 
@@ -175,13 +189,13 @@ export const useHarvestDetailsStore =
           error: null,
         })
 
-        const harvest = await cancelHarvest(id)
+        await cancelHarvest(id)
 
         set({
-          harvest,
+           saving: false,
+          loading: false
         })
 
-        return harvest
       } catch (error) {
         console.error(error)
 
