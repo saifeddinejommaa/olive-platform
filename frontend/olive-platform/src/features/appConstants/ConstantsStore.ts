@@ -1,15 +1,17 @@
-import { create } from "zustand";
-import type { AppConstants } from "./domain/models/AppConstants";
-import { getAppConstants } from "./domain/useCases/GetAppConstants";
+import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
+
+import type { AppConstants } from './domain/models/AppConstants'
+import { getAppConstants } from './domain/useCases/GetAppConstants'
 
 type AppConstantsState = {
-  Appconstants: AppConstants;
+  Appconstants: AppConstants
+  loading: boolean
+  loaded: boolean
+   hydrated: boolean
 
-  loading: boolean;
-  loaded: boolean;
-
-  fetchConstants: () => Promise<void>;
-};
+  fetchConstants: () => Promise<void>
+}
 
 const initialConstants: AppConstants = {
   oliveVarieties: [],
@@ -19,49 +21,51 @@ const initialConstants: AppConstants = {
   invoiceTypes: [],
   invoiceStatuses: [],
   paymentMethods: [],
-  purchaseStatuses: []
-};
+  purchaseStatuses: [],
+}
 
 export const useConstantsStore =
-  create<AppConstantsState>((set, get) => ({
-    Appconstants: initialConstants,
+  create<AppConstantsState>()(
+    persist(
+      (set, get) => ({
+        Appconstants: initialConstants,
+        loading: false,
+        loaded: false,
+        hydrated: false,
 
-    loading: false,
-    loaded: false,
+        fetchConstants: async () => {
+          if (get().loaded || get().loading) {
+            return
+          }
 
-    fetchConstants: async () => {
-      // Déjà chargées → on ne fait rien
-      if (get().loaded) {
-        return;
-      }
+          set({
+            loading: true,
+          })
 
-      // Évite également plusieurs appels simultanés
-      if (get().loading) {
-        return;
-      }
+          try {
+            const data = await getAppConstants()
 
-      set({
-        loading: true,
-      });
+            set({
+              Appconstants: data,
+              loaded: true,
+            })
+          } finally {
+            set({
+              loading: false,
+            })
+          }
+        },
+      }),
+      {
+        name: 'olive-platform-constants',
 
-      try {
-        const data = await getAppConstants();
-
-        set({
-          Appconstants: data,
-          loaded: true,
-        });
-      } catch (error) {
-        console.error(
-          "Erreur lors du chargement des constantes",
-          error
-        );
-
-        throw error;
-      } finally {
-        set({
-          loading: false,
-        });
-      }
-    },
-  }));
+        onRehydrateStorage: () => {
+          return () => {
+            useConstantsStore.setState({
+              hydrated: true,
+            })
+          }
+        },
+      },
+    ),
+  )

@@ -1,9 +1,6 @@
 ﻿using Dapper;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Text;
 
 namespace OlivePlatform.Infrastructure
 {

@@ -1,5 +1,7 @@
-﻿using OlivePlatform.Infrastructure;
-using Autofac;
+﻿using Autofac;
+using OlivePlatform.Application.Common;
+using OlivePlatform.Infrastructure;
+using OlivePlatform.Infrastructure.Persistence;
 using OlivePlatform.Infrastructure.Persistence.Repositories;
 
 public class InfrastructureModule : Module
@@ -17,6 +19,10 @@ public class InfrastructureModule : Module
         // 🔹 DbContext
         builder.RegisterType<OlivePlatformAppDbContext>()
             .AsSelf()
+            .InstancePerLifetimeScope();
+
+        builder.RegisterType<UnitOfWork>()
+            .As<IUnitOfWork>()
             .InstancePerLifetimeScope();
     }
 }

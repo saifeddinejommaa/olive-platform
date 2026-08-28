@@ -21,17 +21,17 @@ public class PressingOperationQueryRepository : IPressiongOperationQueryReposito
      PressingOperationsRequestFilter filter)
     {
         var sql = new StringBuilder(
-            """
+            $"""
         SELECT DISTINCT
-            COUNT(*) OVER() AS Total,
+            COUNT(*) OVER() {nameof(PressingOperationDetailsResponse.Total)},
 
-            p.id AS Id,
-            p.operation_number AS OperationNumber,
-            p.start_time AS StartTime,
-            p.created_at AS CreatedAt,
-            p.end_time AS EndTime,
-            p.status_id AS Status,
-            p.oil_quantity_liters AS OilQuantityLiters
+            p.id {nameof(PressingOperationDetailsResponse.Id)},
+            p.operation_number {nameof(PressingOperationDetailsResponse.OperationNumber)},
+            p.start_time  {nameof(PressingOperationDetailsResponse.StartTime)},
+            p.created_at  {nameof(PressingOperationDetailsResponse.CreatedAt)},
+            p.end_time {nameof(PressingOperationDetailsResponse.EndTime)},
+            p.status_id {nameof(PressingOperationDetailsResponse.Status)},
+            p.oil_quantity_liters {nameof(PressingOperationDetailsResponse.OilQuantityLiters)}
 
         FROM pressing_operations p
 

@@ -6,5 +6,7 @@ public static class DocumentPrefixes
 
     public const string Harvest = "HARV";
 
+    public const string HarvestStock = "HARV_STOCK";
+
     public const string OlivePurchase = "ACH";
 }

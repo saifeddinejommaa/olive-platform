@@ -1,0 +1,42 @@
+﻿using OlivePlatform.Application.Common;
+
+namespace OlivePlatform.Infrastructure.Persistence
+{
+    public class UnitOfWork : IUnitOfWork
+    {
+        private readonly OlivePlatformAppDbContext _context;
+
+        public UnitOfWork(
+            OlivePlatformAppDbContext context)
+        {
+            _context = context;
+        }
+
+        public async Task ExecuteInTransactionAsync(
+            Func<CancellationToken, Task> action,
+            CancellationToken cancellationToken = default)
+        {
+            await using var transaction =
+                await _context.Database.BeginTransactionAsync(
+                    cancellationToken);
+
+            try
+            {
+                await action(cancellationToken);
+
+                await _context.SaveChangesAsync(
+                    cancellationToken);
+
+                await transaction.CommitAsync(
+                    cancellationToken);
+            }
+            catch
+            {
+                await transaction.RollbackAsync(
+                    cancellationToken);
+
+                throw;
+            }
+        }
+    }
+}

@@ -10,9 +10,13 @@ public interface IHarvestQueryRepository
     Task<PagedResult<HarvestForListResponse>> GetHarvests(
         HarvestsRequestFilter filter);
 
-    Task<Harvest?> GetByIdAsync(
-        int id,
+    Task<PagedResult<HarvestStockForListResponse>> GetHarvestStocks(int id,
+        HarvestStocksRequestFilter filter,
         CancellationToken cancellationToken = default);
+
+    Task<HarvestDetailsResponse?> GetHarvestDetails(
+    int id,
+    CancellationToken cancellationToken = default);
 
     Task<IReadOnlyList<Harvest>> GetByPlotIdAsync(
         int plotId,

@@ -70,26 +70,22 @@ export const HarvestRepository = {
   complete: async (
     id: number,
     params: CompleteHarvestParams
-  ): Promise<Harvest> => {
-    const httpResponse = await http<ApiResponse<HarvestResponse>>(
-      `${API_BASE_URL}harvests/${id}/complete`,
+  ): Promise<void> => {
+     await http<ApiResponse<HarvestResponse>>(
+      `${API_BASE_URL}harvests/${id}/close`,
       {
         method: "POST",
         body: params,
       }
     );
-
-    return HarvestMapper(httpResponse.Response);
   },
 
-  cancel: async (id: number): Promise<Harvest> => {
-    const httpResponse = await http<ApiResponse<HarvestResponse>>(
+  cancel: async (id: number): Promise<void> => {
+     await http<ApiResponse<HarvestResponse>>(
       `${API_BASE_URL}harvests/${id}/cancel`,
       {
         method: "POST",
       }
     );
-
-    return HarvestMapper(httpResponse.Response);
   },
 };

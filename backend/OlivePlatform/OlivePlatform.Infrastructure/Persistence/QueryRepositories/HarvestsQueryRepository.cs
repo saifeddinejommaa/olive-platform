@@ -206,76 +206,101 @@ public class HarvestQueryRepository : IHarvestQueryRepository
         };
     }
 
-    // ============================================================
-    // GET BY ID
-    // ============================================================
 
-    public async Task<Harvest?> GetByIdAsync(
-        int id,
-        CancellationToken cancellationToken = default)
+    public async Task<HarvestDetailsResponse?> GetHarvestDetails(
+    int id,
+    CancellationToken cancellationToken = default)
     {
         const string sql =
             $"""
-            SELECT
-                h.id AS Id,
-                h.reference AS HarvestNumber,
+        SELECT
+            h.id {nameof(HarvestDetailsResponse.Id)},
+            h.reference {nameof(HarvestDetailsResponse.Reference)},
+            p.reference {nameof(HarvestDetailsResponse.PlotReference)},
+            h.harvest_date {nameof(HarvestDetailsResponse.HarvestDate)},
+            h.quantity_kg  {nameof(HarvestDetailsResponse.QuantityKg)},
+            h.planned_trees {nameof(HarvestDetailsResponse.PlannedTrees)},
+            h.harvested_trees {nameof(HarvestDetailsResponse.HarvestedTrees)},
+            h.notes {nameof(HarvestDetailsResponse.Notes)},
+            h.status {nameof(HarvestDetailsResponse.Status)},
+            h.start_time {nameof(HarvestDetailsResponse.StartTime)},
+            h.end_time {nameof(HarvestDetailsResponse.EndTime)},
+            h.created_at {nameof(HarvestDetailsResponse.CreatedAt)},
+            h.updated_at {nameof(HarvestDetailsResponse.UpdatedAt)},
+            h.variety_id {nameof(HarvestDetailsResponse.VarietyId)},
 
-                h.plot_id AS PlotId,
+            COALESCE(
+                json_agg(
+                    json_build_object(
+                        '{nameof(HarvestStockForListResponse.Id)}',
+                            hs.id,
 
-                h.harvest_date AS HarvestDate,
-                h.quantity_kg AS QuantityKg,
-                h.quality_grade AS QualityGrade,
-                h.notes AS Notes
+                        '{nameof(HarvestStockForListResponse.HarvestId)}',
+                            hs.harvest_id,
 
-            FROM harvests h
+                        '{nameof(HarvestStockForListResponse.Reference)}',
+                            hs.reference,
 
-            WHERE h.id = @Id
-            """;
+                        '{nameof(HarvestStockForListResponse.QuantityKg)}',
+                            hs.quantity_kg,
 
-        using var connection = _dbConnection;
+                        '{nameof(HarvestStockForListResponse.Status)}',
+                            hs.status,
 
-        return await connection.QuerySingleOrDefaultAsync<Harvest>(
-            sql,
-            new
-            {
-                Id = id
-            });
-    }
+                        '{nameof(HarvestStockForListResponse.CreatedAt)}',
+                            hs.created_at,
 
-    // ============================================================
-    // GET ALL
-    // ============================================================
+                        '{nameof(HarvestStockForListResponse.UpdatedAt)}',
+                            hs.updated_at
+                    )
+                    ORDER BY hs.created_at DESC
+                ) FILTER (WHERE hs.id IS NOT NULL),
+                '[]'::json
+            ) AS {nameof(HarvestDetailsResponse.Stocks)}
 
-    public async Task<IReadOnlyList<Harvest>> GetAllAsync(
-        CancellationToken cancellationToken = default)
-    {
-        const string sql =
-            """
-            SELECT
-                h.id AS Id,
-                h.harvest_number AS HarvestNumber,
+        FROM public.harvests h
 
-                h.plot_id AS PlotId,
+        INNER JOIN public.plots p
+            ON p.id = h.plot_id
 
-                h.harvest_date AS HarvestDate,
-                h.quantity_kg AS QuantityKg,
-                h.quality_grade AS QualityGrade,
-                h.notes AS Notes
+        LEFT JOIN public.harvest_stock hs
+            ON hs.harvest_id = h.id
 
-            FROM harvests h
+        WHERE h.id = @Id
 
-            ORDER BY
-                h.harvest_date DESC,
-                h.harvest_number
-            """;
+        GROUP BY
+            h.id,
+            h.reference,
+            p.reference,
+            h.harvest_date,
+            h.quantity_kg,
+            h.notes,
+            h.status,
+            h.start_time,
+            h.end_time,
+            h.created_at,
+            h.updated_at;
+        """;
 
         using var connection = _dbConnection;
 
         var result =
-            await connection.QueryAsync<Harvest>(sql);
+            await connection.QuerySingleOrDefaultAsync<HarvestDetailsResponse>(
+                new CommandDefinition(
+                    sql,
+                    new
+                    {
+                        Id = id
+                    },
+                    cancellationToken: cancellationToken));
 
-        return result.ToList();
+        if (result is null)
+            return null;
+
+        return result;
     }
+
+
 
     // ============================================================
     // GET BY PLOT ID
@@ -318,5 +343,67 @@ public class HarvestQueryRepository : IHarvestQueryRepository
                 });
 
         return result.ToList();
+    }
+
+    public async Task<PagedResult<HarvestStockForListResponse>> GetHarvestStocks(int id, HarvestStocksRequestFilter filter, CancellationToken cancellationToken = default)
+    {
+        var sql = new StringBuilder(
+           $"""
+            SELECT
+                COUNT(*) OVER() AS {nameof(HarvestStockForListResponse.Total)},
+
+                id {nameof(HarvestStockForListResponse.Id)} ,
+                harvest_id {nameof(HarvestStockForListResponse.HarvestId)},
+                reference {nameof(HarvestStockForListResponse.HarvestId)},
+                quantity_kg {nameof(HarvestStockForListResponse.HarvestId)},
+                status {nameof(HarvestStockForListResponse.Status)},
+                created_at {nameof(HarvestStockForListResponse.CreatedAt)},
+                updated_at {nameof(HarvestStockForListResponse.UpdatedAt)}
+            FROM public.harvest_stock
+            WHERE harvest_id = @HarvestId
+            ORDER BY created_at DESC
+            """);
+
+        var parameters = new DynamicParameters();
+
+        parameters.Add(
+            "HarvestId",
+            id);
+
+        // ----------------------------------------------------
+        // Pagination
+        // ----------------------------------------------------
+
+        sql.Append(
+            """
+
+            ORDER BY
+                h.harvest_date DESC,
+                h.reference
+
+            LIMIT @PageSize
+            OFFSET @Offset
+            """);
+
+        using var connection = _dbConnection;
+
+        var result =
+            await connection.QueryAsync<HarvestStockForListResponse>(
+                sql.ToString(),
+                parameters);
+
+        var items = result.ToList();
+
+        var total =
+            items.FirstOrDefault()?.Total ?? 0;
+
+        return new PagedResult<HarvestStockForListResponse>
+        {
+            PageNumber = filter.PageNumber,
+            PageSize = filter.PageSize,
+            TotalCount = total,
+            Items = items
+        };
+
     }
 }

@@ -4,6 +4,7 @@ using System.Text.Json;
 
 namespace OlivePlatform.Api.Middleware
 {
+
     public class ApiResponseMiddleware
     {
         private readonly RequestDelegate _next;
@@ -16,6 +17,7 @@ namespace OlivePlatform.Api.Middleware
         public async Task Invoke(HttpContext context)
         {
             var originalBodyStream = context.Response.Body;
+
             try
             {
                 using var memoryStream = new MemoryStream();
@@ -23,20 +25,27 @@ namespace OlivePlatform.Api.Middleware
 
                 await _next(context);
 
+                // 204 No Content ne doit jamais avoir de body
+                if (context.Response.StatusCode == StatusCodes.Status204NoContent)
+                {
+                    context.Response.Body = originalBodyStream;
+                    return;
+                }
+
                 memoryStream.Position = 0;
                 var body = await new StreamReader(memoryStream).ReadToEndAsync();
 
                 object? data = null;
 
                 if (!string.IsNullOrWhiteSpace(body))
-                {
                     data = JsonSerializer.Deserialize<object>(body);
-                }
 
                 var wrappedResponse = new ApiResponse<object?>(
                     context.Response.StatusCode,
                     data,
-                    context.Response.StatusCode == 200 ? "Success" : "Error"
+                    context.Response.StatusCode >= 200 && context.Response.StatusCode < 300
+                        ? "Success"
+                        : "Error"
                 );
 
                 var json = JsonSerializer.Serialize(wrappedResponse);
@@ -48,18 +57,23 @@ namespace OlivePlatform.Api.Middleware
             catch (BusinessException ex)
             {
                 context.Response.Body = originalBodyStream;
-                context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+                context.Response.StatusCode = StatusCodes.Status400BadRequest;
                 context.Response.ContentType = "application/json";
 
                 var response = new ApiResponse<object?>(
-                    400,
+                    StatusCodes.Status400BadRequest,
                     null,
                     ex.Message
                 );
 
-                await context.Response.WriteAsync(
-                    JsonSerializer.Serialize(response));
+                await context.Response.WriteAsync(JsonSerializer.Serialize(response));
+            }
+            finally
+            {
+                context.Response.Body = originalBodyStream;
             }
         }
     }
+
+
 }
