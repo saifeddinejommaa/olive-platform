@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace OlivePlatform.Application.Common
+﻿namespace OlivePlatform.Application.Common
 {
     public interface IUnitOfWork
     {

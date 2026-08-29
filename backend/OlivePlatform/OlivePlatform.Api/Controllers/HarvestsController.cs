@@ -55,7 +55,7 @@ public class HarvestsController : ControllerBase
     [HttpGet("{id:int}/stocks")]
     public async Task<ActionResult> GetHarvestStocks(
         int id,
-        HarvestStocksRequestFilter filter,
+        [FromQuery] HarvestStocksRequestFilter filter,
         CancellationToken cancellationToken)
     {
         var stocks =
