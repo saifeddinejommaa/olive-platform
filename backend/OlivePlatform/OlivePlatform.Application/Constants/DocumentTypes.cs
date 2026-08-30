@@ -9,4 +9,6 @@ public static class DocumentTypes
     public const string HarvestStock = "HARVEST_STOCK";
 
     public const string OlivePurchase = "OLIVE_PURCHASE";
+
+    public const string OliveAnalyse = "OLIVE_ANALYSE";
 }

@@ -27,7 +27,6 @@ export const PressingOperationRepository = {
 
   createPressingOperation: async (params: CreatePressingOperationParams) => {
     var data = CreatePressingOperationMapper(params);
-    console.log("data to send",data)
     return await http<ApiResponse<boolean>>(`${API_BASE_URL}pressingoperations/create`, {
       method: "POST",
       body: data
@@ -37,8 +36,6 @@ export const PressingOperationRepository = {
   getPressingOperationDetails: async(operationId: number) => {
      const response = await http<ApiResponse<PressingOperationDetails>>(`${API_BASE_URL}pressingoperations/${operationId}`, {
     });
-    
-    console.log(response)
     return response
   },
 

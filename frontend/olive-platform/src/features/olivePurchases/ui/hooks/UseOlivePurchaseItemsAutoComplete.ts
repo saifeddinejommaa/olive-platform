@@ -36,7 +36,6 @@ export function UseOlivePurchaseItems(
 
         setResults(data.items)
       } catch (error) {
-        console.error(error)
         setResults([])
       } finally {
         setLoading(false)

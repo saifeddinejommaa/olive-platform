@@ -1,7 +1,6 @@
 import { create } from 'zustand'
 
 import type { Harvest } from '../../domain/entities/Harvest'
-import type { HarvestStock } from '../../domain/entities/HarvestStock'
 import type { UpdateHarvestParams } from '../../domain/params/UpdateHarvestParams'
 
 import { getHarvest } from '../../domain/usecases/GetHarvest'
@@ -33,6 +32,7 @@ type HarvestDetailsState = {
     harvestedTrees: number,
     completeDate: string,
     stocks: HarvestStockParams[],
+    proceedAnalyse: boolean
   ) => Promise<void>
 
   cancel: (id: number) => Promise<void>
@@ -60,7 +60,6 @@ export const useHarvestDetailsStore =
           harvest,
         })
       } catch (error) {
-        console.error(error)
 
         set({
           error: 'Impossible de charger la récolte.',
@@ -89,7 +88,6 @@ export const useHarvestDetailsStore =
 
         return harvest
       } catch (error) {
-        console.error(error)
 
         set({
           error: 'Impossible de modifier la récolte.',
@@ -121,7 +119,6 @@ export const useHarvestDetailsStore =
           harvest,
         })
       } catch (error) {
-        console.error(error)
 
         set({
           error: 'Impossible de lancer la récolte.',
@@ -141,6 +138,7 @@ export const useHarvestDetailsStore =
       harvestedTrees,
       completeDate,
       stocks,
+      proceedAnalyse
     ) => {
       try {
         set({
@@ -148,12 +146,12 @@ export const useHarvestDetailsStore =
           error: null,
         })
 
-        console.log()
         const params: CompleteHarvestParams = {
           quantityKg: quantityKg,
           harvestedTrees: harvestedTrees,
           completeDate: completeDate,
           stocks: stocks,
+          proceedAnalyse : proceedAnalyse
         }
 
          await completeHarvest(
@@ -168,7 +166,6 @@ export const useHarvestDetailsStore =
 
         
       } catch (error) {
-        console.error(error)
 
         set({
           error: 'Impossible de clôturer la récolte.',
@@ -197,7 +194,6 @@ export const useHarvestDetailsStore =
         })
 
       } catch (error) {
-        console.error(error)
 
         set({
           error: "Impossible d'annuler la récolte.",

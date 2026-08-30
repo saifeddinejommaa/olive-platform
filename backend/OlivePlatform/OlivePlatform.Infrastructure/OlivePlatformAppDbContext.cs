@@ -22,8 +22,8 @@ public class OlivePlatformAppDbContext : DbContext
     public DbSet<OlivePurchaseItem> OlivePurchaseItems => Set<OlivePurchaseItem>();
 
     public DbSet<OliveSample> OliveSamples => Set<OliveSample>();
-    public DbSet<LabAnalysis> LabAnalyses => Set<LabAnalysis>();
-    public DbSet<LabAnalysisResult> LabAnalysisResults => Set<LabAnalysisResult>();
+    public DbSet<OliveAnalysis> OliveAnalysis => Set<OliveAnalysis>();
+    public DbSet<OilAnalysis> OilAnalysis => Set<OilAnalysis>();
 
     public DbSet<OilBatch> OilBatches => Set<OilBatch>();
 

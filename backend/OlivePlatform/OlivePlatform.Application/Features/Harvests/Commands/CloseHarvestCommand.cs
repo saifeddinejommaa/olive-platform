@@ -17,6 +17,8 @@ public class CloseHarvestCommand : IRequest<Unit>
 
     public int harvestedTrees { get; set; }
     public List<HarvestStockItemRequest> Stocks { get; set; } = [];
+
+    public bool ProceedAnalyse { get; set; }
 }
 
 public class CloseHarvestCommandHandler : IRequestHandler<CloseHarvestCommand, Unit>
@@ -24,17 +26,20 @@ public class CloseHarvestCommandHandler : IRequestHandler<CloseHarvestCommand, U
     private readonly IHarvestRepository _repository;
     private readonly IHarvestStockRepository _harvestStockRepository;
     private readonly IDocumentNumberService _documentNumberService;
+    private readonly IOliveAnalysisRepository _oliveAnalyseRepository;
     private readonly IUnitOfWork _unitOfWork;
 
     public CloseHarvestCommandHandler(
         IHarvestRepository repository,
         IHarvestStockRepository harvestStockRepository,
         IDocumentNumberService documentNumberService,
+        IOliveAnalysisRepository oliveAnalyseRepository,
         IUnitOfWork unitOfWork)
     {
         _repository = repository;
         _harvestStockRepository = harvestStockRepository;
         _documentNumberService = documentNumberService;
+        _oliveAnalyseRepository = oliveAnalyseRepository;
         _unitOfWork = unitOfWork;
     }
 
@@ -97,6 +102,28 @@ public class CloseHarvestCommandHandler : IRequestHandler<CloseHarvestCommand, U
                 };
 
                 await _harvestStockRepository.AddAsync(stock, ct);
+            }
+
+            if (request.ProceedAnalyse)
+            {
+                var operationNumber = await _documentNumberService.GenerateAsync(
+                    DocumentTypes.OliveAnalyse,
+                    DocumentPrefixes.OliveAnalyse,
+                    now.Year,
+                    ct);
+
+                var newAnalyse = new OliveAnalysis
+                {
+                    Reference = operationNumber,
+                    SourceId = harvest.Id,
+                    SourceType = InputSourceType.Harvest,
+                    Status = ProductionStatus.Planned,
+                    CreatedAt = now,
+
+
+                };
+
+                await _oliveAnalyseRepository.AddAsync(newAnalyse, ct);
             }
         }, cancellationToken);
 

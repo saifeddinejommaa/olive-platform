@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { CreateHarvestParams } from '../../domain/params/CreateHarvestParams'
-import { createHarvestUseCase } from '../../domain/usecases/createHarvest'
+import { createHarvestUseCase } from '../../domain/usecases/CreateHarvest'
 
 export function useCreateHarvest() {
   const [isLoading, setIsLoading] = useState(false)
