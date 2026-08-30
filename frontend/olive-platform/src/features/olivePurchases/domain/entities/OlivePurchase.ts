@@ -1,5 +1,4 @@
 
-import type { OlivePurchaseItem } from './OlivePurchaseItem'
 import type { PurchaseStatus } from './PurchaseStatus'
 
 export type OlivePurchase = {

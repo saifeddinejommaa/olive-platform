@@ -2,9 +2,7 @@
 using OlivePlatform.Application.Common;
 using OlivePlatform.Application.Features.Analysis.Repositories;
 using OlivePlatform.Application.Features.Analysis.Responses;
-using OlivePlatform.Application.Features.Harvests.Requests;
 using OlivePlatform.Application.Features.Laboratory.Requests;
-using OlivePlatform.Application.Features.Laboratory.Responses;
 using System.Data;
 using System.Text;
 
@@ -19,171 +17,298 @@ public class OliveAnalysisQueryRepository : IOliveAnalysisQueryRepository
         _dbConnection = dbConnection;
     }
 
-    public Task<OliveAnalysisDetailsResponse> GetOliveAnalysisDetails(HarvestsRequestFilter filter)
-    {
-        throw new NotImplementedException();
-    }
+    // ============================================================
+    // DETAILS
+    // ============================================================
 
-    public async Task<PagedResult<OliveAnalysisForListResponse>> GetOliveAnalysisList(
-     OliveAnalysesRequestFilter filter,
-     CancellationToken cancellationToken)
+    public async Task<OliveAnalysisDetailsResponse?> GetOliveAnalysisDetails(
+    int id,
+    CancellationToken cancellationToken = default)
     {
-        var sql = new StringBuilder(
-            $"""
+        const string sql = $"""
         SELECT
-            COUNT(*) OVER() AS {nameof(OliveAnalysisForListResponse.Total)},
-            oa.id AS {nameof(OliveAnalysisForListResponse.Id)},
+            oa.id AS {nameof(OliveAnalysisDetailsResponse.Id)},
+
+            oa.source_type AS {nameof(OliveAnalysisDetailsResponse.SourceTypeId)},
+
+            oa.reference AS {nameof(OliveAnalysisDetailsResponse.Reference)},
 
             COALESCE(
                 h.reference,
                 op.reference
-            ) AS {nameof(OliveAnalysisForListResponse.SourceReference)},
+            ) AS {nameof(OliveAnalysisDetailsResponse.SourceReference)},
 
-            pl.reference AS {nameof(OliveAnalysisForListResponse.PlotReference)},
+            oa.humidity_percentage AS {nameof(OliveAnalysisDetailsResponse.HumidityPercentage)},
 
-            oa.analysis_date AS {nameof(OliveAnalysisForListResponse.AnalysisDate)},
-            oa.created_at AS {nameof(OliveAnalysisForListResponse.CreatedAt)},
-            oa.updated_at AS {nameof(OliveAnalysisForListResponse.UpdatedAt)}
+            oa.water_percentage AS {nameof(OliveAnalysisDetailsResponse.WaterPercentage)},
 
-        FROM olive_analyses oa
+            oa.oil_percentage AS {nameof(OliveAnalysisDetailsResponse.OilPercentage)},
 
-        LEFT JOIN harvests h
+            oa.acidity_percentage AS {nameof(OliveAnalysisDetailsResponse.AcidityPercentage)},
+
+            oa.analysis_date AS {nameof(OliveAnalysisDetailsResponse.AnalysisDate)},
+
+            oa.created_at AS {nameof(OliveAnalysisDetailsResponse.CreatedAt)},
+
+            oa.updated_at AS {nameof(OliveAnalysisDetailsResponse.UpdatedAt)},
+
+            h.variety_id AS {nameof(OliveAnalysisDetailsResponse.VarietyId)},
+
+            oa.status AS {nameof(OliveAnalysisDetailsResponse.Status)}
+
+        FROM public.olive_analyses oa
+
+        LEFT JOIN public.harvests h
             ON oa.source_type = 1
             AND h.id = oa.source_id
 
-        LEFT JOIN olive_purchases op
+        LEFT JOIN public.olive_purchases op
             ON oa.source_type = 2
             AND op.id = oa.source_id
 
-        LEFT JOIN plots pl
-            ON oa.source_type = 1
-            AND h.plot_id = pl.id
+        WHERE oa.id = @Id
 
-        WHERE 1 = 1
-        """);
+        LIMIT 1;
+        """;
+
+        using var connection = _dbConnection;
+
+        var command = new CommandDefinition(
+            sql,
+            new
+            {
+                Id = id
+            },
+            cancellationToken: cancellationToken);
+
+        return await connection.QueryFirstOrDefaultAsync<OliveAnalysisDetailsResponse>(
+            command);
+    }
+
+
+    // ============================================================
+    // LIST
+    // ============================================================
+
+    public async Task<PagedResult<OliveAnalysisForListResponse>> GetOliveAnalysisList(
+        OliveAnalysesRequestFilter filter,
+        CancellationToken cancellationToken = default)
+    {
+        var sql = new StringBuilder(
+            $"""
+            SELECT
+                COUNT(*) OVER() AS {nameof(OliveAnalysisForListResponse.Total)},
+
+                oa.id AS {nameof(OliveAnalysisForListResponse.Id)},
+
+                COALESCE(
+                    h.reference,
+                    op.reference
+                ) AS {nameof(OliveAnalysisForListResponse.SourceReference)},
+                oa.reference AS {nameof(OliveAnalysisForListResponse.Reference)},
+
+                pl.reference AS {nameof(OliveAnalysisForListResponse.PlotReference)},
+
+                oa.analysis_date AS {nameof(OliveAnalysisForListResponse.AnalysisDate)},
+
+                oa.created_at AS {nameof(OliveAnalysisForListResponse.CreatedAt)},
+
+                oa.updated_at AS {nameof(OliveAnalysisForListResponse.UpdatedAt)},
+
+                oa.status AS {nameof(OliveAnalysisForListResponse.Status)}
+
+            FROM public.olive_analyses oa
+
+            LEFT JOIN public.harvests h
+                ON oa.source_type = 1
+                AND h.id = oa.source_id
+
+            LEFT JOIN public.olive_purchases op
+                ON oa.source_type = 2
+                AND op.id = oa.source_id
+
+            LEFT JOIN public.plots pl
+                ON oa.source_type = 1
+                AND h.plot_id = pl.id
+
+            WHERE 1 = 1
+            """);
 
         var parameters = new DynamicParameters();
 
-        parameters.Add("PageSize", filter.PageSize);
-        parameters.Add(
-            "Offset",
-            (filter.PageNumber - 1) * filter.PageSize);
 
-        // ----------------------------------------------------
-        // Reference
-        // ----------------------------------------------------
+        // ========================================================
+        // PAGINATION
+        // ========================================================
+
+        var pageSize = filter.PageSize <= 0
+            ? 10
+            : filter.PageSize;
+
+        var pageNumber = filter.PageNumber <= 0
+            ? 1
+            : filter.PageNumber;
+
+        var offset = (pageNumber - 1) * pageSize;
+
+        parameters.Add("PageSize", pageSize);
+        parameters.Add("Offset", offset);
+
+
+        // ========================================================
+        // REFERENCE
+        // ========================================================
 
         if (!string.IsNullOrWhiteSpace(filter.Reference))
         {
             sql.Append(
                 """
 
-            AND (
-                h.reference ILIKE @Reference
-                OR op.reference ILIKE @Reference
-            )
-            """);
+                AND (
+                    h.reference ILIKE @Reference
+                    OR op.reference ILIKE @Reference
+                )
+                """);
 
             parameters.Add(
                 "Reference",
-                $"%{filter.Reference}%");
+                $"%{filter.Reference.Trim()}%");
         }
 
-        // ----------------------------------------------------
-        // Plot Reference
-        // ----------------------------------------------------
+
+        // ========================================================
+        // PLOT REFERENCE
+        // ========================================================
 
         if (!string.IsNullOrWhiteSpace(filter.PlotReference))
         {
             sql.Append(
                 """
 
-            AND pl.reference ILIKE @PlotReference
-            """);
+                AND pl.reference ILIKE @PlotReference
+                """);
 
             parameters.Add(
                 "PlotReference",
-                $"%{filter.PlotReference}%");
+                $"%{filter.PlotReference.Trim()}%");
         }
 
-        // ----------------------------------------------------
-        // Purchase Reference
-        // ----------------------------------------------------
+
+        // ========================================================
+        // PURCHASE REFERENCE
+        // ========================================================
 
         if (!string.IsNullOrWhiteSpace(filter.PurchaseReference))
         {
             sql.Append(
                 """
 
-            AND op.reference ILIKE @PurchaseReference
-            """);
+                AND op.reference ILIKE @PurchaseReference
+                """);
 
             parameters.Add(
                 "PurchaseReference",
-                $"%{filter.PurchaseReference}%");
+                $"%{filter.PurchaseReference.Trim()}%");
         }
 
-        // ----------------------------------------------------
-        // Harvest Reference
-        // ----------------------------------------------------
+
+        // ========================================================
+        // HARVEST REFERENCE
+        // ========================================================
 
         if (!string.IsNullOrWhiteSpace(filter.HarvestReference))
         {
             sql.Append(
                 """
 
-            AND h.reference ILIKE @HarvestReference
-            """);
+                AND h.reference ILIKE @HarvestReference
+                """);
 
             parameters.Add(
                 "HarvestReference",
-                $"%{filter.HarvestReference}%");
+                $"%{filter.HarvestReference.Trim()}%");
         }
 
-        // ----------------------------------------------------
-        // Analysis Date
-        // ----------------------------------------------------
+
+        // ========================================================
+        // ANALYSIS DATE
+        // ========================================================
 
         if (filter.AnalysisDate.HasValue)
         {
             sql.Append(
                 """
 
-            AND oa.analysis_date::date = @AnalysisDate
-            """);
+                AND oa.analysis_date::date = @AnalysisDate
+                """);
 
             parameters.Add(
                 "AnalysisDate",
                 filter.AnalysisDate.Value);
         }
 
-        // ----------------------------------------------------
-        // Pagination
-        // ----------------------------------------------------
+
+        // ========================================================
+        // STATUS
+        // ========================================================
+
+        if (filter.Status != default)
+        {
+            sql.Append(
+                """
+
+                AND oa.status = @Status
+                """);
+
+            parameters.Add(
+                "Status",
+                filter.Status);
+        }
+
+
+        // ========================================================
+        // ORDER + PAGINATION
+        // ========================================================
 
         sql.Append(
             """
 
-        ORDER BY oa.analysis_date DESC, oa.id DESC
+            ORDER BY
+                oa.analysis_date DESC,
+                oa.id DESC
 
-        LIMIT @PageSize
-        OFFSET @Offset
-        """);
+            LIMIT @PageSize
+            OFFSET @Offset
+            """);
+
+
+        // ========================================================
+        // EXECUTION
+        // ========================================================
 
         using var connection = _dbConnection;
 
-        var result = await connection.QueryAsync<OliveAnalysisForListResponse>(
+        var command = new CommandDefinition(
             sql.ToString(),
-            parameters);
+            parameters,
+            cancellationToken: cancellationToken);
+
+        var result = await connection.QueryAsync<OliveAnalysisForListResponse>(
+            command);
 
         var items = result.ToList();
 
         var total = items.FirstOrDefault()?.Total ?? 0;
 
+
+        // ========================================================
+        // RESULT
+        // ========================================================
+
         return new PagedResult<OliveAnalysisForListResponse>
         {
-            PageNumber = filter.PageNumber,
-            PageSize = filter.PageSize,
+            PageNumber = pageNumber,
+            PageSize = pageSize,
             TotalCount = total,
             Items = items
         };

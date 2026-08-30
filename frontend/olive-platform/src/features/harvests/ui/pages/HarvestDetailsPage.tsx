@@ -26,9 +26,18 @@ type HarvestForm = {
   quantityKg: number
 }
 
+type CompleteHarvestForm = {
+  harvestedTrees: number
+  quantityKg: number
+  completionDate: string
+  proceedAnalyse: boolean
+  stocks: HarvestStockParams[]
+}
+
 const getCurrentDateTimeLocal = () => {
   const now = new Date()
   const offset = now.getTimezoneOffset()
+
   const localDate = new Date(
     now.getTime() - offset * 60 * 1000,
   )
@@ -67,27 +76,21 @@ export default function HarvestDetailsPage() {
   const [completeDrawerOpen, setCompleteDrawerOpen] =
     useState(false)
 
-  const [harvestedTrees, setHarvestedTrees] = useState(0)
-
-  const [quantityKg, setQuantityKg] = useState(0)
-
-  const [completionDate, setCompletionDate] = useState(
-    getCurrentDateTimeLocal(),
-  )
-
   /**
-   * Stocks utilisés uniquement lors de la clôture.
-   *
-   * Ce sont des HarvestStockParams car ce sont
-   * les données envoyées au backend.
+   * Formulaire de clôture.
    */
-  const [stocks, setStocks] = useState<
-    HarvestStockParams[]
-  >([
-    {
+  const [completeForm, setCompleteForm] =
+    useState<CompleteHarvestForm>({
+      harvestedTrees: 0,
       quantityKg: 0,
-    },
-  ])
+      completionDate: getCurrentDateTimeLocal(),
+      proceedAnalyse: false,
+      stocks: [
+        {
+          quantityKg: 0,
+        },
+      ],
+    })
 
   useEffect(() => {
     if (!id) return
@@ -150,6 +153,29 @@ export default function HarvestDetailsPage() {
             }
           : previous,
       )
+
+      setErrors(previous => {
+        if (!previous[field]) return previous
+
+        const next = { ...previous }
+
+        delete next[field]
+
+        return next
+      })
+    },
+    [],
+  )
+
+  const updateCompleteForm = useCallback(
+    <K extends keyof CompleteHarvestForm>(
+      field: K,
+      value: CompleteHarvestForm[K],
+    ) => {
+      setCompleteForm(previous => ({
+        ...previous,
+        [field]: value,
+      }))
 
       setErrors(previous => {
         if (!previous[field]) return previous
@@ -244,26 +270,21 @@ export default function HarvestDetailsPage() {
 
   /**
    * Ouverture du drawer de clôture.
-   *
-   * Si des stocks existent déjà, on ne les reprend pas ici :
-   * une récolte InProgress n'est pas encore clôturée.
-   *
-   * On initialise un nouveau stock avec la quantité totale.
    */
   const handleOpenCompleteDrawer = useCallback(() => {
     if (!harvest) return
 
-    setHarvestedTrees(harvest.harvestedTrees ?? 0)
-
-    setQuantityKg(harvest.quantityKg ?? 0)
-
-    setStocks([
-      {
-        quantityKg: harvest.quantityKg ?? 0,
-      },
-    ])
-
-    setCompletionDate(getCurrentDateTimeLocal())
+    setCompleteForm({
+      harvestedTrees: harvest.harvestedTrees ?? 0,
+      quantityKg: harvest.quantityKg ?? 0,
+      completionDate: getCurrentDateTimeLocal(),
+      proceedAnalyse: false,
+      stocks: [
+        {
+          quantityKg: harvest.quantityKg ?? 0,
+        },
+      ],
+    })
 
     setErrors({})
 
@@ -282,12 +303,15 @@ export default function HarvestDetailsPage() {
    * Ajoute une nouvelle ligne de stock.
    */
   const handleAddStock = useCallback(() => {
-    setStocks(previous => [
+    setCompleteForm(previous => ({
       ...previous,
-      {
-        quantityKg: 0,
-      },
-    ])
+      stocks: [
+        ...previous.stocks,
+        {
+          quantityKg: 0,
+        },
+      ],
+    }))
   }, [])
 
   /**
@@ -295,11 +319,12 @@ export default function HarvestDetailsPage() {
    */
   const handleRemoveStock = useCallback(
     (index: number) => {
-      setStocks(previous =>
-        previous.filter(
+      setCompleteForm(previous => ({
+        ...previous,
+        stocks: previous.stocks.filter(
           (_, currentIndex) => currentIndex !== index,
         ),
-      )
+      }))
 
       setErrors(previous => {
         const next = { ...previous }
@@ -317,16 +342,18 @@ export default function HarvestDetailsPage() {
    */
   const handleStockQuantityChange = useCallback(
     (index: number, quantity: number) => {
-      setStocks(previous =>
-        previous.map((stock, currentIndex) =>
-          currentIndex === index
-            ? {
-                ...stock,
-                quantityKg: quantity,
-              }
-            : stock,
+      setCompleteForm(previous => ({
+        ...previous,
+        stocks: previous.stocks.map(
+          (stock, currentIndex) =>
+            currentIndex === index
+              ? {
+                  ...stock,
+                  quantityKg: quantity,
+                }
+              : stock,
         ),
-      )
+      }))
 
       setErrors(previous => {
         const next = { ...previous }
@@ -345,18 +372,20 @@ export default function HarvestDetailsPage() {
    */
   const totalStocksQuantity = useMemo(
     () =>
-      stocks.reduce(
-        (total, stock) => total + stock.quantityKg,
+      completeForm.stocks.reduce(
+        (total, stock) =>
+          total + stock.quantityKg,
         0,
       ),
-    [stocks],
+    [completeForm.stocks],
   )
 
   /**
    * Quantité restante à affecter.
    */
   const remainingQuantity =
-    quantityKg - totalStocksQuantity
+    completeForm.quantityKg -
+    totalStocksQuantity
 
   /**
    * Clôture de la récolte.
@@ -366,22 +395,22 @@ export default function HarvestDetailsPage() {
 
     const validationErrors: Record<string, string> = {}
 
-    if (harvestedTrees < 0) {
+    if (completeForm.harvestedTrees < 0) {
       validationErrors.harvestedTrees =
         "Le nombre d'arbres récoltés ne peut pas être négatif."
     }
 
-    if (quantityKg <= 0) {
+    if (completeForm.quantityKg <= 0) {
       validationErrors.quantityKg =
         "La quantité d'olives doit être supérieure à 0."
     }
 
-    if (!completionDate) {
+    if (!completeForm.completionDate) {
       validationErrors.completionDate =
         'La date et l’heure de clôture sont obligatoires.'
     }
 
-    if (stocks.length === 0) {
+    if (completeForm.stocks.length === 0) {
       validationErrors.stocks =
         'Au moins un stock doit être renseigné.'
     }
@@ -389,7 +418,7 @@ export default function HarvestDetailsPage() {
     /**
      * Validation de chaque stock.
      */
-    stocks.forEach((stock, index) => {
+    completeForm.stocks.forEach((stock, index) => {
       if (stock.quantityKg <= 0) {
         validationErrors[
           `stock_${index}_quantityKg`
@@ -403,9 +432,10 @@ export default function HarvestDetailsPage() {
      * égale à la quantité récoltée.
      */
     if (
-      stocks.length > 0 &&
+      completeForm.stocks.length > 0 &&
       Math.abs(
-        totalStocksQuantity - quantityKg,
+        totalStocksQuantity -
+          completeForm.quantityKg,
       ) > 0.001
     ) {
       validationErrors.stocks =
@@ -415,7 +445,7 @@ export default function HarvestDetailsPage() {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2,
           },
-        )} kg) doit être égale à la quantité récoltée (${quantityKg.toLocaleString(
+        )} kg) doit être égale à la quantité récoltée (${completeForm.quantityKg.toLocaleString(
           'fr-FR',
           {
             minimumFractionDigits: 2,
@@ -433,10 +463,11 @@ export default function HarvestDetailsPage() {
     try {
       await complete(
         harvest.id,
-        quantityKg,
-        harvestedTrees,
-        completionDate,
-        stocks,
+        completeForm.quantityKg,
+        completeForm.harvestedTrees,
+        completeForm.completionDate,
+        completeForm.stocks,
+        completeForm.proceedAnalyse,
       )
 
       setCompleteDrawerOpen(false)
@@ -444,19 +475,19 @@ export default function HarvestDetailsPage() {
       setErrors({})
 
       toast.success(
-        'La récolte a été clôturée avec succès.',
+        completeForm.proceedAnalyse
+          ? 'La récolte a été clôturée et une analyse a été demandée.'
+          : 'La récolte a été clôturée avec succès.',
       )
     } catch {
       toast.error(
-        error ?? 'Impossible de clôturer la récolte.',
+        error ??
+          'Impossible de clôturer la récolte.',
       )
     }
   }, [
     harvest,
-    harvestedTrees,
-    quantityKg,
-    completionDate,
-    stocks,
+    completeForm,
     totalStocksQuantity,
     complete,
     error,
@@ -474,10 +505,13 @@ export default function HarvestDetailsPage() {
     try {
       await cancel(harvest.id)
 
-      toast.success('La récolte a été abandonnée.')
+      toast.success(
+        'La récolte a été abandonnée.',
+      )
     } catch {
       toast.error(
-        error ?? "Impossible d'abandonner la récolte.",
+        error ??
+          "Impossible d'abandonner la récolte.",
       )
     }
   }, [harvest, cancel, error])
@@ -571,7 +605,9 @@ export default function HarvestDetailsPage() {
           {isInProgress && (
             <Button
               variant="primary"
-              onClick={handleOpenCompleteDrawer}
+              onClick={
+                handleOpenCompleteDrawer
+              }
               disabled={saving}
             >
               Clôturer la récolte
@@ -620,7 +656,8 @@ export default function HarvestDetailsPage() {
               options={[
                 {
                   value: '0',
-                  label: 'Sélectionnez une variété',
+                  label:
+                    'Sélectionnez une variété',
                 },
                 ...varietyOptions,
               ]}
@@ -632,7 +669,6 @@ export default function HarvestDetailsPage() {
                 saving
               }
             />
-            
 
             {errors.varietyId && (
               <span className="field-error">
@@ -701,7 +737,9 @@ export default function HarvestDetailsPage() {
             <TextInput
               label="Arbres récoltés"
               type="number"
-              value={harvest.harvestedTrees ?? 0}
+              value={
+                harvest.harvestedTrees ?? 0
+              }
               disabled
               onChange={() => {}}
             />
@@ -754,13 +792,13 @@ export default function HarvestDetailsPage() {
               <h3>Stocks</h3>
 
               <span>
-                Stocks créés lors de la clôture de la
-                récolte
+                Stocks créés lors de la clôture de
+                la récolte
               </span>
             </div>
           </div>
 
-          {harvest && harvest.stocks &&
+          {harvest.stocks &&
           harvest.stocks.length > 0 ? (
             <div className="filters-content">
               {harvest.stocks.map(
@@ -786,7 +824,8 @@ export default function HarvestDetailsPage() {
                 padding: '20px',
               }}
             >
-              Aucun stock associé à cette récolte.
+              Aucun stock associé à cette
+              récolte.
             </div>
           )}
         </div>
@@ -839,7 +878,9 @@ export default function HarvestDetailsPage() {
           <>
             <Button
               variant="secondary"
-              onClick={handleCloseCompleteDrawer}
+              onClick={
+                handleCloseCompleteDrawer
+              }
               disabled={saving}
             >
               Annuler
@@ -911,9 +952,12 @@ export default function HarvestDetailsPage() {
             <TextInput
               label="Date et heure de clôture"
               type="datetime-local"
-              value={completionDate}
+              value={
+                completeForm.completionDate
+              }
               onChange={event =>
-                setCompletionDate(
+                updateCompleteForm(
+                  'completionDate',
                   event.target.value,
                 )
               }
@@ -933,9 +977,12 @@ export default function HarvestDetailsPage() {
               label="Arbres récoltés"
               type="number"
               min="0"
-              value={harvestedTrees}
+              value={
+                completeForm.harvestedTrees
+              }
               onChange={event =>
-                setHarvestedTrees(
+                updateCompleteForm(
+                  'harvestedTrees',
                   Number(event.target.value),
                 )
               }
@@ -949,7 +996,8 @@ export default function HarvestDetailsPage() {
             )}
 
             {harvest.plannedTrees !== null &&
-              harvest.plannedTrees !== undefined && (
+              harvest.plannedTrees !==
+                undefined && (
                 <small>
                   {harvest.plannedTrees.toLocaleString(
                     'fr-FR',
@@ -966,9 +1014,10 @@ export default function HarvestDetailsPage() {
               type="number"
               min="0"
               step="0.01"
-              value={quantityKg}
+              value={completeForm.quantityKg}
               onChange={event =>
-                setQuantityKg(
+                updateCompleteForm(
+                  'quantityKg',
                   Number(event.target.value),
                 )
               }
@@ -980,6 +1029,67 @@ export default function HarvestDetailsPage() {
                 {errors.quantityKg}
               </span>
             )}
+          </div>
+
+          {/* ================================================= */}
+          {/* ANALYSE                                           */}
+          {/* ================================================= */}
+
+          <div
+            style={{
+              padding: '16px',
+              border: '1px solid #e5e7eb',
+              borderRadius: '8px',
+              background: '#fafafa',
+            }}
+          >
+            <label
+              style={{
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: '12px',
+                cursor: saving
+                  ? 'not-allowed'
+                  : 'pointer',
+              }}
+            >
+              <input
+                type="checkbox"
+                checked={
+                  completeForm.proceedAnalyse
+                }
+                onChange={event =>
+                  updateCompleteForm(
+                    'proceedAnalyse',
+                    event.target.checked,
+                  )
+                }
+                disabled={saving}
+                style={{
+                  width: '18px',
+                  height: '18px',
+                  marginTop: '2px',
+                  flexShrink: 0,
+                }}
+              />
+
+              <div>
+                <strong>
+                  Procéder à une analyse
+                </strong>
+
+                <div
+                  style={{
+                    marginTop: '4px',
+                    fontSize: '13px',
+                    color: '#6b7280',
+                  }}
+                >
+                  Une analyse des olives sera créée
+                  lors de la clôture de la récolte.
+                </div>
+              </div>
+            </label>
           </div>
 
           {/* ================================================= */}
@@ -1031,73 +1141,79 @@ export default function HarvestDetailsPage() {
               </span>
             )}
 
-            {stocks.map((stock, index) => (
-              <div
-                key={index}
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns:
-                    '1fr auto',
-                  gap: '12px',
-                  alignItems: 'start',
-                  padding: '16px',
-                  border: '1px solid #e5e7eb',
-                  borderRadius: '8px',
-                }}
-              >
-                <div className="filter-item">
-                  <TextInput
-                    label={`Stock ${index + 1} - Quantité (kg)`}
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={stock.quantityKg}
-                    onChange={event =>
-                      handleStockQuantityChange(
-                        index,
-                        Number(
-                          event.target.value,
-                        ),
-                      )
-                    }
-                    disabled={saving}
-                  />
-
-                  {errors[
-                    `stock_${index}_quantityKg`
-                  ] && (
-                    <span className="field-error">
-                      {
-                        errors[
-                          `stock_${index}_quantityKg`
-                        ]
-                      }
-                    </span>
-                  )}
-                </div>
-
+            {completeForm.stocks.map(
+              (stock, index) => (
                 <div
+                  key={index}
                   style={{
-                    paddingTop: '24px',
+                    display: 'grid',
+                    gridTemplateColumns:
+                      '1fr auto',
+                    gap: '12px',
+                    alignItems: 'start',
+                    padding: '16px',
+                    border:
+                      '1px solid #e5e7eb',
+                    borderRadius: '8px',
                   }}
                 >
-                  <Button
-                    variant="secondary"
-                    onClick={() =>
-                      handleRemoveStock(
-                        index,
-                      )
-                    }
-                    disabled={
-                      saving ||
-                      stocks.length === 1
-                    }
+                  <div className="filter-item">
+                    <TextInput
+                      label={`Stock ${index + 1} - Quantité (kg)`}
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={
+                        stock.quantityKg
+                      }
+                      onChange={event =>
+                        handleStockQuantityChange(
+                          index,
+                          Number(
+                            event.target.value,
+                          ),
+                        )
+                      }
+                      disabled={saving}
+                    />
+
+                    {errors[
+                      `stock_${index}_quantityKg`
+                    ] && (
+                      <span className="field-error">
+                        {
+                          errors[
+                            `stock_${index}_quantityKg`
+                          ]
+                        }
+                      </span>
+                    )}
+                  </div>
+
+                  <div
+                    style={{
+                      paddingTop: '24px',
+                    }}
                   >
-                    Supprimer
-                  </Button>
+                    <Button
+                      variant="secondary"
+                      onClick={() =>
+                        handleRemoveStock(
+                          index,
+                        )
+                      }
+                      disabled={
+                        saving ||
+                        completeForm.stocks
+                          .length === 1
+                      }
+                    >
+                      Supprimer
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ),
+            )}
 
             {/* ================================================= */}
             {/* RESUME STOCKS                                    */}
@@ -1125,7 +1241,7 @@ export default function HarvestDetailsPage() {
                 </span>
 
                 <strong>
-                  {quantityKg.toLocaleString(
+                  {completeForm.quantityKg.toLocaleString(
                     'fr-FR',
                     {
                       minimumFractionDigits: 2,

@@ -1,4 +1,5 @@
 ﻿using OlivePlatform.Application.Common;
+using OlivePlatform.Domain.Enums;
 
 namespace OlivePlatform.Application.Features.Laboratory.Requests
 {
@@ -13,5 +14,7 @@ namespace OlivePlatform.Application.Features.Laboratory.Requests
         public string? HarvestReference { get; set; }
 
         public DateOnly? AnalysisDate { get; set; }
+
+        public ProductionStatus Status { get; set; }
     }
 }

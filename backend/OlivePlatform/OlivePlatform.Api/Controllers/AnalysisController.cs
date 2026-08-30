@@ -52,7 +52,7 @@ namespace OlivePlatform.Api.Controllers
             CancellationToken cancellationToken)
         {
             var analysis =
-             await _oliveAnalysisRepository.GetByIdAsync(id,
+             await _oliveAnalysisQueryRepository.GetOliveAnalysisDetails(id,
                  cancellationToken);
 
             if (analysis is null)

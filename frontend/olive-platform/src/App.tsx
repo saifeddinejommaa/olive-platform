@@ -43,6 +43,9 @@ import { ToastContainer } from 'react-toastify'
 import PressingOperationDetailsPage from './features/production/ui/pages/PressingOperationsDetailsPage'
 import CreateHarvestPage from './features/harvests/ui/pages/NewHarvestPage'
 import HarvestDetailsPage from './features/harvests/ui/pages/HarvestDetailsPage'
+import OliveAnalysesPage from './features/analyses/oliveAnalyses/ui/pages/OliveAnalysesPage'
+import NewOliveAnalysisPage from './features/analyses/oliveAnalyses/ui/pages/NewOliveAnalysisPage'
+import OliveAnalysisDetailsPage from './features/analyses/oliveAnalyses/ui/pages/OliveAnalysisDetailsPage'
 
 
 function App() {
@@ -88,6 +91,41 @@ function App() {
             element={<OlivePurchaseDetailsPage />}
           />
 
+          {/* ================================================== */}
+          {/* OLIVE Analyses */}
+          {/* ================================================== */}
+          <Route
+            path="/Olive-analyses"
+            element={<OliveAnalysesPage />}
+          />
+
+          <Route
+            path="/Olive-analyses/new"
+            element={<NewOliveAnalysisPage />}
+          />
+
+          <Route
+            path="/Olive-analyses/:id"
+            element={<OliveAnalysisDetailsPage />}
+          />
+
+          {/* ================================================== */}
+          {/* OIL Analyses */}
+          {/* ================================================== */}
+          <Route
+            path="/Oil-analyses"
+            element={<OliveAnalysesPage />}
+          />
+
+          <Route
+            path="/Olive-analyses/new"
+            element={<NewOliveAnalysisPage />}
+          />
+
+          <Route
+            path="/Oil-analyses/:id"
+            element={<OliveAnalysisDetailsPage />}
+          />
 
           {/* ================================================== */}
           {/* PAYMENTS */}

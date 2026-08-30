@@ -27,7 +27,7 @@ namespace OlivePlatform.Infrastructure.Persistence.Repositories
         public async Task<OliveAnalysis?> GetBySourceAsync(int sourceTypeId, int sourceId, CancellationToken cancellationToken = default)
         {
            return await _context.OliveAnalysis.FirstOrDefaultAsync(x => x.SourceId == sourceId
-                                                                    && x.SourceTypeId == sourceTypeId, cancellationToken);
+                                                                    && (int)x.SourceType ==sourceTypeId, cancellationToken);
         }
 
         public async Task UpdateAsync(OliveAnalysis entity, CancellationToken cancellationToken = default)

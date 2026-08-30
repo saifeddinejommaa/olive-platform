@@ -1,14 +1,16 @@
-﻿namespace OlivePlatform.Application.Features.Analysis.Responses
+﻿using OlivePlatform.Domain.Enums;
+
+namespace OlivePlatform.Application.Features.Analysis.Responses
 {
     public class OliveAnalysisDetailsResponse
     {
         public int Id { get; set; }
 
+        public required string Reference { get; set; }
+
         public int SourceTypeId { get; set; }
 
-        public int SourceId { get; set; }
-
-        public int PlotId { get; set; }
+        public required string SourceReference { get; set; }
 
         public decimal? HumidityPercentage { get; set; }
 
@@ -25,5 +27,7 @@
         public DateTime UpdatedAt { get; set; }
 
         public int VarietyId { get; set; }
+
+        public ProductionStatus Status { get; set; }
     }
 }

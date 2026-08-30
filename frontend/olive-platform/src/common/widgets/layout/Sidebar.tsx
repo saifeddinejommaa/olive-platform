@@ -9,7 +9,8 @@ type MenuItem = {
 type MenuSection = {
   label: string;
   icon: string;
-  items: MenuItem[];
+  items?: MenuItem[];
+  sections?: MenuSection[];
 };
 
 const menuSections: MenuSection[] = [
@@ -54,6 +55,45 @@ const menuSections: MenuSection[] = [
       {
         label: "Nouvelle opération de pression",
         path: "/production/new",
+      },
+    ],
+  },
+
+  // =========================
+  // ANALYSES
+  // =========================
+  {
+    label: "Analyses",
+    icon: "🧪",
+    sections: [
+      {
+        label: "Analyses d'olive",
+        icon: "🫒",
+        items: [
+          {
+            label: "Opérations d'analyse",
+            path: "/Olive-analyses",
+          },
+          {
+            label: "Nouvelle opération d'analyse",
+            path: "/Olive-analyses/new",
+          },
+        ],
+      },
+
+      {
+        label: "Analyses d'huile",
+        icon: "🫙",
+        items: [
+          {
+            label: "Opérations d'analyse",
+            path: "/Oil-analyses",
+          },
+          {
+            label: "Nouvelle opération d'analyse",
+            path: "/Oil-analyses/new",
+          },
+        ],
       },
     ],
   },
@@ -147,16 +187,114 @@ export default function Sidebar() {
     }));
   };
 
-  const isSectionActive = (section: MenuSection) => {
-    return section.items.some((item) =>
+  const isSectionActive = (section: MenuSection): boolean => {
+    if (section.items?.some((item) =>
       location.pathname.startsWith(item.path)
+    )) {
+      return true;
+    }
+
+    if (section.sections?.some((subSection) =>
+      isSectionActive(subSection)
+    )) {
+      return true;
+    }
+
+    return false;
+  };
+
+  const renderItems = (items: MenuItem[]) => {
+    return (
+      <div className="submenu">
+        {items.map((item) => (
+          <NavLink
+            key={item.path}
+            to={item.path}
+            end
+            className={({ isActive }) =>
+              `submenu-item ${isActive ? "active" : ""}`
+            }
+          >
+            <span className="submenu-indicator" />
+
+            <span>
+              {item.label}
+            </span>
+          </NavLink>
+        ))}
+      </div>
+    );
+  };
+
+  const renderSubSection = (section: MenuSection) => {
+    const active = isSectionActive(section);
+
+    const isOpen =
+      openSections[section.label] ?? active;
+
+    return (
+      <div
+        key={section.label}
+        className="menu-subsection"
+      >
+        <button
+          type="button"
+          className={`menu-subsection-parent ${
+            active ? "active-parent" : ""
+          }`}
+          onClick={() =>
+            toggleSection(section.label)
+          }
+        >
+          <span className="nav-icon">
+            {section.icon}
+          </span>
+
+          <span className="menu-subsection-label">
+            {section.label}
+          </span>
+
+          <span
+            className={`menu-chevron ${
+              isOpen ? "open" : ""
+            }`}
+          >
+            ›
+          </span>
+        </button>
+
+        {isOpen && section.items && (
+          <div className="submenu nested">
+            {section.items.map((item) => (
+              <NavLink
+                key={item.path}
+                to={item.path}
+                end
+                className={({ isActive }) =>
+                  `submenu-item ${
+                    isActive ? "active" : ""
+                  }`
+                }
+              >
+                <span className="submenu-indicator" />
+
+                <span>
+                  {item.label}
+                </span>
+              </NavLink>
+            ))}
+          </div>
+        )}
+      </div>
     );
   };
 
   return (
     <aside className="sidebar">
 
-      {/* BRAND */}
+      {/* =========================
+          BRAND
+      ========================== */}
       <div className="sidebar-brand">
         <div className="brand-icon">
           🫒
@@ -173,9 +311,12 @@ export default function Sidebar() {
         </div>
       </div>
 
-      {/* NAVIGATION */}
+      {/* =========================
+          NAVIGATION
+      ========================== */}
       <nav className="sidebar-nav">
 
+        {/* ACCUEIL */}
         <NavLink
           to="/"
           end
@@ -196,8 +337,12 @@ export default function Sidebar() {
           GESTION
         </div>
 
+        {/* =========================
+            MENU
+        ========================== */}
         {menuSections.map((section) => {
-          const active = isSectionActive(section);
+          const active =
+            isSectionActive(section);
 
           const isOpen =
             openSections[section.label] ?? active;
@@ -207,10 +352,13 @@ export default function Sidebar() {
               key={section.label}
               className="menu-section"
             >
+
+              {/* PARENT */}
               <button
                 type="button"
-                className={`menu-parent ${active ? "active-parent" : ""
-                  }`}
+                className={`menu-parent ${
+                  active ? "active-parent" : ""
+                }`}
                 onClick={() =>
                   toggleSection(section.label)
                 }
@@ -224,39 +372,43 @@ export default function Sidebar() {
                 </span>
 
                 <span
-                  className={`menu-chevron ${isOpen ? "open" : ""
-                    }`}
+                  className={`menu-chevron ${
+                    isOpen ? "open" : ""
+                  }`}
                 >
                   ›
                 </span>
               </button>
 
-              {isOpen && (
-                <div className="submenu">
-                  {section.items.map((item) => (
-                    <NavLink
-                      key={item.path}
-                      to={item.path}
-                      end
-                      className={({ isActive }) =>
-                        `submenu-item ${isActive ? "active" : ""}`
-                      }
-                    >
-                      <span className="submenu-indicator" />
+              {/* =========================
+                  ITEMS DIRECTS
+              ========================== */}
+              {isOpen &&
+                section.items &&
+                renderItems(section.items)}
 
-                      <span>
-                        {item.label}
-                      </span>
-                    </NavLink>
-                  ))}
-                </div>
-              )}
+              {/* =========================
+                  SOUS-SECTIONS
+              ========================== */}
+              {isOpen &&
+                section.sections && (
+                  <div className="submenu sections-container">
+                    {section.sections.map(
+                      (subSection) =>
+                        renderSubSection(
+                          subSection
+                        )
+                    )}
+                  </div>
+                )}
             </div>
           );
         })}
       </nav>
 
-      {/* SYSTEM */}
+      {/* =========================
+          SYSTEM
+      ========================== */}
       <div className="sidebar-bottom">
 
         <div className="nav-section-title">
@@ -281,6 +433,7 @@ export default function Sidebar() {
         <div className="sidebar-version">
           Olive Platform v1.0
         </div>
+
       </div>
 
     </aside>

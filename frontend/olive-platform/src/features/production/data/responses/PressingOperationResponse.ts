@@ -5,7 +5,7 @@ export type PressingOperationResponse = {
   createdAt:string
   startTime: string | null
   endTime: string | null
-  status: string
+  status: number
 
   oilQuantityLiters: number | null
 

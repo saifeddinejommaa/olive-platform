@@ -10,9 +10,11 @@ namespace OlivePlatform.Application.Features.Analysis.Responses
 
         public int Total { get; set; }
 
-        public int SourceReference { get; set; }
+        public required string Reference { get; set; }
 
-        public int PlotReference { get; set; }
+        public required string SourceReference { get; set; }
+
+        public required string PlotReference { get; set; }
 
         public DateTime? AnalysisDate { get; set; }
 

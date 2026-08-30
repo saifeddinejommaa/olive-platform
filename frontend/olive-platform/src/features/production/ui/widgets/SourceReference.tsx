@@ -25,9 +25,7 @@ export type SourceOption = {
 
 export default function SourceReference({
   sourceType,
-  value,
   error,
-  onChange,
   onSelect,
 }: SourceReferenceProps) {
   const isHarvest = sourceType === 'harvest'

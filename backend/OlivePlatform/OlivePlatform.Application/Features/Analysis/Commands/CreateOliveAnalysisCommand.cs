@@ -1,7 +1,10 @@
 ﻿using MediatR;
 using OlivePlatform.Application.Common;
 using OlivePlatform.Domain.Entities;
+using OlivePlatform.Domain.Enums;
 using OlivePlatform.Domain.Interfaces.Repositories;
+using YourProject.Application.Constants;
+using YourProject.Application.Services;
 
 namespace OlivePlatform.Application.Features.Analysis.Commands
 {
@@ -9,27 +12,24 @@ namespace OlivePlatform.Application.Features.Analysis.Commands
     {
         public int SourceTypeId { get; set; }
         public int SourceId { get; set; }
-
-        public decimal HumidityPercentage { get; set; }
-        public decimal WaterPercentage { get; set; }
-        public decimal OilPercentage { get; set; }
-        public decimal AcidityPercentage { get; set; }
-
-        public DateTime AnalysisDate { get; set; }
     }
 
     public class CreateOliveAnalysisCommandHandler
     : IRequestHandler<CreateOliveAnalysisCommand, int>
     {
         private readonly IOliveAnalysisRepository _repository;
+        private readonly IDocumentNumberService _documentNumberService;
+
         private readonly IUnitOfWork _unitOfWork;
 
         public CreateOliveAnalysisCommandHandler(
             IOliveAnalysisRepository repository,
+            IDocumentNumberService documentNumberService,
             IUnitOfWork unitOfWork)
         {
             _repository = repository;
             _unitOfWork = unitOfWork;
+            _documentNumberService = documentNumberService;
         }
 
         public async Task<int> Handle(
@@ -47,17 +47,17 @@ namespace OlivePlatform.Application.Features.Analysis.Commands
 
             var now = DateTime.UtcNow;
 
+            var operationNumber = await _documentNumberService.GenerateAsync(
+                    DocumentTypes.OliveAnalyse,
+                    DocumentPrefixes.OliveAnalyse,
+                    now.Year);
+
             var analysis = new OliveAnalysis
             {
-                SourceTypeId = request.SourceTypeId,
+                SourceType = (InputSourceType)request.SourceTypeId,
                 SourceId = request.SourceId,
-                HumidityPercentage = request.HumidityPercentage,
-                WaterPercentage = request.WaterPercentage,
-                OilPercentage = request.OilPercentage,
-                AcidityPercentage = request.AcidityPercentage,
-                AnalysisDate = request.AnalysisDate,
+                Reference = operationNumber,
                 CreatedAt = now,
-                UpdatedAt = now
             };
 
             await _unitOfWork.ExecuteInTransactionAsync(async ct =>
