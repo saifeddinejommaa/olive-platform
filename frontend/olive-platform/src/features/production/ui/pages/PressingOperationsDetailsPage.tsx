@@ -66,7 +66,6 @@ export default function PressingOperationDetailsPage() {
       try {
         await fetchOperation(operationId)
       } catch (err) {
-        console.error('Erreur lors du chargement de l’opération :', err)
         toast.error('Impossible de charger l’opération. Une erreur API est survenue.')
       }
     }
@@ -253,7 +252,6 @@ export default function PressingOperationDetailsPage() {
       setDirty(false)
       toast.success('Opération enregistrée avec succès.')
     } catch (error) {
-      console.error('Erreur lors de la sauvegarde :', error)
       toast.error('Impossible d’enregistrer les modifications.')
     }
   }, [operation, updateOperationStore])
@@ -280,7 +278,6 @@ export default function PressingOperationDetailsPage() {
       await startOperationStore(operation.id)
       toast.success('La pression a été lancée.')
     } catch (error) {
-      console.error('Erreur lors du lancement :', error)
       toast.error('Impossible de lancer l’opération de pression.')
     }
   }, [operation, startOperationStore])
@@ -296,7 +293,6 @@ export default function PressingOperationDetailsPage() {
       await cancelOperationStore(operation.id)
       toast.success('La pression a été abandonnée.')
     } catch (error) {
-      console.error('Erreur lors de l’abandon :', error)
       toast.error('Impossible d’abandonner l’opération de pression.')
     }
   }, [operation, cancelOperationStore])
@@ -316,7 +312,6 @@ export default function PressingOperationDetailsPage() {
       await completeOperationStore(operation.id, oilQuantity)
       toast.success('La pression a été clôturée.')
     } catch (error) {
-      console.error('Erreur lors de la clôture :', error)
       toast.error('Impossible de clôturer l’opération de pression.')
     }
   }, [operation, completeOperationStore])

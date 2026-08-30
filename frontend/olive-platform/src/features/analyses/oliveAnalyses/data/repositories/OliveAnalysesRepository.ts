@@ -7,10 +7,10 @@ import type { OliveAnalysisDetails } from "../../domain/entities/OliveAnalysisDe
 import type { CompleteOliveAnalysisParams } from "../../domain/params/CompleteOliveAnalysisParams";
 import type { CreateOliveAnalysisParams } from "../../domain/params/CreateOliveAnalysisParams";
 import type { UpdateOliveAnalysisParams } from "../../domain/params/UpdateOliveAnalysisParams";
-import { mapOliveAnalysisDetails } from "./mappers/OliveAnalysisDetailsMapper";
-import { OliveAnalysisMapper } from "./mappers/OliveAnalysisMapper";
-import type { OliveAnalysisDetailsResponse } from "./responses/OliveAnalysesDetailsResponse";
-import type { OliveAnalysisForListResponse } from "./responses/OliveAnalysesResponse";
+import { mapOliveAnalysisDetails } from "../mappers/OliveAnalysisDetailsMapper";
+import { OliveAnalysisMapper } from "../mappers/OliveAnalysisMapper";
+import type { OliveAnalysisDetailsResponse } from "../responses/OliveAnalysesDetailsResponse";
+import type { OliveAnalysisForListResponse } from "../responses/OliveAnalysesResponse";
 
 
 export const OliveAnalysesRepository = {
@@ -49,52 +49,44 @@ export const OliveAnalysesRepository = {
   update: async (
     id: number,
     params: UpdateOliveAnalysisParams
-  ): Promise<OliveAnalysisDetails> => {
-    const httpResponse = await http<ApiResponse<OliveAnalysisDetailsResponse>>(
+  ): Promise<void> => {
+     await http<ApiResponse<void>>(
       `${API_BASE_URL}analyses/olive/${id}/update`,
       {
         method: "PUT",
         body: params,
       }
     );
-
-    return mapOliveAnalysisDetails(httpResponse.Response);
   },
 
-  start: async (id: number): Promise<OliveAnalysisDetails> => {
-    const httpResponse = await http<ApiResponse<OliveAnalysisDetailsResponse>>(
+  start: async (id: number): Promise<void> => {
+     await http<ApiResponse<OliveAnalysisDetailsResponse>>(
       `${API_BASE_URL}analyses/olive/${id}/start`,
       {
         method: 'POST',
       }
     )
-
-     return mapOliveAnalysisDetails(httpResponse.Response);
   },
 
   complete: async (
     id: number,
     params: CompleteOliveAnalysisParams
-  ): Promise<OliveAnalysisDetails> => {
-     const httpResponse = await http<ApiResponse<OliveAnalysisDetailsResponse>>(
-      `${API_BASE_URL}analyses/olive/${id}/close`,
+  ): Promise<void> => {
+      await http<ApiResponse<void>>(
+      `${API_BASE_URL}analyses/olive/${id}/complete`,
       {
-        method: "POST",
+        method: "PUT",
         body: params,
       }
     );
-
-    return mapOliveAnalysisDetails(httpResponse.Response);
   },
 
-  cancel: async (id: number): Promise<OliveAnalysisDetailsResponse> => {
-    const httpResponse = await http<ApiResponse<OliveAnalysisDetailsResponse>>(
+  cancel: async (id: number): Promise<void> => {
+     await http<ApiResponse<OliveAnalysisDetailsResponse>>(
       `${API_BASE_URL}analyses/olive/${id}/cancel`,
       {
         method: "POST",
       }
     );
-
-     return mapOliveAnalysisDetails(httpResponse.Response);
   },
 };

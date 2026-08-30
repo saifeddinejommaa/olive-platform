@@ -1,4 +1,5 @@
-﻿using OlivePlatform.Domain.Enums;
+﻿using OlivePlatform.Domain.Entities;
+using OlivePlatform.Domain.Enums;
 
 namespace OlivePlatform.Application.Features.Analysis.Responses
 {
@@ -9,6 +10,8 @@ namespace OlivePlatform.Application.Features.Analysis.Responses
         public required string Reference { get; set; }
 
         public int SourceTypeId { get; set; }
+
+        public int VarietyId { get; set; }
 
         public required string SourceReference { get; set; }
 
@@ -25,8 +28,6 @@ namespace OlivePlatform.Application.Features.Analysis.Responses
         public DateTime CreatedAt { get; set; }
 
         public DateTime UpdatedAt { get; set; }
-
-        public int VarietyId { get; set; }
 
         public ProductionStatus Status { get; set; }
     }

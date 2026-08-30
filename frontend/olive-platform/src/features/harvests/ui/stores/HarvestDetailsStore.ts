@@ -60,7 +60,6 @@ export const useHarvestDetailsStore =
           harvest,
         })
       } catch (error) {
-        console.error(error)
 
         set({
           error: 'Impossible de charger la récolte.',
@@ -89,7 +88,6 @@ export const useHarvestDetailsStore =
 
         return harvest
       } catch (error) {
-        console.error(error)
 
         set({
           error: 'Impossible de modifier la récolte.',
@@ -121,7 +119,6 @@ export const useHarvestDetailsStore =
           harvest,
         })
       } catch (error) {
-        console.error(error)
 
         set({
           error: 'Impossible de lancer la récolte.',
@@ -149,7 +146,6 @@ export const useHarvestDetailsStore =
           error: null,
         })
 
-        console.log()
         const params: CompleteHarvestParams = {
           quantityKg: quantityKg,
           harvestedTrees: harvestedTrees,
@@ -170,7 +166,6 @@ export const useHarvestDetailsStore =
 
         
       } catch (error) {
-        console.error(error)
 
         set({
           error: 'Impossible de clôturer la récolte.',
@@ -199,7 +194,6 @@ export const useHarvestDetailsStore =
         })
 
       } catch (error) {
-        console.error(error)
 
         set({
           error: "Impossible d'annuler la récolte.",

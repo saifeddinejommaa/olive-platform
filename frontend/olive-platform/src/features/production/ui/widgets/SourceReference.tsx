@@ -63,7 +63,6 @@ export default function SourceReference({
       } catch (exception) {
         if (cancelled) return
 
-        console.error('Erreur lors du chargement des lots', exception)
         setPurchaseItems([])
       } finally {
         if (!cancelled) setLoadingItems(false)
@@ -100,7 +99,6 @@ export default function SourceReference({
 
   const handleToggleItem = (itemId: number) => {
     setSelectedItemIds(current => {
-      console.log(current)
       const alreadySelected = current.includes(itemId)
       const next = alreadySelected
         ? current.filter(id => id !== itemId)

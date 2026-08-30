@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Mvc;
 using OlivePlatform.Application.Features.Analysis.Commands;
 using OlivePlatform.Application.Features.Analysis.Repositories;
-using OlivePlatform.Application.Features.Harvests.Requests;
 using OlivePlatform.Application.Features.Laboratory.Requests;
 using OlivePlatform.Domain.Interfaces.Repositories;
 using OlivePlatform.Domain.Repositories;
@@ -70,6 +69,44 @@ namespace OlivePlatform.Api.Controllers
         {
             var id = await _mediator.Send(command, cancellationToken);
             return Ok(new { id });
+        }
+
+        [HttpPost("olive/{id:int}/start")]
+        public async Task<IActionResult> Start(
+            int id,
+            CancellationToken cancellationToken)
+        {
+           var StartOliveAnalyseCommand = new StartOliveAnalyseCommand { Id = id };
+
+            await _mediator.Send(StartOliveAnalyseCommand, cancellationToken);
+
+            return NoContent();
+        }
+
+        [HttpPut("olive/{id:int}/update")]
+        public async Task<IActionResult> Update(
+            [FromBody] UpdateOliveAnalyseCommand command,
+            int id,
+            CancellationToken cancellationToken)
+        {
+
+            command.Id = id;
+            await _mediator.Send(command, cancellationToken);
+
+            return NoContent();
+        }
+
+        [HttpPut("olive/{id:int}/complete")]
+        public async Task<IActionResult> Complete(
+            [FromBody] CompleteOliveAnalyseCommand command,
+            int id,
+            CancellationToken cancellationToken)
+        {
+
+            command.Id = id;
+            await _mediator.Send(command, cancellationToken);
+
+            return NoContent();
         }
 
         [HttpPost("oil")]

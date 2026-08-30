@@ -25,5 +25,7 @@ export type OliveAnalysisDetailsResponse = {
 
   varietyId: number
 
+  oliveVarOliveVarietyId: number
+
   status: ProductionStatus
 }

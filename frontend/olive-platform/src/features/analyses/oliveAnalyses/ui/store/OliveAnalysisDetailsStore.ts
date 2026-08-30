@@ -7,6 +7,8 @@ import { getOliveAnalysisDetails } from '../../domain/usescases/GetOliveAnalysis
 import { updateOliveAnalysis } from '../../domain/usescases/UpdateOliveAnalysis'
 import { startOliveAnalysis } from '../../domain/usescases/StartOliveAnalysis'
 import { cancelOliveAnalysis } from '../../domain/usescases/CancelOliveAnalysis'
+import { completeOliveAnalysis } from '../../domain/usescases/CompleteOliveAnalysis'
+import type { CompleteOliveAnalysisParams } from '../../domain/params/CompleteOliveAnalysisParams'
 
 type OliveAnalysisDetailsState = {
   analysis: OliveAnalysisDetails | null
@@ -32,8 +34,8 @@ type OliveAnalysisDetailsState = {
 
   complete: (
     id: number,
-    params: UpdateOliveAnalysisParams,
-  ) => Promise<OliveAnalysisDetails>
+    params: CompleteOliveAnalysisParams,
+  ) => Promise<void>
 
   cancel: (
     id: number,
@@ -74,7 +76,6 @@ export const useOliveAnalysisDetailsStore =
           analysis,
         })
       } catch (error) {
-        console.error(error)
 
         set({
           error:
@@ -100,11 +101,14 @@ export const useOliveAnalysisDetailsStore =
           error: null,
         })
 
-        const analysis =
           await updateOliveAnalysis(
             id,
             params,
           )
+
+          
+        const analysis =
+          await getOliveAnalysisDetails(id)
 
         set({
           analysis,
@@ -112,7 +116,6 @@ export const useOliveAnalysisDetailsStore =
 
         return analysis
       } catch (error) {
-        console.error(error)
 
         set({
           error:
@@ -137,7 +140,7 @@ export const useOliveAnalysisDetailsStore =
           saving: true,
           error: null,
         })
-
+        
         await startOliveAnalysis(id)
 
         const analysis =
@@ -147,7 +150,6 @@ export const useOliveAnalysisDetailsStore =
           analysis,
         })
       } catch (error) {
-        console.error(error)
 
         set({
           error:
@@ -173,7 +175,7 @@ export const useOliveAnalysisDetailsStore =
           error: null,
         })
 
-        await updateOliveAnalysis(
+        await completeOliveAnalysis(
           id,
           params,
         )
@@ -184,10 +186,8 @@ export const useOliveAnalysisDetailsStore =
         set({
           analysis,
         })
-
-        return analysis
+        
       } catch (error) {
-        console.error(error)
 
         set({
           error:
@@ -224,7 +224,6 @@ export const useOliveAnalysisDetailsStore =
 
         return analysis
       } catch (error) {
-        console.error(error)
 
         set({
           error:

@@ -76,7 +76,6 @@ export const useOliveAnalysesStore = create<OliveAnalysesState>(
           filter,
         })
       } catch (error) {
-        console.error(error)
 
         set({
           error: 'Impossible de charger les analyses d’olives.',

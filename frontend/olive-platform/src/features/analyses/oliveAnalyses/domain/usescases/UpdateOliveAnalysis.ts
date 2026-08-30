@@ -2,6 +2,6 @@ import { OliveAnalysesRepository } from "../../data/repositories/OliveAnalysesRe
 import type { OliveAnalysisDetails } from "../entities/OliveAnalysisDetails";
 import type { UpdateOliveAnalysisParams } from "../params/UpdateOliveAnalysisParams";
 
-export async function updateOliveAnalysis(id: number,params: UpdateOliveAnalysisParams): Promise<OliveAnalysisDetails> {
-  return OliveAnalysesRepository.update(id, params);
+export async function updateOliveAnalysis(id: number,params: UpdateOliveAnalysisParams): Promise<void> {
+  await OliveAnalysesRepository.update(id, params);
 }
