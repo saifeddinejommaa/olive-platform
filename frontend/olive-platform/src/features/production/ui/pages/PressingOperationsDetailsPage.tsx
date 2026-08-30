@@ -21,24 +21,29 @@ import { usePressingOperationDetailsStore } from '../stores/PressingOperationDet
 import './PressingOperationDetailsPage.css'
 import { toDateTime } from '../../../shared/utils/DatesUtils'
 
+const cloneOperation = (operation: PressingOperationDetails): PressingOperationDetails => ({
+  ...operation,
+  inputs: operation.inputs.map(input => ({ ...input })),
+})
+
+const emptyInput = (): PressingOperationInput => ({
+  id: crypto.randomUUID(),
+  sourceType: 'harvest',
+  harvestId: null,
+  purchaseItemId: null,
+  reference: '',
+  quantityKg: '',
+  notes: '',
+})
+
 export default function PressingOperationDetailsPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
 
   const {
-    operation: storeOperation,
-    loading,
-    error: storeError,
-    saving,
-    starting,
-    completing,
-    cancelling,
-    fetchOperation,
-    updateOperation: updateOperationStore,
-    startOperation: startOperationStore,
-    completeOperation: completeOperationStore,
-    cancelOperation: cancelOperationStore,
-    clear,
+    operation: storeOperation, loading, error: storeError, saving, starting, completing, cancelling,
+    fetchOperation, updateOperation: updateOperationStore, startOperation: startOperationStore,
+    completeOperation: completeOperationStore, cancelOperation: cancelOperationStore, clear,
   } = usePressingOperationDetailsStore()
 
   const [operation, setOperation] = useState<PressingOperationDetails | null>(null)
@@ -50,40 +55,25 @@ export default function PressingOperationDetailsPage() {
   const [newInputErrors, setNewInputErrors] = useState<Record<string, string>>({})
 
   useEffect(() => {
-    if (!id) {
-      setError('Identifiant de l’opération invalide.')
-      return
-    }
-
     const operationId = Number(id)
-
-    if (Number.isNaN(operationId)) {
+    if (!id || Number.isNaN(operationId)) {
       setError('Identifiant de l’opération invalide.')
       return
     }
 
-    const loadOperation = async () => {
-      try {
-        await fetchOperation(operationId)
-      } catch (err) {
-        toast.error('Impossible de charger l’opération. Une erreur API est survenue.')
-      }
-    }
+    fetchOperation(operationId).catch(() => {
+      toast.error('Impossible de charger l’opération. Une erreur API est survenue.')
+    })
 
-    loadOperation()
     return () => clear()
   }, [id, fetchOperation, clear])
 
   useEffect(() => {
     if (!storeOperation) return
 
-    const data: PressingOperationDetails = {
-      ...storeOperation,
-      inputs: storeOperation.inputs.map(input => ({ ...input })),
-    }
-
+    const data = cloneOperation(storeOperation)
     setOperation(data)
-    setOriginalOperation({ ...data, inputs: data.inputs.map(input => ({ ...input })) })
+    setOriginalOperation(cloneOperation(data))
     setDirty(false)
     setError(null)
   }, [storeOperation])
@@ -96,13 +86,13 @@ export default function PressingOperationDetailsPage() {
     if (error) toast.error(error)
   }, [error])
 
-  const oliveQuantityKg = useMemo(() => {
-    if (!operation) return 0
-    return operation.inputs.reduce((total, input) => total + Number(input.quantityKg || 0), 0)
-  }, [operation])
+  const oliveQuantityKg = useMemo(
+    () => operation?.inputs.reduce((total, input) => total + Number(input.quantityKg || 0), 0) ?? 0,
+    [operation],
+  )
 
   const yieldPercentage = useMemo(() => {
-    if (!operation || oliveQuantityKg <= 0 || operation.oilQuantityLiters === null || operation.oilQuantityLiters === undefined) return ''
+    if (!operation || oliveQuantityKg <= 0 || operation.oilQuantityLiters == null) return ''
     return ((Number(operation.oilQuantityLiters) / oliveQuantityKg) * 100).toFixed(2)
   }, [operation, oliveQuantityKg])
 
@@ -110,38 +100,28 @@ export default function PressingOperationDetailsPage() {
   const isInProgress = operation?.status === ProductionStatus.InProgress
   const isCompleted = operation?.status === ProductionStatus.Completed
   const isAbandoned = operation?.status === ProductionStatus.Cancelled
-  const canEditInputs = isPlanned === true
+  const canEditInputs = isPlanned
   const canEditOperation = !isCompleted && !isAbandoned
-  const canEditOil = isInProgress === true
+  const canEditOil = isInProgress
   const isBusy = saving || starting || completing || cancelling
 
   const handleBack = useCallback(() => navigate('/production'), [navigate])
 
   const updateOperation = useCallback(<K extends keyof PressingOperationDetails>(field: K, value: PressingOperationDetails[K]) => {
-    setOperation(previous => previous ? { ...previous, [field]: value } : null)
+    setOperation(previous => (previous ? { ...previous, [field]: value } : null))
     setDirty(true)
   }, [])
 
   const updateInputQuantity = useCallback((inputId: number, quantityKg: number) => {
-    setOperation(previous => {
-      if (!previous) return previous
-      return { ...previous, inputs: previous.inputs.map(input => input.id === inputId ? { ...input, quantityKg } : input) }
-    })
+    setOperation(previous => previous && ({
+      ...previous,
+      inputs: previous.inputs.map(input => (input.id === inputId ? { ...input, quantityKg } : input)),
+    }))
     setDirty(true)
   }, [])
 
   const handleOpenAddInput = useCallback(() => {
-    const input: PressingOperationInput = {
-      id: crypto.randomUUID(),
-      sourceType: 'harvest',
-      harvestId: null,
-      purchaseItemId: null,
-      reference: '',
-      quantityKg: '',
-      notes: '',
-    }
-
-    setNewInput(input)
+    setNewInput(emptyInput())
     setNewInputErrors({})
     setShowAddInput(true)
   }, [])
@@ -153,10 +133,10 @@ export default function PressingOperationDetailsPage() {
   }, [])
 
   const handleUpdateNewInput = useCallback((field: keyof PressingOperationInput, value: string | number | null) => {
-    setNewInput(previous => previous ? {
+    setNewInput(previous => previous && {
       ...previous,
       [field]: field === 'quantityKg' ? String(value ?? '') : value,
-    } : null)
+    })
 
     setNewInputErrors(previous => {
       const next = { ...previous }
@@ -167,14 +147,14 @@ export default function PressingOperationDetailsPage() {
   }, [])
 
   const handleChangeNewInputSource = useCallback((sourceType: InputSourceType) => {
-    setNewInput(previous => previous ? {
+    setNewInput(previous => previous && {
       ...previous,
       sourceType,
       harvestId: null,
       purchaseItemId: null,
       reference: '',
       quantityKg: '',
-    } : null)
+    })
 
     setNewInputErrors({})
   }, [])
@@ -203,17 +183,9 @@ export default function PressingOperationDetailsPage() {
 
     const validationErrors: Record<string, string> = {}
 
-    if (newInput.sourceType === 'harvest' && !newInput.harvestId) {
-      validationErrors.input = 'Sélectionnez une récolte valide.'
-    }
-
-    if (newInput.sourceType === 'purchase' && !newInput.purchaseItemId) {
-      validationErrors.input = 'Sélectionnez un achat valide.'
-    }
-
-    if (!newInput.quantityKg || Number(newInput.quantityKg) <= 0) {
-      validationErrors.quantity = 'La quantité doit être supérieure à 0.'
-    }
+    if (newInput.sourceType === 'harvest' && !newInput.harvestId) validationErrors.input = 'Sélectionnez une récolte valide.'
+    if (newInput.sourceType === 'purchase' && !newInput.purchaseItemId) validationErrors.input = 'Sélectionnez un achat valide.'
+    if (!newInput.quantityKg || Number(newInput.quantityKg) <= 0) validationErrors.quantity = 'La quantité doit être supérieure à 0.'
 
     if (Object.keys(validationErrors).length > 0) {
       setNewInputErrors(validationErrors)
@@ -230,7 +202,7 @@ export default function PressingOperationDetailsPage() {
       purchaseItemId: newInput.sourceType === 'purchase' ? newInput.purchaseItemId : null,
     }
 
-    setOperation(previous => previous ? { ...previous, inputs: [...previous.inputs, convertedInput] } : previous)
+    setOperation(previous => previous && { ...previous, inputs: [...previous.inputs, convertedInput] })
     setDirty(true)
     setShowAddInput(false)
     setNewInput(null)
@@ -239,7 +211,7 @@ export default function PressingOperationDetailsPage() {
   }, [operation, newInput])
 
   const handleRemoveInput = useCallback((inputId: number) => {
-    setOperation(previous => previous ? { ...previous, inputs: previous.inputs.filter(input => input.id !== inputId) } : previous)
+    setOperation(previous => previous && { ...previous, inputs: previous.inputs.filter(input => input.id !== inputId) })
     setDirty(true)
   }, [])
 
@@ -251,7 +223,7 @@ export default function PressingOperationDetailsPage() {
       await updateOperationStore(operation)
       setDirty(false)
       toast.success('Opération enregistrée avec succès.')
-    } catch (error) {
+    } catch {
       toast.error('Impossible d’enregistrer les modifications.')
     }
   }, [operation, updateOperationStore])
@@ -259,11 +231,7 @@ export default function PressingOperationDetailsPage() {
   const handleCancel = useCallback(() => {
     if (!originalOperation) return
 
-    setOperation({
-      ...originalOperation,
-      inputs: originalOperation.inputs.map(input => ({ ...input })),
-    })
-
+    setOperation(cloneOperation(originalOperation))
     setShowAddInput(false)
     setNewInput(null)
     setNewInputErrors({})
@@ -277,22 +245,20 @@ export default function PressingOperationDetailsPage() {
       setError(null)
       await startOperationStore(operation.id)
       toast.success('La pression a été lancée.')
-    } catch (error) {
+    } catch {
       toast.error('Impossible de lancer l’opération de pression.')
     }
   }, [operation, startOperationStore])
 
   const handleAbandon = useCallback(async () => {
     if (!operation) return
-
-    const confirmed = window.confirm('Voulez-vous vraiment abandonner cette opération de pression ?')
-    if (!confirmed) return
+    if (!window.confirm('Voulez-vous vraiment abandonner cette opération de pression ?')) return
 
     try {
       setError(null)
       await cancelOperationStore(operation.id)
       toast.success('La pression a été abandonnée.')
-    } catch (error) {
+    } catch {
       toast.error('Impossible d’abandonner l’opération de pression.')
     }
   }, [operation, cancelOperationStore])
@@ -301,7 +267,6 @@ export default function PressingOperationDetailsPage() {
     if (!operation) return
 
     const oilQuantity = Number(operation.oilQuantityLiters)
-
     if (!Number.isFinite(oilQuantity) || oilQuantity <= 0) {
       toast.error('Veuillez renseigner une quantité d’huile produite valide.')
       return
@@ -311,7 +276,7 @@ export default function PressingOperationDetailsPage() {
       setError(null)
       await completeOperationStore(operation.id, oilQuantity)
       toast.success('La pression a été clôturée.')
-    } catch (error) {
+    } catch {
       toast.error('Impossible de clôturer l’opération de pression.')
     }
   }, [operation, completeOperationStore])
