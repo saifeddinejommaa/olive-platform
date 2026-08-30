@@ -1,50 +1,43 @@
-import { create } from 'zustand'
+import { create } from "zustand";
 
-import type { PressingOperationDetails } from '../../domain/entities/PressingOperationDetails'
+import type { PressingOperationDetails } from "../../domain/entities/PressingOperationDetails";
 
-import { GetPressingOperationDetails } from '../../domain/useCases/GetPressingOperationDetails'
-import { UpdatePressingOperation } from '../../domain/useCases/UpdatePressingOperation'
-import { StartPressingOperation } from '../../domain/useCases/StartPressingOperation'
-import { CancelPressingOperation } from '../../domain/useCases/CancelPressingOperation'
-import { ClosePressingOperation } from '../../domain/useCases/ClosePressingOperation '
+import { GetPressingOperationDetails } from "../../domain/useCases/GetPressingOperationDetails";
+import { UpdatePressingOperation } from "../../domain/useCases/UpdatePressingOperation";
+import { StartPressingOperation } from "../../domain/useCases/StartPressingOperation";
+import { CancelPressingOperation } from "../../domain/useCases/CancelPressingOperation";
+import { ClosePressingOperation } from "../../domain/useCases/ClosePressingOperation ";
 
 type PressingOperationDetailsState = {
-  operation: PressingOperationDetails | null
+  operation: PressingOperationDetails | null;
 
-  loading: boolean
-  saving: boolean
-  starting: boolean
-  completing: boolean
-  cancelling: boolean
+  loading: boolean;
+  saving: boolean;
+  starting: boolean;
+  completing: boolean;
+  cancelling: boolean;
 
-  error: string | null
+  error: string | null;
 
-  fetchOperation: (id: number) => Promise<void>
+  fetchOperation: (id: number) => Promise<void>;
 
-  updateOperation: (
-    operation: PressingOperationDetails
-  ) => Promise<void>
+  updateOperation: (operation: PressingOperationDetails) => Promise<void>;
 
-  startOperation: (
-    id: number
-  ) => Promise<void>
+  startOperation: (id: number) => Promise<void>;
 
   completeOperation: (
     id: number,
     oliveQuantity: number,
-    endDate?: string
-  ) => Promise<void>
+    endDate?: string,
+  ) => Promise<void>;
 
-  cancelOperation: (
-    id: number
-  ) => Promise<void>
+  cancelOperation: (id: number) => Promise<void>;
 
-  clear: () => void
-}
+  clear: () => void;
+};
 
 export const usePressingOperationDetailsStore =
   create<PressingOperationDetailsState>((set, get) => ({
-
     operation: null,
 
     loading: false,
@@ -63,37 +56,34 @@ export const usePressingOperationDetailsStore =
       set({
         loading: true,
         error: null,
-      })
+      });
 
       try {
-        const result =
-          await GetPressingOperationDetails(id)
+        const result = await GetPressingOperationDetails(id);
 
         if (result.Code !== 200) {
           set({
             error: result.ResponseMessage,
             operation: null,
-          })
+          });
 
-          return
+          return;
         }
 
         set({
           operation: result.Response,
           error: null,
-        })
+        });
       } catch (error) {
         set({
           operation: null,
           error:
-            error instanceof Error
-              ? error.message
-              : 'Une erreur est survenue.',
-        })
+            error instanceof Error ? error.message : "Une erreur est survenue.",
+        });
       } finally {
         set({
           loading: false,
-        })
+        });
       }
     },
 
@@ -105,44 +95,39 @@ export const usePressingOperationDetailsStore =
       set({
         saving: true,
         error: null,
-      })
+      });
 
       try {
-        const result =
-          await UpdatePressingOperation(
-            operation.id,
-            {
-              inputs: operation.inputs,
-              notes: operation.notes,
-              planificationDate: operation.pressingDate,
-            }
-          )
+        const result = await UpdatePressingOperation(operation.id, {
+          inputs: operation.inputs,
+          notes: operation.notes,
+          planificationDate: operation.pressingDate,
+        });
 
         if (result.Code !== 200) {
           set({
             error: result.ResponseMessage,
-          })
+          });
 
-          throw new Error(result.ResponseMessage)
+          throw new Error(result.ResponseMessage);
         }
 
         // On recharge les détails pour avoir la
         // représentation complète de l'opération.
-        await get().fetchOperation(operation.id)
-
+        await get().fetchOperation(operation.id);
       } catch (error) {
         set({
           error:
             error instanceof Error
               ? error.message
-              : 'Impossible d’enregistrer les modifications.',
-        })
+              : "Impossible d’enregistrer les modifications.",
+        });
 
-        throw error
+        throw error;
       } finally {
         set({
           saving: false,
-        })
+        });
       }
     },
 
@@ -154,40 +139,35 @@ export const usePressingOperationDetailsStore =
       set({
         starting: true,
         error: null,
-      })
+      });
 
       try {
-        const result =
-          await StartPressingOperation(
-            id,
-            {
-              startDate: new Date().toISOString(),
-            }
-          )
+        const result = await StartPressingOperation(id, {
+          startDate: new Date().toISOString(),
+        });
 
         if (result.Code !== 200) {
           set({
             error: result.ResponseMessage,
-          })
+          });
 
-          throw new Error(result.ResponseMessage)
+          throw new Error(result.ResponseMessage);
         }
 
-        await get().fetchOperation(id)
-
+        await get().fetchOperation(id);
       } catch (error) {
         set({
           error:
             error instanceof Error
               ? error.message
-              : 'Impossible de lancer la pression.',
-        })
+              : "Impossible de lancer la pression.",
+        });
 
-        throw error
+        throw error;
       } finally {
         set({
           starting: false,
-        })
+        });
       }
     },
 
@@ -195,54 +175,42 @@ export const usePressingOperationDetailsStore =
     // CLOSE
     // ============================================================
 
-    completeOperation: async (
-      id,
-      oliveQuantity,
-      endDate
-    ) => {
+    completeOperation: async (id, oliveQuantity, endDate) => {
       set({
         completing: true,
         error: null,
-      })
+      });
 
       try {
-        const result =
-          await ClosePressingOperation(
-            id,
-            {
-              endDate:
-                endDate ??
-                new Date().toISOString(),
-              oilQuantity:
-              oliveQuantity,
-            }
-          )
+        const result = await ClosePressingOperation(id, {
+          endDate: endDate ?? new Date().toISOString(),
+          oilQuantity: oliveQuantity,
+        });
 
         if (result.Code !== 200) {
           set({
             error: result.ResponseMessage,
-          })
+          });
 
-          throw new Error(result.ResponseMessage)
+          throw new Error(result.ResponseMessage);
         }
 
         // L'endpoint close retourne seulement l'ID.
         // On recharge donc l'opération.
-        await get().fetchOperation(id)
-
+        await get().fetchOperation(id);
       } catch (error) {
         set({
           error:
             error instanceof Error
               ? error.message
-              : 'Impossible de clôturer la pression.',
-        })
+              : "Impossible de clôturer la pression.",
+        });
 
-        throw error
+        throw error;
       } finally {
         set({
           completing: false,
-        })
+        });
       }
     },
 
@@ -254,40 +222,35 @@ export const usePressingOperationDetailsStore =
       set({
         cancelling: true,
         error: null,
-      })
+      });
 
       try {
-        const result =
-          await CancelPressingOperation(id)
+        const result = await CancelPressingOperation(id);
 
-        if (
-          result.Code !== 200 ||
-          result.Response !== true
-        ) {
+        if (result.Code !== 200 || result.Response !== true) {
           set({
             error: result.ResponseMessage,
-          })
+          });
 
-          throw new Error(result.ResponseMessage)
+          throw new Error(result.ResponseMessage);
         }
 
         // L'endpoint cancel retourne seulement bool.
         // On recharge donc l'opération.
-        await get().fetchOperation(id)
-
+        await get().fetchOperation(id);
       } catch (error) {
         set({
           error:
             error instanceof Error
               ? error.message
-              : 'Impossible d’abandonner la pression.',
-        })
+              : "Impossible d’abandonner la pression.",
+        });
 
-        throw error
+        throw error;
       } finally {
         set({
           cancelling: false,
-        })
+        });
       }
     },
 
@@ -304,6 +267,6 @@ export const usePressingOperationDetailsStore =
         completing: false,
         cancelling: false,
         error: null,
-      })
+      });
     },
-  }))
+  }));

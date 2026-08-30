@@ -1,9 +1,10 @@
-import { useConstantsStore } from '../ConstantsStore'
+import { useConstantsStore } from "../ConstantsStore";
 
 export function getOliveVarietyLabel(varietyId: number): string {
-  const { Appconstants } = useConstantsStore.getState()
+  const { Appconstants } = useConstantsStore.getState();
 
-  return Appconstants.oliveVarieties.find(
-    variety => variety.id === varietyId
-  )?.label ?? 'Inconnue'
+  return (
+    Appconstants.oliveVarieties.find((variety) => variety.id === varietyId)
+      ?.label ?? "Inconnue"
+  );
 }

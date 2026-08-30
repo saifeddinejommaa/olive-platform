@@ -1,5 +1,5 @@
 export type AppConstantItemResponse = {
   id: number;
-  code: string; 
+  code: string;
   name: string;
-}
+};

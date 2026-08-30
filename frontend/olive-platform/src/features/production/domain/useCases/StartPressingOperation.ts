@@ -1,11 +1,9 @@
-import { PressingOperationRepository } from '../../data/repositories/PressingOperationRepository'
-import type { StartPressingOperationRequest } from '../../data/requests/StartPressingOperationRequest'
-
-
+import { PressingOperationRepository } from "../../data/repositories/PressingOperationRepository";
+import type { StartPressingOperationRequest } from "../../data/requests/StartPressingOperationRequest";
 
 export const StartPressingOperation = async (
   id: number,
-  request: StartPressingOperationRequest
+  request: StartPressingOperationRequest,
 ) => {
-  return await PressingOperationRepository.startPressingOperation(id,request)
-}
+  return await PressingOperationRepository.startPressingOperation(id, request);
+};

@@ -177,8 +177,7 @@ const menuSections: MenuSection[] = [
 export default function Sidebar() {
   const location = useLocation();
 
-  const [openSections, setOpenSections] =
-    useState<Record<string, boolean>>({});
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
 
   const toggleSection = (label: string) => {
     setOpenSections((previous) => ({
@@ -188,15 +187,13 @@ export default function Sidebar() {
   };
 
   const isSectionActive = (section: MenuSection): boolean => {
-    if (section.items?.some((item) =>
-      location.pathname.startsWith(item.path)
-    )) {
+    if (
+      section.items?.some((item) => location.pathname.startsWith(item.path))
+    ) {
       return true;
     }
 
-    if (section.sections?.some((subSection) =>
-      isSectionActive(subSection)
-    )) {
+    if (section.sections?.some((subSection) => isSectionActive(subSection))) {
       return true;
     }
 
@@ -217,9 +214,7 @@ export default function Sidebar() {
           >
             <span className="submenu-indicator" />
 
-            <span>
-              {item.label}
-            </span>
+            <span>{item.label}</span>
           </NavLink>
         ))}
       </div>
@@ -229,38 +224,20 @@ export default function Sidebar() {
   const renderSubSection = (section: MenuSection) => {
     const active = isSectionActive(section);
 
-    const isOpen =
-      openSections[section.label] ?? active;
+    const isOpen = openSections[section.label] ?? active;
 
     return (
-      <div
-        key={section.label}
-        className="menu-subsection"
-      >
+      <div key={section.label} className="menu-subsection">
         <button
           type="button"
-          className={`menu-subsection-parent ${
-            active ? "active-parent" : ""
-          }`}
-          onClick={() =>
-            toggleSection(section.label)
-          }
+          className={`menu-subsection-parent ${active ? "active-parent" : ""}`}
+          onClick={() => toggleSection(section.label)}
         >
-          <span className="nav-icon">
-            {section.icon}
-          </span>
+          <span className="nav-icon">{section.icon}</span>
 
-          <span className="menu-subsection-label">
-            {section.label}
-          </span>
+          <span className="menu-subsection-label">{section.label}</span>
 
-          <span
-            className={`menu-chevron ${
-              isOpen ? "open" : ""
-            }`}
-          >
-            ›
-          </span>
+          <span className={`menu-chevron ${isOpen ? "open" : ""}`}>›</span>
         </button>
 
         {isOpen && section.items && (
@@ -271,16 +248,12 @@ export default function Sidebar() {
                 to={item.path}
                 end
                 className={({ isActive }) =>
-                  `submenu-item ${
-                    isActive ? "active" : ""
-                  }`
+                  `submenu-item ${isActive ? "active" : ""}`
                 }
               >
                 <span className="submenu-indicator" />
 
-                <span>
-                  {item.label}
-                </span>
+                <span>{item.label}</span>
               </NavLink>
             ))}
           </div>
@@ -291,23 +264,16 @@ export default function Sidebar() {
 
   return (
     <aside className="sidebar">
-
       {/* =========================
           BRAND
       ========================== */}
       <div className="sidebar-brand">
-        <div className="brand-icon">
-          🫒
-        </div>
+        <div className="brand-icon">🫒</div>
 
         <div>
-          <div className="brand-title">
-            Olive Platform
-          </div>
+          <div className="brand-title">Olive Platform</div>
 
-          <div className="brand-subtitle">
-            Gestion de l'huilerie
-          </div>
+          <div className="brand-subtitle">Gestion de l'huilerie</div>
         </div>
       </div>
 
@@ -315,67 +281,40 @@ export default function Sidebar() {
           NAVIGATION
       ========================== */}
       <nav className="sidebar-nav">
-
         {/* ACCUEIL */}
         <NavLink
           to="/"
           end
-          className={({ isActive }) =>
-            `nav-item ${isActive ? "active" : ""}`
-          }
+          className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
         >
-          <span className="nav-icon">
-            ⌂
-          </span>
+          <span className="nav-icon">⌂</span>
 
-          <span>
-            Tableau de bord
-          </span>
+          <span>Tableau de bord</span>
         </NavLink>
 
-        <div className="nav-section-title">
-          GESTION
-        </div>
+        <div className="nav-section-title">GESTION</div>
 
         {/* =========================
             MENU
         ========================== */}
         {menuSections.map((section) => {
-          const active =
-            isSectionActive(section);
+          const active = isSectionActive(section);
 
-          const isOpen =
-            openSections[section.label] ?? active;
+          const isOpen = openSections[section.label] ?? active;
 
           return (
-            <div
-              key={section.label}
-              className="menu-section"
-            >
-
+            <div key={section.label} className="menu-section">
               {/* PARENT */}
               <button
                 type="button"
-                className={`menu-parent ${
-                  active ? "active-parent" : ""
-                }`}
-                onClick={() =>
-                  toggleSection(section.label)
-                }
+                className={`menu-parent ${active ? "active-parent" : ""}`}
+                onClick={() => toggleSection(section.label)}
               >
-                <span className="nav-icon">
-                  {section.icon}
-                </span>
+                <span className="nav-icon">{section.icon}</span>
 
-                <span className="menu-parent-label">
-                  {section.label}
-                </span>
+                <span className="menu-parent-label">{section.label}</span>
 
-                <span
-                  className={`menu-chevron ${
-                    isOpen ? "open" : ""
-                  }`}
-                >
+                <span className={`menu-chevron ${isOpen ? "open" : ""}`}>
                   ›
                 </span>
               </button>
@@ -383,24 +322,18 @@ export default function Sidebar() {
               {/* =========================
                   ITEMS DIRECTS
               ========================== */}
-              {isOpen &&
-                section.items &&
-                renderItems(section.items)}
+              {isOpen && section.items && renderItems(section.items)}
 
               {/* =========================
                   SOUS-SECTIONS
               ========================== */}
-              {isOpen &&
-                section.sections && (
-                  <div className="submenu sections-container">
-                    {section.sections.map(
-                      (subSection) =>
-                        renderSubSection(
-                          subSection
-                        )
-                    )}
-                  </div>
-                )}
+              {isOpen && section.sections && (
+                <div className="submenu sections-container">
+                  {section.sections.map((subSection) =>
+                    renderSubSection(subSection),
+                  )}
+                </div>
+              )}
             </div>
           );
         })}
@@ -410,32 +343,19 @@ export default function Sidebar() {
           SYSTEM
       ========================== */}
       <div className="sidebar-bottom">
-
-        <div className="nav-section-title">
-          SYSTÈME
-        </div>
+        <div className="nav-section-title">SYSTÈME</div>
 
         <NavLink
           to="/settings"
-          className={({ isActive }) =>
-            `nav-item ${isActive ? "active" : ""}`
-          }
+          className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
         >
-          <span className="nav-icon">
-            ⚙
-          </span>
+          <span className="nav-icon">⚙</span>
 
-          <span>
-            Paramètres
-          </span>
+          <span>Paramètres</span>
         </NavLink>
 
-        <div className="sidebar-version">
-          Olive Platform v1.0
-        </div>
-
+        <div className="sidebar-version">Olive Platform v1.0</div>
       </div>
-
     </aside>
   );
 }

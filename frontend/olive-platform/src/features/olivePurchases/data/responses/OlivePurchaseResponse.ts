@@ -1,19 +1,19 @@
 export type OlivePurchaseResponse = {
-  total: number
+  total: number;
 
-  id: number
+  id: number;
 
-  purchaseNumber: string
+  purchaseNumber: string;
 
-  supplierName: string
+  supplierName: string;
 
-  purchaseDate: string
+  purchaseDate: string;
 
-  status: number
+  status: number;
 
-  totalQuantityKg: number
+  totalQuantityKg: number;
 
-  totalAmount: number
+  totalAmount: number;
 
-  itemsCount: number
-}
+  itemsCount: number;
+};

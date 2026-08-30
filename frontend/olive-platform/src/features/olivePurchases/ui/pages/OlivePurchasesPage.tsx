@@ -1,14 +1,14 @@
-import { useEffect } from 'react'
-import DataTable from '../../../../common/widgets/tables/OrdersTable'
-import Button from '../../../../common/widgets/button/Button'
-import TextInput from '../../../../common/widgets/textInput/TextInput'
-import Select from '../../../../common/widgets/select/Select'
+import { useEffect } from "react";
+import DataTable from "../../../../common/widgets/tables/OrdersTable";
+import Button from "../../../../common/widgets/button/Button";
+import TextInput from "../../../../common/widgets/textInput/TextInput";
+import Select from "../../../../common/widgets/select/Select";
 
-import type { OlivePurchase } from '../../domain/entities/OlivePurchase'
-import type { OlivePurchasesFilter } from '../../domain/entities/OlivePurchaseFilter'
+import type { OlivePurchase } from "../../domain/entities/OlivePurchase";
+import type { OlivePurchasesFilter } from "../../domain/entities/OlivePurchaseFilter";
 
-import { useOlivePurchasesStore } from '../stores/OlivePurchaseStore'
-import { useConstantsStore } from '../../../appConstants/ConstantsStore'
+import { useOlivePurchasesStore } from "../stores/OlivePurchaseStore";
+import { useConstantsStore } from "../../../appConstants/ConstantsStore";
 
 export default function OlivePurchasesPage() {
   const {
@@ -19,148 +19,134 @@ export default function OlivePurchasesPage() {
     setFilter,
     clearFilters,
     fetchOlivePurchases,
-  } = useOlivePurchasesStore()
+  } = useOlivePurchasesStore();
 
   const {
     Appconstants,
     loading: constantsLoading,
     fetchConstants,
-  } = useConstantsStore()
+  } = useConstantsStore();
 
   /**
    * Chargement des constantes
    */
   useEffect(() => {
-    fetchConstants()
-  }, [fetchConstants])
+    fetchConstants();
+  }, [fetchConstants]);
 
   /**
    * Chargement initial des achats
    */
   useEffect(() => {
-    fetchOlivePurchases()
-  }, [fetchOlivePurchases])
+    fetchOlivePurchases();
+  }, [fetchOlivePurchases]);
 
   /**
    * Modification d'un filtre
    */
   const updateFilter = (
     field: keyof OlivePurchasesFilter,
-    value: string | number
+    value: string | number,
   ) => {
-    setFilter(field, value)
-  }
+    setFilter(field, value);
+  };
 
   /**
    * Recherche
    */
   const handleSearch = async () => {
-    setFilter('pageNumber', 1)
+    setFilter("pageNumber", 1);
 
-    await fetchOlivePurchases()
-  }
+    await fetchOlivePurchases();
+  };
 
   /**
    * Réinitialisation des filtres
    */
   const handleReset = async () => {
-    clearFilters()
+    clearFilters();
 
-    await fetchOlivePurchases()
-  }
+    await fetchOlivePurchases();
+  };
 
   /**
    * Pagination
    */
   const handlePageChange = async (page: number) => {
-    setFilter('pageNumber', page)
+    setFilter("pageNumber", page);
 
-    await fetchOlivePurchases()
-  }
+    await fetchOlivePurchases();
+  };
 
   /**
    * Options des statuts
    */
   const statusOptions = [
     {
-      value: '',
-      label: 'Tous les statuts',
+      value: "",
+      label: "Tous les statuts",
     },
 
     ...Appconstants.purchaseStatuses.map((status) => ({
       value: String(status.id),
       label: status.label,
     })),
-  ]
+  ];
 
   const columns = [
     {
-      key: 'purchaseNumber' as keyof OlivePurchase,
-      label: 'N° Achat',
+      key: "purchaseNumber" as keyof OlivePurchase,
+      label: "N° Achat",
     },
 
     {
-      key: 'supplierName' as keyof OlivePurchase,
-      label: 'Fournisseur',
+      key: "supplierName" as keyof OlivePurchase,
+      label: "Fournisseur",
     },
 
     {
-      key: 'purchaseDate' as keyof OlivePurchase,
-      label: 'Date',
+      key: "purchaseDate" as keyof OlivePurchase,
+      label: "Date",
       render: (item: OlivePurchase) =>
-        new Date(item.purchaseDate).toLocaleDateString(
-          'fr-FR'
-        ),
+        new Date(item.purchaseDate).toLocaleDateString("fr-FR"),
     },
 
     {
-      key: 'status' as keyof OlivePurchase,
-      label: 'Statut',
+      key: "status" as keyof OlivePurchase,
+      label: "Statut",
     },
-  ]
+  ];
 
   return (
     <div className="feature-page">
-
       {/* =====================================================
           HEADER
           ===================================================== */}
 
       <div className="page-header">
         <div className="page-header-content">
-
-          <h1 className="page-title">
-            Achats d’olives
-          </h1>
+          <h1 className="page-title">Achats d’olives</h1>
 
           <p className="page-description">
-            Gestion des achats d’olives auprès des
-            fournisseurs.
+            Gestion des achats d’olives auprès des fournisseurs.
           </p>
-
         </div>
       </div>
-
 
       {/* =====================================================
           FILTERS
           ===================================================== */}
 
       <div className="filters">
-
         <div className="filters-header">
           <div>
             <h3>Filtres de recherche</h3>
 
-            <span>
-              Rechercher un achat d’olives
-            </span>
+            <span>Rechercher un achat d’olives</span>
           </div>
         </div>
 
-
         <div className="filters-content">
-
           {/* N° ACHAT */}
 
           <div className="filter-item">
@@ -169,14 +155,10 @@ export default function OlivePurchasesPage() {
               placeholder="ACH-2026-001"
               value={filters.purchaseNumber}
               onChange={(event) =>
-                updateFilter(
-                  'purchaseNumber',
-                  event.target.value
-                )
+                updateFilter("purchaseNumber", event.target.value)
               }
             />
           </div>
-
 
           {/* FOURNISSEUR */}
 
@@ -186,14 +168,10 @@ export default function OlivePurchasesPage() {
               placeholder="Nom du fournisseur"
               value={filters.supplierName}
               onChange={(event) =>
-                updateFilter(
-                  'supplierName',
-                  event.target.value
-                )
+                updateFilter("supplierName", event.target.value)
               }
             />
           </div>
-
 
           {/* DATE DEBUT */}
 
@@ -202,15 +180,9 @@ export default function OlivePurchasesPage() {
               label="Du"
               type="date"
               value={filters.fromDate}
-              onChange={(event) =>
-                updateFilter(
-                  'fromDate',
-                  event.target.value
-                )
-              }
+              onChange={(event) => updateFilter("fromDate", event.target.value)}
             />
           </div>
-
 
           {/* DATE FIN */}
 
@@ -219,15 +191,9 @@ export default function OlivePurchasesPage() {
               label="Au"
               type="date"
               value={filters.toDate}
-              onChange={(event) =>
-                updateFilter(
-                  'toDate',
-                  event.target.value
-                )
-              }
+              onChange={(event) => updateFilter("toDate", event.target.value)}
             />
           </div>
-
 
           {/* STATUT */}
 
@@ -235,60 +201,36 @@ export default function OlivePurchasesPage() {
             <Select
               label="Statut"
               value={filters.status}
-              onChange={(event) =>
-                updateFilter(
-                  'status',
-                  event.target.value
-                )
-              }
+              onChange={(event) => updateFilter("status", event.target.value)}
               options={statusOptions}
             />
           </div>
-
         </div>
-
 
         {/* =====================================================
             FILTER FOOTER
             ===================================================== */}
 
         <div className="filters-footer">
-
-          <Button
-            variant="secondary"
-            onClick={handleReset}
-            disabled={loading}
-          >
+          <Button variant="secondary" onClick={handleReset} disabled={loading}>
             Réinitialiser
           </Button>
 
           <Button
             variant="primary"
             onClick={handleSearch}
-            disabled={
-              loading || constantsLoading
-            }
+            disabled={loading || constantsLoading}
           >
-            {loading
-              ? 'Recherche...'
-              : 'Rechercher'}
+            {loading ? "Recherche..." : "Rechercher"}
           </Button>
-
         </div>
-
       </div>
-
 
       {/* =====================================================
           ERROR
           ===================================================== */}
 
-      {error && (
-        <div className="error-message">
-          {error}
-        </div>
-      )}
-
+      {error && <div className="error-message">{error}</div>}
 
       {/* =====================================================
           TABLE
@@ -303,7 +245,6 @@ export default function OlivePurchasesPage() {
         onPageChange={handlePageChange}
       />
 
-
       {/* =====================================================
           LOADING
           ===================================================== */}
@@ -311,11 +252,10 @@ export default function OlivePurchasesPage() {
       {(loading || constantsLoading) && (
         <div className="loading">
           {constantsLoading
-            ? 'Chargement des constantes...'
-            : 'Chargement des achats d’olives...'}
+            ? "Chargement des constantes..."
+            : "Chargement des achats d’olives..."}
         </div>
       )}
-
     </div>
-  )
+  );
 }

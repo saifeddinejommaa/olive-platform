@@ -1,12 +1,12 @@
-import Button from '../../../../common/widgets/button/Button'
+import Button from "../../../../common/widgets/button/Button";
 
 // ============================================================
 // TYPES
 // ============================================================
 
 type PressingOperationInputsFooterProps = {
-  onAdd: () => void
-}
+  onAdd: () => void;
+};
 
 // ============================================================
 // COMPONENT
@@ -15,28 +15,21 @@ type PressingOperationInputsFooterProps = {
 export default function PressingOperationInputsFooter({
   onAdd,
 }: PressingOperationInputsFooterProps) {
-
   return (
     <div
       style={{
-        gridColumn: '1 / -1',
+        gridColumn: "1 / -1",
 
-        display: 'flex',
+        display: "flex",
 
-        justifyContent:
-          'flex-end',
+        justifyContent: "flex-end",
 
-        marginTop: '10px',
+        marginTop: "10px",
       }}
     >
-
-      <Button
-        variant="primary"
-        onClick={onAdd}
-      >
+      <Button variant="primary" onClick={onAdd}>
         + Ajouter une source
       </Button>
-
     </div>
-  )
+  );
 }

@@ -9,59 +9,37 @@ export default function NewOlivePurchasePage() {
 
   return (
     <div className="feature-page">
-
       {/* =====================================================
           HEADER
           ===================================================== */}
 
       <div className="page-header">
-
         <div className="page-header-content">
-
-          <h1 className="page-title">
-            Nouvel achat d’olives
-          </h1>
+          <h1 className="page-title">Nouvel achat d’olives</h1>
 
           <p className="page-description">
             Enregistrer un nouvel achat auprès d’un fournisseur.
           </p>
-
         </div>
-
       </div>
-
 
       {/* =====================================================
           FORM
           ===================================================== */}
 
       <div className="glass-card form-card">
-
         <div className="form-grid">
-
           {/* Numéro d'achat */}
 
-          <TextInput
-            label="Numéro d’achat"
-            placeholder="ACH-2026-001"
-          />
-
+          <TextInput label="Numéro d’achat" placeholder="ACH-2026-001" />
 
           {/* Fournisseur */}
 
-          <TextInput
-            label="Fournisseur"
-            placeholder="Nom du fournisseur"
-          />
-
+          <TextInput label="Fournisseur" placeholder="Nom du fournisseur" />
 
           {/* Date */}
 
-          <TextInput
-            label="Date d’achat"
-            type="date"
-          />
-
+          <TextInput label="Date d’achat" type="date" />
 
           {/* Statut */}
 
@@ -83,31 +61,23 @@ export default function NewOlivePurchasePage() {
               },
             ]}
           />
-
         </div>
-
 
         {/* Notes */}
 
         <div className="form-field">
-
-          <label htmlFor="purchase-notes">
-            Notes
-          </label>
+          <label htmlFor="purchase-notes">Notes</label>
 
           <textarea
             id="purchase-notes"
             rows={4}
             placeholder="Ajouter une note..."
           />
-
         </div>
-
 
         {/* Actions */}
 
         <div className="form-actions">
-
           <Button
             variant="secondary"
             onClick={() => navigate("/olive-purchases")}
@@ -115,16 +85,9 @@ export default function NewOlivePurchasePage() {
             Annuler
           </Button>
 
-          <Button
-            variant="primary"
-          >
-            Enregistrer
-          </Button>
-
+          <Button variant="primary">Enregistrer</Button>
         </div>
-
       </div>
-
     </div>
   );
 }

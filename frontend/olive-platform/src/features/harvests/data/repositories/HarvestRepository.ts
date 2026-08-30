@@ -12,9 +12,10 @@ import type { HarvestResponse } from "../responses/HarvestResponse";
 
 export const HarvestRepository = {
   getAll: async (filters?: HarvestFilters) => {
-
     const params = buildQueryParams(filters as any);
-    const httpResponse = await http<ApiResponse<PagedResult<HarvestResponse>>>(`${API_BASE_URL}harvests?${params.toString()}`);
+    const httpResponse = await http<ApiResponse<PagedResult<HarvestResponse>>>(
+      `${API_BASE_URL}harvests?${params.toString()}`,
+    );
     return {
       pageNumber: httpResponse.Response.pageNumber,
       pageSize: httpResponse.Response.pageSize,
@@ -25,67 +26,56 @@ export const HarvestRepository = {
 
   getById: async (id: number): Promise<Harvest> => {
     const httpResponse = await http<ApiResponse<HarvestResponse>>(
-      `${API_BASE_URL}harvests/${id}`
+      `${API_BASE_URL}harvests/${id}`,
     );
 
     return HarvestMapper(httpResponse.Response);
   },
 
-
   create: (params: CreateHarvestParams) => {
-    return http<ApiResponse<number>>(
-      `${API_BASE_URL}harvests`,
-      {
-        method: "POST",
-        body: params,
-      }
-    );
-
+    return http<ApiResponse<number>>(`${API_BASE_URL}harvests`, {
+      method: "POST",
+      body: params,
+    });
   },
 
-  update: async (
-    id: number,
-    params: UpdateHarvestParams
-  ): Promise<Harvest> => {
+  update: async (id: number, params: UpdateHarvestParams): Promise<Harvest> => {
     const httpResponse = await http<ApiResponse<HarvestResponse>>(
       `${API_BASE_URL}harvests/${id}`,
       {
         method: "PUT",
         body: params,
-      }
+      },
     );
 
     return HarvestMapper(httpResponse.Response);
   },
 
   start: async (id: number): Promise<void> => {
-    await http<ApiResponse<null>>(
-      `${API_BASE_URL}harvests/${id}/start`,
-      {
-        method: 'POST',
-      }
-    )
+    await http<ApiResponse<null>>(`${API_BASE_URL}harvests/${id}/start`, {
+      method: "POST",
+    });
   },
 
   complete: async (
     id: number,
-    params: CompleteHarvestParams
+    params: CompleteHarvestParams,
   ): Promise<void> => {
-     await http<ApiResponse<HarvestResponse>>(
+    await http<ApiResponse<HarvestResponse>>(
       `${API_BASE_URL}harvests/${id}/close`,
       {
         method: "POST",
         body: params,
-      }
+      },
     );
   },
 
   cancel: async (id: number): Promise<void> => {
-     await http<ApiResponse<HarvestResponse>>(
+    await http<ApiResponse<HarvestResponse>>(
       `${API_BASE_URL}harvests/${id}/cancel`,
       {
         method: "POST",
-      }
+      },
     );
   },
 };

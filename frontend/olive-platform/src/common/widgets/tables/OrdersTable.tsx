@@ -28,52 +28,47 @@ export default function DataTable<T>({
   totalCount,
   onPageChange,
 }: Props<T>) {
-  const totalPages = Math.max(
-    1,
-    Math.ceil(totalCount / pageSize)
-  );
+  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
 
   return (
     <div className="glass-card">
       <div className="table-wrapper">
-      <table className="modern-table">
-        <thead>
-          <tr>
-            {columns.map((col) => (
-              <th key={String(col.key)}>{col.label}</th>
-            ))}
-          </tr>
-        </thead>
-
-        <tbody>
-          {data.map((item, index) => (
-            <tr
-              key={index}
-              onClick={() => onRowClick?.(item)}
-              style={{
-                cursor: onRowClick ? "pointer" : "default",
-              }}
-            >
+        <table className="modern-table">
+          <thead>
+            <tr>
               {columns.map((col) => (
-                <td key={String(col.key)}>
-                  {col.render
-                    ? col.render(item)
-                    : String(item[col.key] ?? "")}
-                </td>
+                <th key={String(col.key)}>{col.label}</th>
               ))}
             </tr>
-          ))}
+          </thead>
 
-          {data.length === 0 && (
-            <tr>
-              <td colSpan={columns.length}>
-                No data found
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
-       </div>
+          <tbody>
+            {data.map((item, index) => (
+              <tr
+                key={index}
+                onClick={() => onRowClick?.(item)}
+                style={{
+                  cursor: onRowClick ? "pointer" : "default",
+                }}
+              >
+                {columns.map((col) => (
+                  <td key={String(col.key)}>
+                    {col.render
+                      ? col.render(item)
+                      : String(item[col.key] ?? "")}
+                  </td>
+                ))}
+              </tr>
+            ))}
+
+            {data.length === 0 && (
+              <tr>
+                <td colSpan={columns.length}>No data found</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
       <div className="pagination">
         <Button
           variant="secondary"

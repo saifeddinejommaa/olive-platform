@@ -14,7 +14,12 @@ export function UseOlivePurchaseAutoComplete(serialNumber: string) {
 
     const timeout = setTimeout(async () => {
       setLoading(true);
-      const data = await GetOlivePurchases({ toPressing: true, purchaseNumber: serialNumber, pageNumber: 1, pageSize: 10 });
+      const data = await GetOlivePurchases({
+        toPressing: true,
+        purchaseNumber: serialNumber,
+        pageNumber: 1,
+        pageSize: 10,
+      });
       setResults(data.items);
       setLoading(false);
     }, 300);

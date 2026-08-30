@@ -1,45 +1,29 @@
 import type { CreatePressingOperationParams } from "../../../domain/params/CreatePressingOperationParams";
 import type { CreatePressingOperationRequest } from "../../requests/CreatePressingOperationRequest";
 
-
 export function CreatePressingOperationMapper(
-  data: CreatePressingOperationParams
+  data: CreatePressingOperationParams,
 ): CreatePressingOperationRequest {
-
   return {
-    createdAt : data.createdAt,
-    startTime:
-      data.startTime,
+    createdAt: data.createdAt,
+    startTime: data.startTime,
 
-    endTime:
-      data.endTime,
+    endTime: data.endTime,
 
-    status:
-      data.status,
+    status: data.status,
 
-    oliveQuantityKg:
-      data.oliveQuantityKg,
+    oliveQuantityKg: data.oliveQuantityKg,
 
-    oilQuantityLiters:
-      data.oilQuantityLiters,
+    oilQuantityLiters: data.oilQuantityLiters,
 
-    notes:
-      data.notes,
+    notes: data.notes,
 
-    inputs:
-      data.inputs.map(
-        input => ({
-          harvestId:
-            input.harvestId,
+    inputs: data.inputs.map((input) => ({
+      harvestId: input.harvestId,
 
-          purchaseItemId:
-            input.purchaseItemId,
+      purchaseItemId: input.purchaseItemId,
 
-          quantityKg:
-            Number(
-              input.quantityKg
-            ),
-        })
-      ),
-  }
+      quantityKg: Number(input.quantityKg),
+    })),
+  };
 }

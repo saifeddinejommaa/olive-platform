@@ -1,9 +1,9 @@
 export type CompleteOliveAnalysisParams = {
-  id: number
+  id: number;
 
-  humidityPercentage?: number
-  waterPercentage?: number
-  oilPercentage?: number
-  acidityPercentage?: number
-  analysisDate?: string
-}
+  humidityPercentage?: number;
+  waterPercentage?: number;
+  oilPercentage?: number;
+  acidityPercentage?: number;
+  analysisDate?: string;
+};

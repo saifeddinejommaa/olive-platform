@@ -5,7 +5,11 @@ type DonutItem = {
 };
 
 export default function DonutChart({ data }: { data: DonutItem[] }) {
-  const r = 44, cx = 56, cy = 56, stroke = 13, circ = 2 * Math.PI * r;
+  const r = 44,
+    cx = 56,
+    cy = 56,
+    stroke = 13,
+    circ = 2 * Math.PI * r;
   let offset = 0;
 
   return (

@@ -1,4 +1,4 @@
 export type AppConstantItem = {
-  id: number; 
+  id: number;
   label: string;
-}
+};

@@ -3,7 +3,7 @@ export const OliveVarieties = {
   Koroneiki: 6,
   Arbosana: 7,
   Chemlali: 8,
-} as const
+} as const;
 
 export type OliveVarieties =
-  typeof OliveVarieties[keyof typeof OliveVarieties]
+  (typeof OliveVarieties)[keyof typeof OliveVarieties];

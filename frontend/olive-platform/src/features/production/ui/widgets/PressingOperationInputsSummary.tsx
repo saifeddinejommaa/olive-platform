@@ -1,14 +1,12 @@
-import type {
-  PressingOperationInput,
-} from './InputTypes'
+import type { PressingOperationInput } from "./InputTypes";
 
 // ============================================================
 // TYPES
 // ============================================================
 
 type PressingOperationInputsSummaryProps = {
-  inputs: PressingOperationInput[]
-}
+  inputs: PressingOperationInput[];
+};
 
 // ============================================================
 // COMPONENT
@@ -17,49 +15,30 @@ type PressingOperationInputsSummaryProps = {
 export default function PressingOperationInputsSummary({
   inputs,
 }: PressingOperationInputsSummaryProps) {
-
-  const totalOliveQuantity =
-    inputs.reduce(
-      (total, input) =>
-        total +
-        (
-          Number(
-            input.quantityKg
-          ) || 0
-        ),
-      0
-    )
+  const totalOliveQuantity = inputs.reduce(
+    (total, input) => total + (Number(input.quantityKg) || 0),
+    0,
+  );
 
   return (
     <div
       style={{
-        gridColumn: '1 / -1',
+        gridColumn: "1 / -1",
 
-        display: 'flex',
+        display: "flex",
 
-        justifyContent:
-          'flex-end',
+        justifyContent: "flex-end",
 
-        alignItems:
-          'center',
+        alignItems: "center",
 
-        paddingTop:
-          '10px',
+        paddingTop: "10px",
 
-        fontWeight:
-          'bold',
+        fontWeight: "bold",
 
-        fontSize:
-          '18px',
+        fontSize: "18px",
       }}
     >
-      Total olives :{' '}
-
-      {totalOliveQuantity.toLocaleString(
-        'fr-FR'
-      )}
-
-      {' '}kg
+      Total olives : {totalOliveQuantity.toLocaleString("fr-FR")} kg
     </div>
-  )
+  );
 }

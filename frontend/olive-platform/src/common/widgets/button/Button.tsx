@@ -4,12 +4,7 @@ import "./Button.css";
 type ButtonProps = {
   children: React.ReactNode;
 
-  variant?: 
-    | "primary"
-    | "secondary"
-    | "outline"
-    | "danger"
-    | "gold";
+  variant?: "primary" | "secondary" | "outline" | "danger" | "gold";
 
   size?: "sm" | "md" | "lg";
 

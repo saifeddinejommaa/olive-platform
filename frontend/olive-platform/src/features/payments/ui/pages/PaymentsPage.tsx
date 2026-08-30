@@ -62,8 +62,7 @@ export default function PaymentsPage() {
     {
       key: "amount" as keyof Payment,
       label: "Montant",
-      render: (item: Payment) =>
-        `${item.amount.toLocaleString("fr-FR")} €`,
+      render: (item: Payment) => `${item.amount.toLocaleString("fr-FR")} €`,
     },
     {
       key: "paymentMethod" as keyof Payment,
@@ -72,31 +71,26 @@ export default function PaymentsPage() {
     {
       key: "invoiceNumber" as keyof Payment,
       label: "Facture",
-      render: (item: Payment) =>
-        item.invoiceNumber ?? "—",
+      render: (item: Payment) => item.invoiceNumber ?? "—",
     },
     {
       key: "supplierName" as keyof Payment,
       label: "Fournisseur",
-      render: (item: Payment) =>
-        item.supplierName ?? "—",
+      render: (item: Payment) => item.supplierName ?? "—",
     },
     {
       key: "workerName" as keyof Payment,
       label: "Ouvrier",
-      render: (item: Payment) =>
-        item.workerName ?? "—",
+      render: (item: Payment) => item.workerName ?? "—",
     },
     {
       key: "reference" as keyof Payment,
       label: "Référence",
-      render: (item: Payment) =>
-        item.reference ?? "—",
+      render: (item: Payment) => item.reference ?? "—",
     },
   ];
 
   const handleSearch = () => {
-
     setPageNumber(1);
 
     // TODO:
@@ -112,45 +106,30 @@ export default function PaymentsPage() {
 
   return (
     <div className="feature-page">
-
       {/* =====================================================
           HEADER
           ===================================================== */}
 
       <div className="page-header">
-
         <div className="page-header-content">
+          <h1 className="page-title">Paiements</h1>
 
-          <h1 className="page-title">
-            Paiements
-          </h1>
-
-          <p className="page-description">
-            Suivi des paiements et règlements.
-          </p>
-
+          <p className="page-description">Suivi des paiements et règlements.</p>
         </div>
 
-        <Button variant="primary">
-          + Nouveau paiement
-        </Button>
-
+        <Button variant="primary">+ Nouveau paiement</Button>
       </div>
-
 
       {/* =====================================================
           FILTERS
           ===================================================== */}
 
       <div className="filters">
-
         <TextInput
           label="N° paiement"
           placeholder="Ex. PAY-2026-001"
           value={paymentNumber}
-          onChange={(event) =>
-            setPaymentNumber(event.target.value)
-          }
+          onChange={(event) => setPaymentNumber(event.target.value)}
         />
 
         <TextInput
@@ -158,40 +137,26 @@ export default function PaymentsPage() {
           placeholder="ID facture"
           type="number"
           value={invoiceId}
-          onChange={(event) =>
-            setInvoiceId(event.target.value)
-          }
+          onChange={(event) => setInvoiceId(event.target.value)}
         />
 
         <Select
           label="Mode de paiement"
           value={paymentMethod}
-          onChange={(event) =>
-            setPaymentMethod(event.target.value)
-          }
+          onChange={(event) => setPaymentMethod(event.target.value)}
           options={paymentMethodOptions}
         />
 
         <div className="filter-actions">
-
-          <Button
-            variant="secondary"
-            onClick={handleReset}
-          >
+          <Button variant="secondary" onClick={handleReset}>
             Réinitialiser
           </Button>
 
-          <Button
-            variant="primary"
-            onClick={handleSearch}
-          >
+          <Button variant="primary" onClick={handleSearch}>
             Rechercher
           </Button>
-
         </div>
-
       </div>
-
 
       {/* =====================================================
           TABLE
@@ -205,7 +170,6 @@ export default function PaymentsPage() {
         totalCount={mockPayments.length}
         onPageChange={setPageNumber}
       />
-
     </div>
   );
 }

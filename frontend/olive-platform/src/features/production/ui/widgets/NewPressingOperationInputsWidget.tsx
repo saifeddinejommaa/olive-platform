@@ -1,46 +1,38 @@
-import PressingOperationInputsHeader from './PressingOperationInputsHeader'
-import PressingOperationInputItem from './PressingOperationInputItem'
-import PressingOperationInputsEmptyState from './PressingOperationInputsEmptyState'
-import PressingOperationInputsSummary from './PressingOperationInputsSummary'
-import PressingOperationInputsFooter from './PressingOperationInputsFooter'
+import PressingOperationInputsHeader from "./PressingOperationInputsHeader";
+import PressingOperationInputItem from "./PressingOperationInputItem";
+import PressingOperationInputsEmptyState from "./PressingOperationInputsEmptyState";
+import PressingOperationInputsSummary from "./PressingOperationInputsSummary";
+import PressingOperationInputsFooter from "./PressingOperationInputsFooter";
 
 import type {
   PressingOperationInput,
   InputSourceType,
   PressingOperationInputUpdate,
-} from './InputTypes'
+} from "./InputTypes";
 
-import type { SourceOption } from './SourceReference'
+import type { SourceOption } from "./SourceReference";
 
 // ============================================================
 // TYPES
 // ============================================================
 
 type NewPressingOperationInputsWidgetProps = {
-  inputs: PressingOperationInput[]
+  inputs: PressingOperationInput[];
 
-  errors: Record<string, string>
+  errors: Record<string, string>;
 
-  onAdd?: () => void
+  onAdd?: () => void;
 
-  onRemove?: (
-    id: string
-  ) => void
+  onRemove?: (id: string) => void;
 
-  onUpdate: PressingOperationInputUpdate
+  onUpdate: PressingOperationInputUpdate;
 
-  onChangeSource: (
-    id: string,
-    sourceType: InputSourceType
-  ) => void
+  onChangeSource: (id: string, sourceType: InputSourceType) => void;
 
-  onSelectSource: (
-    id: string,
-    source: SourceOption
-  ) => void
+  onSelectSource: (id: string, source: SourceOption) => void;
 
-  showAddButton?: boolean
-}
+  showAddButton?: boolean;
+};
 
 // ============================================================
 // COMPONENT
@@ -55,17 +47,12 @@ export default function NewPressingOperationInputsWidget({
   onSelectSource,
   showAddButton = true,
 }: NewPressingOperationInputsWidgetProps) {
-
   return (
     <div className="filters">
-
       <PressingOperationInputsHeader />
 
       <div className="filters-content">
-
-        {inputs.length === 0 && (
-          <PressingOperationInputsEmptyState />
-        )}
+        {inputs.length === 0 && <PressingOperationInputsEmptyState />}
 
         {inputs.map((input, index) => (
           <PressingOperationInputItem
@@ -83,25 +70,19 @@ export default function NewPressingOperationInputsWidget({
           <div
             className="field-error"
             style={{
-              gridColumn: '1 / -1',
+              gridColumn: "1 / -1",
             }}
           >
             {errors.inputs}
           </div>
         )}
 
-        <PressingOperationInputsSummary
-          inputs={inputs}
-        />
+        <PressingOperationInputsSummary inputs={inputs} />
 
         {showAddButton && onAdd && (
-          <PressingOperationInputsFooter
-            onAdd={onAdd}
-          />
+          <PressingOperationInputsFooter onAdd={onAdd} />
         )}
-
       </div>
-
     </div>
-  )
+  );
 }

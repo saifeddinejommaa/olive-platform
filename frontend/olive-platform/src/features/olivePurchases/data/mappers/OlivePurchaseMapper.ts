@@ -1,24 +1,18 @@
-import type { PurchaseStatus } from "../../domain/entities/PurchaseStatus"
-import type { OlivePurchaseResponse } from "../responses/OlivePurchaseResponse"
+import type { PurchaseStatus } from "../../domain/entities/PurchaseStatus";
+import type { OlivePurchaseResponse } from "../responses/OlivePurchaseResponse";
 
-export function OlivePurchaseMapper(
-    response: OlivePurchaseResponse
-) {
-    return {
-        id: response.id,
+export function OlivePurchaseMapper(response: OlivePurchaseResponse) {
+  return {
+    id: response.id,
 
-        purchaseNumber:
-            response.purchaseNumber,
+    purchaseNumber: response.purchaseNumber,
 
-        supplierName:
-            response.supplierName,
+    supplierName: response.supplierName,
 
-        purchaseDate:
-            response.purchaseDate,
+    purchaseDate: response.purchaseDate,
 
-        status:
-            response.status as PurchaseStatus,
+    status: response.status as PurchaseStatus,
 
-        notes: null,
-    }
+    notes: null,
+  };
 }

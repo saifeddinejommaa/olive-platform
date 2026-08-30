@@ -1,21 +1,18 @@
-import { useEffect } from 'react'
+import { useEffect } from "react";
 
+import type { OliveAnalysis } from "../../domain/entities/OliveAnalysis";
+import type { OliveAnalysesFilters } from "../../domain/entities/OliveAnalysesFilter";
 
-import type { OliveAnalysis } from '../../domain/entities/OliveAnalysis'
-import type { OliveAnalysesFilters } from '../../domain/entities/OliveAnalysesFilter'
-
-import EditIcon from '@mui/icons-material/Edit'
-import { useOliveAnalysesStore } from '../store/OliveAnalysesStore'
-import { renderStatus } from '../../../../shared/utils/StatusUtils'
-import { productionStatusConfig } from '../../../../shared/status/ProductionStatusConfig'
-import TextInput from '../../../../../common/widgets/textInput/TextInput'
-import Select from '../../../../../common/widgets/select/Select'
-import Button from '../../../../../common/widgets/button/Button'
-import DataTable from '../../../../../common/widgets/tables/OrdersTable'
-
+import EditIcon from "@mui/icons-material/Edit";
+import { useOliveAnalysesStore } from "../store/OliveAnalysesStore";
+import { renderStatus } from "../../../../shared/utils/StatusUtils";
+import { productionStatusConfig } from "../../../../shared/status/ProductionStatusConfig";
+import TextInput from "../../../../../common/widgets/textInput/TextInput";
+import Select from "../../../../../common/widgets/select/Select";
+import Button from "../../../../../common/widgets/button/Button";
+import DataTable from "../../../../../common/widgets/tables/OrdersTable";
 
 export default function OliveAnalysesPage() {
-
   // ============================================================
   // STORE
   // ============================================================
@@ -29,17 +26,15 @@ export default function OliveAnalysesPage() {
     setParams,
     fetchAnalyses,
     clear,
-  } = useOliveAnalysesStore()
-
+  } = useOliveAnalysesStore();
 
   // ============================================================
   // INITIAL LOAD
   // ============================================================
 
   useEffect(() => {
-    fetchAnalyses()
-  }, [fetchAnalyses])
-
+    fetchAnalyses();
+  }, [fetchAnalyses]);
 
   // ============================================================
   // FILTER UPDATE
@@ -51,9 +46,8 @@ export default function OliveAnalysesPage() {
   ) => {
     setParams({
       [field]: value,
-    })
-  }
-
+    });
+  };
 
   // ============================================================
   // SEARCH
@@ -62,51 +56,39 @@ export default function OliveAnalysesPage() {
   const handleSearch = async () => {
     await fetchAnalyses({
       pageNumber: 1,
-    })
-  }
-
+    });
+  };
 
   // ============================================================
   // RESET
   // ============================================================
 
   const handleReset = async () => {
-    clear()
+    clear();
 
     await fetchAnalyses({
       pageNumber: 1,
       pageSize: 10,
-    })
-  }
-
+    });
+  };
 
   // ============================================================
   // PAGINATION
   // ============================================================
 
-  const handlePageChange = async (
-    page: number,
-  ) => {
+  const handlePageChange = async (page: number) => {
     await fetchAnalyses({
       pageNumber: page,
-    })
-  }
-
+    });
+  };
 
   // ============================================================
   // DETAILS
   // ============================================================
 
-  const handleOpenDetails = (
-    id: number,
-  ) => {
-    window.open(
-      `/Olive-analyses/${id}`,
-      '_blank',
-      'noopener,noreferrer',
-    )
-  }
-
+  const handleOpenDetails = (id: number) => {
+    window.open(`/Olive-analyses/${id}`, "_blank", "noopener,noreferrer");
+  };
 
   // ============================================================
   // COLUMNS
@@ -114,96 +96,70 @@ export default function OliveAnalysesPage() {
 
   const columns = [
     {
-      key: 'reference' as keyof OliveAnalysis,
+      key: "reference" as keyof OliveAnalysis,
 
-      label: 'Référence',
+      label: "Référence",
 
-      render: (
-        item: OliveAnalysis,
-      ) =>
-        item.reference || '-',
+      render: (item: OliveAnalysis) => item.reference || "-",
     },
 
     {
-      key: 'analysisDate' as keyof OliveAnalysis,
+      key: "analysisDate" as keyof OliveAnalysis,
 
       label: "Date d'analyse",
 
-      render: (
-        item: OliveAnalysis,
-      ) =>
+      render: (item: OliveAnalysis) =>
         item.analysisDate
-          ? new Date(
-              item.analysisDate,
-            ).toLocaleDateString(
-              'fr-FR',
-            )
-          : '-',
+          ? new Date(item.analysisDate).toLocaleDateString("fr-FR")
+          : "-",
     },
 
     {
-      key: 'sourceId' as keyof OliveAnalysis,
+      key: "sourceId" as keyof OliveAnalysis,
 
-      label: 'Source',
+      label: "Source",
 
-      render: (
-        item: OliveAnalysis,
-      ) =>
-        item.sourceId
-          ? item.sourceId.toString()
-          : '-',
+      render: (item: OliveAnalysis) =>
+        item.sourceId ? item.sourceId.toString() : "-",
     },
 
     {
-      key: 'status' as keyof OliveAnalysis,
+      key: "status" as keyof OliveAnalysis,
 
-      label: 'Statut',
+      label: "Statut",
 
-      render: (
-        item: OliveAnalysis,
-      ) =>
-        renderStatus(
-          item.status,
-          productionStatusConfig,
-        ),
+      render: (item: OliveAnalysis) =>
+        renderStatus(item.status, productionStatusConfig),
     },
 
     {
-      key: 'id' as keyof OliveAnalysis,
+      key: "id" as keyof OliveAnalysis,
 
-      label: 'Actions',
+      label: "Actions",
 
-      render: (
-        item: OliveAnalysis,
-      ) => (
+      render: (item: OliveAnalysis) => (
         <button
           type="button"
           title="Modifier l'analyse"
           aria-label="Modifier l'analyse"
-          onClick={() =>
-            handleOpenDetails(
-              item.id,
-            )
-          }
+          onClick={() => handleOpenDetails(item.id)}
           style={{
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            padding: '6px',
+            background: "none",
+            border: "none",
+            cursor: "pointer",
+            padding: "6px",
           }}
         >
           <EditIcon
             fontSize="small"
             sx={{
-              color:
-                'var(--color-olive-900)',
+              color: "var(--color-olive-900)",
             }}
           />
         </button>
       ),
     },
-  ]
-
+  ];
 
   // ============================================================
   // RENDER
@@ -211,235 +167,147 @@ export default function OliveAnalysesPage() {
 
   return (
     <div className="feature-page">
-
       {/* ====================================================== */}
       {/* HEADER                                                 */}
       {/* ====================================================== */}
 
       <div className="page-header">
-
         <div className="page-header-content">
-
-          <h1 className="page-title">
-            Analyses d'olives
-          </h1>
+          <h1 className="page-title">Analyses d'olives</h1>
 
           <p className="page-description">
-            Gestion des analyses physico-chimiques
-            des olives et suivi de leur qualité.
+            Gestion des analyses physico-chimiques des olives et suivi de leur
+            qualité.
           </p>
-
         </div>
-
       </div>
-
 
       {/* ====================================================== */}
       {/* FILTERS                                                */}
       {/* ====================================================== */}
 
       <div className="filters">
-
         <div className="filters-header">
-
           <div>
+            <h3>Filtres de recherche</h3>
 
-            <h3>
-              Filtres de recherche
-            </h3>
-
-            <span>
-              Rechercher une analyse d'olive
-            </span>
-
+            <span>Rechercher une analyse d'olive</span>
           </div>
-
         </div>
 
-
         <div className="filters-content">
-
-
           {/* REFERENCE */}
 
           <div className="filter-item">
-
             <TextInput
               label="Référence"
               placeholder="ANA-2026-001"
-              value={
-                filter.reference ??
-                ''
-              }
-              onChange={event =>
-                updateFilter(
-                  'reference',
-                  event.target.value,
-                )
+              value={filter.reference ?? ""}
+              onChange={(event) =>
+                updateFilter("reference", event.target.value)
               }
             />
-
           </div>
-
 
           {/* SOURCE */}
 
           <div className="filter-item">
-
             <TextInput
               label="Ref de la Récolte:"
               placeholder="Ref de la Récolte"
               type="number"
               min="1"
               value={
-                filter.harvestReference !==
-                  null &&
-                filter.harvestReference !==
-                  undefined
-                  ? String(
-                      filter.harvestReference,
-                    )
-                  : ''
+                filter.harvestReference !== null &&
+                filter.harvestReference !== undefined
+                  ? String(filter.harvestReference)
+                  : ""
               }
-              onChange={event =>
+              onChange={(event) =>
                 updateFilter(
-                  'harvestReference',
-                  event.target.value
-                    ? Number(
-                        event.target.value,
-                      )
-                    : null,
+                  "harvestReference",
+                  event.target.value ? Number(event.target.value) : null,
                 )
               }
             />
-
           </div>
-
 
           {/* PARCELLE */}
 
           <div className="filter-item">
-
             <TextInput
               label="Ref de la Parcelle"
               placeholder="Ref de la Parcelle"
               type="number"
               min="1"
               value={
-                filter.plotReference !==
-                  null &&
-                filter.plotReference !==
-                  undefined
-                  ? String(
-                      filter.plotReference,
-                    )
-                  : ''
+                filter.plotReference !== null &&
+                filter.plotReference !== undefined
+                  ? String(filter.plotReference)
+                  : ""
               }
-              onChange={event =>
+              onChange={(event) =>
                 updateFilter(
-                  'plotReference',
-                  event.target.value
-                    ? Number(
-                        event.target.value,
-                      )
-                    : null,
+                  "plotReference",
+                  event.target.value ? Number(event.target.value) : null,
                 )
               }
             />
-
           </div>
-
 
           {/* STATUS */}
 
           <div className="filter-item">
-
             <Select
               label="Statut"
-              value={
-                filter.status ??
-                ''
-              }
-              onChange={event =>
-                updateFilter(
-                  'status',
-                  event.target.value,
-                )
-              }
+              value={filter.status ?? ""}
+              onChange={(event) => updateFilter("status", event.target.value)}
               options={[
                 {
-                  value: '',
-                  label:
-                    'Tous les statuts',
+                  value: "",
+                  label: "Tous les statuts",
                 },
                 {
-                  value: 'Planned',
-                  label: 'Planifiée',
+                  value: "Planned",
+                  label: "Planifiée",
                 },
                 {
-                  value: 'InProgress',
-                  label: 'En cours',
+                  value: "InProgress",
+                  label: "En cours",
                 },
                 {
-                  value: 'Completed',
-                  label: 'Clôturée',
+                  value: "Completed",
+                  label: "Clôturée",
                 },
                 {
-                  value: 'Cancelled',
-                  label: 'Annulée',
+                  value: "Cancelled",
+                  label: "Annulée",
                 },
               ]}
             />
-
           </div>
-
         </div>
-
 
         {/* ==================================================== */}
         {/* FILTER ACTIONS                                       */}
         {/* ==================================================== */}
 
         <div className="filters-footer">
-
-          <Button
-            variant="secondary"
-            onClick={
-              handleReset
-            }
-            disabled={loading}
-          >
+          <Button variant="secondary" onClick={handleReset} disabled={loading}>
             Réinitialiser
           </Button>
 
-
-          <Button
-            variant="primary"
-            onClick={
-              handleSearch
-            }
-            disabled={loading}
-          >
-            {loading
-              ? 'Recherche...'
-              : 'Rechercher'}
+          <Button variant="primary" onClick={handleSearch} disabled={loading}>
+            {loading ? "Recherche..." : "Rechercher"}
           </Button>
-
         </div>
-
       </div>
-
 
       {/* ====================================================== */}
       {/* ERROR                                                  */}
       {/* ====================================================== */}
 
-      {error && (
-        <div className="error-message">
-          {error}
-        </div>
-      )}
-
+      {error && <div className="error-message">{error}</div>}
 
       {/* ====================================================== */}
       {/* TABLE                                                  */}
@@ -448,31 +316,17 @@ export default function OliveAnalysesPage() {
       <DataTable
         data={analyses}
         columns={columns}
-        pageNumber={
-          filter.pageNumber
-        }
-        pageSize={
-          filter.pageSize
-        }
-        totalCount={
-          total
-        }
-        onPageChange={
-          handlePageChange
-        }
+        pageNumber={filter.pageNumber}
+        pageSize={filter.pageSize}
+        totalCount={total}
+        onPageChange={handlePageChange}
       />
-
 
       {/* ====================================================== */}
       {/* LOADING                                                */}
       {/* ====================================================== */}
 
-      {loading && (
-        <div className="loading">
-          Chargement des analyses...
-        </div>
-      )}
-
+      {loading && <div className="loading">Chargement des analyses...</div>}
     </div>
-  )
+  );
 }

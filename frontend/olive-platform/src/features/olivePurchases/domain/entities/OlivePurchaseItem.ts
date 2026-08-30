@@ -1,25 +1,25 @@
-import type { OliveVarieties } from "../../../shared/entities/OliveVarieties"
+import type { OliveVarieties } from "../../../shared/entities/OliveVarieties";
 
 export type OlivePurchaseItem = {
-  id: number
+  id: number;
 
-  reference: string
+  reference: string;
 
-  purchaseId: number
+  purchaseId: number;
 
-  variety: OliveVarieties
+  variety: OliveVarieties;
 
-  description: string | null
+  description: string | null;
 
-  agreedQuantityKg: number
+  agreedQuantityKg: number;
 
-  pressedQuantityKg: number
+  pressedQuantityKg: number;
 
-  remainingQuantityKg: number
+  remainingQuantityKg: number;
 
-  pricePerKg: number
+  pricePerKg: number;
 
-  totalAmount: number | null
+  totalAmount: number | null;
 
-  notes: string | null
-}
+  notes: string | null;
+};

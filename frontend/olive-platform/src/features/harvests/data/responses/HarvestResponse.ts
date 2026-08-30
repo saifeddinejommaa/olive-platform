@@ -1,33 +1,32 @@
-
 export type HarvestResponse = {
-  id: number
-  reference: string
+  id: number;
+  reference: string;
 
-  plotId: number
+  plotId: number;
 
-  plotName: string
+  plotName: string;
 
-  harvestDate: string
+  harvestDate: string;
 
-  startTime: string |null
+  startTime: string | null;
 
-  endTime:string | null
+  endTime: string | null;
 
-  quantityKg: number
+  quantityKg: number;
 
-  qualityGrade: string | null
+  qualityGrade: string | null;
 
-  createdAt: string,
+  createdAt: string;
 
-  harvestedTrees: number,
+  harvestedTrees: number;
 
-  plannedTrees: number,
+  plannedTrees: number;
 
-  varietyId: number
+  varietyId: number;
 
-  status: number,
+  status: number;
 
-  notes: string | null
+  notes: string | null;
 
-  updatedAt:string
-}
+  updatedAt: string;
+};

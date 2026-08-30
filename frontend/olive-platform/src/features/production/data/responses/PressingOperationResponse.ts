@@ -1,15 +1,15 @@
 export type PressingOperationResponse = {
-  id: number
-  operationNumber: string
-  pressingDate: string
-  createdAt:string
-  startTime: string | null
-  endTime: string | null
-  status: number
+  id: number;
+  operationNumber: string;
+  pressingDate: string;
+  createdAt: string;
+  startTime: string | null;
+  endTime: string | null;
+  status: number;
 
-  oilQuantityLiters: number | null
+  oilQuantityLiters: number | null;
 
-  harvestNumber: string | null
-  purchaseNumber: string | null
-  notes : string | null
-}
+  harvestNumber: string | null;
+  purchaseNumber: string | null;
+  notes: string | null;
+};

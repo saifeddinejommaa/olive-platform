@@ -1,4 +1,4 @@
 export type CreateOliveAnalysisParams = {
-  sourceTypeId: number
-  sourceId: number,
-}
+  sourceTypeId: number;
+  sourceId: number;
+};

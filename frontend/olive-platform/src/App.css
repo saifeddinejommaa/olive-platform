@@ -11,7 +11,6 @@
   background: var(--color-bg);
 }
 
-
 /* ============================================================
    SIDEBAR
    ============================================================ */
@@ -36,7 +35,6 @@
 
   z-index: 100;
 }
-
 
 /* ============================================================
    BRAND
@@ -100,7 +98,6 @@
   white-space: nowrap;
 }
 
-
 /* ============================================================
    SIDEBAR NAVIGATION
    ============================================================ */
@@ -115,9 +112,7 @@
 
   scrollbar-width: thin;
 
-  scrollbar-color:
-    rgba(255, 255, 255, 0.15)
-    transparent;
+  scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
 }
 
 .sidebar-nav::-webkit-scrollbar {
@@ -133,7 +128,6 @@
 
   border-radius: 10px;
 }
-
 
 /* ============================================================
    SECTION TITLE
@@ -158,7 +152,6 @@
 .nav-section-title:first-child {
   margin-top: 0;
 }
-
 
 /* ============================================================
    SIMPLE NAV ITEM
@@ -206,7 +199,6 @@
   box-shadow: var(--shadow-sm);
 }
 
-
 /* ============================================================
    NAV ICON
    ============================================================ */
@@ -224,7 +216,6 @@
   line-height: 1;
 }
 
-
 /* ============================================================
    MENU SECTION
    ============================================================ */
@@ -234,7 +225,6 @@
 
   padding: 0;
 }
-
 
 /* ============================================================
    MAIN MENU PARENT
@@ -297,7 +287,6 @@
   text-overflow: ellipsis;
 }
 
-
 /* ============================================================
    MAIN CHEVRON
    ============================================================ */
@@ -330,7 +319,6 @@
   opacity: 0.8;
 }
 
-
 /* ============================================================
    SUBSECTIONS CONTAINER
    ============================================================ */
@@ -349,9 +337,8 @@
 
   padding-left: 7px;
 
-  border-left: 1px solid rgba(255, 255, 255, 0.10);
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
 }
-
 
 /* ============================================================
    SUBSECTION
@@ -362,7 +349,6 @@
 
   padding: 0;
 }
-
 
 /* ============================================================
    SUBSECTION PARENT
@@ -417,7 +403,6 @@
   background: rgba(200, 155, 60, 0.07);
 }
 
-
 /* ============================================================
    SUBSECTION ICON
    ============================================================ */
@@ -429,7 +414,6 @@
 
   font-size: 13px;
 }
-
 
 /* ============================================================
    SUBSECTION LABEL
@@ -444,7 +428,6 @@
 
   text-overflow: ellipsis;
 }
-
 
 /* ============================================================
    SUBSECTION CHEVRON
@@ -465,7 +448,6 @@
 .menu-subsection-parent.active-parent .menu-chevron {
   opacity: 0.8;
 }
-
 
 /* ============================================================
    NESTED SUBMENU
@@ -488,7 +470,6 @@
 
   border-left: 1px solid rgba(255, 255, 255, 0.07);
 }
-
 
 /* ============================================================
    NESTED SUBMENU ITEMS
@@ -528,7 +509,6 @@
   font-weight: 600;
 }
 
-
 /* ============================================================
    NESTED INDICATOR
    ============================================================ */
@@ -559,7 +539,6 @@
   background: var(--color-gold-500);
 }
 
-
 /* ============================================================
    STANDARD SUBMENU
    ============================================================ */
@@ -573,7 +552,6 @@
 
   border-left: 1px solid rgba(255, 255, 255, 0.08);
 }
-
 
 /* ============================================================
    SUBMENU ITEM
@@ -620,7 +598,6 @@
   font-weight: 600;
 }
 
-
 /* ============================================================
    SUBMENU INDICATOR
    ============================================================ */
@@ -656,7 +633,6 @@
   background: var(--color-gold-500);
 }
 
-
 /* ============================================================
    SIDEBAR BOTTOM
    ============================================================ */
@@ -666,8 +642,7 @@
 
   flex-shrink: 0;
 
-  border-top:
-    1px solid rgba(255, 255, 255, 0.08);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .sidebar-version {
@@ -677,7 +652,6 @@
 
   font-size: 10px;
 }
-
 
 /* ============================================================
    MAIN LAYOUT
@@ -692,7 +666,6 @@
 
   min-height: 100vh;
 }
-
 
 /* ============================================================
    TOPBAR
@@ -713,8 +686,7 @@
 
   background: rgba(252, 252, 248, 0.94);
 
-  border-bottom:
-    1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
 
   backdrop-filter: blur(12px);
 
@@ -739,7 +711,6 @@
   font-size: var(--fs-xs);
 }
 
-
 /* ============================================================
    TOPBAR ACTIONS
    ============================================================ */
@@ -760,13 +731,11 @@
   align-items: center;
   justify-content: center;
 
-  border:
-    1px solid var(--color-border);
+  border: 1px solid var(--color-border);
 
   border-radius: 50%;
 
-  background:
-    var(--color-surface-raised);
+  background: var(--color-surface-raised);
 
   cursor: pointer;
 
@@ -777,16 +746,12 @@
 }
 
 .topbar-button:hover {
-  border-color:
-    var(--color-border-strong);
+  border-color: var(--color-border-strong);
 
-  background:
-    var(--color-surface);
+  background: var(--color-surface);
 
-  box-shadow:
-    var(--shadow-sm);
+  box-shadow: var(--shadow-sm);
 }
-
 
 /* ============================================================
    USER PROFILE
@@ -812,11 +777,9 @@
 
   border-radius: 50%;
 
-  background:
-    var(--color-olive-100);
+  background: var(--color-olive-100);
 
-  color:
-    var(--color-olive-900);
+  color: var(--color-olive-900);
 
   font-size: var(--fs-xs);
 
@@ -842,18 +805,15 @@
   font-size: var(--fs-xs);
 }
 
-
 /* ============================================================
    PAGE CONTENT
    ============================================================ */
 
 .page-content {
-  min-height:
-    calc(100vh - var(--topbar-height));
+  min-height: calc(100vh - var(--topbar-height));
 
   padding: 32px;
 }
-
 
 /* ============================================================
    PAGE HEADER
@@ -879,25 +839,19 @@
   color: var(--color-muted);
 }
 
-
 /* ============================================================
    CARDS
    ============================================================ */
 
 .glass-card {
-  background:
-    var(--color-surface-raised);
+  background: var(--color-surface-raised);
 
-  border:
-    1px solid var(--color-border);
+  border: 1px solid var(--color-border);
 
-  border-radius:
-    var(--radius-lg);
+  border-radius: var(--radius-lg);
 
-  box-shadow:
-    var(--shadow-sm);
+  box-shadow: var(--shadow-sm);
 }
-
 
 /* ============================================================
    TABLE
@@ -926,8 +880,7 @@
 
   background: var(--color-surface);
 
-  border-bottom:
-    1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
 
   font-family: var(--font-mono);
 
@@ -943,26 +896,22 @@
 .modern-table td {
   padding: 15px 18px;
 
-  border-bottom:
-    1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
 
   color: var(--color-ink);
 }
 
 .modern-table tbody tr {
-  transition:
-    background 0.15s ease;
+  transition: background 0.15s ease;
 }
 
 .modern-table tbody tr:hover {
-  background:
-    var(--color-olive-100);
+  background: var(--color-olive-100);
 }
 
 .modern-table tbody tr:last-child td {
   border-bottom: none;
 }
-
 
 /* ============================================================
    PAGINATION
@@ -975,8 +924,7 @@
 
   padding: 16px 18px;
 
-  border-top:
-    1px solid var(--color-border);
+  border-top: 1px solid var(--color-border);
 
   color: var(--color-muted);
 
@@ -988,17 +936,13 @@
 
   padding: 7px 12px;
 
-  border:
-    1px solid var(--color-border);
+  border: 1px solid var(--color-border);
 
-  border-radius:
-    var(--radius-sm);
+  border-radius: var(--radius-sm);
 
-  background:
-    var(--color-surface-raised);
+  background: var(--color-surface-raised);
 
-  color:
-    var(--color-ink);
+  color: var(--color-ink);
 
   cursor: pointer;
 
@@ -1009,14 +953,11 @@
 }
 
 .pagination button:hover:not(:disabled) {
-  border-color:
-    var(--color-olive-500);
+  border-color: var(--color-olive-500);
 
-  color:
-    var(--color-olive-700);
+  color: var(--color-olive-700);
 
-  background:
-    var(--color-olive-100);
+  background: var(--color-olive-100);
 }
 
 .pagination button:disabled {
@@ -1024,7 +965,6 @@
 
   cursor: not-allowed;
 }
-
 
 /* ============================================================
    BUTTONS
@@ -1043,8 +983,7 @@
 
   border: none;
 
-  border-radius:
-    var(--radius-md);
+  border-radius: var(--radius-md);
 
   font-size: var(--fs-sm);
 
@@ -1064,49 +1003,38 @@
 .btn-primary {
   color: white;
 
-  background:
-    var(--color-olive-700);
+  background: var(--color-olive-700);
 }
 
 .btn-primary:hover {
-  background:
-    var(--color-olive-800);
+  background: var(--color-olive-800);
 
-  box-shadow:
-    var(--shadow-sm);
+  box-shadow: var(--shadow-sm);
 }
 
 .btn-secondary {
-  color:
-    var(--color-olive-900);
+  color: var(--color-olive-900);
 
-  background:
-    var(--color-olive-100);
+  background: var(--color-olive-100);
 
-  border:
-    1px solid var(--color-border);
+  border: 1px solid var(--color-border);
 }
 
 .btn-secondary:hover {
-  background:
-    var(--color-olive-100);
+  background: var(--color-olive-100);
 
-  border-color:
-    var(--color-border-strong);
+  border-color: var(--color-border-strong);
 }
 
 .btn-danger {
   color: white;
 
-  background:
-    var(--color-danger);
+  background: var(--color-danger);
 }
 
 .btn-danger:hover {
-  background:
-    #8d3026;
+  background: #8d3026;
 }
-
 
 /* ============================================================
    FORM ELEMENTS
@@ -1125,8 +1053,7 @@
 
   font-weight: 600;
 
-  color:
-    var(--color-olive-900);
+  color: var(--color-olive-900);
 }
 
 .form-input,
@@ -1138,17 +1065,13 @@
 
   padding: 8px 12px;
 
-  border:
-    1px solid var(--color-border);
+  border: 1px solid var(--color-border);
 
-  border-radius:
-    var(--radius-md);
+  border-radius: var(--radius-md);
 
-  background:
-    var(--color-surface-raised);
+  background: var(--color-surface-raised);
 
-  color:
-    var(--color-ink);
+  color: var(--color-ink);
 
   outline: none;
 
@@ -1160,11 +1083,9 @@
 .form-input:focus,
 .form-select:focus,
 .form-textarea:focus {
-  border-color:
-    var(--color-olive-500);
+  border-color: var(--color-olive-500);
 
-  box-shadow:
-    0 0 0 3px rgba(116, 144, 74, 0.12);
+  box-shadow: 0 0 0 3px rgba(116, 144, 74, 0.12);
 }
 
 .form-textarea {
@@ -1173,13 +1094,11 @@
   resize: vertical;
 }
 
-
 /* ============================================================
    RESPONSIVE — TABLET
    ============================================================ */
 
 @media (max-width: 900px) {
-
   .sidebar {
     width: 210px;
   }
@@ -1203,13 +1122,11 @@
   }
 }
 
-
 /* ============================================================
    RESPONSIVE — MOBILE
    ============================================================ */
 
 @media (max-width: 700px) {
-
   .sidebar {
     width: 64px;
   }
@@ -1261,7 +1178,6 @@
     width: 100%;
   }
 
-
   /* ----------------------------------------------------------
      SUBSECTIONS MOBILE
      ---------------------------------------------------------- */
@@ -1295,7 +1211,6 @@
     display: none;
   }
 
-
   /* ----------------------------------------------------------
      SIDEBAR BOTTOM
      ---------------------------------------------------------- */
@@ -1307,7 +1222,6 @@
   .sidebar-bottom .nav-item {
     justify-content: center;
   }
-
 
   /* ----------------------------------------------------------
      PAGE
@@ -1338,13 +1252,11 @@
   }
 }
 
-
 /* ============================================================
    VERY SMALL SCREENS
    ============================================================ */
 
 @media (max-width: 480px) {
-
   .sidebar {
     width: 56px;
   }
