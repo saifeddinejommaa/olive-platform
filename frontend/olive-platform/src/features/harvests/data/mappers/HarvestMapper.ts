@@ -3,24 +3,17 @@ import type { OliveVarieties } from "../../../shared/entities/OliveVarieties";
 import type { Harvest } from "../../domain/entities/Harvest";
 import type { HarvestResponse } from "../responses/HarvestResponse";
 
-
-export function HarvestMapper(
-  response: HarvestResponse
-): Harvest {
+export function HarvestMapper(response: HarvestResponse): Harvest {
   return {
     id: response.id,
 
-    reference:
-      response.reference,
+    reference: response.reference,
 
-    plotId:
-      response.plotId,
+    plotId: response.plotId,
 
-    harvestDate:
-      response.harvestDate,
+    harvestDate: response.harvestDate,
 
-    quantityKg:
-      response.quantityKg,
+    quantityKg: response.quantityKg,
 
     harvestedTrees: response.harvestedTrees,
 
@@ -28,7 +21,7 @@ export function HarvestMapper(
 
     variety: response.varietyId as OliveVarieties,
 
-    notes:response.notes,
+    notes: response.notes,
 
     createdAt: response.createdAt,
 
@@ -38,7 +31,6 @@ export function HarvestMapper(
 
     endTime: response.endTime,
 
-    updatedAt:response.updatedAt
-
-  }
+    updatedAt: response.updatedAt,
+  };
 }

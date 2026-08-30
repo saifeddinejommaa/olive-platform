@@ -9,7 +9,10 @@ type Props = {
 
 export default function KPICard({ label, value, sub, up, icon, color }: Props) {
   return (
-    <div className="kpi-card" style={{ "--kpi-color": color } as React.CSSProperties}>
+    <div
+      className="kpi-card"
+      style={{ "--kpi-color": color } as React.CSSProperties}
+    >
       <div className="kpi-top">
         <span className="kpi-label">{label}</span>
         <div className="kpi-icon-wrap">{icon}</div>

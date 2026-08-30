@@ -4,6 +4,6 @@ export type CompleteHarvestParams = {
   harvestedTrees: number;
   quantityKg: number;
   completeDate: string;
-  stocks : HarvestStockParams[];
-  proceedAnalyse : boolean
+  stocks: HarvestStockParams[];
+  proceedAnalyse: boolean;
 };

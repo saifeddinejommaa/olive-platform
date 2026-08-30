@@ -97,20 +97,17 @@ export default function OilMovementsPage() {
     {
       key: "oilBatchNumber" as keyof OilMovement,
       label: "Lot d'huile",
-      render: (item: OilMovement) =>
-        item.oilBatchNumber ?? "—",
+      render: (item: OilMovement) => item.oilBatchNumber ?? "—",
     },
     {
       key: "sourceTankCode" as keyof OilMovement,
       label: "Source",
-      render: (item: OilMovement) =>
-        item.sourceTankCode ?? "—",
+      render: (item: OilMovement) => item.sourceTankCode ?? "—",
     },
     {
       key: "destinationTankCode" as keyof OilMovement,
       label: "Destination",
-      render: (item: OilMovement) =>
-        item.destinationTankCode ?? "—",
+      render: (item: OilMovement) => item.destinationTankCode ?? "—",
     },
     {
       key: "quantityLiters" as keyof OilMovement,
@@ -121,7 +118,6 @@ export default function OilMovementsPage() {
   ];
 
   const handleSearch = () => {
-
     setPageNumber(1);
 
     // Plus tard :
@@ -138,53 +134,38 @@ export default function OilMovementsPage() {
 
   return (
     <div className="feature-page">
-
       {/* =====================================================
           HEADER
           ===================================================== */}
 
       <div className="page-header">
-
         <div className="page-header-content">
-
-          <h1 className="page-title">
-            Mouvements d'huile
-          </h1>
+          <h1 className="page-title">Mouvements d'huile</h1>
 
           <p className="page-description">
             Entrées, transferts, sorties et ajustements de stock.
           </p>
-
         </div>
 
-        <Button variant="primary">
-          + Nouveau mouvement
-        </Button>
-
+        <Button variant="primary">+ Nouveau mouvement</Button>
       </div>
-
 
       {/* =====================================================
           FILTERS
           ===================================================== */}
 
       <div className="filters">
-
         <TextInput
           label="N° mouvement"
           placeholder="Ex. MOV-2026-001"
           value={movementNumber}
-          onChange={(event) =>
-            setMovementNumber(event.target.value)
-          }
+          onChange={(event) => setMovementNumber(event.target.value)}
         />
 
         <Select
           label="Type"
           value={movementType}
-          onChange={(event) =>
-            setMovementType(event.target.value)
-          }
+          onChange={(event) => setMovementType(event.target.value)}
           options={movementTypeOptions}
         />
 
@@ -192,40 +173,26 @@ export default function OilMovementsPage() {
           label="Lot d'huile"
           placeholder="Ex. LOT-2026-001"
           value={oilBatchNumber}
-          onChange={(event) =>
-            setOilBatchNumber(event.target.value)
-          }
+          onChange={(event) => setOilBatchNumber(event.target.value)}
         />
 
         <TextInput
           label="Citerne"
           placeholder="Ex. TANK-01"
           value={tankCode}
-          onChange={(event) =>
-            setTankCode(event.target.value)
-          }
+          onChange={(event) => setTankCode(event.target.value)}
         />
 
         <div className="filter-actions">
-
-          <Button
-            variant="secondary"
-            onClick={handleReset}
-          >
+          <Button variant="secondary" onClick={handleReset}>
             Réinitialiser
           </Button>
 
-          <Button
-            variant="primary"
-            onClick={handleSearch}
-          >
+          <Button variant="primary" onClick={handleSearch}>
             Rechercher
           </Button>
-
         </div>
-
       </div>
-
 
       {/* =====================================================
           TABLE
@@ -239,7 +206,6 @@ export default function OilMovementsPage() {
         totalCount={mockOilMovements.length}
         onPageChange={setPageNumber}
       />
-
     </div>
   );
 }

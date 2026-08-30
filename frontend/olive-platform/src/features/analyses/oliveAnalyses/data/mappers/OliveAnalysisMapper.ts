@@ -29,5 +29,5 @@ export function OliveAnalysisMapper(
     updatedAt: response.updatedAt,
 
     status: response.status as ProductionStatus,
-  }
+  };
 }

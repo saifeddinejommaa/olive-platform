@@ -1,16 +1,16 @@
-import { useEffect } from 'react'
-import DataTable from '../../../../common/widgets/tables/OrdersTable'
-import Button from '../../../../common/widgets/button/Button'
-import TextInput from '../../../../common/widgets/textInput/TextInput'
-import Select from '../../../../common/widgets/select/Select'
-import type { Harvest } from '../../domain/entities/Harvest'
-import type { HarvestFilters } from '../../domain/entities/HarvestsFilters'
-import { useHarvestsStore } from '../stores/HarvestsStore'
-import { useConstantsStore } from '../../../appConstants/ConstantsStore'
-import { getOliveVarietyLabel } from '../../../appConstants/helper/AppConstantsHelper'
-import { renderStatus } from '../../../shared/utils/StatusUtils'
-import { productionStatusConfig } from '../../../shared/status/ProductionStatusConfig'
-import EditIcon from '@mui/icons-material/Edit';
+import { useEffect } from "react";
+import DataTable from "../../../../common/widgets/tables/OrdersTable";
+import Button from "../../../../common/widgets/button/Button";
+import TextInput from "../../../../common/widgets/textInput/TextInput";
+import Select from "../../../../common/widgets/select/Select";
+import type { Harvest } from "../../domain/entities/Harvest";
+import type { HarvestFilters } from "../../domain/entities/HarvestsFilters";
+import { useHarvestsStore } from "../stores/HarvestsStore";
+import { useConstantsStore } from "../../../appConstants/ConstantsStore";
+import { getOliveVarietyLabel } from "../../../appConstants/helper/AppConstantsHelper";
+import { renderStatus } from "../../../shared/utils/StatusUtils";
+import { productionStatusConfig } from "../../../shared/status/ProductionStatusConfig";
+import EditIcon from "@mui/icons-material/Edit";
 
 export default function HarvestsPage() {
   const {
@@ -21,86 +21,86 @@ export default function HarvestsPage() {
     setFilter,
     clearFilters,
     fetchHarvests,
-  } = useHarvestsStore()
+  } = useHarvestsStore();
 
-  const {
-    fetchConstants,
-  } = useConstantsStore()
+  const { fetchConstants } = useConstantsStore();
 
   useEffect(() => {
-    fetchConstants()
-    fetchHarvests()
-  }, [])
+    fetchConstants();
+    fetchHarvests();
+  }, []);
 
   const updateFilter = (
     field: keyof HarvestFilters,
-    value: string | number | null
+    value: string | number | null,
   ) => {
-    setFilter(field, value)
-  }
+    setFilter(field, value);
+  };
 
   const handleSearch = async () => {
-    setFilter('pageNumber', 1)
-    await fetchHarvests()
-  }
+    setFilter("pageNumber", 1);
+    await fetchHarvests();
+  };
 
   const handleReset = async () => {
-    clearFilters()
-    await fetchHarvests()
-  }
+    clearFilters();
+    await fetchHarvests();
+  };
 
   const handlePageChange = async (page: number) => {
-    setFilter('pageNumber', page)
-    await fetchHarvests()
-  }
+    setFilter("pageNumber", page);
+    await fetchHarvests();
+  };
 
   const handleOpenDetails = (id: number) => {
-    window.open(`/harvests/harvest-operation/${id}`, '_blank', 'noopener,noreferrer')
-  }
-
+    window.open(
+      `/harvests/harvest-operation/${id}`,
+      "_blank",
+      "noopener,noreferrer",
+    );
+  };
 
   const columns = [
     {
-      key: 'reference' as keyof Harvest,
-      label: 'Référence',
-      render: (item: Harvest) => item.reference || '-',
+      key: "reference" as keyof Harvest,
+      label: "Référence",
+      render: (item: Harvest) => item.reference || "-",
     },
     {
-      key: 'harvestDate' as keyof Harvest,
-      label: 'Date',
+      key: "harvestDate" as keyof Harvest,
+      label: "Date",
       render: (item: Harvest) =>
         item.harvestDate
-          ? new Date(item.harvestDate).toLocaleDateString('fr-FR')
-          : '-',
+          ? new Date(item.harvestDate).toLocaleDateString("fr-FR")
+          : "-",
     },
     {
-      key: 'plannedTrees' as keyof Harvest,
-      label: 'Arbres planifiés',
+      key: "plannedTrees" as keyof Harvest,
+      label: "Arbres planifiés",
       render: (item: Harvest) =>
-        item.plannedTrees?.toLocaleString('fr-FR') ?? '0',
+        item.plannedTrees?.toLocaleString("fr-FR") ?? "0",
     },
     {
-      key: 'harvestedTrees' as keyof Harvest,
-      label: 'Arbres récoltés',
+      key: "harvestedTrees" as keyof Harvest,
+      label: "Arbres récoltés",
       render: (item: Harvest) =>
-        item.harvestedTrees?.toLocaleString('fr-FR') ?? '0',
+        item.harvestedTrees?.toLocaleString("fr-FR") ?? "0",
     },
     {
-      key: 'varietyId' as keyof Harvest,
-      label: 'Variété',
-      render: (item: Harvest) =>
-        getOliveVarietyLabel(item.variety),
+      key: "varietyId" as keyof Harvest,
+      label: "Variété",
+      render: (item: Harvest) => getOliveVarietyLabel(item.variety),
     },
     {
-      key: 'status' as keyof Harvest,
-      label: 'Statut',
+      key: "status" as keyof Harvest,
+      label: "Statut",
       render: (item: Harvest) =>
-        renderStatus(item.status,productionStatusConfig),
+        renderStatus(item.status, productionStatusConfig),
     },
 
     {
-      key: 'id' as keyof Harvest,
-      label: 'Actions',
+      key: "id" as keyof Harvest,
+      label: "Actions",
       render: (item: Harvest) => (
         <button
           type="button"
@@ -108,17 +108,17 @@ export default function HarvestsPage() {
           aria-label="Modifier l'opération"
           onClick={() => handleOpenDetails(item.id)}
           style={{
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            padding: '6px',
+            background: "none",
+            border: "none",
+            cursor: "pointer",
+            padding: "6px",
           }}
         >
-          <EditIcon fontSize="small" sx={{ color: 'var(--color-olive-900)' }} />
+          <EditIcon fontSize="small" sx={{ color: "var(--color-olive-900)" }} />
         </button>
       ),
     },
-  ]
+  ];
 
   return (
     <div className="feature-page">
@@ -145,8 +145,8 @@ export default function HarvestsPage() {
               label="N° Récolte"
               placeholder="REC-2026-001"
               value={filters.harvestNumber}
-              onChange={event =>
-                updateFilter('harvestNumber', event.target.value)
+              onChange={(event) =>
+                updateFilter("harvestNumber", event.target.value)
               }
             />
           </div>
@@ -156,17 +156,11 @@ export default function HarvestsPage() {
               label="Parcelle"
               placeholder="ID parcelle"
               type="number"
-              value={
-                filters.plotId !== null
-                  ? String(filters.plotId)
-                  : ''
-              }
-              onChange={event =>
+              value={filters.plotId !== null ? String(filters.plotId) : ""}
+              onChange={(event) =>
                 updateFilter(
-                  'plotId',
-                  event.target.value
-                    ? Number(event.target.value)
-                    : null
+                  "plotId",
+                  event.target.value ? Number(event.target.value) : null,
                 )
               }
             />
@@ -177,9 +171,7 @@ export default function HarvestsPage() {
               label="Du"
               type="date"
               value={filters.fromDate}
-              onChange={event =>
-                updateFilter('fromDate', event.target.value)
-              }
+              onChange={(event) => updateFilter("fromDate", event.target.value)}
             />
           </div>
 
@@ -188,9 +180,7 @@ export default function HarvestsPage() {
               label="Au"
               type="date"
               value={filters.toDate}
-              onChange={event =>
-                updateFilter('toDate', event.target.value)
-              }
+              onChange={(event) => updateFilter("toDate", event.target.value)}
             />
           </div>
 
@@ -198,28 +188,25 @@ export default function HarvestsPage() {
             <Select
               label="Qualité"
               value={filters.qualityGrade}
-              onChange={event =>
-                updateFilter(
-                  'qualityGrade',
-                  event.target.value
-                )
+              onChange={(event) =>
+                updateFilter("qualityGrade", event.target.value)
               }
               options={[
                 {
-                  value: '',
-                  label: 'Toutes les qualités',
+                  value: "",
+                  label: "Toutes les qualités",
                 },
                 {
-                  value: 'A',
-                  label: 'Qualité A',
+                  value: "A",
+                  label: "Qualité A",
                 },
                 {
-                  value: 'B',
-                  label: 'Qualité B',
+                  value: "B",
+                  label: "Qualité B",
                 },
                 {
-                  value: 'C',
-                  label: 'Qualité C',
+                  value: "C",
+                  label: "Qualité C",
                 },
               ]}
             />
@@ -227,29 +214,17 @@ export default function HarvestsPage() {
         </div>
 
         <div className="filters-footer">
-          <Button
-            variant="secondary"
-            onClick={handleReset}
-            disabled={loading}
-          >
+          <Button variant="secondary" onClick={handleReset} disabled={loading}>
             Réinitialiser
           </Button>
 
-          <Button
-            variant="primary"
-            onClick={handleSearch}
-            disabled={loading}
-          >
-            {loading ? 'Recherche...' : 'Rechercher'}
+          <Button variant="primary" onClick={handleSearch} disabled={loading}>
+            {loading ? "Recherche..." : "Rechercher"}
           </Button>
         </div>
       </div>
 
-      {error && (
-        <div className="error-message">
-          {error}
-        </div>
-      )}
+      {error && <div className="error-message">{error}</div>}
 
       <DataTable
         data={harvests.items}
@@ -260,11 +235,7 @@ export default function HarvestsPage() {
         onPageChange={handlePageChange}
       />
 
-      {loading && (
-        <div className="loading">
-          Chargement des récoltes...
-        </div>
-      )}
+      {loading && <div className="loading">Chargement des récoltes...</div>}
     </div>
-  )
+  );
 }

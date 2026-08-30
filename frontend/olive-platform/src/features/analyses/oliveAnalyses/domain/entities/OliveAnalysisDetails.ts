@@ -1,29 +1,29 @@
-import type { ProductionStatus } from "../../../../production/domain/entities/ProductionStatus"
+import type { ProductionStatus } from "../../../../production/domain/entities/ProductionStatus";
 
 export type OliveAnalysisDetails = {
-  id: number
+  id: number;
 
-  reference: string
+  reference: string;
 
-  sourceTypeId: number
+  sourceTypeId: number;
 
-  sourceReference: string
+  sourceReference: string;
 
-  humidityPercentage?: number
+  humidityPercentage?: number;
 
-  waterPercentage?: number
+  waterPercentage?: number;
 
-  oilPercentage?: number
+  oilPercentage?: number;
 
-  acidityPercentage?: number
+  acidityPercentage?: number;
 
-  analysisDate?: string
+  analysisDate?: string;
 
-  createdAt: string
+  createdAt: string;
 
-  updatedAt: string
+  updatedAt: string;
 
-  varietyId: number
+  varietyId: number;
 
-  status: ProductionStatus
-}
+  status: ProductionStatus;
+};

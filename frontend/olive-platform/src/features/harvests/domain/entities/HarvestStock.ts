@@ -1,5 +1,5 @@
 export interface HarvestStock {
-  id: number,
-  reference: string,  
-  quantityKg: number
+  id: number;
+  reference: string;
+  quantityKg: number;
 }

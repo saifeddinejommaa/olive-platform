@@ -1,20 +1,19 @@
-import type { CreatePressingOperationInputParams } from "./CreatePressingOperationInputParams"
+import type { CreatePressingOperationInputParams } from "./CreatePressingOperationInputParams";
 
 export type CreatePressingOperationParams = {
+  createdAt: string;
 
-  createdAt: string,
+  startTime: string | null;
 
-  startTime: string | null
+  endTime: string | null;
 
-  endTime: string | null
+  status: number;
 
-  status: number
+  oliveQuantityKg: number | null;
 
-  oliveQuantityKg: number | null
+  oilQuantityLiters: number | null;
 
-  oilQuantityLiters: number | null
+  notes: string | null;
 
-  notes: string | null
-
-  inputs: CreatePressingOperationInputParams[]
-}
+  inputs: CreatePressingOperationInputParams[];
+};

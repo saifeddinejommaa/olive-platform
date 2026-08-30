@@ -1,16 +1,16 @@
-import type { ProductionStatus } from "./ProductionStatus"
+import type { ProductionStatus } from "./ProductionStatus";
 
 export type PressingOperation = {
-  id: number
+  id: number;
 
-  operationNumber: string
-  createdAt : Date
-  startTime: Date | null
-  endTime: Date | null
+  operationNumber: string;
+  createdAt: Date;
+  startTime: Date | null;
+  endTime: Date | null;
 
-  status: ProductionStatus
+  status: ProductionStatus;
 
-  oilQuantityLiters: number | null
+  oilQuantityLiters: number | null;
 
-  notes : string | null
-}
+  notes: string | null;
+};

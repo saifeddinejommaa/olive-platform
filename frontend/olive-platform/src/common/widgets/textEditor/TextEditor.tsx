@@ -45,12 +45,11 @@ export default function TextEditor({
   const handleInput = () => {
     if (!editorRef.current) return;
 
-    if (
-      maxLength &&
-      editorRef.current.innerText.length > maxLength
-    ) {
-      editorRef.current.innerText =
-        editorRef.current.innerText.substring(0, maxLength);
+    if (maxLength && editorRef.current.innerText.length > maxLength) {
+      editorRef.current.innerText = editorRef.current.innerText.substring(
+        0,
+        maxLength,
+      );
     }
 
     handleChange();
@@ -58,16 +57,11 @@ export default function TextEditor({
 
   return (
     <div className="text-editor-field">
-
       {label && (
         <label className="text-editor-label">
           {label}
 
-          {required && (
-            <span className="text-editor-required">
-              *
-            </span>
-          )}
+          {required && <span className="text-editor-required">*</span>}
         </label>
       )}
 
@@ -80,11 +74,9 @@ export default function TextEditor({
           .filter(Boolean)
           .join(" ")}
       >
-
         {/* Toolbar */}
 
         <div className="text-editor-toolbar">
-
           <button
             type="button"
             className="editor-tool"
@@ -120,9 +112,7 @@ export default function TextEditor({
           <button
             type="button"
             className="editor-tool"
-            onClick={() =>
-              executeCommand("insertUnorderedList")
-            }
+            onClick={() => executeCommand("insertUnorderedList")}
             disabled={disabled}
             title="Liste à puces"
           >
@@ -132,9 +122,7 @@ export default function TextEditor({
           <button
             type="button"
             className="editor-tool"
-            onClick={() =>
-              executeCommand("insertOrderedList")
-            }
+            onClick={() => executeCommand("insertOrderedList")}
             disabled={disabled}
             title="Liste numérotée"
           >
@@ -166,15 +154,12 @@ export default function TextEditor({
           <button
             type="button"
             className="editor-tool"
-            onClick={() =>
-              executeCommand("removeFormat")
-            }
+            onClick={() => executeCommand("removeFormat")}
             disabled={disabled}
             title="Effacer le formatage"
           >
             Tx
           </button>
-
         </div>
 
         {/* Content */}
@@ -190,15 +175,11 @@ export default function TextEditor({
           }}
           onInput={handleInput}
         />
-
       </div>
 
       <div className="text-editor-footer">
-
         {error ? (
-          <span className="text-editor-error-message">
-            {error}
-          </span>
+          <span className="text-editor-error-message">{error}</span>
         ) : (
           <span />
         )}
@@ -208,9 +189,7 @@ export default function TextEditor({
             {editorRef.current?.innerText.length ?? 0} / {maxLength}
           </span>
         )}
-
       </div>
-
     </div>
   );
 }

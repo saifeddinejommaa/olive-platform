@@ -1,28 +1,25 @@
-export type InputSourceType =
-  | 'harvest'
-  | 'purchase'
+export type InputSourceType = "harvest" | "purchase";
 
 export type PressingOperationInput = {
-  id: string
+  id: string;
 
-  sourceType: InputSourceType
+  sourceType: InputSourceType;
 
-  harvestId: number | null
+  harvestId: number | null;
 
-  purchaseItemId: number | null
+  purchaseItemId: number | null;
 
-  reference: string
+  reference: string;
 
-  quantityKg: string
+  quantityKg: string;
 
-  notes: string
-}
+  notes: string;
+};
 
-export type PressingOperationInputField =
-  keyof PressingOperationInput
+export type PressingOperationInputField = keyof PressingOperationInput;
 
 export type PressingOperationInputUpdate = (
   id: string,
   field: PressingOperationInputField,
-  value: string | number | null
-) => void
+  value: string | number | null,
+) => void;

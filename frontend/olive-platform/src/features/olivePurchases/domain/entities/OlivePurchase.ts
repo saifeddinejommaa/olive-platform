@@ -1,16 +1,15 @@
-
-import type { PurchaseStatus } from './PurchaseStatus'
+import type { PurchaseStatus } from "./PurchaseStatus";
 
 export type OlivePurchase = {
-  id: number
+  id: number;
 
-  purchaseNumber: string
+  purchaseNumber: string;
 
-  supplierName: string
+  supplierName: string;
 
-  purchaseDate: string
+  purchaseDate: string;
 
-  status: PurchaseStatus | null
+  status: PurchaseStatus | null;
 
-  notes: string | null
-}
+  notes: string | null;
+};

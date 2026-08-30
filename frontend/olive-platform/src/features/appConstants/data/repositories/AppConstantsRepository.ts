@@ -7,9 +7,9 @@ import type { AppConstantsResponse } from "../responses/AppConstantsResponse";
 export const AppConstantsRepository = {
   getAll: async (): Promise<AppConstants> => {
     const httpResponse = await http<ApiResponse<AppConstantsResponse>>(
-      `${API_BASE_URL}appconstants`
+      `${API_BASE_URL}appconstants`,
     );
-      const constantsResponse = httpResponse.Response;
+    const constantsResponse = httpResponse.Response;
     return mapConstantsResponseToModel(constantsResponse);
   },
 };

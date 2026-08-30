@@ -1,24 +1,23 @@
-
 export type OlivePurchaseItemResponse = {
-  id: number
+  id: number;
 
-  reference: string
+  reference: string;
 
-  purchaseId: number
+  purchaseId: number;
 
-  varietyId: number | null
+  varietyId: number | null;
 
-  description: string | null
+  description: string | null;
 
-  agreedQuantityKg: number
+  agreedQuantityKg: number;
 
-  pressedQuantityKg: number
+  pressedQuantityKg: number;
 
-  remainingQuantityKg: number
+  remainingQuantityKg: number;
 
-  pricePerKg: number
+  pricePerKg: number;
 
-  totalAmount: number | null
+  totalAmount: number | null;
 
-  notes: string | null
-}
+  notes: string | null;
+};

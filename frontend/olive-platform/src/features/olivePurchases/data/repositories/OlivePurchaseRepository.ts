@@ -11,9 +11,10 @@ import type { OlivePurchaseResponse } from "../responses/OlivePurchaseResponse";
 
 export const OlivePurchaseRepository = {
   getAll: async (filters?: OlivePurchasesFilter) => {
-
     const params = buildQueryParams(filters as any);
-    const httpResponse = await http<ApiResponse<PagedResult<OlivePurchaseResponse>>>(`${API_BASE_URL}olivepurchases?${params.toString()}`);
+    const httpResponse = await http<
+      ApiResponse<PagedResult<OlivePurchaseResponse>>
+    >(`${API_BASE_URL}olivepurchases?${params.toString()}`);
     return {
       pageNumber: httpResponse.Response.pageNumber,
       pageSize: httpResponse.Response.pageSize,
@@ -22,10 +23,15 @@ export const OlivePurchaseRepository = {
     };
   },
 
-  getPurchaseItemsById: async (id: number,filters?: OlivePurchaseItemsFilter) => {
-        const params = buildQueryParams(filters as any);
+  getPurchaseItemsById: async (
+    id: number,
+    filters?: OlivePurchaseItemsFilter,
+  ) => {
+    const params = buildQueryParams(filters as any);
 
-    const httpResponse = await http<ApiResponse<PagedResult<OlivePurchaseItemResponse>>>(`${API_BASE_URL}olivepurchases/items/${id}?${params.toString()}`);
+    const httpResponse = await http<
+      ApiResponse<PagedResult<OlivePurchaseItemResponse>>
+    >(`${API_BASE_URL}olivepurchases/items/${id}?${params.toString()}`);
 
     return {
       pageNumber: httpResponse.Response.pageNumber,

@@ -1,51 +1,42 @@
-import { create } from 'zustand'
+import { create } from "zustand";
 
-import type { OliveAnalysisDetails } from '../../domain/entities/OliveAnalysisDetails'
-import type { UpdateOliveAnalysisParams } from '../../domain/params/UpdateOliveAnalysisParams'
+import type { OliveAnalysisDetails } from "../../domain/entities/OliveAnalysisDetails";
+import type { UpdateOliveAnalysisParams } from "../../domain/params/UpdateOliveAnalysisParams";
 
-import { getOliveAnalysisDetails } from '../../domain/usescases/GetOliveAnalysisDetails'
-import { updateOliveAnalysis } from '../../domain/usescases/UpdateOliveAnalysis'
-import { startOliveAnalysis } from '../../domain/usescases/StartOliveAnalysis'
-import { cancelOliveAnalysis } from '../../domain/usescases/CancelOliveAnalysis'
-import { completeOliveAnalysis } from '../../domain/usescases/CompleteOliveAnalysis'
-import type { CompleteOliveAnalysisParams } from '../../domain/params/CompleteOliveAnalysisParams'
+import { getOliveAnalysisDetails } from "../../domain/usescases/GetOliveAnalysisDetails";
+import { updateOliveAnalysis } from "../../domain/usescases/UpdateOliveAnalysis";
+import { startOliveAnalysis } from "../../domain/usescases/StartOliveAnalysis";
+import { cancelOliveAnalysis } from "../../domain/usescases/CancelOliveAnalysis";
+import { completeOliveAnalysis } from "../../domain/usescases/CompleteOliveAnalysis";
+import type { CompleteOliveAnalysisParams } from "../../domain/params/CompleteOliveAnalysisParams";
 
 type OliveAnalysisDetailsState = {
-  analysis: OliveAnalysisDetails | null
+  analysis: OliveAnalysisDetails | null;
 
-  loading: boolean
+  loading: boolean;
 
-  saving: boolean
+  saving: boolean;
 
-  error: string | null
+  error: string | null;
 
-  fetchAnalysis: (
-    id: number,
-  ) => Promise<void>
+  fetchAnalysis: (id: number) => Promise<void>;
 
   update: (
     id: number,
     params: UpdateOliveAnalysisParams,
-  ) => Promise<OliveAnalysisDetails>
+  ) => Promise<OliveAnalysisDetails>;
 
-  start: (
-    id: number,
-  ) => Promise<void>
+  start: (id: number) => Promise<void>;
 
-  complete: (
-    id: number,
-    params: CompleteOliveAnalysisParams,
-  ) => Promise<void>
+  complete: (id: number, params: CompleteOliveAnalysisParams) => Promise<void>;
 
-  cancel: (
-    id: number,
-  ) => Promise<OliveAnalysisDetails>
+  cancel: (id: number) => Promise<OliveAnalysisDetails>;
 
-  clear: () => void
-}
+  clear: () => void;
+};
 
-export const useOliveAnalysisDetailsStore =
-  create<OliveAnalysisDetailsState>((set) => ({
+export const useOliveAnalysisDetailsStore = create<OliveAnalysisDetailsState>(
+  (set) => ({
     // ============================================================
     // STATE
     // ============================================================
@@ -67,26 +58,23 @@ export const useOliveAnalysisDetailsStore =
         set({
           loading: true,
           error: null,
-        })
+        });
 
-        const analysis =
-          await getOliveAnalysisDetails(id)
+        const analysis = await getOliveAnalysisDetails(id);
 
         set({
           analysis,
-        })
+        });
       } catch (error) {
-
         set({
-          error:
-            "Impossible de charger l'analyse d'olive.",
-        })
+          error: "Impossible de charger l'analyse d'olive.",
+        });
 
-        throw error
+        throw error;
       } finally {
         set({
           loading: false,
-        })
+        });
       }
     },
 
@@ -99,34 +87,27 @@ export const useOliveAnalysisDetailsStore =
         set({
           saving: true,
           error: null,
-        })
+        });
 
-          await updateOliveAnalysis(
-            id,
-            params,
-          )
+        await updateOliveAnalysis(id, params);
 
-          
-        const analysis =
-          await getOliveAnalysisDetails(id)
+        const analysis = await getOliveAnalysisDetails(id);
 
         set({
           analysis,
-        })
+        });
 
-        return analysis
+        return analysis;
       } catch (error) {
-
         set({
-          error:
-            "Impossible de modifier l'analyse d'olive.",
-        })
+          error: "Impossible de modifier l'analyse d'olive.",
+        });
 
-        throw error
+        throw error;
       } finally {
         set({
           saving: false,
-        })
+        });
       }
     },
 
@@ -139,28 +120,25 @@ export const useOliveAnalysisDetailsStore =
         set({
           saving: true,
           error: null,
-        })
-        
-        await startOliveAnalysis(id)
+        });
 
-        const analysis =
-          await getOliveAnalysisDetails(id)
+        await startOliveAnalysis(id);
+
+        const analysis = await getOliveAnalysisDetails(id);
 
         set({
           analysis,
-        })
+        });
       } catch (error) {
-
         set({
-          error:
-            "Impossible de démarrer l'analyse d'olive.",
-        })
+          error: "Impossible de démarrer l'analyse d'olive.",
+        });
 
-        throw error
+        throw error;
       } finally {
         set({
           saving: false,
-        })
+        });
       }
     },
 
@@ -173,32 +151,25 @@ export const useOliveAnalysisDetailsStore =
         set({
           saving: true,
           error: null,
-        })
+        });
 
-        await completeOliveAnalysis(
-          id,
-          params,
-        )
+        await completeOliveAnalysis(id, params);
 
-        const analysis =
-          await getOliveAnalysisDetails(id)
+        const analysis = await getOliveAnalysisDetails(id);
 
         set({
           analysis,
-        })
-        
+        });
       } catch (error) {
-
         set({
-          error:
-            "Impossible de clôturer l'analyse d'olive.",
-        })
+          error: "Impossible de clôturer l'analyse d'olive.",
+        });
 
-        throw error
+        throw error;
       } finally {
         set({
           saving: false,
-        })
+        });
       }
     },
 
@@ -211,30 +182,27 @@ export const useOliveAnalysisDetailsStore =
         set({
           saving: true,
           error: null,
-        })
+        });
 
-        await cancelOliveAnalysis(id)
+        await cancelOliveAnalysis(id);
 
-        const analysis =
-          await getOliveAnalysisDetails(id)
+        const analysis = await getOliveAnalysisDetails(id);
 
         set({
           analysis,
-        })
+        });
 
-        return analysis
+        return analysis;
       } catch (error) {
-
         set({
-          error:
-            "Impossible d'annuler l'analyse d'olive.",
-        })
+          error: "Impossible d'annuler l'analyse d'olive.",
+        });
 
-        throw error
+        throw error;
       } finally {
         set({
           saving: false,
-        })
+        });
       }
     },
 
@@ -248,7 +216,7 @@ export const useOliveAnalysisDetailsStore =
         loading: false,
         saving: false,
         error: null,
-      })
+      });
     },
-  }))
-
+  }),
+);

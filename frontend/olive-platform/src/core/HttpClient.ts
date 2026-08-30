@@ -14,7 +14,7 @@ export type ApiResponse<T> = {
 
 export async function http<T>(
   url: string,
-  options: RequestOptions = {}
+  options: RequestOptions = {},
 ): Promise<T> {
   const { method = "GET", body, headers = {} } = options;
 
@@ -30,7 +30,6 @@ export async function http<T>(
 
   const data = await response.json().catch(() => null);
   if (!response.ok) {
-
     throw {
       code: data?.Code ?? response.status,
       message: data?.ResponseMessage ?? "HTTP Error",

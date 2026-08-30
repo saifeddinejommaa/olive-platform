@@ -1,5 +1,5 @@
 export type CreatePressingOperationInputParams = {
-  harvestId: number | null
-  purchaseItemId: number | null
-  quantityKg: number
-}
+  harvestId: number | null;
+  purchaseItemId: number | null;
+  quantityKg: number;
+};

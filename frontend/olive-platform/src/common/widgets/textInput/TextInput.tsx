@@ -18,18 +18,13 @@ export default function TextInput({
 }: TextInputProps) {
   return (
     <div className="text-input-field">
-
       {/* Label */}
 
       {label && (
         <label className="text-input-label">
           {label}
 
-          {required && (
-            <span className="text-input-required">
-              *
-            </span>
-          )}
+          {required && <span className="text-input-required">*</span>}
         </label>
       )}
 
@@ -38,31 +33,18 @@ export default function TextInput({
       <input
         {...props}
         required={required}
-        className={[
-          "text-input",
-          error ? "text-input-error" : "",
-          className,
-        ]
+        className={["text-input", error ? "text-input-error" : "", className]
           .filter(Boolean)
           .join(" ")}
       />
 
       {/* Error */}
 
-      {error && (
-        <div className="text-input-error-message">
-          {error}
-        </div>
-      )}
+      {error && <div className="text-input-error-message">{error}</div>}
 
       {/* Hint */}
 
-      {!error && hint && (
-        <div className="text-input-hint">
-          {hint}
-        </div>
-      )}
-
+      {!error && hint && <div className="text-input-hint">{hint}</div>}
     </div>
   );
 }

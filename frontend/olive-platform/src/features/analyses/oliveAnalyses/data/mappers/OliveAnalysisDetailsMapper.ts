@@ -1,5 +1,5 @@
-import type { OliveAnalysisDetails } from '../../domain/entities/OliveAnalysisDetails'
-import type { OliveAnalysisDetailsResponse } from '../repositories/responses/OliveAnalysesDetailsResponse'
+import type { OliveAnalysisDetails } from "../../domain/entities/OliveAnalysisDetails";
+import type { OliveAnalysisDetailsResponse } from "../repositories/responses/OliveAnalysesDetailsResponse";
 
 export function mapOliveAnalysisDetails(
   response: OliveAnalysisDetailsResponse,
@@ -13,31 +13,22 @@ export function mapOliveAnalysisDetails(
 
     sourceReference: response.sourceReference,
 
-    humidityPercentage:
-      response.humidityPercentage,
+    humidityPercentage: response.humidityPercentage,
 
-    waterPercentage:
-      response.waterPercentage,
+    waterPercentage: response.waterPercentage,
 
-    oilPercentage:
-      response.oilPercentage,
+    oilPercentage: response.oilPercentage,
 
-    acidityPercentage:
-      response.acidityPercentage,
+    acidityPercentage: response.acidityPercentage,
 
-    analysisDate:
-      response.analysisDate,
+    analysisDate: response.analysisDate,
 
-    createdAt:
-      response.createdAt,
+    createdAt: response.createdAt,
 
-    updatedAt:
-      response.updatedAt,
+    updatedAt: response.updatedAt,
 
-    varietyId:
-      response.varietyId,
+    varietyId: response.varietyId,
 
-    status:
-      response.status,
-  }
+    status: response.status,
+  };
 }

@@ -1,52 +1,41 @@
-import { useEffect, useState } from "react"
-import { GetOlivePurchaseItems } from "../../domain/usecases/GetOlivePurchaseItems"
-import type { OlivePurchaseItem } from "../../domain/entities/OlivePurchaseItem"
+import { useEffect, useState } from "react";
+import { GetOlivePurchaseItems } from "../../domain/usecases/GetOlivePurchaseItems";
+import type { OlivePurchaseItem } from "../../domain/entities/OlivePurchaseItem";
 
-export function UseOlivePurchaseItems(
-  purchaseId: number | null
-) {
-  const [
-    results,
-    setResults,
-  ] = useState<OlivePurchaseItem[]>([])
+export function UseOlivePurchaseItems(purchaseId: number | null) {
+  const [results, setResults] = useState<OlivePurchaseItem[]>([]);
 
-  const [
-    loading,
-    setLoading,
-  ] = useState(false)
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (!purchaseId) {
-      setResults([])
-      setLoading(false)
-      return
+      setResults([]);
+      setLoading(false);
+      return;
     }
 
     const loadItems = async () => {
-      setLoading(true)
+      setLoading(true);
 
       try {
-        const data = await GetOlivePurchaseItems(
-          purchaseId,
-          {
-            pageNumber: 1,
-            pageSize: 50,
-          }
-        )
+        const data = await GetOlivePurchaseItems(purchaseId, {
+          pageNumber: 1,
+          pageSize: 50,
+        });
 
-        setResults(data.items)
+        setResults(data.items);
       } catch (error) {
-        setResults([])
+        setResults([]);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    loadItems()
-  }, [purchaseId])
+    loadItems();
+  }, [purchaseId]);
 
   return {
     results,
     loading,
-  }
+  };
 }

@@ -27,16 +27,11 @@ export default function Select({
 }: SelectProps) {
   return (
     <div className="select-field">
-
       {label && (
         <label className="select-label">
           {label}
 
-          {required && (
-            <span className="select-required">
-              *
-            </span>
-          )}
+          {required && <span className="select-required">*</span>}
         </label>
       )}
 
@@ -52,46 +47,23 @@ export default function Select({
         <select
           {...props}
           required={required}
-          className={[
-            "custom-select",
-            className,
-          ]
-            .filter(Boolean)
-            .join(" ")}
+          className={["custom-select", className].filter(Boolean).join(" ")}
         >
-          {placeholder && (
-            <option value="">
-              {placeholder}
-            </option>
-          )}
+          {placeholder && <option value="">{placeholder}</option>}
 
           {options.map((option) => (
-            <option
-              key={option.value}
-              value={option.value}
-            >
+            <option key={option.value} value={option.value}>
               {option.label}
             </option>
           ))}
         </select>
 
-        <span className="select-chevron">
-          ▾
-        </span>
+        <span className="select-chevron">▾</span>
       </div>
 
-      {error && (
-        <div className="select-error-message">
-          {error}
-        </div>
-      )}
+      {error && <div className="select-error-message">{error}</div>}
 
-      {!error && hint && (
-        <div className="select-hint">
-          {hint}
-        </div>
-      )}
-
+      {!error && hint && <div className="select-hint">{hint}</div>}
     </div>
   );
 }

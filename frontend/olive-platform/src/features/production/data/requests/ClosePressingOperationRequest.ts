@@ -1,4 +1,4 @@
 export type ClosePressingOperationRequest = {
-  endDate: string
-  oilQuantity: number
-}
+  endDate: string;
+  oilQuantity: number;
+};

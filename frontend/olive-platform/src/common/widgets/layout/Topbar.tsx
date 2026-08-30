@@ -20,34 +20,24 @@ export default function Topbar() {
     Object.entries(pageTitles).find(([path]) =>
       path === "/"
         ? location.pathname === "/"
-        : location.pathname.startsWith(path)
+        : location.pathname.startsWith(path),
     )?.[1] ?? "Olive Platform";
 
   return (
     <header className="topbar">
       <div>
-        <h1 className="topbar-title">
-          {title}
-        </h1>
+        <h1 className="topbar-title">{title}</h1>
 
-        <div className="topbar-breadcrumb">
-          Olive Platform / {title}
-        </div>
+        <div className="topbar-breadcrumb">Olive Platform / {title}</div>
       </div>
 
       <div className="topbar-actions">
-        <button
-          type="button"
-          className="topbar-button"
-          title="Notifications"
-        >
+        <button type="button" className="topbar-button" title="Notifications">
           🔔
         </button>
 
         <div className="user-profile">
-          <div className="user-avatar">
-            SJ
-          </div>
+          <div className="user-avatar">SJ</div>
 
           <div className="user-info">
             <strong>Administrateur</strong>

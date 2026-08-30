@@ -7,46 +7,47 @@
 
 :root {
   /* --- Couleurs de marque --- */
-  --color-ink: #1F2A18;           /* texte principal, presque noir à sous-ton olive */
-  --color-olive-900: #29331B;
-  --color-olive-800: #3A4526;
-  --color-olive-700: #4B5D2C;      /* vert olivier mature — couleur primaire */
-  --color-olive-600: #5C7236;
-  --color-olive-500: #74904A;
-  --color-olive-100: #E4E9D6;
+  --color-ink: #1f2a18; /* texte principal, presque noir à sous-ton olive */
+  --color-olive-900: #29331b;
+  --color-olive-800: #3a4526;
+  --color-olive-700: #4b5d2c; /* vert olivier mature — couleur primaire */
+  --color-olive-600: #5c7236;
+  --color-olive-500: #74904a;
+  --color-olive-100: #e4e9d6;
 
-  --color-gold-700: #9C7A1F;
-  --color-gold-600: #C89B3C;       /* or de l'huile fraîche — accent principal */
-  --color-gold-500: #D9AE55;
-  --color-gold-100: #F3E6C4;
+  --color-gold-700: #9c7a1f;
+  --color-gold-600: #c89b3c; /* or de l'huile fraîche — accent principal */
+  --color-gold-500: #d9ae55;
+  --color-gold-100: #f3e6c4;
 
-  --color-rust-600: #A23B2E;       /* alerte / suppression, usage rare */
-  --color-rust-100: #F3DAD6;
+  --color-rust-600: #a23b2e; /* alerte / suppression, usage rare */
+  --color-rust-100: #f3dad6;
 
-  --color-teal-700: #2E5C55;       /* vert-bleu labo, usage rare (statuts "analysé") */
-  --color-teal-100: #DCEAE7;
+  --color-teal-700: #2e5c55; /* vert-bleu labo, usage rare (statuts "analysé") */
+  --color-teal-100: #dceae7;
 
   /* --- Neutres / surfaces --- */
-  --color-bg: #EFF1E6;             /* pierre calcaire pâle, plus verte/froide qu'un crème classique */
-  --color-surface: #FCFCF8;
-  --color-surface-raised: #FFFFFF;
-  --color-border: #DADFCB;
-  --color-border-strong: #C3CBA9;
-  --color-muted: #6B7460;
+  --color-bg: #eff1e6; /* pierre calcaire pâle, plus verte/froide qu'un crème classique */
+  --color-surface: #fcfcf8;
+  --color-surface-raised: #ffffff;
+  --color-border: #dadfcb;
+  --color-border-strong: #c3cba9;
+  --color-muted: #6b7460;
 
   /* --- Statuts sémantiques --- */
-  --color-success: #4B7A3D;
-  --color-success-bg: #E3EEDD;
-  --color-warning: #B9832A;
-  --color-warning-bg: #F6EAD2;
-  --color-danger: #A23B2E;
-  --color-danger-bg: #F3DAD6;
-  --color-info: #2E5C55;
-  --color-info-bg: #DCEAE7;
+  --color-success: #4b7a3d;
+  --color-success-bg: #e3eedd;
+  --color-warning: #b9832a;
+  --color-warning-bg: #f6ead2;
+  --color-danger: #a23b2e;
+  --color-danger-bg: #f3dad6;
+  --color-info: #2e5c55;
+  --color-info-bg: #dceae7;
 
   /* --- Typographie --- */
   --font-display: "Fraunces", "Iowan Old Style", serif;
-  --font-body: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-body:
+    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-mono: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
 
   --fs-xs: 0.75rem;
@@ -81,7 +82,9 @@
   box-sizing: border-box;
 }
 
-html, body, #root {
+html,
+body,
+#root {
   height: 100%;
 }
 
@@ -95,7 +98,10 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-h1, h2, h3, h4 {
+h1,
+h2,
+h3,
+h4 {
   font-family: var(--font-display);
   font-weight: 600;
   color: var(--color-olive-900);
@@ -106,7 +112,10 @@ a {
   color: inherit;
 }
 
-button, input, select, textarea {
+button,
+input,
+select,
+textarea {
   font-family: inherit;
   font-size: inherit;
   color: inherit;
@@ -127,7 +136,9 @@ button, input, select, textarea {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
+  *,
+  *::before,
+  *::after {
     animation-duration: 0.001ms !important;
     transition-duration: 0.001ms !important;
   }
@@ -153,7 +164,6 @@ button, input, select, textarea {
 
   box-sizing: border-box;
 }
-
 
 /* ============================================================
    FILTER HEADER
@@ -191,7 +201,6 @@ button, input, select, textarea {
   font-size: var(--fs-xs);
 }
 
-
 /* ============================================================
    FILTER CONTENT
    ============================================================ */
@@ -201,8 +210,7 @@ button, input, select, textarea {
 
   display: grid;
 
-  grid-template-columns:
-    repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
 
   gap: 18px;
 
@@ -212,7 +220,6 @@ button, input, select, textarea {
 
   text-align: left;
 }
-
 
 /* ============================================================
    FILTER ITEM
@@ -232,14 +239,12 @@ button, input, select, textarea {
   justify-content: flex-start;
 }
 
-
 /* Empêche les composants internes
    de rester centrés */
 
 .filter-item > * {
   width: 100%;
 }
-
 
 /* ============================================================
    FILTER FOOTER
@@ -263,33 +268,23 @@ button, input, select, textarea {
   border-top: 1px solid var(--color-border);
 }
 
-
 /* ============================================================
    RESPONSIVE
    ============================================================ */
 
 @media (max-width: 1200px) {
-
   .filters-content {
-    grid-template-columns:
-      repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
-
 }
-
 
 @media (max-width: 800px) {
-
   .filters-content {
-    grid-template-columns:
-      repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-
 }
 
-
 @media (max-width: 550px) {
-
   .filters {
     padding: 18px;
   }
@@ -309,7 +304,6 @@ button, input, select, textarea {
   .filters-footer .btn {
     width: 100%;
   }
-
 }
 
 .autocomplete {
@@ -403,8 +397,7 @@ button, input, select, textarea {
   border: 1px solid #d1d5db;
   border-radius: 6px;
 
-  box-shadow:
-    0 4px 12px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
 }
 
 .autocomplete-option {

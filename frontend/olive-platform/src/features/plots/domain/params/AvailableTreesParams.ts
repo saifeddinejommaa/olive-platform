@@ -1,5 +1,5 @@
 export type AvailableTreesParams = {
-    plotId: number,
-    varietyId: number,
-    harvestDate: string
-}
+  plotId: number;
+  varietyId: number;
+  harvestDate: string;
+};

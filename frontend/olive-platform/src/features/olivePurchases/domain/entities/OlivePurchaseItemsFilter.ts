@@ -1,6 +1,3 @@
-import type { PaginationFilter } from "../../../../core/PaginationFilter"
+import type { PaginationFilter } from "../../../../core/PaginationFilter";
 
-
-export type OlivePurchaseItemsFilter =
-  PaginationFilter & {
-  }
+export type OlivePurchaseItemsFilter = PaginationFilter & {};

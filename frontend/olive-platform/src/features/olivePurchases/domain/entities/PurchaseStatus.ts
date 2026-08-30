@@ -4,7 +4,7 @@ export const PurchaseStatus = {
   Approved: 3,
   Received: 4,
   Cancelled: 5,
-} as const
+} as const;
 
 export type PurchaseStatus =
-  typeof PurchaseStatus[keyof typeof PurchaseStatus]
+  (typeof PurchaseStatus)[keyof typeof PurchaseStatus];

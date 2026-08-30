@@ -1,7 +1,6 @@
-import type { PaginationFilter } from "../../../../core/PaginationFilter"
+import type { PaginationFilter } from "../../../../core/PaginationFilter";
 
-export type PlotsFilter =
-  PaginationFilter & {
-    reference?: string
-    name?: string
-  }
+export type PlotsFilter = PaginationFilter & {
+  reference?: string;
+  name?: string;
+};

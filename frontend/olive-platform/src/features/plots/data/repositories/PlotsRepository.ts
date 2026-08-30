@@ -11,7 +11,7 @@ export const PlotRepository = {
     const params = buildQueryParams(filters as any);
 
     const httpResponse = await http<ApiResponse<PagedResult<Plot>>>(
-      `${API_BASE_URL}plots?${params.toString()}`
+      `${API_BASE_URL}plots?${params.toString()}`,
     );
 
     return {
@@ -24,14 +24,14 @@ export const PlotRepository = {
 
   getById: async (id: number) => {
     const httpResponse = await http<ApiResponse<Plot>>(
-      `${API_BASE_URL}plots/${id}`
+      `${API_BASE_URL}plots/${id}`,
     );
 
     return httpResponse.Response;
   },
   getAvailableTrees: async (params: AvailableTreesParams) => {
     const httpResponse = await http<ApiResponse<number>>(
-      `${API_BASE_URL}plots/available-trees?plotId=${params.plotId}&varietyId=${params.varietyId}&harvestDate=${params.harvestDate}`
+      `${API_BASE_URL}plots/available-trees?plotId=${params.plotId}&varietyId=${params.varietyId}&harvestDate=${params.harvestDate}`,
     );
 
     return httpResponse.Response;

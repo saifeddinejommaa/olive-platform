@@ -1,20 +1,19 @@
-
 export type OliveAnalysisForListResponse = {
-  id: number
+  id: number;
 
-  total: number
+  total: number;
 
-  reference: string
+  reference: string;
 
-  sourceReference: number
+  sourceReference: number;
 
-  plotReference: number
+  plotReference: number;
 
-  analysisDate?: string
+  analysisDate?: string;
 
-  createdAt: string
+  createdAt: string;
 
-  updatedAt: string
+  updatedAt: string;
 
-  status: number
-}
+  status: number;
+};

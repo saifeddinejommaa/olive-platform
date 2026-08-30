@@ -1,30 +1,28 @@
-import type { OliveVarieties } from "../../../shared/entities/OliveVarieties"
-import type { OlivePurchaseItemResponse } from "../responses/OlivePurchaseItemResponse"
+import type { OliveVarieties } from "../../../shared/entities/OliveVarieties";
+import type { OlivePurchaseItemResponse } from "../responses/OlivePurchaseItemResponse";
 
-export function OlivePurchaseItemMapper(
-    response: OlivePurchaseItemResponse
-) {
-    return {
-        id: response.id,
+export function OlivePurchaseItemMapper(response: OlivePurchaseItemResponse) {
+  return {
+    id: response.id,
 
-        reference: response.reference,
+    reference: response.reference,
 
-        purchaseId: response.purchaseId,
+    purchaseId: response.purchaseId,
 
-        variety: response.varietyId as OliveVarieties,
+    variety: response.varietyId as OliveVarieties,
 
-        description: response.description,
+    description: response.description,
 
-        agreedQuantityKg: response.agreedQuantityKg,
+    agreedQuantityKg: response.agreedQuantityKg,
 
-        pressedQuantityKg: response.pressedQuantityKg,
+    pressedQuantityKg: response.pressedQuantityKg,
 
-        remainingQuantityKg: response.remainingQuantityKg,
+    remainingQuantityKg: response.remainingQuantityKg,
 
-        pricePerKg: response.pricePerKg,
+    pricePerKg: response.pricePerKg,
 
-        totalAmount: response.totalAmount,
+    totalAmount: response.totalAmount,
 
-        notes: response.notes
-    }
+    notes: response.notes,
+  };
 }

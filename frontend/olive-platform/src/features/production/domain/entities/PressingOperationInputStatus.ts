@@ -2,7 +2,7 @@ export const PressingOperationInputStatus = {
   Reserved: 0,
   Consumed: 1,
   Released: 2,
-} as const
+} as const;
 
 export type PressingOperationInputStatus =
-  typeof PressingOperationInputStatus[keyof typeof PressingOperationInputStatus]
+  (typeof PressingOperationInputStatus)[keyof typeof PressingOperationInputStatus];

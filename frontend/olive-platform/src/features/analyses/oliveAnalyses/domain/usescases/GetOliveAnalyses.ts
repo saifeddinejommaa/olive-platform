@@ -3,6 +3,8 @@ import { OliveAnalysesRepository } from "../../data/repositories/OliveAnalysesRe
 import type { OliveAnalysesFilters } from "../entities/OliveAnalysesFilter";
 import type { OliveAnalysis } from "../entities/OliveAnalysis";
 
-export async function getOliveAnalyses(filter: OliveAnalysesFilters) : Promise<PagedResult<OliveAnalysis>> {
+export async function getOliveAnalyses(
+  filter: OliveAnalysesFilters,
+): Promise<PagedResult<OliveAnalysis>> {
   return OliveAnalysesRepository.getAll(filter);
 }
