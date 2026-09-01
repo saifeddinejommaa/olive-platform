@@ -1,23 +1,41 @@
-﻿using OlivePlatform.Domain.Entities;
+﻿using Microsoft.EntityFrameworkCore;
+using OlivePlatform.Domain.Entities;
 using OlivePlatform.Domain.Interfaces.Repositories;
 
 namespace OlivePlatform.Infrastructure.Persistence.Repositories;
 
 public class OlivePurchaseItemRepository
-    : Repository<OlivePurchaseItem>, IOlivePurchaseItemRepository
+    : IOlivePurchaseItemRepository
 {
+    private readonly OlivePlatformAppDbContext _context;
+
     public OlivePurchaseItemRepository(OlivePlatformAppDbContext context)
-        : base(context)
     {
+        _context = context;
     }
 
-    public Task DeleteByPurchaseIdAsync(int purchaseId, CancellationToken cancellationToken = default)
+    public async Task AddAsync(OlivePurchaseItem entity, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        await _context.OlivePurchaseItems.AddAsync(entity, cancellationToken);
     }
 
-    public Task<IReadOnlyList<OlivePurchaseItem>> GetByPurchaseIdAsync(int purchaseId, CancellationToken cancellationToken = default)
+    public async Task<OlivePurchaseItem?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return await _context.OlivePurchaseItems
+         .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<OlivePurchaseItem>> GetByPurchaseIdAsync(int purchaseId, CancellationToken cancellationToken = default)
+    {
+        return await _context.OlivePurchaseItems
+         .Where(x => x.PurchaseId == purchaseId)
+         .ToListAsync(cancellationToken);
+    }
+
+    public async Task UpdateAsync(OlivePurchaseItem entity, CancellationToken cancellationToken = default)
+    {
+        _context.OlivePurchaseItems.Update(entity);
+        await _context.SaveChangesAsync(
+         cancellationToken);
     }
 }

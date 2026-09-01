@@ -1,52 +1,55 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Text;
 using YourProject.Application.Services;
-using YourProject.Domain.Entities;
 
-namespace OlivePlatform.Infrastructure.Services
+namespace OlivePlatform.Infrastructure.Services;
+
+public class DocumentNumberService : IDocumentNumberService
 {
-    public class DocumentNumberService : IDocumentNumberService
+    private readonly OlivePlatformAppDbContext _context;
+
+    public DocumentNumberService(OlivePlatformAppDbContext context)
     {
-        private readonly OlivePlatformAppDbContext _context;
+        _context = context;
+    }
 
-        public DocumentNumberService(OlivePlatformAppDbContext context)
-        {
-            _context = context;
-        }
+    public async Task<string> GenerateAsync(
+        string documentType,
+        string prefix,
+        int year,
+        CancellationToken cancellationToken = default)
+    {
+        var connection = _context.Database.GetDbConnection();
 
-        public async Task<string> GenerateAsync(
-            string documentType,
-            string prefix,
-            int year,
-            CancellationToken cancellationToken = default)
-        {
-            var counter = await _context.DocumentCounters
-                .SingleOrDefaultAsync(
-                    x =>
-                        x.DocumentType == documentType &&
-                        x.Year == year,
-                    cancellationToken);
+        await using var command = connection.CreateCommand();
 
-            if (counter == null)
-            {
-                counter = new DocumentCounter
-                {
-                    DocumentType = documentType,
-                    Year = year,
-                    LastNumber = 1,
-                };
+        command.CommandText = """
+            INSERT INTO document_counters
+                (document_type, year, last_number)
+            VALUES
+                (@document_type, @year, 1)
+            ON CONFLICT (document_type, year)
+            DO UPDATE SET
+                last_number = document_counters.last_number + 1
+            RETURNING last_number;
+            """;
 
-                _context.DocumentCounters.Add(counter);
-            }
-            else
-            {
-                counter.LastNumber++;
-            }
+        var documentTypeParameter = command.CreateParameter();
+        documentTypeParameter.ParameterName = "document_type";
+        documentTypeParameter.Value = documentType;
+        command.Parameters.Add(documentTypeParameter);
 
-            return $"{prefix}-{year}-{counter.LastNumber:D3}";
-        }
+        var yearParameter = command.CreateParameter();
+        yearParameter.ParameterName = "year";
+        yearParameter.Value = year;
+        command.Parameters.Add(yearParameter);
+
+        if (connection.State != System.Data.ConnectionState.Open)
+            await connection.OpenAsync(cancellationToken);
+
+        var result = await command.ExecuteScalarAsync(cancellationToken);
+
+        var lastNumber = Convert.ToInt32(result);
+
+        return $"{prefix}-{year}-{lastNumber:D3}";
     }
 }

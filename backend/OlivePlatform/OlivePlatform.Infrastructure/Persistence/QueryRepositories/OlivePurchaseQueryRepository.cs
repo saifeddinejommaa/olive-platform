@@ -26,22 +26,17 @@ public class OlivePurchaseQueryRepository : IOlivePurchaseQueryRepository
         OlivePurchasesRequestFilter filter)
     {
         var sql = new StringBuilder(
-            """
+            $"""
             SELECT
                 COUNT(*) OVER() AS Total,
 
-                op.id AS Id,
-                op.purchase_number AS PurchaseNumber,
-                op.supplier_name AS SupplierName,
-                op.purchase_date AS PurchaseDate,
-
-                ps.id AS Status,
-
-                COALESCE(SUM(opi.agreed_quantity_kg), 0) AS TotalQuantityKg,
-
-                COALESCE(SUM(opi.total_amount), 0) AS TotalAmount,
-
-                COUNT(opi.id) AS ItemsCount
+                op.id AS {nameof(OlivePurchaseForListResponse.Id)},
+                op.reference AS {nameof(OlivePurchaseForListResponse.Reference)},
+                op.supplier_name AS {nameof(OlivePurchaseForListResponse.SupplierName)},
+                op.purchase_date AS {nameof(OlivePurchaseForListResponse.PurchaseDate)},
+                op.created_at AS {nameof(OlivePurchaseForListResponse.CreatedAt)},
+                ps.id AS {nameof(OlivePurchaseForListResponse.Status)},
+                COALESCE(SUM(opi.agreed_quantity_kg), 0) AS {nameof(OlivePurchaseForListResponse.TotalQuantityKg)}
 
             FROM olive_purchases op
 
@@ -197,7 +192,7 @@ public class OlivePurchaseQueryRepository : IOlivePurchaseQueryRepository
 
             GROUP BY
                 op.id,
-                op.purchase_number,
+                op.reference,
                 op.supplier_name,
                 op.purchase_date,
                 ps.id
@@ -211,7 +206,7 @@ public class OlivePurchaseQueryRepository : IOlivePurchaseQueryRepository
         sql.Append(
             """
 
-            ORDER BY op.purchase_date DESC, op.purchase_number
+            ORDER BY op.purchase_date DESC, op.reference
 
             LIMIT @PageSize
             OFFSET @Offset

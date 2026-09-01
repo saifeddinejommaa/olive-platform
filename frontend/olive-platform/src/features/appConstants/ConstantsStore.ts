@@ -15,13 +15,12 @@ type AppConstantsState = {
 
 const initialConstants: AppConstants = {
   oliveVarieties: [],
-  sampleStatuses: [],
-  productionStatuses: [],
+  productionStatus: [],
   oilMovementTypes: [],
   invoiceTypes: [],
   invoiceStatuses: [],
   paymentMethods: [],
-  purchaseStatuses: [],
+  purchaseStatus: [],
 };
 
 export const useConstantsStore = create<AppConstantsState>()(

@@ -1,19 +1,12 @@
+import type { PurchaseStatus } from "../../domain/entities/PurchaseStatus";
+
 export type OlivePurchaseResponse = {
-  total: number;
-
-  id: number;
-
-  purchaseNumber: string;
-
+ id: number;
+  reference: string;
   supplierName: string;
-
   purchaseDate: string;
-
-  status: number;
-
+  status: PurchaseStatus;
+  createdAt: string;
   totalQuantityKg: number;
-
-  totalAmount: number;
-
-  itemsCount: number;
+  pricePerKg: number;
 };

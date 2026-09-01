@@ -87,7 +87,7 @@ export default function OlivePurchasesPage() {
       label: "Tous les statuts",
     },
 
-    ...Appconstants.purchaseStatuses.map((status) => ({
+    ...Appconstants.purchaseStatus.map((status) => ({
       value: String(status.id),
       label: status.label,
     })),

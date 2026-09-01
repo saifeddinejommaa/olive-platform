@@ -4,6 +4,7 @@ import type { PagedResult } from "../../../../core/PagedResult";
 import { buildQueryParams } from "../../../../core/QueryUtils";
 import type { OlivePurchasesFilter } from "../../domain/entities/OlivePurchaseFilter";
 import type { OlivePurchaseItemsFilter } from "../../domain/entities/OlivePurchaseItemsFilter";
+import type { CreateOlivePurchaseParams } from "../../domain/params/CreateOlivePurchaseParams";
 import { OlivePurchaseItemMapper } from "../mappers/OlivePurchaseItemMapper";
 import { OlivePurchaseMapper } from "../mappers/OlivePurchaseMapper";
 import type { OlivePurchaseItemResponse } from "../responses/OlivePurchaseItemResponse";
@@ -40,4 +41,11 @@ export const OlivePurchaseRepository = {
       items: httpResponse.Response.items.map(OlivePurchaseItemMapper),
     };
   },
+
+  create: (params: CreateOlivePurchaseParams) => {
+      return http<ApiResponse<number>>(`${API_BASE_URL}olivepurchases`, {
+        method: "POST",
+        body: params,
+      });
+    },
 };

@@ -2,14 +2,11 @@ import type { PurchaseStatus } from "./PurchaseStatus";
 
 export type OlivePurchase = {
   id: number;
-
-  purchaseNumber: string;
-
+  reference: string;
   supplierName: string;
-
   purchaseDate: string;
-
-  status: PurchaseStatus | null;
-
+  status: PurchaseStatus;
+  createdAt: string;
+  updatedAt?: string;
   notes: string | null;
 };

@@ -16,6 +16,7 @@ import { renderStatus } from "../../../shared/utils/StatusUtils";
 import { productionStatusConfig } from "../../../shared/status/ProductionStatusConfig";
 
 import type { HarvestStockParams } from "../../domain/params/HarvestStockParams";
+import CheckboxField from "../../../../common/widgets/checkBoxField/CheckboxField";
 
 type HarvestForm = {
   plotId: number;
@@ -400,7 +401,7 @@ export default function HarvestDetailsPage() {
               label="Référence"
               value={harvest.reference ?? ""}
               disabled
-              onChange={() => {}}
+              onChange={() => { }}
             />
           </div>
 
@@ -459,7 +460,7 @@ export default function HarvestDetailsPage() {
               type="number"
               value={harvest.harvestedTrees ?? 0}
               disabled
-              onChange={() => {}}
+              onChange={() => { }}
             />
           </div>
 
@@ -469,7 +470,7 @@ export default function HarvestDetailsPage() {
               type="number"
               value={harvest.quantityKg ?? 0}
               disabled
-              onChange={() => {}}
+              onChange={() => { }}
             />
           </div>
 
@@ -503,7 +504,7 @@ export default function HarvestDetailsPage() {
                     type="number"
                     value={stock.quantityKg}
                     disabled
-                    onChange={() => {}}
+                    onChange={() => { }}
                   />
                 </div>
               ))}
@@ -638,51 +639,15 @@ export default function HarvestDetailsPage() {
             )}
           </div>
 
-          <div
-            style={{
-              padding: "16px",
-              border: "1px solid #e5e7eb",
-              borderRadius: "8px",
-              background: "#fafafa",
-            }}
-          >
-            <label
-              style={{
-                display: "flex",
-                alignItems: "flex-start",
-                gap: "12px",
-                cursor: saving ? "not-allowed" : "pointer",
-              }}
-            >
-              <input
-                type="checkbox"
-                checked={completeForm.proceedAnalyse}
-                onChange={(event) =>
-                  updateCompleteForm("proceedAnalyse", event.target.checked)
-                }
-                disabled={saving}
-                style={{
-                  width: "18px",
-                  height: "18px",
-                  marginTop: "2px",
-                  flexShrink: 0,
-                }}
-              />
-              <div>
-                <strong>Procéder à une analyse</strong>
-                <div
-                  style={{
-                    marginTop: "4px",
-                    fontSize: "13px",
-                    color: "#6b7280",
-                  }}
-                >
-                  Une analyse des olives sera créée lors de la clôture de la
-                  récolte.
-                </div>
-              </div>
-            </label>
-          </div>
+          <CheckboxField
+            label="Procéder à une analyse"
+            description="Une analyse des olives sera créée lors de la clôture de la récolte."
+            checked={completeForm.proceedAnalyse}
+            onChange={(checked) =>
+              updateCompleteForm("proceedAnalyse", checked)
+            }
+            disabled={saving}
+          />
 
           <div
             style={{ display: "flex", flexDirection: "column", gap: "12px" }}
