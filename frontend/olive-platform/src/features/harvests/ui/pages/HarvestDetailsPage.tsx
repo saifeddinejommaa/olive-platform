@@ -401,7 +401,7 @@ export default function HarvestDetailsPage() {
               label="Référence"
               value={harvest.reference ?? ""}
               disabled
-              onChange={() => { }}
+              onChange={() => {}}
             />
           </div>
 
@@ -460,7 +460,7 @@ export default function HarvestDetailsPage() {
               type="number"
               value={harvest.harvestedTrees ?? 0}
               disabled
-              onChange={() => { }}
+              onChange={() => {}}
             />
           </div>
 
@@ -470,7 +470,7 @@ export default function HarvestDetailsPage() {
               type="number"
               value={harvest.quantityKg ?? 0}
               disabled
-              onChange={() => { }}
+              onChange={() => {}}
             />
           </div>
 
@@ -504,7 +504,7 @@ export default function HarvestDetailsPage() {
                     type="number"
                     value={stock.quantityKg}
                     disabled
-                    onChange={() => { }}
+                    onChange={() => {}}
                   />
                 </div>
               ))}

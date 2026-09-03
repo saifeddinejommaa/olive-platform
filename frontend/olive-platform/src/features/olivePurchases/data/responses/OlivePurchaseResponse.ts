@@ -1,7 +1,7 @@
 import type { PurchaseStatus } from "../../domain/entities/PurchaseStatus";
 
 export type OlivePurchaseResponse = {
- id: number;
+  id: number;
   reference: string;
   supplierName: string;
   purchaseDate: string;

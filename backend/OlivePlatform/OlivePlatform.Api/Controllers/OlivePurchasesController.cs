@@ -30,16 +30,17 @@ public class OlivePurchasesController : ControllerBase
     }
 
     [HttpGet("{id:int}")]
-    public async Task<IActionResult> GetById(int id)
+    public async Task<IActionResult> GetOlivePurchaseDetails(int id)
     {
-        var result = await _queryRepository.GetOlivePurchaseById(id);
+        var result = await _queryRepository.GetOlivePurchaseDetails(id);
 
         return result is null ? NotFound() : Ok(result);
     }
+
     [HttpGet("items/{purchaseId:int}", Name = nameof(GetPurchaseItems))]
-    public async Task<IActionResult> GetPurchaseItems(int purchaseId, [FromQuery] OlivePurchaseItemsRequestFilter filter)
+    public async Task<IActionResult> GetPurchaseItems(int purchaseId)
     {
-        var result = await _queryRepository.GetOlivePurchaseItems(purchaseId, filter);
+        var result = await _queryRepository.GetOlivePurchaseItems(purchaseId);
 
         return result is null ? NotFound() : Ok(result);
     }

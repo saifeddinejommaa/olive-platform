@@ -1,16 +1,22 @@
 import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import DataTable from "../../../../common/widgets/tables/OrdersTable";
 import Button from "../../../../common/widgets/button/Button";
 import TextInput from "../../../../common/widgets/textInput/TextInput";
 import Select from "../../../../common/widgets/select/Select";
+import EditIcon from "@mui/icons-material/Edit";
 
 import type { OlivePurchase } from "../../domain/entities/OlivePurchase";
 import type { OlivePurchasesFilter } from "../../domain/entities/OlivePurchaseFilter";
 
 import { useOlivePurchasesStore } from "../stores/OlivePurchaseStore";
 import { useConstantsStore } from "../../../appConstants/ConstantsStore";
+import { renderStatus } from "../../../shared/utils/StatusUtils";
+import { purchaseStatusConfig } from "../../../shared/status/PurchaseStatusConfig";
 
 export default function OlivePurchasesPage() {
+  const navigate = useNavigate();
+
   const {
     olivePurchases,
     loading,
@@ -27,23 +33,14 @@ export default function OlivePurchasesPage() {
     fetchConstants,
   } = useConstantsStore();
 
-  /**
-   * Chargement des constantes
-   */
   useEffect(() => {
     fetchConstants();
   }, [fetchConstants]);
 
-  /**
-   * Chargement initial des achats
-   */
   useEffect(() => {
     fetchOlivePurchases();
   }, [fetchOlivePurchases]);
 
-  /**
-   * Modification d'un filtre
-   */
   const updateFilter = (
     field: keyof OlivePurchasesFilter,
     value: string | number,
@@ -51,47 +48,35 @@ export default function OlivePurchasesPage() {
     setFilter(field, value);
   };
 
-  /**
-   * Recherche
-   */
   const handleSearch = async () => {
     setFilter("pageNumber", 1);
-
     await fetchOlivePurchases();
   };
 
-  /**
-   * Réinitialisation des filtres
-   */
   const handleReset = async () => {
     clearFilters();
-
     await fetchOlivePurchases();
   };
 
-  /**
-   * Pagination
-   */
   const handlePageChange = async (page: number) => {
     setFilter("pageNumber", page);
-
     await fetchOlivePurchases();
   };
 
-  /**
-   * Options des statuts
-   */
   const statusOptions = [
     {
       value: "",
       label: "Tous les statuts",
     },
-
     ...Appconstants.purchaseStatus.map((status) => ({
       value: String(status.id),
       label: status.label,
     })),
   ];
+
+  const handleOpenDetails = (id: number) => {
+    window.open(`/olive-purchases/${id}`, "_blank", "noopener,noreferrer");
+  };
 
   const columns = [
     {
@@ -114,15 +99,41 @@ export default function OlivePurchasesPage() {
     {
       key: "status" as keyof OlivePurchase,
       label: "Statut",
+      render: (item: OlivePurchase) =>
+        renderStatus(item.status, purchaseStatusConfig),
+    },
+
+    {
+      key: "id" as keyof OlivePurchase,
+
+      label: "Actions",
+
+      render: (item: OlivePurchase) => (
+        <button
+          type="button"
+          title="Modifier l'analyse"
+          aria-label="Modifier l'analyse"
+          onClick={() => handleOpenDetails(item.id)}
+          style={{
+            background: "none",
+            border: "none",
+            cursor: "pointer",
+            padding: "6px",
+          }}
+        >
+          <EditIcon
+            fontSize="small"
+            sx={{
+              color: "var(--color-olive-900)",
+            }}
+          />
+        </button>
+      ),
     },
   ];
 
   return (
     <div className="feature-page">
-      {/* =====================================================
-          HEADER
-          ===================================================== */}
-
       <div className="page-header">
         <div className="page-header-content">
           <h1 className="page-title">Achats d’olives</h1>
@@ -132,10 +143,6 @@ export default function OlivePurchasesPage() {
           </p>
         </div>
       </div>
-
-      {/* =====================================================
-          FILTERS
-          ===================================================== */}
 
       <div className="filters">
         <div className="filters-header">
@@ -147,8 +154,6 @@ export default function OlivePurchasesPage() {
         </div>
 
         <div className="filters-content">
-          {/* N° ACHAT */}
-
           <div className="filter-item">
             <TextInput
               label="N° Achat"
@@ -159,8 +164,6 @@ export default function OlivePurchasesPage() {
               }
             />
           </div>
-
-          {/* FOURNISSEUR */}
 
           <div className="filter-item">
             <TextInput
@@ -173,8 +176,6 @@ export default function OlivePurchasesPage() {
             />
           </div>
 
-          {/* DATE DEBUT */}
-
           <div className="filter-item">
             <TextInput
               label="Du"
@@ -183,8 +184,6 @@ export default function OlivePurchasesPage() {
               onChange={(event) => updateFilter("fromDate", event.target.value)}
             />
           </div>
-
-          {/* DATE FIN */}
 
           <div className="filter-item">
             <TextInput
@@ -195,8 +194,6 @@ export default function OlivePurchasesPage() {
             />
           </div>
 
-          {/* STATUT */}
-
           <div className="filter-item">
             <Select
               label="Statut"
@@ -206,10 +203,6 @@ export default function OlivePurchasesPage() {
             />
           </div>
         </div>
-
-        {/* =====================================================
-            FILTER FOOTER
-            ===================================================== */}
 
         <div className="filters-footer">
           <Button variant="secondary" onClick={handleReset} disabled={loading}>
@@ -226,15 +219,7 @@ export default function OlivePurchasesPage() {
         </div>
       </div>
 
-      {/* =====================================================
-          ERROR
-          ===================================================== */}
-
       {error && <div className="error-message">{error}</div>}
-
-      {/* =====================================================
-          TABLE
-          ===================================================== */}
 
       <DataTable
         data={olivePurchases.items}
@@ -244,10 +229,6 @@ export default function OlivePurchasesPage() {
         totalCount={olivePurchases.totalCount}
         onPageChange={handlePageChange}
       />
-
-      {/* =====================================================
-          LOADING
-          ===================================================== */}
 
       {(loading || constantsLoading) && (
         <div className="loading">

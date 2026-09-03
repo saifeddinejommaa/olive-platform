@@ -1,5 +1,5 @@
 import type { OliveAnalysisDetails } from "../../domain/entities/OliveAnalysisDetails";
-import type { OliveAnalysisDetailsResponse } from "../repositories/responses/OliveAnalysesDetailsResponse";
+import type { OliveAnalysisDetailsResponse } from "../responses/OliveAnalysesDetailsResponse";
 
 export function mapOliveAnalysisDetails(
   response: OliveAnalysisDetailsResponse,

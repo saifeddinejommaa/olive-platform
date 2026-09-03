@@ -1,6 +1,6 @@
 import type { ProductionStatus } from "../../../../production/domain/entities/ProductionStatus";
 import type { OliveAnalysis } from "../../domain/entities/OliveAnalysis";
-import type { OliveAnalysisForListResponse } from "../repositories/responses/OliveAnalysesResponse";
+import type { OliveAnalysisForListResponse } from "../responses/OliveAnalysesResponse";
 
 export function OliveAnalysisMapper(
   response: OliveAnalysisForListResponse,

@@ -10,9 +10,15 @@ import Select from "../../../../common/widgets/select/Select";
 import { useConstantsStore } from "../../../appConstants/ConstantsStore";
 import { useCreateOlivePurchase } from "../hooks/UseCreateOlivePurchase";
 import type { CreateOlivePurchaseParams } from "../../domain/params/CreateOlivePurchaseParams";
-import NewOlivePurchaseItemsWidget, {
-  type OlivePurchaseItemForm,
-} from "../widgets/NewOlivePurchaseItemsWidget";
+import CheckboxField from "../../../../common/widgets/checkBoxField/CheckboxField";
+
+type OlivePurchaseItemForm = {
+  id: string;
+  varietyId: number | null;
+  agreedQuantityKg: string;
+  pricePerKg: string;
+  goesToAnalysis: boolean;
+};
 
 type NewOlivePurchaseForm = {
   supplierName: string;
@@ -44,8 +50,6 @@ export default function NewOlivePurchasePage() {
     label: status.label,
   }));
 
-  
-
   const varietyOptions = Appconstants.oliveVarieties.map((variety) => ({
     value: variety.id.toString(),
     label: variety.label,
@@ -66,7 +70,7 @@ export default function NewOlivePurchasePage() {
         (total, item) =>
           total +
           Number(item.agreedQuantityKg || 0) *
-            Number(item.pricePerKg || 0),
+          Number(item.pricePerKg || 0),
         0,
       ),
     [form.items],
@@ -195,9 +199,9 @@ export default function NewOlivePurchasePage() {
         items: previous.items.map((item) =>
           item.id === id
             ? {
-                ...item,
-                [field]: value,
-              }
+              ...item,
+              [field]: value,
+            }
             : item,
         ),
       }));
@@ -314,7 +318,10 @@ export default function NewOlivePurchasePage() {
               label="Fournisseur"
               value={form.supplierName}
               onChange={(event) =>
-                updateForm("supplierName", event.target.value)
+                updateForm(
+                  "supplierName",
+                  event.target.value,
+                )
               }
             />
 
@@ -331,7 +338,10 @@ export default function NewOlivePurchasePage() {
               type="date"
               value={form.purchaseDate}
               onChange={(event) =>
-                updateForm("purchaseDate", event.target.value)
+                updateForm(
+                  "purchaseDate",
+                  event.target.value,
+                )
               }
             />
 
@@ -385,16 +395,172 @@ export default function NewOlivePurchasePage() {
         </div>
       </div>
 
-      <NewOlivePurchaseItemsWidget
-        items={form.items}
-        varietyOptions={varietyOptions}
-        errors={errors}
-        constantsLoading={constantsLoading}
-        saving={saving}
-        onAdd={addItem}
-        onRemove={removeItem}
-        onUpdate={updateItem}
-      />
+      <div className="filters">
+        <div
+          className="filters-header"
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <div>
+            <h3>Lignes d'achat</h3>
+
+            <span>
+              Définissez les olives achetées, les quantités et les prix.
+            </span>
+          </div>
+
+          <Button
+            variant="secondary"
+            onClick={addItem}
+            disabled={saving}
+          >
+            Ajouter une ligne
+          </Button>
+        </div>
+
+        <div className="filters-content">
+          {form.items.length === 0 && (
+            <div style={{ gridColumn: "1 / -1" }}>
+              <span>
+                Aucune ligne d'achat. Ajoutez une ligne pour commencer.
+              </span>
+            </div>
+          )}
+
+          {form.items.map((item, index) => (
+            <div
+              key={item.id}
+              style={{
+                gridColumn: "1 / -1",
+                display: "grid",
+                gridTemplateColumns:
+                  "1.5fr 1fr 1fr auto auto",
+                gap: "15px",
+                alignItems: "start",
+                padding: "15px 0",
+                borderBottom:
+                  index < form.items.length - 1
+                    ? "1px solid #eee"
+                    : "none",
+              }}
+            >
+              <div className="filter-item">
+                <label>Variété</label>
+
+                <Select
+                  options={varietyOptions}
+                  placeholder={
+                    constantsLoading
+                      ? "Chargement..."
+                      : "Sélectionnez une variété"
+                  }
+                  value={item.varietyId ?? ""}
+                  onChange={(event) =>
+                    updateItem(
+                      item.id,
+                      "varietyId",
+                      event.target.value
+                        ? Number(event.target.value)
+                        : null,
+                    )
+                  }
+                />
+
+                {errors[`variety-${item.id}`] && (
+                  <span className="field-error">
+                    {errors[`variety-${item.id}`]}
+                  </span>
+                )}
+              </div>
+
+              <div className="filter-item">
+                <TextInput
+                  label="Quantité (kg)"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={item.agreedQuantityKg}
+                  onChange={(event) =>
+                    updateItem(
+                      item.id,
+                      "agreedQuantityKg",
+                      event.target.value,
+                    )
+                  }
+                />
+
+                {errors[`quantity-${item.id}`] && (
+                  <span className="field-error">
+                    {errors[`quantity-${item.id}`]}
+                  </span>
+                )}
+              </div>
+
+              <div className="filter-item">
+                <TextInput
+                  label="Prix / kg"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={item.pricePerKg}
+                  onChange={(event) =>
+                    updateItem(
+                      item.id,
+                      "pricePerKg",
+                      event.target.value,
+                    )
+                  }
+                />
+
+                {errors[`price-${item.id}`] && (
+                  <span className="field-error">
+                    {errors[`price-${item.id}`]}
+                  </span>
+                )}
+              </div>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  minWidth: "190px",
+                  height: "100%",
+                }}
+              >
+                <CheckboxField
+                  label="Procéder à une analyse"
+                  checked={item.goesToAnalysis}
+                  onChange={(checked) =>
+                    updateItem(item.id, "goesToAnalysis", checked)
+                  }
+                  disabled={saving}
+                />
+              </div>
+
+              <div style={{ paddingTop: "28px" }}>
+                <Button
+                  variant="secondary"
+                  onClick={() => removeItem(item.id)}
+                  disabled={saving}
+                >
+                  Supprimer
+                </Button>
+              </div>
+            </div>
+          ))}
+
+          {errors.items && (
+            <span
+              className="field-error"
+              style={{ gridColumn: "1 / -1" }}
+            >
+              {errors.items}
+            </span>
+          )}
+        </div>
+      </div>
 
       <div className="filters">
         <div className="filters-header">

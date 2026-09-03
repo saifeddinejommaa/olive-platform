@@ -10,10 +10,9 @@ public interface IOlivePurchaseQueryRepository
     Task<PagedResult<OlivePurchaseForListResponse>> GetOlivePurchases(
         OlivePurchasesRequestFilter filter);
 
-    Task<PagedResult<OlivePurchaseItemResponse>> GetOlivePurchaseItems(int purchaseId,
-        OlivePurchaseItemsRequestFilter filter);
+    Task<List<OlivePurchaseItemDetailsResponse>> GetOlivePurchaseItems(int purchaseId);
 
-    Task<OlivePurchaseForDetailsResponse?> GetOlivePurchaseById(
+    Task<OlivePurchaseDetailsResponse?> GetOlivePurchaseDetails(
         int id);
 
     Task<OlivePurchase?> GetByIdAsync(

@@ -7,9 +7,7 @@ export function mapConstantsResponseToModel(
 ): AppConstants {
   return {
     oliveVarieties: mapConstantItemResponseToModel(response.oliveVarieties),
-    productionStatus: mapConstantItemResponseToModel(
-      response.productionStatus,
-    ),
+    productionStatus: mapConstantItemResponseToModel(response.productionStatus),
     oilMovementTypes: mapConstantItemResponseToModel(response.oilMovementTypes),
     invoiceTypes: mapConstantItemResponseToModel(response.invoiceTypes),
     invoiceStatuses: mapConstantItemResponseToModel(response.invoiceStatuses),
