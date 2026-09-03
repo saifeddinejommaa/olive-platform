@@ -10,17 +10,21 @@ import Button from "../../../../common/widgets/button/Button";
 import PurchaseTabs from "../components/PurchaseTabs";
 import OlivePurchaseGeneralTab from "../components/OlivePurchaseGeneralTab";
 import OlivePurchaseItemsTab from "../components/OlivePurchaseItemsTab";
+import ClosePurchaseDrawer from "../components/ClosePurchaseDrawer";
 
 export default function OlivePurchaseDetailsPage() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const [activeTab, setActiveTab] = useState<PurchaseTab>("general");
+  const [closeDrawerOpen, setCloseDrawerOpen] = useState(false);
 
   const { details, saving, fetchPurchase, validate, clear } =
     useOlivePurchaseDetailsStore();
 
-  const { fetchItems, clear: clearItems } =
-    useOlivePurchaseItemsStore();
+  const { fetchItems, clear: clearItems } = useOlivePurchaseItemsStore();
+
+  const isDraft = details?.status === PurchaseStatus.Draft;
+  const isPending = details?.status === PurchaseStatus.Pending;
 
   useEffect(() => {
     if (!id) return;
@@ -39,6 +43,11 @@ export default function OlivePurchaseDetailsPage() {
     };
   }, [clear, clearItems]);
 
+  const handleConfirmClose = async () => {
+    await validate(Number(id));
+    setCloseDrawerOpen(false);
+  };
+
   return (
     <div className="feature-page">
       <div className="page-header">
@@ -47,16 +56,24 @@ export default function OlivePurchaseDetailsPage() {
           {details && renderStatus(details.status, purchaseStatusConfig)}
         </div>
 
-        {details?.status === PurchaseStatus.Draft && (
+        {isDraft && (
           <Button variant="primary" onClick={() => validate(Number(id))} disabled={saving}>
-            {saving ? "Validation..." : "Valider l'achat"}
+            {saving ? "Lancement..." : "Lancer l'étude"}
+          </Button>
+        )}
+
+        {isPending && (
+          <Button variant="primary" onClick={() => setCloseDrawerOpen(true)} disabled={saving}>
+            Clôturer l'achat
           </Button>
         )}
       </div>
 
       <PurchaseTabs activeTab={activeTab} onChange={setActiveTab} />
 
-      {activeTab === "general" && details && <OlivePurchaseGeneralTab purchase={details} />}
+      {activeTab === "general" && details && (
+        <OlivePurchaseGeneralTab purchase={details} onNotesChange={() => {}} />
+      )}
       {activeTab === "olives" && <OlivePurchaseItemsTab purchaseId={Number(id)} />}
 
       <div className="filters-footer">
@@ -64,6 +81,16 @@ export default function OlivePurchaseDetailsPage() {
           Retour
         </Button>
       </div>
+
+      {details && (
+        <ClosePurchaseDrawer
+          open={closeDrawerOpen}
+          saving={saving}
+          purchase={details}
+          onClose={() => setCloseDrawerOpen(false)}
+          onConfirm={handleConfirmClose}
+        />
+      )}
     </div>
   );
 }

@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import OlivePurchaseItemCardWidget from "../widgets/OlivePurchaseItemCard";
+import OlivePurchaseItemCardWidget from "../widgets/OlivePurchaseItemCardWidget";
 import { useOlivePurchaseItemsStore } from "../stores/OlivePurchaseItemsStore";
 
 type Props = {

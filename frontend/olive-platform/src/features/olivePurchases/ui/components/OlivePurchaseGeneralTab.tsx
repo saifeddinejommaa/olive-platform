@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
 import TextEditor from "../../../../common/widgets/textEditor/TextEditor";
-import type { OlivePurchaseDetails } from "../../domain/entities/OlivePurchaseDetails";
 import InfoFieldWidget from "../../../../common/widgets/InfoFieldWidget";
+import type { OlivePurchaseDetails } from "../../domain/entities/OlivePurchaseDetails";
 
 type Props = {
   purchase: OlivePurchaseDetails;
+  onNotesChange: (notes: string) => void;
 };
 
 const formatDate = (value: string) => {
@@ -17,13 +17,7 @@ const formatDateTime = (value?: string) => {
   return new Date(value).toLocaleString("fr-FR");
 };
 
-export default function OlivePurchaseGeneralTab({ purchase }: Props) {
-  const [notes, setNotes] = useState(purchase.notes ?? "");
-
-  useEffect(() => {
-    setNotes(purchase.notes ?? "");
-  }, [purchase]);
-
+export default function OlivePurchaseGeneralTab({ purchase, onNotesChange }: Props) {
   return (
     <div className="filters">
       <div className="filters-header">
@@ -43,9 +37,9 @@ export default function OlivePurchaseGeneralTab({ purchase }: Props) {
         <div className="filter-item" style={{ gridColumn: "1 / -1" }}>
           <span className="filter-item-label">Notes</span>
           <TextEditor
-            value={notes}
+            value={purchase.notes??""}
             placeholder="Notes concernant l'achat..."
-            onChange={setNotes}
+            onChange={onNotesChange}
           />
         </div>
       </div>
