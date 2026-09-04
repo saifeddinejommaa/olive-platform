@@ -246,6 +246,25 @@ textarea {
   width: 100%;
 }
 
+.filter-item-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.filter-item-value {
+  font-size: 14px;
+  color: #111827;
+}
+
+.filter-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
 /* ============================================================
    FILTER FOOTER
    ============================================================ */

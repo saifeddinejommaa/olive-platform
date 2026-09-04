@@ -9,8 +9,4 @@ public interface IOlivePurchaseItemRepository
     Task<IReadOnlyList<OlivePurchaseItem>> GetByPurchaseIdAsync(
         int purchaseId,
         CancellationToken cancellationToken = default);
-
-    Task DeleteByPurchaseIdAsync(
-        int purchaseId,
-        CancellationToken cancellationToken = default);
 }

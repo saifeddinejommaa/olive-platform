@@ -1,5 +1,6 @@
 ﻿using Dapper;
 using OlivePlatform.Application.Common;
+using OlivePlatform.Application.Features.Analysis.Responses;
 using OlivePlatform.Application.Features.OlivePurchases.Requests;
 using OlivePlatform.Application.Features.OlivePurchases.Responses;
 using OlivePlatform.Domain.Entities;
@@ -26,22 +27,17 @@ public class OlivePurchaseQueryRepository : IOlivePurchaseQueryRepository
         OlivePurchasesRequestFilter filter)
     {
         var sql = new StringBuilder(
-            """
+            $"""
             SELECT
                 COUNT(*) OVER() AS Total,
 
-                op.id AS Id,
-                op.purchase_number AS PurchaseNumber,
-                op.supplier_name AS SupplierName,
-                op.purchase_date AS PurchaseDate,
-
-                ps.id AS Status,
-
-                COALESCE(SUM(opi.agreed_quantity_kg), 0) AS TotalQuantityKg,
-
-                COALESCE(SUM(opi.total_amount), 0) AS TotalAmount,
-
-                COUNT(opi.id) AS ItemsCount
+                op.id AS {nameof(OlivePurchaseForListResponse.Id)},
+                op.reference AS {nameof(OlivePurchaseForListResponse.Reference)},
+                op.supplier_name AS {nameof(OlivePurchaseForListResponse.SupplierName)},
+                op.purchase_date AS {nameof(OlivePurchaseForListResponse.PurchaseDate)},
+                op.created_at AS {nameof(OlivePurchaseForListResponse.CreatedAt)},
+                ps.id AS {nameof(OlivePurchaseForListResponse.Status)},
+                COALESCE(SUM(opi.agreed_quantity_kg), 0) AS {nameof(OlivePurchaseForListResponse.TotalQuantityKg)}
 
             FROM olive_purchases op
 
@@ -197,7 +193,7 @@ public class OlivePurchaseQueryRepository : IOlivePurchaseQueryRepository
 
             GROUP BY
                 op.id,
-                op.purchase_number,
+                op.reference,
                 op.supplier_name,
                 op.purchase_date,
                 ps.id
@@ -211,7 +207,7 @@ public class OlivePurchaseQueryRepository : IOlivePurchaseQueryRepository
         sql.Append(
             """
 
-            ORDER BY op.purchase_date DESC, op.purchase_number
+            ORDER BY op.purchase_date DESC, op.reference
 
             LIMIT @PageSize
             OFFSET @Offset
@@ -242,151 +238,65 @@ public class OlivePurchaseQueryRepository : IOlivePurchaseQueryRepository
     // GET OLIVE PURCHASE BY ID - DETAILS
     // ============================================================
 
-    public async Task<OlivePurchaseForDetailsResponse?> GetOlivePurchaseById(
-        int id)
+    public async Task<OlivePurchaseDetailsResponse?> GetOlivePurchaseDetails(
+    int id)
     {
         const string purchaseSql =
-            """
-            SELECT
-                op.id AS Id,
+            $"""
+        SELECT
+            op.id AS {nameof(OlivePurchaseDetailsResponse.Id)},
 
-                op.purchase_number AS PurchaseNumber,
+            op.reference AS {nameof(OlivePurchaseDetailsResponse.Reference)},
 
-                op.supplier_name AS SupplierName,
+            op.supplier_name AS {nameof(OlivePurchaseDetailsResponse.SupplierName)},
 
-                op.purchase_date AS PurchaseDate,
+            op.purchase_date AS {nameof(OlivePurchaseDetailsResponse.PurchaseDate)},
 
-                ps.id AS Status,
+            ps.id AS {nameof(OlivePurchaseDetailsResponse.Status)},
 
-                op.notes AS Notes,
+            op.created_at AS {nameof(OlivePurchaseDetailsResponse.CreatedAt)},
 
-                COALESCE(
-                    (
-                        SELECT SUM(opi.agreed_quantity_kg)
-                        FROM olive_purchase_items opi
-                        WHERE opi.purchase_id = op.id
-                    ),
-                    0
-                ) AS TotalQuantityKg,
+            op.updated_at AS {nameof(OlivePurchaseDetailsResponse.UpdatedAt)},
 
-                COALESCE(
-                    (
-                        SELECT SUM(opi.total_amount)
-                        FROM olive_purchase_items opi
-                        WHERE opi.purchase_id = op.id
-                    ),
-                    0
-                ) AS TotalAmount
+            COALESCE(
+                (
+                    SELECT SUM(opi.agreed_quantity_kg)
+                    FROM olive_purchase_items opi
+                    WHERE opi.purchase_id = op.id
+                ),
+                0
+            ) AS {nameof(OlivePurchaseDetailsResponse.TotalQuantity)},
 
-            FROM olive_purchases op
+            COALESCE(
+                (
+                    SELECT SUM(
+                        opi.agreed_quantity_kg * opi.price_per_kg
+                    )
+                    FROM olive_purchase_items opi
+                    WHERE opi.purchase_id = op.id
+                ),
+                0
+            ) AS {nameof(OlivePurchaseDetailsResponse.TotalAmount)},
 
-            INNER JOIN purchase_status ps
-                ON ps.id = op.status_id
+            op.notes AS {nameof(OlivePurchaseDetailsResponse.Notes)}
 
-            WHERE op.id = @Id
-            """;
+        FROM olive_purchases op
 
-        const string itemsSql =
-             """
-             SELECT
-                 opi.id AS Id,
+        INNER JOIN purchase_status ps
+            ON ps.id = op.status_id
 
-                 opi.variety_id AS VarietyId,
-
-                 ov.name AS VarietyName,
-
-                 opi.agreed_quantity_kg AS AgreedQuantityKg,
-
-                 COALESCE(
-                     (
-                         SELECT SUM(po_input.quantity_kg)
-                         FROM pressing_operation_inputs po_input
-                         WHERE po_input.purchase_item_id = opi.id
-                     ),
-                     0
-                 ) AS PressedQuantityKg,
-
-                 (
-                     opi.agreed_quantity_kg
-                     -
-                     COALESCE(
-                         (
-                             SELECT SUM(po_input.quantity_kg)
-                             FROM pressing_operation_inputs po_input
-                             WHERE po_input.purchase_item_id = opi.id
-                         ),
-                         0
-                     )
-                 ) AS RemainingQuantityKg,
-
-                 opi.price_per_kg AS PricePerKg,
-
-                 opi.total_amount AS TotalAmount
-
-             FROM olive_purchase_items opi
-
-             LEFT JOIN olive_varieties ov
-                 ON ov.id = opi.variety_id
-
-             WHERE opi.purchase_id = @PurchaseId
-
-             ORDER BY opi.id
-             """;
-
-        const string samplesSql =
-            """
-            SELECT
-                os.id AS Id,
-
-                os.sample_number AS SampleNumber,
-
-                os.sample_date AS SampleDate,
-
-                ss.id AS Status
-
-            FROM olive_samples os
-
-            INNER JOIN sample_status ss
-                ON ss.id = os.status_id
-
-            WHERE os.purchase_id = @PurchaseId
-
-            ORDER BY os.sample_date DESC, os.sample_number
-            """;
+        WHERE op.id = @Id
+        """;
 
         using var connection = _dbConnection;
 
         var purchase =
-            await connection.QuerySingleOrDefaultAsync<OlivePurchaseForDetailsResponse>(
+            await connection.QuerySingleOrDefaultAsync<OlivePurchaseDetailsResponse>(
                 purchaseSql,
                 new
                 {
                     Id = id
                 });
-
-        if (purchase is null)
-        {
-            return null;
-        }
-
-        var items =
-            await connection.QueryAsync<OlivePurchaseItemResponse>(
-                itemsSql,
-                new
-                {
-                    PurchaseId = id
-                });
-
-        var samples =
-            await connection.QueryAsync<OliveSampleSummaryResponse>(
-                samplesSql,
-                new
-                {
-                    PurchaseId = id
-                });
-
-        purchase.Items = items.ToList();
-        purchase.Samples = samples.ToList();
 
         return purchase;
     }
@@ -520,37 +430,19 @@ public class OlivePurchaseQueryRepository : IOlivePurchaseQueryRepository
     // GET OLIVE PURCHASE ITEMS - PAGINATED
     // ============================================================
 
-    public async Task<PagedResult<OlivePurchaseItemResponse>> GetOlivePurchaseItems(
-        int purchaseId,
-        OlivePurchaseItemsRequestFilter filter)
+
+    public async Task<List<OlivePurchaseItemDetailsResponse>> GetOlivePurchaseItems(
+        int purchaseId)
     {
-        var sql = new StringBuilder(
-            """
+        var sql = $"""
         SELECT
-            COUNT(*) OVER() AS Total,
+            opi.id AS {nameof(OlivePurchaseItemDetailsResponse.Id)},
+            opi.reference AS {nameof(OlivePurchaseItemDetailsResponse.Reference)},
+            opi.variety_id AS {nameof(OlivePurchaseItemDetailsResponse.VarietyId)},
+            opi.agreed_quantity_kg AS {nameof(OlivePurchaseItemDetailsResponse.AgreedQuantityKg)},
 
-            opi.id AS Id,
-
-            opi.reference AS Reference,
-
-            opi.purchase_id AS PurchaseId,
-
-            opi.variety_id AS VarietyId,
-
-            ov.name AS VarietyName,
-
-            opi.description AS Description,
-
-            opi.agreed_quantity_kg AS AgreedQuantityKg,
-
-            opi.price_per_kg AS PricePerKg,
-
-            opi.total_amount AS TotalAmount,
-
-            opi.notes AS Notes,
-
-            (opi.agreed_quantity_kg
-                -
+            (
+                opi.agreed_quantity_kg -
                 COALESCE(
                     (
                         SELECT SUM(poi.quantity_kg)
@@ -563,62 +455,47 @@ public class OlivePurchaseQueryRepository : IOlivePurchaseQueryRepository
                     ),
                     0
                 )
-            ) AS RemainingQuantityKg
+            ) AS {nameof(OlivePurchaseItemDetailsResponse.RemainingQuantityKg)},
+
+            opi.price_per_kg AS {nameof(OlivePurchaseItemDetailsResponse.PricePerKg)},
+            opi.agreed_quantity_kg * opi.price_per_kg
+                AS {nameof(OlivePurchaseItemDetailsResponse.TotalAmount)},
+
+            (
+                SELECT jsonb_build_object(
+                    '{nameof(OliveAnalysisInfoResponse.Id)}', oa.id,
+                    '{nameof(OliveAnalysisInfoResponse.Reference)}', oa.reference,
+                    '{nameof(OliveAnalysisInfoResponse.HumidityPercentage)}', oa.humidity_percentage,
+                    '{nameof(OliveAnalysisInfoResponse.WaterPercentage)}', oa.water_percentage,
+                    '{nameof(OliveAnalysisInfoResponse.OilPercentage)}', oa.oil_percentage,
+                    '{nameof(OliveAnalysisInfoResponse.AcidityPercentage)}', oa.acidity_percentage,
+                    '{nameof(OliveAnalysisInfoResponse.AnalysisDate)}', oa.analysis_date,
+                    '{nameof(OliveAnalysisInfoResponse.CreatedAt)}', oa.created_at,
+                    '{nameof(OliveAnalysisInfoResponse.UpdatedAt)}', oa.updated_at,
+                    '{nameof(OliveAnalysisInfoResponse.Status)}', oa.status
+                )
+                FROM olive_analyses oa
+                WHERE oa.source_id = opi.id
+                  AND oa.source_type = 2
+                ORDER BY oa.id DESC
+                LIMIT 1
+            ) AS {nameof(OlivePurchaseItemDetailsResponse.Analysis)}
 
         FROM olive_purchase_items opi
-
-        LEFT JOIN olive_varieties ov
-            ON ov.id = opi.variety_id
-
         WHERE opi.purchase_id = @PurchaseId
-        """);
-
-        var parameters = new DynamicParameters();
-
-        parameters.Add(
-            "PurchaseId",
-            purchaseId);
-
-        parameters.Add(
-            "PageSize",
-            filter.PageSize);
-
-        parameters.Add(
-            "Offset",
-            (filter.PageNumber - 1) * filter.PageSize);
-
-
-        // ========================================================
-        // PAGINATION
-        // ========================================================
-
-        sql.Append(
-            """
-
-        ORDER BY opi.id DESC
-
-        LIMIT @PageSize
-        OFFSET @Offset
-        """);
+        ORDER BY opi.id DESC;
+        """;
 
         using var connection = _dbConnection;
 
-        var result =
-            await connection.QueryAsync<OlivePurchaseItemResponse>(
-                sql.ToString(),
-                parameters);
+        var items = await connection.QueryAsync<OlivePurchaseItemDetailsResponse>(
+            sql,
+            new { PurchaseId = purchaseId }
+        );
 
-        var items = result.ToList();
-
-        var total =
-            items.FirstOrDefault()?.TotalAmount ?? 0;
-
-        return new PagedResult<OlivePurchaseItemResponse>
-        {
-            PageNumber = filter.PageNumber,
-            PageSize = filter.PageSize,
-            TotalCount = total,
-            Items = items
-        };
+        return items.ToList();
     }
+
+
+
 }

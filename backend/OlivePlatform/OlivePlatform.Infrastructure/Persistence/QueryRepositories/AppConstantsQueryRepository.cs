@@ -17,42 +17,44 @@ public class ReferenceDataQueryRepository
     public async Task<AppConstantsResponse> GetAppConstants(
         CancellationToken cancellationToken = default)
     {
-        const string sql = """
-            SELECT id AS Id, label AS Name
+        const string sql = $"""
+            SELECT id AS {nameof(AppConstantItemResponse.Id)}, 
+                label AS {nameof(AppConstantItemResponse.Name)}
             FROM olive_varieties
             ORDER BY name;
 
-            SELECT id AS Id, code AS Code, name AS Name
+            SELECT id AS {nameof(AppConstantItemResponse.Id)}, 
+                label AS {nameof(AppConstantItemResponse.Name)}
             FROM purchase_status
             WHERE is_active = TRUE
             ORDER BY name;
 
-            SELECT id AS Id, code AS Code, name AS Name
-            FROM sample_status
-            WHERE is_active = TRUE
-            ORDER BY name;
-
-            SELECT id AS Id, label AS Code
+            SELECT id AS {nameof(AppConstantItemResponse.Id)},
+                label AS {nameof(AppConstantItemResponse.Name)}
             FROM production_status
             WHERE is_active = TRUE
             ORDER BY label;
 
-            SELECT id AS Id, code AS Code, name AS Name
+            SELECT id AS {nameof(AppConstantItemResponse.Id)},
+                label AS {nameof(AppConstantItemResponse.Name)}
             FROM oil_movement_type
             WHERE is_active = TRUE
             ORDER BY name;
 
-            SELECT id AS Id, code AS Code, name AS Name
+            SELECT id AS {nameof(AppConstantItemResponse.Id)},
+                label AS {nameof(AppConstantItemResponse.Name)}
             FROM invoice_type
             WHERE is_active = TRUE
             ORDER BY name;
 
-            SELECT id AS Id, code AS Code, name AS Name
+            SELECT id AS {nameof(AppConstantItemResponse.Id)},
+                label AS {nameof(AppConstantItemResponse.Name)}
             FROM invoice_status
             WHERE is_active = TRUE
             ORDER BY name;
 
-            SELECT id AS Id, code AS Code, name AS Name
+            SELECT id AS {nameof(AppConstantItemResponse.Id)},
+                label AS {nameof(AppConstantItemResponse.Name)}
             FROM payment_method
             WHERE is_active = TRUE
             ORDER BY name;
@@ -69,15 +71,11 @@ public class ReferenceDataQueryRepository
                 (await multi.ReadAsync<AppConstantItemResponse>())
                 .ToList(),
 
-            PurchaseStatuses =
+            PurchaseStatus =
                 (await multi.ReadAsync<AppConstantItemResponse>())
                 .ToList(),
 
-            SampleStatuses =
-                (await multi.ReadAsync<AppConstantItemResponse>())
-                .ToList(),
-
-            ProductionStatuses =
+            ProductionStatus =
                 (await multi.ReadAsync<AppConstantItemResponse>())
                 .ToList(),
 

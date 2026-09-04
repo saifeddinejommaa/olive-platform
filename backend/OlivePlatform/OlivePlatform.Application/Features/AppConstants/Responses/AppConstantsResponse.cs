@@ -5,11 +5,9 @@
 
         public IReadOnlyList<AppConstantItemResponse> OliveVarieties { get; init; } = [];
 
-        public IReadOnlyList<AppConstantItemResponse> PurchaseStatuses { get; init; } = [];
+        public IReadOnlyList<AppConstantItemResponse> PurchaseStatus { get; init; } = [];
 
-        public IReadOnlyList<AppConstantItemResponse> SampleStatuses { get; init; } = [];
-
-        public IReadOnlyList<AppConstantItemResponse> ProductionStatuses { get; init; } = [];
+        public IReadOnlyList<AppConstantItemResponse> ProductionStatus { get; init; } = [];
 
         public IReadOnlyList<AppConstantItemResponse> OilMovementTypes { get; init; } = [];
 

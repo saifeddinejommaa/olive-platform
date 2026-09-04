@@ -1,17 +1,36 @@
-﻿namespace OlivePlatform.Domain.Entities;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
+namespace OlivePlatform.Domain.Entities;
+
+[Table("olive_purchase_items")]
 public class OlivePurchaseItem
 {
+    [Key]
+    [Column("id")]
     public int Id { get; set; }
-    public string Reference { get; set; }
-    public int PurchaseId { get; private set; }
-    public int? VarietyId { get; private set; }
 
-    public string? Description { get; private set; }
+    [Column("reference")]
+    public required string Reference { get; set; }
 
-    public decimal AgreedQuantityKg { get; private set; }
-    public decimal PricePerKg { get; private set; }
+    [Column("purchase_id")]
+    public int PurchaseId { get;  set; }
 
-    public OlivePurchase Purchase { get; private set; } = null!;
-    public OliveVariety? Variety { get; private set; }
+    [Column("variety_id")]
+    public int VarietyId { get;  set; }
+
+    [Column("agreed_quantity_kg")]
+    public decimal AgreedQuantityKg { get;  set; }
+
+    [Column("price_per_kg")]
+    public decimal PricePerKg { get;  set; }
+
+    [Column("created_at")]
+    public DateTime CreatedAt { get;  set; }
+
+    [Column("updated_at")]
+    public DateTime? UpdatedAt { get;  set; }
+
+    public OlivePurchase Purchase { get; set; }
+
 }

@@ -38,7 +38,7 @@ public class UpdateOlivePurchaseCommandHandler
             throw new KeyNotFoundException(
                 $"Purchase with id '{request.Id}' was not found.");
 
-        entity.PurchaseNumber = request.PurchaseNumber;
+        entity.Reference = request.PurchaseNumber;
         entity.SupplierName = request.SupplierName;
         entity.PurchaseDate = request.PurchaseDate;
         entity.Status = request.Status;

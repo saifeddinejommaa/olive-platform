@@ -10,5 +10,7 @@ public static class DocumentTypes
 
     public const string OlivePurchase = "OLIVE_PURCHASE";
 
+    public const string OlivePurchaseItem = "OLIVE_PURCHASE_ITEM";
+
     public const string OliveAnalyse = "OLIVE_ANALYSE";
 }

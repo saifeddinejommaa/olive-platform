@@ -5,44 +5,31 @@ using OlivePlatform.Domain.Interfaces.Repositories;
 namespace OlivePlatform.Infrastructure.Persistence.Repositories;
 
 public class OlivePurchaseRepository
-    : Repository<OlivePurchase>, IOlivePurchaseRepository
+    : IOlivePurchaseRepository
 {
+    private readonly OlivePlatformAppDbContext _context;
+
     public OlivePurchaseRepository(
         OlivePlatformAppDbContext context)
-        : base(context)
+        
     {
+        _context = context;
     }
 
-    public async Task<OlivePurchase?> GetByNumberAsync(
-        string purchaseNumber,
-        CancellationToken cancellationToken = default)
+    public async Task AddAsync(OlivePurchase entity, CancellationToken cancellationToken = default)
     {
-        return await DbSet
-            .FirstOrDefaultAsync(
-                x => x.PurchaseNumber == purchaseNumber,
-                cancellationToken);
+        await _context.OlivePurchases.AddAsync(entity, cancellationToken);
     }
 
-    public async Task<bool> ExistsByNumberAsync(
-        string purchaseNumber,
-        int? excludeId = null,
-        CancellationToken cancellationToken = default)
+    public async Task<OlivePurchase?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
-        return await DbSet.AnyAsync(
-            x =>
-                x.PurchaseNumber == purchaseNumber &&
-                (!excludeId.HasValue || x.Id != excludeId.Value),
-            cancellationToken);
+        return await _context.OlivePurchases
+            .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
     }
 
-    public async Task<IReadOnlyList<OlivePurchase>>
-        GetBySupplierAsync(
-            string supplierName,
-            CancellationToken cancellationToken = default)
+    public async Task UpdateAsync(OlivePurchase entity, CancellationToken cancellationToken = default)
     {
-        return await DbSet
-            .Where(x => x.SupplierName == supplierName)
-            .OrderByDescending(x => x.PurchaseDate)
-            .ToListAsync(cancellationToken);
+        _context.OlivePurchases.Update(entity);
+        await _context.SaveChangesAsync(cancellationToken);
     }
 }

@@ -7,22 +7,10 @@ export function OlivePurchaseItemMapper(response: OlivePurchaseItemResponse) {
 
     reference: response.reference,
 
-    purchaseId: response.purchaseId,
-
     variety: response.varietyId as OliveVarieties,
-
-    description: response.description,
 
     agreedQuantityKg: response.agreedQuantityKg,
 
-    pressedQuantityKg: response.pressedQuantityKg,
-
-    remainingQuantityKg: response.remainingQuantityKg,
-
     pricePerKg: response.pricePerKg,
-
-    totalAmount: response.totalAmount,
-
-    notes: response.notes,
   };
 }

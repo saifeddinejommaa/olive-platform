@@ -2,11 +2,10 @@ import type { AppConstantItem } from "./AppConstantItem";
 
 export type AppConstants = {
   oliveVarieties: AppConstantItem[];
-  sampleStatuses: AppConstantItem[];
-  productionStatuses: AppConstantItem[];
+  productionStatus: AppConstantItem[];
   oilMovementTypes: AppConstantItem[];
   invoiceTypes: AppConstantItem[];
   invoiceStatuses: AppConstantItem[];
   paymentMethods: AppConstantItem[];
-  purchaseStatuses: AppConstantItem[];
+  purchaseStatus: AppConstantItem[];
 };

@@ -1,0 +1,15 @@
+.collapsible-card-toggle {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.collapsible-card-chevron {
+  display: inline-block;
+  transition: transform 0.15s ease;
+}
+
+.collapsible-card-chevron--expanded {
+  transform: rotate(180deg);
+}

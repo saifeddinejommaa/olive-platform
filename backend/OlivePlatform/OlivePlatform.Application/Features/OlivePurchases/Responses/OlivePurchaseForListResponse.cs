@@ -8,7 +8,7 @@ public class OlivePurchaseForListResponse
 
     public int Id { get; set; }
 
-    public string PurchaseNumber { get; set; } = null!;
+    public string Reference { get; set; } = null!;
 
     public string SupplierName { get; set; } = null!;
 
@@ -16,9 +16,7 @@ public class OlivePurchaseForListResponse
 
     public PurchaseStatus Status { get; set; }
 
+    public DateTime CreatedAt { get; set; }
+
     public decimal TotalQuantityKg { get; set; }
-
-    public decimal TotalAmount { get; set; }
-
-    public int ItemsCount { get; set; }
 }

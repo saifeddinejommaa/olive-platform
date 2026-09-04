@@ -7,15 +7,12 @@ export function mapConstantsResponseToModel(
 ): AppConstants {
   return {
     oliveVarieties: mapConstantItemResponseToModel(response.oliveVarieties),
-    sampleStatuses: mapConstantItemResponseToModel(response.sampleStatuses),
-    productionStatuses: mapConstantItemResponseToModel(
-      response.productionStatuses,
-    ),
+    productionStatus: mapConstantItemResponseToModel(response.productionStatus),
     oilMovementTypes: mapConstantItemResponseToModel(response.oilMovementTypes),
     invoiceTypes: mapConstantItemResponseToModel(response.invoiceTypes),
     invoiceStatuses: mapConstantItemResponseToModel(response.invoiceStatuses),
     paymentMethods: mapConstantItemResponseToModel(response.paymentMethods),
-    purchaseStatuses: mapConstantItemResponseToModel(response.purchaseStatuses),
+    purchaseStatus: mapConstantItemResponseToModel(response.purchaseStatus),
   };
 }
 

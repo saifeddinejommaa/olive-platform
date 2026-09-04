@@ -40,7 +40,7 @@ export default function NewPressingOperationPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
 
-  const statusOptions = Appconstants.productionStatuses.map((status) => ({
+  const statusOptions = Appconstants.productionStatus.map((status) => ({
     value: status.id.toString(),
     label: status.label,
   }));

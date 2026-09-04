@@ -3,6 +3,7 @@ using OlivePlatform.Application.Common;
 using OlivePlatform.Application.Features.Analysis.Repositories;
 using OlivePlatform.Application.Features.Analysis.Responses;
 using OlivePlatform.Application.Features.Laboratory.Requests;
+using OlivePlatform.Domain.Enums;
 using System.Data;
 using System.Text;
 
@@ -26,64 +27,74 @@ public class OliveAnalysisQueryRepository : IOliveAnalysisQueryRepository
     CancellationToken cancellationToken = default)
     {
         const string sql = $"""
-        SELECT
-            oa.id AS {nameof(OliveAnalysisDetailsResponse.Id)},
+             SELECT
+                 oa.id AS {nameof(OliveAnalysisDetailsResponse.Id)},
 
-            oa.source_type AS {nameof(OliveAnalysisDetailsResponse.SourceTypeId)},
+                 oa.source_type AS {nameof(OliveAnalysisDetailsResponse.SourceTypeId)},
 
-            oa.reference AS {nameof(OliveAnalysisDetailsResponse.Reference)},
+                 oa.reference AS {nameof(OliveAnalysisDetailsResponse.Reference)},
 
-            COALESCE(
-                h.reference,
-                op.reference
-            ) AS {nameof(OliveAnalysisDetailsResponse.SourceReference)},
+                 CASE
+                     WHEN oa.source_type = 1 THEN h.reference
+                     WHEN oa.source_type = 2 THEN opi.reference
+                 END AS {nameof(OliveAnalysisDetailsResponse.SourceReference)},
 
-            oa.humidity_percentage AS {nameof(OliveAnalysisDetailsResponse.HumidityPercentage)},
+                 oa.humidity_percentage AS {nameof(OliveAnalysisDetailsResponse.HumidityPercentage)},
 
-            oa.water_percentage AS {nameof(OliveAnalysisDetailsResponse.WaterPercentage)},
+                 oa.water_percentage AS {nameof(OliveAnalysisDetailsResponse.WaterPercentage)},
 
-            oa.oil_percentage AS {nameof(OliveAnalysisDetailsResponse.OilPercentage)},
+                 oa.oil_percentage AS {nameof(OliveAnalysisDetailsResponse.OilPercentage)},
 
-            oa.acidity_percentage AS {nameof(OliveAnalysisDetailsResponse.AcidityPercentage)},
+                 oa.acidity_percentage AS {nameof(OliveAnalysisDetailsResponse.AcidityPercentage)},
 
-            oa.analysis_date AS {nameof(OliveAnalysisDetailsResponse.AnalysisDate)},
+                 oa.analysis_date AS {nameof(OliveAnalysisDetailsResponse.AnalysisDate)},
 
-            oa.created_at AS {nameof(OliveAnalysisDetailsResponse.CreatedAt)},
+                 oa.created_at AS {nameof(OliveAnalysisDetailsResponse.CreatedAt)},
 
-            oa.updated_at AS {nameof(OliveAnalysisDetailsResponse.UpdatedAt)},
+                 oa.updated_at AS {nameof(OliveAnalysisDetailsResponse.UpdatedAt)},
 
-            h.variety_id AS {nameof(OliveAnalysisDetailsResponse.VarietyId)},
+                 CASE
+                     WHEN oa.source_type = 1 THEN h.variety_id
+                     WHEN oa.source_type = 2 THEN opi.variety_id
+                 END AS {nameof(OliveAnalysisDetailsResponse.VarietyId)},
 
-            oa.status AS {nameof(OliveAnalysisDetailsResponse.Status)}
+                 oa.status AS {nameof(OliveAnalysisDetailsResponse.Status)}
 
-        FROM public.olive_analyses oa
+             FROM public.olive_analyses oa
 
-        LEFT JOIN public.harvests h
-            ON oa.source_type = 1
-            AND h.id = oa.source_id
+             -- Source = Harvest
+             LEFT JOIN public.harvests h
+                 ON oa.source_type = 1
+                 AND h.id = oa.source_id
 
-        LEFT JOIN public.olive_purchases op
-            ON oa.source_type = 2
-            AND op.id = oa.source_id
+             -- Source = Olive Purchase Item
+             LEFT JOIN public.olive_purchase_items opi
+                 ON oa.source_type = 2
+                 AND opi.id = oa.source_id
 
-        WHERE oa.id = @Id
+             -- Parent Olive Purchase
+             LEFT JOIN public.olive_purchases op
+                 ON oa.source_type = 2
+                 AND op.id = opi.purchase_id
 
-        LIMIT 1;
-        """;
+             WHERE oa.id = @Id
 
-        using var connection = _dbConnection;
+             LIMIT 1;
+             """;
 
-        var command = new CommandDefinition(
-            sql,
-            new
-            {
-                Id = id
-            },
-            cancellationToken: cancellationToken);
+                 using var connection = _dbConnection;
 
-        return await connection.QueryFirstOrDefaultAsync<OliveAnalysisDetailsResponse>(
-            command);
-    }
+                 var command = new CommandDefinition(
+                     sql,
+                     new
+                     {
+                         Id = id
+                     },
+                     cancellationToken: cancellationToken);
+
+                 return await connection.QueryFirstOrDefaultAsync<OliveAnalysisDetailsResponse>(
+                     command);
+             }
 
 
     // ============================================================
@@ -95,44 +106,53 @@ public class OliveAnalysisQueryRepository : IOliveAnalysisQueryRepository
         CancellationToken cancellationToken = default)
     {
         var sql = new StringBuilder(
-            $"""
-            SELECT
-                COUNT(*) OVER() AS {nameof(OliveAnalysisForListResponse.Total)},
+        $"""
+         SELECT
+             COUNT(*) OVER() AS {nameof(OliveAnalysisForListResponse.Total)},
 
-                oa.id AS {nameof(OliveAnalysisForListResponse.Id)},
+             oa.id AS {nameof(OliveAnalysisForListResponse.Id)},
 
-                COALESCE(
-                    h.reference,
-                    op.reference
-                ) AS {nameof(OliveAnalysisForListResponse.SourceReference)},
-                oa.reference AS {nameof(OliveAnalysisForListResponse.Reference)},
+             CASE
+                 WHEN oa.source_type = 1 THEN h.reference
+                 WHEN oa.source_type = 2 THEN opi.reference
+             END AS {nameof(OliveAnalysisForListResponse.SourceReference)},
 
-                pl.reference AS {nameof(OliveAnalysisForListResponse.PlotReference)},
+             oa.reference AS {nameof(OliveAnalysisForListResponse.Reference)},
 
-                oa.analysis_date AS {nameof(OliveAnalysisForListResponse.AnalysisDate)},
+             pl.reference AS {nameof(OliveAnalysisForListResponse.PlotReference)},
 
-                oa.created_at AS {nameof(OliveAnalysisForListResponse.CreatedAt)},
+             oa.analysis_date AS {nameof(OliveAnalysisForListResponse.AnalysisDate)},
 
-                oa.updated_at AS {nameof(OliveAnalysisForListResponse.UpdatedAt)},
+             oa.created_at AS {nameof(OliveAnalysisForListResponse.CreatedAt)},
 
-                oa.status AS {nameof(OliveAnalysisForListResponse.Status)}
+             oa.updated_at AS {nameof(OliveAnalysisForListResponse.UpdatedAt)},
 
-            FROM public.olive_analyses oa
+             oa.status AS {nameof(OliveAnalysisForListResponse.Status)}
 
-            LEFT JOIN public.harvests h
-                ON oa.source_type = 1
-                AND h.id = oa.source_id
+         FROM public.olive_analyses oa
 
-            LEFT JOIN public.olive_purchases op
-                ON oa.source_type = 2
-                AND op.id = oa.source_id
+         -- Source = Harvest
+         LEFT JOIN public.harvests h
+             ON oa.source_type = 1
+             AND h.id = oa.source_id
 
-            LEFT JOIN public.plots pl
-                ON oa.source_type = 1
-                AND h.plot_id = pl.id
+         -- Source = Purchase Item
+         LEFT JOIN public.olive_purchase_items opi
+             ON oa.source_type = 2
+             AND opi.id = oa.source_id
 
-            WHERE 1 = 1
-            """);
+         -- Purchase parent
+         LEFT JOIN public.olive_purchases op
+             ON oa.source_type = 2
+             AND op.id = opi.purchase_id
+
+         -- Plot uniquement pour les récoltes
+         LEFT JOIN public.plots pl
+             ON oa.source_type = 1
+             AND h.plot_id = pl.id
+
+         WHERE 1 = 1
+         """);
 
         var parameters = new DynamicParameters();
 
