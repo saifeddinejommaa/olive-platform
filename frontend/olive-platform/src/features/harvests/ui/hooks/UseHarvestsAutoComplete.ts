@@ -7,11 +7,6 @@ export function useHarvestsAutocomplete(serialNumber: string) {
   const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
-    if (!serialNumber || serialNumber.length < 2) {
-      setResults([]);
-      return;
-    }
-
     const timeout = setTimeout(async () => {
       console.log("Fetching harvests for serial number:", serialNumber);
       setLoading(true);
