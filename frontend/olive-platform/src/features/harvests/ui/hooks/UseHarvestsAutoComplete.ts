@@ -13,6 +13,7 @@ export function useHarvestsAutocomplete(serialNumber: string) {
     }
 
     const timeout = setTimeout(async () => {
+      console.log("Fetching harvests for serial number:", serialNumber);
       setLoading(true);
       const data = await GetHarvests({
         toPressing: true,

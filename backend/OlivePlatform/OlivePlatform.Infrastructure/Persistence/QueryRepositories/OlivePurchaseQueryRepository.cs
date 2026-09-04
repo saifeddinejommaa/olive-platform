@@ -69,7 +69,7 @@ public class OlivePurchaseQueryRepository : IOlivePurchaseQueryRepository
             sql.Append(
                 """
 
-                AND op.purchase_number ILIKE @PurchaseNumber
+                AND op.reference ILIKE @PurchaseNumber
                 """);
 
             parameters.Add(
@@ -299,89 +299,6 @@ public class OlivePurchaseQueryRepository : IOlivePurchaseQueryRepository
                 });
 
         return purchase;
-    }
-
-    // ============================================================
-    // GET BY ID
-    // ============================================================
-
-    public async Task<OlivePurchase?> GetByIdAsync(
-        int id,
-        CancellationToken cancellationToken = default)
-    {
-        const string sql =
-            """
-            SELECT
-                op.id AS Id,
-
-                op.purchase_number AS PurchaseNumber,
-
-                op.supplier_name AS SupplierName,
-
-                op.purchase_date AS PurchaseDate,
-
-                op.status_id AS StatusId,
-
-                op.notes AS Notes,
-
-                op.created_at AS CreatedAt,
-
-                op.updated_at AS UpdatedAt
-
-            FROM olive_purchases op
-
-            WHERE op.id = @Id
-            """;
-
-        using var connection = _dbConnection;
-
-        return await connection.QuerySingleOrDefaultAsync<OlivePurchase>(
-            sql,
-            new
-            {
-                Id = id
-            });
-    }
-
-    // ============================================================
-    // GET ALL
-    // ============================================================
-
-    public async Task<IReadOnlyList<OlivePurchase>> GetAllAsync(
-        CancellationToken cancellationToken = default)
-    {
-        const string sql =
-            """
-            SELECT
-                op.id AS Id,
-
-                op.purchase_number AS PurchaseNumber,
-
-                op.supplier_name AS SupplierName,
-
-                op.purchase_date AS PurchaseDate,
-
-                op.status_id AS StatusId,
-
-                op.notes AS Notes,
-
-                op.created_at AS CreatedAt,
-
-                op.updated_at AS UpdatedAt
-
-            FROM olive_purchases op
-
-            ORDER BY
-                op.purchase_date DESC,
-                op.purchase_number
-            """;
-
-        using var connection = _dbConnection;
-
-        var result =
-            await connection.QueryAsync<OlivePurchase>(sql);
-
-        return result.ToList();
     }
 
     // ============================================================

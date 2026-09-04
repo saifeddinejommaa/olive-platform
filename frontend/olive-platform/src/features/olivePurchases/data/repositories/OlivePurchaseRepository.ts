@@ -38,7 +38,7 @@ export const OlivePurchaseRepository = {
   },
 
 
-  getPurchaseItemsById: async (id: number) => { 
+  getPurchaseItemsDetailsById: async (id: number) => { 
     const httpResponse = await http<ApiResponse<OlivePurchaseItemDetailsResponse[]>>
       ( `${API_BASE_URL}olivepurchases/items/${id}` ); 
       

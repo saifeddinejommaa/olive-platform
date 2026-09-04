@@ -3,7 +3,7 @@ import { OlivePurchaseRepository } from "../../data/repositories/OlivePurchaseRe
 export const GetOlivePurchaseItems = async (
   purchaseId: number,
 ) => {
-  const olivePurchaseItems = await OlivePurchaseRepository.getPurchaseItemsById(
+  const olivePurchaseItems = await OlivePurchaseRepository.getPurchaseItemsDetailsById(
     purchaseId,
   );
 

@@ -15,13 +15,6 @@ public interface IOlivePurchaseQueryRepository
     Task<OlivePurchaseDetailsResponse?> GetOlivePurchaseDetails(
         int id);
 
-    Task<OlivePurchase?> GetByIdAsync(
-        int id,
-        CancellationToken cancellationToken = default);
-
-    Task<IReadOnlyList<OlivePurchase>> GetAllAsync(
-        CancellationToken cancellationToken = default);
-
     Task<OlivePurchase?> GetByPurchaseNumberAsync(
         string purchaseNumber,
         CancellationToken cancellationToken = default);
