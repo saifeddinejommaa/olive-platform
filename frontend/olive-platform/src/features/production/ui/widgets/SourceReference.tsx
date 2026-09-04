@@ -7,6 +7,7 @@ export type SourceOption = {
   id: number;
   reference: string;
   purchaseItemIds?: number[];
+  harvestStockIds?: number[];
   quantityKg?: number | null;
 };
 

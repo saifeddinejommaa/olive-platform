@@ -2,14 +2,13 @@ import { create } from "zustand";
 
 import type { Harvest } from "../../domain/entities/Harvest";
 import type { UpdateHarvestParams } from "../../domain/params/UpdateHarvestParams";
-
-import { getHarvest } from "../../domain/usecases/GetHarvest";
 import { updateHarvest } from "../../domain/usecases/UpdateHarvest";
 import { startHarvest } from "../../domain/usecases/StartHarvest";
 import { completeHarvest } from "../../domain/usecases/CompleteHarvest";
 import { cancelHarvest } from "../../domain/usecases/CancelHarvest";
 import type { HarvestStockParams } from "../../domain/params/HarvestStockParams";
 import type { CompleteHarvestParams } from "../../domain/params/CompleteHarvestParams";
+import { GetHarvestDetails } from "../../domain/usecases/GetHarvestDetails";
 
 type HarvestDetailsState = {
   harvest: Harvest | null;
@@ -50,7 +49,7 @@ export const useHarvestDetailsStore = create<HarvestDetailsState>((set) => ({
         error: null,
       });
 
-      const harvest = await getHarvest(id);
+      const harvest = await GetHarvestDetails(id);
 
       set({
         harvest,
@@ -104,10 +103,7 @@ export const useHarvestDetailsStore = create<HarvestDetailsState>((set) => ({
 
       // Le backend retourne 204 No Content
       await startHarvest(id);
-
-      // On recharge la récolte pour récupérer
-      // le nouveau statut InProgress
-      const harvest = await getHarvest(id);
+      const harvest = await GetHarvestDetails(id);
 
       set({
         harvest,
