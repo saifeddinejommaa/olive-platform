@@ -2,7 +2,9 @@ import { mapOliveAnalysisDetails } from "../../../analyses/oliveAnalyses/data/ma
 import type { OlivePurchaseItemDetails } from "../../domain/entities/OlivePurchaseItemDetails";
 import type { OlivePurchaseItemDetailsResponse } from "../responses/OLivePurchaseItemDetailsResponse";
 
-export function OlivePurchaseItemDetailsMapper(response: OlivePurchaseItemDetailsResponse) : OlivePurchaseItemDetails {
+export function OlivePurchaseItemDetailsMapper(
+  response: OlivePurchaseItemDetailsResponse,
+): OlivePurchaseItemDetails {
   return {
     id: response.id,
     reference: response.reference,

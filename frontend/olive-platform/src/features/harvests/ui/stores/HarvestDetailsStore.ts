@@ -9,9 +9,10 @@ import { cancelHarvest } from "../../domain/usecases/CancelHarvest";
 import type { HarvestStockParams } from "../../domain/params/HarvestStockParams";
 import type { CompleteHarvestParams } from "../../domain/params/CompleteHarvestParams";
 import { GetHarvestDetails } from "../../domain/usecases/GetHarvestDetails";
+import type { HarvestDetails } from "../../domain/entities/HarvestDetails";
 
 type HarvestDetailsState = {
-  harvest: Harvest | null;
+  harvest: HarvestDetails | null;
   loading: boolean;
   saving: boolean;
   error: string | null;

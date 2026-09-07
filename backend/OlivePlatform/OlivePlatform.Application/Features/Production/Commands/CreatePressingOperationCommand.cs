@@ -31,14 +31,19 @@ public class CreateProductionBatchCommandHandler
     : IRequestHandler<CreatePressingOperationCommand, int>
 {
     private readonly IPressingOperationsRepository _repository;
+    private readonly IOliveAnalysisRepository _oliveAnalysisRepository;
     private readonly IDocumentNumberService _documentNumberService;
+
+    private const decimal OliveOilDensityKgPerLiter = 0.916m;
 
     public CreateProductionBatchCommandHandler(
         IPressingOperationsRepository repository,
-        IDocumentNumberService documentNumberService)
+        IDocumentNumberService documentNumberService,
+        IOliveAnalysisRepository oliveAnalysisRepository)
     {
         _repository = repository;
         _documentNumberService = documentNumberService;
+        _oliveAnalysisRepository = oliveAnalysisRepository;
     }
 
     public async Task<int> Handle(
@@ -53,6 +58,10 @@ public class CreateProductionBatchCommandHandler
                year,
                cancellationToken);
 
+        var expectedOilLiters = await CalculateExpectedOilLitersAsync(
+            request.Inputs,
+            cancellationToken);
+
         var pressingOperation = new PressingOperation
         {
             OperationNumber = operationNumber,
@@ -62,6 +71,7 @@ public class CreateProductionBatchCommandHandler
             OilQuantityLiters = request.OilQuantityLiters,
             CreatedAt = request.CreatedAt,
             Notes = request.Notes,
+            ExpectedOilLiters = expectedOilLiters
         };
 
         await _repository.AddAsync(
@@ -86,5 +96,67 @@ public class CreateProductionBatchCommandHandler
             cancellationToken);
 
         return pressingOperation.Id;
+    }
+
+    private async Task<decimal?> CalculateExpectedOilLitersAsync(
+       List<NewPressingOperationInputRequest> inputs,
+       CancellationToken cancellationToken)
+    {
+        var sources = inputs
+            .Select(input => input.HarvestId is not null
+                ? (SourceType: InputSourceType.Harvest, SourceId: input.HarvestId.Value)
+                : (SourceType: InputSourceType.Purchase, SourceId: input.PurchaseItemId!.Value))
+            .Distinct()
+            .ToList();
+
+        if (sources.Count == 0)
+        {
+            return null;
+        }
+
+        var analyses = new List<OliveAnalysis>();
+
+        foreach (var source in sources)
+        {
+            var analysis = await _oliveAnalysisRepository.GetBySourceAsync(
+                (int)source.SourceType,
+                source.SourceId,
+                cancellationToken);
+
+            if (analysis is not null)
+            {
+                analyses.Add(analysis);
+            }
+        }
+
+        decimal expectedOilKg = 0;
+        var hasAnyAnalysis = false;
+
+        foreach (var input in inputs)
+        {
+            var sourceType = input.HarvestId is not null
+                ? InputSourceType.Harvest
+                : InputSourceType.Purchase;
+
+            var sourceId = input.HarvestId ?? input.PurchaseItemId!.Value;
+
+            var analysis = analyses.FirstOrDefault(a =>
+                a.SourceType == sourceType && a.SourceId == sourceId);
+
+            if (analysis?.OilPercentage is null)
+            {
+                continue;
+            }
+
+            expectedOilKg += input.QuantityKg * (analysis.OilPercentage.Value / 100m);
+            hasAnyAnalysis = true;
+        }
+
+        if (!hasAnyAnalysis)
+        {
+            return null;
+        }
+
+        return expectedOilKg / OliveOilDensityKgPerLiter;
     }
 }

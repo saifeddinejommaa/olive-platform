@@ -26,24 +26,21 @@ export const OlivePurchaseRepository = {
     };
   },
 
-  getPurchaseDetails: async (
-    id: number,
-  ) => {
-
-    const httpResponse = await http<
-      ApiResponse<OlivePurchaseDetailsResponse>
-    >(`${API_BASE_URL}olivepurchases/${id}`);
+  getPurchaseDetails: async (id: number) => {
+    const httpResponse = await http<ApiResponse<OlivePurchaseDetailsResponse>>(
+      `${API_BASE_URL}olivepurchases/${id}`,
+    );
 
     return OlivePurchaseDetailsMapper(httpResponse.Response);
   },
 
+  getPurchaseItemsDetailsById: async (id: number) => {
+    const httpResponse = await http<
+      ApiResponse<OlivePurchaseItemDetailsResponse[]>
+    >(`${API_BASE_URL}olivepurchases/items/${id}`);
 
-  getPurchaseItemsDetailsById: async (id: number) => { 
-    const httpResponse = await http<ApiResponse<OlivePurchaseItemDetailsResponse[]>>
-      ( `${API_BASE_URL}olivepurchases/items/${id}` ); 
-      
-    return httpResponse.Response.map(OlivePurchaseItemDetailsMapper); 
-},
+    return httpResponse.Response.map(OlivePurchaseItemDetailsMapper);
+  },
 
   create: (params: CreateOlivePurchaseParams) => {
     return http<ApiResponse<number>>(`${API_BASE_URL}olivepurchases`, {

@@ -1,4 +1,3 @@
-
 export type OlivePurchaseDetailsResponse = {
   id: number;
   reference: string;

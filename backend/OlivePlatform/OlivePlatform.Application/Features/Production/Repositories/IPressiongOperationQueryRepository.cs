@@ -12,4 +12,6 @@ public interface IPressiongOperationQueryRepository
     Task<PressingOperationDetailsResponse> GetPressingOperationDetails(
         int id,
         CancellationToken cancellationToken = default);
+
+    Task<List<PressingOperationInputDetailsResponse>> GetPressingOperationInputs(int operationId, CancellationToken cancellationToken = default);
 }

@@ -6,7 +6,11 @@ type Props = {
   children: ReactNode;
 };
 
-export default function DrawerSummarySection({ title, description, children }: Props) {
+export default function DrawerSummarySection({
+  title,
+  description,
+  children,
+}: Props) {
   return (
     <div
       style={{
@@ -18,7 +22,9 @@ export default function DrawerSummarySection({ title, description, children }: P
     >
       <div style={{ marginBottom: "16px" }}>
         <strong>{title}</strong>
-        <div style={{ marginTop: "4px", fontSize: "13px", color: "#6b7280" }}>{description}</div>
+        <div style={{ marginTop: "4px", fontSize: "13px", color: "#6b7280" }}>
+          {description}
+        </div>
       </div>
 
       {children}

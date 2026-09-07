@@ -1,11 +1,11 @@
-﻿using OlivePlatform.Domain.Entities;
+﻿using OlivePlatform.Application.Features.Analysis.Responses;
+using OlivePlatform.Domain.Entities;
 using OlivePlatform.Domain.Enums;
 
 namespace OlivePlatform.Application.Features.Production.Responses
 {
-    public class PressingOperationInputResponse
+    public class PressingOperationInputDetailsResponse
     {
-       
         public int Id { get; set; }
 
         public InputSourceType SourceType { get; set; }
@@ -19,5 +19,7 @@ namespace OlivePlatform.Application.Features.Production.Responses
         public decimal PressedQuantityKg { get; set; }
 
         public required int OliveVarietyId { get; set; }
+
+        public OliveAnalysisInfoResponse? Analysis { get; set; }
     }
 }

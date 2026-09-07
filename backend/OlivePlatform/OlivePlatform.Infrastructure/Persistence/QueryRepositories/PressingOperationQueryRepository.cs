@@ -1,7 +1,9 @@
 ﻿using Dapper;
 using OlivePlatform.Application.Common;
+using OlivePlatform.Application.Features.Analysis.Responses;
 using OlivePlatform.Application.Features.Production.Requests;
 using OlivePlatform.Application.Features.Production.Responses;
+using OlivePlatform.Domain.Entities;
 using OlivePlatform.Domain.QueryRepositories;
 using System.Data;
 using System.Text;
@@ -161,62 +163,13 @@ public class PressingOperationQueryRepository : IPressiongOperationQueryReposito
             po.oil_quantity_liters {nameof(PressingOperationDetailsResponse.OilQuantityLiters)},
             po.start_time {nameof(PressingOperationDetailsResponse.StartTime)},
             po.end_time {nameof(PressingOperationDetailsResponse.EndTime)},
+            po.expected_oil_liters {nameof(PressingOperationDetailsResponse.ExpectedOilLiters)},
+            po.oil_yield_deviation_liters {nameof(PressingOperationDetailsResponse.OilYieldDeviationLiters)},
 
             COALESCE(
                 SUM(poi.quantity_kg),
                 0
-            ) AS {nameof(PressingOperationDetailsResponse.OliveQuantityKg)},
-
-            COALESCE(
-                json_agg(
-                    json_build_object(
-                        '{nameof(PressingOperationInputResponse.Id)}', poi.id,
-
-                        '{nameof(PressingOperationInputResponse.SourceType)}',
-                            CASE
-                                WHEN poi.harvest_id IS NOT NULL THEN 1
-                                WHEN poi.purchase_item_id IS NOT NULL THEN 2
-                            END,
-
-                        '{nameof(PressingOperationInputResponse.SourceId)}',
-                            CASE
-                                WHEN poi.harvest_id IS NOT NULL
-                                    THEN poi.harvest_id
-                                WHEN poi.purchase_item_id IS NOT NULL
-                                    THEN poi.purchase_item_id
-                            END,
-
-                        '{nameof(PressingOperationInputResponse.SourceReference)}',
-                            CASE
-                                WHEN poi.harvest_id IS NOT NULL
-                                    THEN h.reference
-                                WHEN poi.purchase_item_id IS NOT NULL
-                                    THEN opi.reference
-                            END,
-
-                        '{nameof(PressingOperationInputResponse.QuantityKg)}',
-                            CASE
-                                WHEN poi.harvest_id IS NOT NULL
-                                    THEN h.quantity_kg
-                                WHEN poi.purchase_item_id IS NOT NULL
-                                    THEN opi.agreed_quantity_kg
-                            END,
-
-                        '{nameof(PressingOperationInputResponse.PressedQuantityKg)}',
-                            poi.quantity_kg,
-
-                        '{nameof(PressingOperationInputResponse.OliveVarietyId)}',
-                            CASE
-                                WHEN poi.harvest_id IS NOT NULL
-                                    THEN h.variety_id
-                                WHEN poi.purchase_item_id IS NOT NULL
-                                    THEN opi.variety_id
-                            END
-                    )
-                    ORDER BY poi.id
-                ) FILTER (WHERE poi.id IS NOT NULL),
-                '[]'::json
-            ) AS {nameof(PressingOperationDetailsResponse.Inputs)}
+            ) AS {nameof(PressingOperationDetailsResponse.OliveQuantityKg)}
 
         FROM pressing_operations po
 
@@ -248,5 +201,124 @@ public class PressingOperationQueryRepository : IPressiongOperationQueryReposito
             new { Id = id });
 
         return result;
+    }
+
+    public async Task<List<PressingOperationInputDetailsResponse>> GetPressingOperationInputs(
+    int operationId,
+    CancellationToken cancellationToken = default)
+    {
+        var sql = $"""
+        SELECT
+            poi.id AS {nameof(PressingOperationInputDetailsResponse.Id)},
+
+            CASE
+                WHEN poi.harvest_id IS NOT NULL THEN 1
+                WHEN poi.purchase_item_id IS NOT NULL THEN 2
+            END AS {nameof(PressingOperationInputDetailsResponse.SourceType)},
+
+            CASE
+                WHEN poi.harvest_id IS NOT NULL
+                    THEN poi.harvest_id
+                WHEN poi.purchase_item_id IS NOT NULL
+                    THEN poi.purchase_item_id
+            END AS {nameof(PressingOperationInputDetailsResponse.SourceId)},
+
+            CASE
+                WHEN poi.harvest_id IS NOT NULL
+                    THEN h.reference
+                WHEN poi.purchase_item_id IS NOT NULL
+                    THEN opi.reference
+            END AS {nameof(PressingOperationInputDetailsResponse.SourceReference)},
+
+            CASE
+                WHEN poi.harvest_id IS NOT NULL
+                    THEN h.quantity_kg
+                WHEN poi.purchase_item_id IS NOT NULL
+                    THEN opi.agreed_quantity_kg
+            END AS {nameof(PressingOperationInputDetailsResponse.QuantityKg)},
+
+            poi.quantity_kg AS {nameof(PressingOperationInputDetailsResponse.PressedQuantityKg)},
+
+            CASE
+                WHEN poi.harvest_id IS NOT NULL
+                    THEN h.variety_id
+                WHEN poi.purchase_item_id IS NOT NULL
+                    THEN opi.variety_id
+            END AS {nameof(PressingOperationInputDetailsResponse.OliveVarietyId)},
+
+            CASE
+                WHEN oa.id IS NULL THEN NULL
+                ELSE json_build_object(
+
+                    '{nameof(OliveAnalysisInfoResponse.Id)}',
+                        oa.id,
+
+                    '{nameof(OliveAnalysisInfoResponse.Reference)}',
+                        oa.reference,
+
+                    '{nameof(OliveAnalysisInfoResponse.HumidityPercentage)}',
+                        oa.humidity_percentage,
+
+                    '{nameof(OliveAnalysisInfoResponse.WaterPercentage)}',
+                        oa.water_percentage,
+
+                    '{nameof(OliveAnalysisInfoResponse.OilPercentage)}',
+                        oa.oil_percentage,
+
+                    '{nameof(OliveAnalysisInfoResponse.AcidityPercentage)}',
+                        oa.acidity_percentage,
+
+                    '{nameof(OliveAnalysisInfoResponse.AnalysisDate)}',
+                        oa.analysis_date,
+
+                    '{nameof(OliveAnalysisInfoResponse.CreatedAt)}',
+                        oa.created_at,
+
+                    '{nameof(OliveAnalysisInfoResponse.UpdatedAt)}',
+                        oa.updated_at,
+
+                    '{nameof(OliveAnalysisInfoResponse.Status)}',
+                        oa.status
+                )
+            END AS {nameof(PressingOperationInputDetailsResponse.Analysis)}
+
+        FROM pressing_operation_inputs poi
+
+        LEFT JOIN harvests h
+            ON h.id = poi.harvest_id
+
+        LEFT JOIN olive_purchase_items opi
+            ON opi.id = poi.purchase_item_id
+
+        LEFT JOIN olive_analyses oa
+            ON oa.source_id = CASE
+                WHEN poi.harvest_id IS NOT NULL
+                    THEN poi.harvest_id
+                WHEN poi.purchase_item_id IS NOT NULL
+                    THEN poi.purchase_item_id
+            END
+
+            AND oa.source_type = CASE
+                WHEN poi.harvest_id IS NOT NULL
+                    THEN 1
+                WHEN poi.purchase_item_id IS NOT NULL
+                    THEN 2
+            END
+
+        WHERE poi.pressing_operation_id = @PressingOperationId
+
+        ORDER BY poi.id;
+        """;
+
+        using var connection = _dbConnection;
+
+        var inputs = await connection.QueryAsync<PressingOperationInputDetailsResponse>(
+            sql,
+            new
+            {
+                PressingOperationId = operationId
+            });
+
+        return inputs.ToList();
     }
 }

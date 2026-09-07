@@ -8,9 +8,10 @@ import { API_BASE_URL } from "../../../../constants";
 import type { CreatePressingOperationParams } from "../../domain/params/CreatePressingOperationParams";
 import { CreatePressingOperationMapper } from "../mappers/requests/CreatePressingOperationMapper";
 import type { PressingOperationDetails } from "../../domain/entities/PressingOperationDetails";
-import type { UpdatePressingOperationRequest } from "../../domain/useCases/UpdatePressingOperation";
 import type { StartPressingOperationRequest } from "../requests/StartPressingOperationRequest";
 import type { ClosePressingOperationRequest } from "../requests/ClosePressingOperationRequest";
+import type { PressingOperationInputDetails } from "../../domain/entities/PressingOperationInputDetails";
+import type { UpdatePressingOperationParams } from "../../domain/params/UpdatePressingOperationParams";
 
 export const PressingOperationRepository = {
   getAll: async (filters?: PressingOperationFilters) => {
@@ -45,12 +46,17 @@ export const PressingOperationRepository = {
     return response;
   },
 
-  updatePressingOperation: async (
-    operationId: number,
-    params: UpdatePressingOperationRequest,
-  ) => {
+  getPressingOperationInputs: async (operationId: number) => {
+    const response = await http<ApiResponse<PressingOperationInputDetails[]>>(
+      `${API_BASE_URL}pressingoperations/${operationId}/inputs`,
+      {},
+    );
+    return response.Response;
+  },
+
+  updatePressingOperation: async (params: UpdatePressingOperationParams) => {
     return await http<ApiResponse<PressingOperationDetails>>(
-      `${API_BASE_URL}pressingoperations/update?id=${operationId}`,
+      `${API_BASE_URL}pressingoperations/update?id=${params.id}`,
       {
         method: "PUT",
         body: params,

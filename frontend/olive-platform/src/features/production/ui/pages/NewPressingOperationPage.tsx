@@ -168,13 +168,13 @@ export default function NewPressingOperationPage() {
         inputs: previous.inputs.map((input) =>
           input.id === id
             ? {
-              ...input,
-              sourceType,
-              harvestId: null,
-              purchaseItemId: null,
-              reference: "",
-              quantityKg: "",
-            }
+                ...input,
+                sourceType,
+                harvestId: null,
+                purchaseItemId: null,
+                reference: "",
+                quantityKg: "",
+              }
             : input,
         ),
       }));

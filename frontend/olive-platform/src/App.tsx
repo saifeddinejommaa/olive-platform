@@ -46,6 +46,9 @@ import HarvestDetailsPage from "./features/harvests/ui/pages/HarvestDetailsPage"
 import OliveAnalysesPage from "./features/analyses/oliveAnalyses/ui/pages/OliveAnalysesPage";
 import NewOliveAnalysisPage from "./features/analyses/oliveAnalyses/ui/pages/NewOliveAnalysisPage";
 import OliveAnalysisDetailsPage from "./features/analyses/oliveAnalyses/ui/pages/OliveAnalysisDetailsPage";
+import OilAnalysesPage from "./features/analyses/oilAnalyses/ui/pages/OilAnalysesPage";
+import OilAnalysisDetailsPage from "./features/analyses/oilAnalyses/ui/pages/OilAnalysisDetailsPage";
+import NewOilAnalysisPage from "./features/analyses/oilAnalyses/ui/pages/NewOilAnalysisPage";
 
 function App() {
   const { fetchConstants } = useConstantsStore();
@@ -98,16 +101,13 @@ function App() {
             {/* ================================================== */}
             {/* OIL Analyses */}
             {/* ================================================== */}
-            <Route path="/Oil-analyses" element={<OliveAnalysesPage />} />
+            <Route path="/Oil-analyses" element={<OilAnalysesPage />} />
 
-            <Route
-              path="/Olive-analyses/new"
-              element={<NewOliveAnalysisPage />}
-            />
+            <Route path="/Oil-analyses/new" element={<NewOilAnalysisPage />} />
 
             <Route
               path="/Oil-analyses/:id"
-              element={<OliveAnalysisDetailsPage />}
+              element={<OilAnalysisDetailsPage />}
             />
 
             {/* ================================================== */}

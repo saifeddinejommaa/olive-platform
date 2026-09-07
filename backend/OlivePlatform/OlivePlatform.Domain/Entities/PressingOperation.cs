@@ -29,4 +29,10 @@ public class PressingOperation
 
     [Column("created_at")]
     public DateTime CreatedAt { get; set; }
+
+    [Column("expected_oil_liters")]
+    public decimal? ExpectedOilLiters { get; set; }
+
+    [Column("oil_yield_deviation_liters")]
+    public decimal? OilYieldDeviationLiters { get; set; }
 }

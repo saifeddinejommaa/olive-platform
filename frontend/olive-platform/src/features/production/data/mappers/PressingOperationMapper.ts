@@ -12,6 +12,8 @@ export function PressingOperationMapper(
     endTime: response.endTime ? new Date(response.endTime) : null,
     oilQuantityLiters: response.oilQuantityLiters,
     status: response.status as PressingOperation["status"],
+    expectedOilLiters: response.expectedOilLiters,
+    oilYieldDeviationLiters: response.oilYieldDeviationLiters,
     notes: response.notes,
   };
 }

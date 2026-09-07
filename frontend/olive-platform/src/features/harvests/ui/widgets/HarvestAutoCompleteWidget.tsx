@@ -14,11 +14,14 @@ type Props = {
 };
 
 export default function HarvestAutoCompleteWidget({ onSelect }: Props) {
-  const [selectedHarvestId, setSelectedHarvestId] = useState<number | null>(null);
+  const [selectedHarvestId, setSelectedHarvestId] = useState<number | null>(
+    null,
+  );
   const [selectedHarvestReference, setSelectedHarvestReference] = useState("");
   const [selectedStockIds, setSelectedStockIds] = useState<number[]>([]);
 
-  const { harvest, loading: loadingStocks } = useHarvestDetails(selectedHarvestId);
+  const { harvest, loading: loadingStocks } =
+    useHarvestDetails(selectedHarvestId);
   const stocks = harvest?.stocks ?? [];
 
   const handleSelectHarvest = (option: HarvestOption) => {
@@ -34,7 +37,9 @@ export default function HarvestAutoCompleteWidget({ onSelect }: Props) {
   };
 
   const emitSelection = (stockIds: number[]) => {
-    const selectedStocks = stocks.filter((stock) => stockIds.includes(stock.id));
+    const selectedStocks = stocks.filter((stock) =>
+      stockIds.includes(stock.id),
+    );
     const quantityKg = selectedStocks.reduce(
       (total, stock) => total + Number(stock.quantityKg ?? 0),
       0,
@@ -62,7 +67,10 @@ export default function HarvestAutoCompleteWidget({ onSelect }: Props) {
   };
 
   const handleSelectAll = () => {
-    const next = selectedStockIds.length === stocks.length ? [] : stocks.map((stock) => stock.id);
+    const next =
+      selectedStockIds.length === stocks.length
+        ? []
+        : stocks.map((stock) => stock.id);
 
     setSelectedStockIds(next);
     emitSelection(next);
@@ -109,13 +117,17 @@ export default function HarvestAutoCompleteWidget({ onSelect }: Props) {
           </div>
 
           {loadingStocks && (
-            <div style={{ padding: "20px", textAlign: "center", color: "#666" }}>
+            <div
+              style={{ padding: "20px", textAlign: "center", color: "#666" }}
+            >
               Chargement des stocks...
             </div>
           )}
 
           {!loadingStocks && stocks.length === 0 && (
-            <div style={{ padding: "20px", textAlign: "center", color: "#666" }}>
+            <div
+              style={{ padding: "20px", textAlign: "center", color: "#666" }}
+            >
               Aucun stock trouvé pour cette récolte.
             </div>
           )}
@@ -144,7 +156,11 @@ export default function HarvestAutoCompleteWidget({ onSelect }: Props) {
                         type="checkbox"
                         checked={isSelected}
                         onChange={() => handleToggleStock(stock.id)}
-                        style={{ width: "18px", height: "18px", cursor: "pointer" }}
+                        style={{
+                          width: "18px",
+                          height: "18px",
+                          cursor: "pointer",
+                        }}
                       />
                     </div>
 
@@ -152,7 +168,13 @@ export default function HarvestAutoCompleteWidget({ onSelect }: Props) {
 
                     <div style={{ fontWeight: 500 }}>{stock.reference}</div>
 
-                    <div style={{ fontWeight: 600, whiteSpace: "nowrap", textAlign: "right" }}>
+                    <div
+                      style={{
+                        fontWeight: 600,
+                        whiteSpace: "nowrap",
+                        textAlign: "right",
+                      }}
+                    >
                       {stock.quantityKg} kg
                     </div>
                   </label>
@@ -193,7 +215,8 @@ export default function HarvestAutoCompleteWidget({ onSelect }: Props) {
               </button>
 
               <strong>
-                {selectedStockIds.length} sélectionné{selectedStockIds.length > 1 ? "s" : ""}
+                {selectedStockIds.length} sélectionné
+                {selectedStockIds.length > 1 ? "s" : ""}
               </strong>
             </div>
           )}

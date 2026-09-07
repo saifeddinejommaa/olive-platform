@@ -7,6 +7,8 @@ import { UpdatePressingOperation } from "../../domain/useCases/UpdatePressingOpe
 import { StartPressingOperation } from "../../domain/useCases/StartPressingOperation";
 import { CancelPressingOperation } from "../../domain/useCases/CancelPressingOperation";
 import { ClosePressingOperation } from "../../domain/useCases/ClosePressingOperation ";
+import type { UpdatePressingOperationParams } from "../../domain/params/UpdatePressingOperationParams";
+import type { CompletePressingOperationParams } from "../../domain/params/CompletePressingOperationParams";
 
 type PressingOperationDetailsState = {
   operation: PressingOperationDetails | null;
@@ -21,15 +23,11 @@ type PressingOperationDetailsState = {
 
   fetchOperation: (id: number) => Promise<void>;
 
-  updateOperation: (operation: PressingOperationDetails) => Promise<void>;
+  updateOperation: (operation: UpdatePressingOperationParams) => Promise<void>;
 
   startOperation: (id: number) => Promise<void>;
 
-  completeOperation: (
-    id: number,
-    oliveQuantity: number,
-    endDate?: string,
-  ) => Promise<void>;
+  completeOperation: (params: CompletePressingOperationParams) => Promise<void>;
 
   cancelOperation: (id: number) => Promise<void>;
 
@@ -91,18 +89,14 @@ export const usePressingOperationDetailsStore =
     // UPDATE
     // ============================================================
 
-    updateOperation: async (operation) => {
+    updateOperation: async (params: UpdatePressingOperationParams) => {
       set({
         saving: true,
         error: null,
       });
 
       try {
-        const result = await UpdatePressingOperation(operation.id, {
-          inputs: operation.inputs,
-          notes: operation.notes,
-          planificationDate: operation.pressingDate,
-        });
+        const result = await UpdatePressingOperation(params);
 
         if (result.Code !== 200) {
           set({
@@ -114,7 +108,7 @@ export const usePressingOperationDetailsStore =
 
         // On recharge les détails pour avoir la
         // représentation complète de l'opération.
-        await get().fetchOperation(operation.id);
+        await get().fetchOperation(params.id);
       } catch (error) {
         set({
           error:
@@ -175,16 +169,16 @@ export const usePressingOperationDetailsStore =
     // CLOSE
     // ============================================================
 
-    completeOperation: async (id, oliveQuantity, endDate) => {
+    completeOperation: async (params: CompletePressingOperationParams) => {
       set({
         completing: true,
         error: null,
       });
 
       try {
-        const result = await ClosePressingOperation(id, {
-          endDate: endDate ?? new Date().toISOString(),
-          oilQuantity: oliveQuantity,
+        const result = await ClosePressingOperation(params.id, {
+          endDate: params.endDate,
+          oilQuantity: params.oliveQuantity,
         });
 
         if (result.Code !== 200) {
@@ -197,7 +191,7 @@ export const usePressingOperationDetailsStore =
 
         // L'endpoint close retourne seulement l'ID.
         // On recharge donc l'opération.
-        await get().fetchOperation(id);
+        await get().fetchOperation(params.id);
       } catch (error) {
         set({
           error:

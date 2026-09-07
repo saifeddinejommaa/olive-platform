@@ -1,4 +1,3 @@
-
 import HarvestAutoCompleteWidget from "../../../harvests/ui/widgets/HarvestAutoCompleteWidget";
 import OlivePurchaseAutoCompleteWidget from "../../../olivePurchases/ui/widgets/OlivePurchaseAutCompleteWidget";
 import type { InputSourceType } from "./InputTypes";
@@ -17,7 +16,11 @@ type SourceReferenceProps = {
   onSelect: (source: SourceOption) => void;
 };
 
-export default function SourceReference({ sourceType, error, onSelect }: SourceReferenceProps) {
+export default function SourceReference({
+  sourceType,
+  error,
+  onSelect,
+}: SourceReferenceProps) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
       {sourceType === "harvest" ? (

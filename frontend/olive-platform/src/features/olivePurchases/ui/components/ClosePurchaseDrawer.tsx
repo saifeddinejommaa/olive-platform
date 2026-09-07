@@ -5,6 +5,7 @@ import { renderStatus } from "../../../shared/utils/StatusUtils";
 import { purchaseStatusConfig } from "../../../shared/status/PurchaseStatusConfig";
 import type { OlivePurchaseDetails } from "../../domain/entities/OlivePurchaseDetails";
 import DrawerConfirmationNotice from "../../../../common/widgets/DrawerConfirmationNotice";
+import { formatDate } from "../../../shared/utils/DatesUtils";
 
 type Props = {
   open: boolean;
@@ -12,11 +13,6 @@ type Props = {
   purchase: OlivePurchaseDetails;
   onClose: () => void;
   onConfirm: () => void;
-};
-
-const formatDate = (value: string) => {
-  if (!value) return "-";
-  return new Date(value).toLocaleDateString("fr-FR");
 };
 
 export default function ClosePurchaseDrawer({
@@ -45,11 +41,17 @@ export default function ClosePurchaseDrawer({
       }
     >
       <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-        <DrawerInfoCard label="Référence de l'achat">{purchase.reference || "-"}</DrawerInfoCard>
+        <DrawerInfoCard label="Référence de l'achat">
+          {purchase.reference || "-"}
+        </DrawerInfoCard>
 
-        <DrawerInfoCard label="Fournisseur">{purchase.supplierName || "-"}</DrawerInfoCard>
+        <DrawerInfoCard label="Fournisseur">
+          {purchase.supplierName || "-"}
+        </DrawerInfoCard>
 
-        <DrawerInfoCard label="Date d'achat">{formatDate(purchase.purchaseDate)}</DrawerInfoCard>
+        <DrawerInfoCard label="Date d'achat">
+          {formatDate(purchase.purchaseDate)}
+        </DrawerInfoCard>
 
         <DrawerInfoCard label="Statut actuel">
           {renderStatus(purchase.status, purchaseStatusConfig)}

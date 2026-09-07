@@ -69,8 +69,7 @@ export default function NewOlivePurchasePage() {
       form.items.reduce(
         (total, item) =>
           total +
-          Number(item.agreedQuantityKg || 0) *
-          Number(item.pricePerKg || 0),
+          Number(item.agreedQuantityKg || 0) * Number(item.pricePerKg || 0),
         0,
       ),
     [form.items],
@@ -102,14 +101,10 @@ export default function NewOlivePurchasePage() {
 
     form.items.forEach((item) => {
       if (!item.varietyId) {
-        validationErrors[`variety-${item.id}`] =
-          "Sélectionnez une variété.";
+        validationErrors[`variety-${item.id}`] = "Sélectionnez une variété.";
       }
 
-      if (
-        !item.agreedQuantityKg ||
-        Number(item.agreedQuantityKg) <= 0
-      ) {
+      if (!item.agreedQuantityKg || Number(item.agreedQuantityKg) <= 0) {
         validationErrors[`quantity-${item.id}`] =
           "La quantité doit être supérieure à 0.";
       }
@@ -199,9 +194,9 @@ export default function NewOlivePurchasePage() {
         items: previous.items.map((item) =>
           item.id === id
             ? {
-              ...item,
-              [field]: value,
-            }
+                ...item,
+                [field]: value,
+              }
             : item,
         ),
       }));
@@ -260,13 +255,9 @@ export default function NewOlivePurchasePage() {
         return;
       }
 
-      toast.error(
-        error ?? "Impossible de créer l'achat d'olives.",
-      );
+      toast.error(error ?? "Impossible de créer l'achat d'olives.");
     } catch {
-      toast.error(
-        "Une erreur est survenue lors de la création de l'achat.",
-      );
+      toast.error("Une erreur est survenue lors de la création de l'achat.");
 
       setErrors({
         general: "Impossible de créer l'achat d'olives.",
@@ -274,13 +265,7 @@ export default function NewOlivePurchasePage() {
     } finally {
       setSaving(false);
     }
-  }, [
-    form,
-    getValidationErrors,
-    createOlivePurchaseAction,
-    error,
-    navigate,
-  ]);
+  }, [form, getValidationErrors, createOlivePurchaseAction, error, navigate]);
 
   const handleCancel = useCallback(() => {
     if (!saving) {
@@ -295,8 +280,8 @@ export default function NewOlivePurchasePage() {
           <h1 className="page-title">Nouvel achat d'olives</h1>
 
           <p className="page-description">
-            Créer un nouvel achat d'olives et définir les différentes
-            lignes d'achat.
+            Créer un nouvel achat d'olives et définir les différentes lignes
+            d'achat.
           </p>
         </div>
       </div>
@@ -306,9 +291,7 @@ export default function NewOlivePurchasePage() {
           <div>
             <h3>Informations générales</h3>
 
-            <span>
-              Informations relatives à l'achat d'olives
-            </span>
+            <span>Informations relatives à l'achat d'olives</span>
           </div>
         </div>
 
@@ -318,17 +301,12 @@ export default function NewOlivePurchasePage() {
               label="Fournisseur"
               value={form.supplierName}
               onChange={(event) =>
-                updateForm(
-                  "supplierName",
-                  event.target.value,
-                )
+                updateForm("supplierName", event.target.value)
               }
             />
 
             {errors.supplierName && (
-              <span className="field-error">
-                {errors.supplierName}
-              </span>
+              <span className="field-error">{errors.supplierName}</span>
             )}
           </div>
 
@@ -338,17 +316,12 @@ export default function NewOlivePurchasePage() {
               type="date"
               value={form.purchaseDate}
               onChange={(event) =>
-                updateForm(
-                  "purchaseDate",
-                  event.target.value,
-                )
+                updateForm("purchaseDate", event.target.value)
               }
             />
 
             {errors.purchaseDate && (
-              <span className="field-error">
-                {errors.purchaseDate}
-              </span>
+              <span className="field-error">{errors.purchaseDate}</span>
             )}
           </div>
 
@@ -358,38 +331,26 @@ export default function NewOlivePurchasePage() {
             <Select
               options={statusOptions}
               placeholder={
-                constantsLoading
-                  ? "Chargement..."
-                  : "Sélectionnez un statut"
+                constantsLoading ? "Chargement..." : "Sélectionnez un statut"
               }
               value={form.statusId}
               onChange={(event) =>
-                updateForm(
-                  "statusId",
-                  Number(event.target.value),
-                )
+                updateForm("statusId", Number(event.target.value))
               }
             />
 
             {errors.statusId && (
-              <span className="field-error">
-                {errors.statusId}
-              </span>
+              <span className="field-error">{errors.statusId}</span>
             )}
           </div>
 
-          <div
-            className="filter-item"
-            style={{ gridColumn: "1 / -1" }}
-          >
+          <div className="filter-item" style={{ gridColumn: "1 / -1" }}>
             <label>Notes</label>
 
             <TextEditor
               value={form.notes}
               placeholder="Notes concernant l'achat..."
-              onChange={(value) =>
-                updateForm("notes", value)
-              }
+              onChange={(value) => updateForm("notes", value)}
             />
           </div>
         </div>
@@ -412,11 +373,7 @@ export default function NewOlivePurchasePage() {
             </span>
           </div>
 
-          <Button
-            variant="secondary"
-            onClick={addItem}
-            disabled={saving}
-          >
+          <Button variant="secondary" onClick={addItem} disabled={saving}>
             Ajouter une ligne
           </Button>
         </div>
@@ -436,15 +393,12 @@ export default function NewOlivePurchasePage() {
               style={{
                 gridColumn: "1 / -1",
                 display: "grid",
-                gridTemplateColumns:
-                  "1.5fr 1fr 1fr auto auto",
+                gridTemplateColumns: "1.5fr 1fr 1fr auto auto",
                 gap: "15px",
                 alignItems: "start",
                 padding: "15px 0",
                 borderBottom:
-                  index < form.items.length - 1
-                    ? "1px solid #eee"
-                    : "none",
+                  index < form.items.length - 1 ? "1px solid #eee" : "none",
               }}
             >
               <div className="filter-item">
@@ -462,9 +416,7 @@ export default function NewOlivePurchasePage() {
                     updateItem(
                       item.id,
                       "varietyId",
-                      event.target.value
-                        ? Number(event.target.value)
-                        : null,
+                      event.target.value ? Number(event.target.value) : null,
                     )
                   }
                 />
@@ -484,11 +436,7 @@ export default function NewOlivePurchasePage() {
                   step="0.01"
                   value={item.agreedQuantityKg}
                   onChange={(event) =>
-                    updateItem(
-                      item.id,
-                      "agreedQuantityKg",
-                      event.target.value,
-                    )
+                    updateItem(item.id, "agreedQuantityKg", event.target.value)
                   }
                 />
 
@@ -507,11 +455,7 @@ export default function NewOlivePurchasePage() {
                   step="0.01"
                   value={item.pricePerKg}
                   onChange={(event) =>
-                    updateItem(
-                      item.id,
-                      "pricePerKg",
-                      event.target.value,
-                    )
+                    updateItem(item.id, "pricePerKg", event.target.value)
                   }
                 />
 
@@ -552,10 +496,7 @@ export default function NewOlivePurchasePage() {
           ))}
 
           {errors.items && (
-            <span
-              className="field-error"
-              style={{ gridColumn: "1 / -1" }}
-            >
+            <span className="field-error" style={{ gridColumn: "1 / -1" }}>
               {errors.items}
             </span>
           )}
@@ -567,9 +508,7 @@ export default function NewOlivePurchasePage() {
           <div>
             <h3>Récapitulatif</h3>
 
-            <span>
-              Totaux calculés à partir des lignes d'achat.
-            </span>
+            <span>Totaux calculés à partir des lignes d'achat.</span>
           </div>
         </div>
 
@@ -577,55 +516,38 @@ export default function NewOlivePurchasePage() {
           <div className="filter-item">
             <label>Quantité totale</label>
 
-            <strong>
-              {totalQuantityKg.toFixed(2)} kg
-            </strong>
+            <strong>{totalQuantityKg.toFixed(2)} kg</strong>
           </div>
 
           <div className="filter-item">
             <label>Prix total</label>
 
-            <strong>
-              {totalPrice.toFixed(2)} €
-            </strong>
+            <strong>{totalPrice.toFixed(2)} €</strong>
           </div>
 
           <div className="filter-item">
             <label>Prix moyen / kg</label>
 
-            <strong>
-              {pricePerKg.toFixed(2)} € / kg
-            </strong>
+            <strong>{pricePerKg.toFixed(2)} € / kg</strong>
           </div>
         </div>
       </div>
 
       {errors.general && (
-        <div
-          className="field-error"
-          style={{ marginTop: "15px" }}
-        >
+        <div className="field-error" style={{ marginTop: "15px" }}>
           {errors.general}
         </div>
       )}
 
       <div className="filters-footer">
-        <Button
-          variant="secondary"
-          onClick={handleCancel}
-          disabled={saving}
-        >
+        <Button variant="secondary" onClick={handleCancel} disabled={saving}>
           Annuler
         </Button>
 
         <Button
           variant="primary"
           onClick={handleSubmit}
-          disabled={
-            saving ||
-            constantsLoading ||
-            !isFormValid
-          }
+          disabled={saving || constantsLoading || !isFormValid}
         >
           {saving ? "Création..." : "Créer l'achat"}
         </Button>

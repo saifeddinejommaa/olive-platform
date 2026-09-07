@@ -16,9 +16,14 @@ type Props = {
 };
 
 export default function OlivePurchaseAutoCompleteWidget({ onSelect }: Props) {
-  const [selectedPurchaseId, setSelectedPurchaseId] = useState<number | null>(null);
-  const [selectedPurchaseReference, setSelectedPurchaseReference] = useState("");
-  const [purchaseItems, setPurchaseItems] = useState<OlivePurchaseItemDetails[]>([]);
+  const [selectedPurchaseId, setSelectedPurchaseId] = useState<number | null>(
+    null,
+  );
+  const [selectedPurchaseReference, setSelectedPurchaseReference] =
+    useState("");
+  const [purchaseItems, setPurchaseItems] = useState<
+    OlivePurchaseItemDetails[]
+  >([]);
   const [selectedItemIds, setSelectedItemIds] = useState<number[]>([]);
   const [loadingItems, setLoadingItems] = useState(false);
 
@@ -61,7 +66,9 @@ export default function OlivePurchaseAutoCompleteWidget({ onSelect }: Props) {
   };
 
   const emitSelection = (itemIds: number[]) => {
-    const selectedItems = purchaseItems.filter((item) => itemIds.includes(item.id));
+    const selectedItems = purchaseItems.filter((item) =>
+      itemIds.includes(item.id),
+    );
     const quantityKg = selectedItems.reduce(
       (total, item) => total + Number(item.agreedQuantityKg ?? 0),
       0,
@@ -139,13 +146,17 @@ export default function OlivePurchaseAutoCompleteWidget({ onSelect }: Props) {
           </div>
 
           {loadingItems && (
-            <div style={{ padding: "20px", textAlign: "center", color: "#666" }}>
+            <div
+              style={{ padding: "20px", textAlign: "center", color: "#666" }}
+            >
               Chargement des lots...
             </div>
           )}
 
           {!loadingItems && purchaseItems.length === 0 && (
-            <div style={{ padding: "20px", textAlign: "center", color: "#666" }}>
+            <div
+              style={{ padding: "20px", textAlign: "center", color: "#666" }}
+            >
               Aucun lot trouvé pour cet achat.
             </div>
           )}
@@ -175,7 +186,11 @@ export default function OlivePurchaseAutoCompleteWidget({ onSelect }: Props) {
                         type="checkbox"
                         checked={isSelected}
                         onChange={() => handleToggleItem(item.id)}
-                        style={{ width: "18px", height: "18px", cursor: "pointer" }}
+                        style={{
+                          width: "18px",
+                          height: "18px",
+                          cursor: "pointer",
+                        }}
                       />
                     </div>
 
@@ -201,11 +216,19 @@ export default function OlivePurchaseAutoCompleteWidget({ onSelect }: Props) {
                       </span>
 
                       {varietyLabel && item.notes && (
-                        <span style={{ fontSize: "12px", color: "#777" }}>{varietyLabel}</span>
+                        <span style={{ fontSize: "12px", color: "#777" }}>
+                          {varietyLabel}
+                        </span>
                       )}
                     </div>
 
-                    <div style={{ fontWeight: 600, whiteSpace: "nowrap", textAlign: "right" }}>
+                    <div
+                      style={{
+                        fontWeight: 600,
+                        whiteSpace: "nowrap",
+                        textAlign: "right",
+                      }}
+                    >
                       {item.agreedQuantityKg} kg
                     </div>
                   </label>
@@ -246,7 +269,8 @@ export default function OlivePurchaseAutoCompleteWidget({ onSelect }: Props) {
               </button>
 
               <strong>
-                {selectedItemIds.length} sélectionné{selectedItemIds.length > 1 ? "s" : ""}
+                {selectedItemIds.length} sélectionné
+                {selectedItemIds.length > 1 ? "s" : ""}
               </strong>
             </div>
           )}

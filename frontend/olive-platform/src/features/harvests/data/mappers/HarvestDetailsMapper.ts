@@ -4,7 +4,9 @@ import type { HarvestDetails } from "../../domain/entities/HarvestDetails";
 import type { HarvestDetailsResponse } from "../responses/HarvestDetailsResponse";
 import { HarvestStockDetailsMapper } from "./HarvestStockDetailsMapper";
 
-export function HarvestDetailsMapper(response: HarvestDetailsResponse): HarvestDetails {
+export function HarvestDetailsMapper(
+  response: HarvestDetailsResponse,
+): HarvestDetails {
   return {
     id: response.id,
 

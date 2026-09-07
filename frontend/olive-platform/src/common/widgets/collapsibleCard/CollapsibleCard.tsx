@@ -9,7 +9,11 @@ type Props = {
   defaultExpanded?: boolean;
 };
 
-export default function CollapsibleCard({ title, children, defaultExpanded = false }: Props) {
+export default function CollapsibleCard({
+  title,
+  children,
+  defaultExpanded = false,
+}: Props) {
   const [expanded, setExpanded] = useState(defaultExpanded);
 
   const chevron = (

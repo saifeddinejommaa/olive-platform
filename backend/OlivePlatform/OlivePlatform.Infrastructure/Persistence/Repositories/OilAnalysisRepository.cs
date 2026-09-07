@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using OlivePlatform.Domain.Entities;
+using OlivePlatform.Domain.Enums;
 using OlivePlatform.Domain.Repositories;
 
 namespace OlivePlatform.Infrastructure.Persistence.Repositories
@@ -28,7 +29,7 @@ namespace OlivePlatform.Infrastructure.Persistence.Repositories
         public async Task<OilAnalysis?> GetBySourceAsync(int sourceTypeId, int sourceId, CancellationToken cancellationToken = default)
         {
             return await _context.OilAnalysis.FirstOrDefaultAsync(x => x.SourceId == sourceId
-                                                                      && x.SourceTypeId == sourceTypeId, cancellationToken);
+                                                                      && x.SourceTypeId == (OilAnalysisSourceType)sourceTypeId, cancellationToken);
         }
 
         public async Task UpdateAsync(OilAnalysis entity, CancellationToken cancellationToken = default)

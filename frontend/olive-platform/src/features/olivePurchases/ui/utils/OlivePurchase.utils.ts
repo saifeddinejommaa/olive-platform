@@ -1,10 +1,3 @@
-
-export const formatDate = (date?: string) => {
-  if (!date) return "-";
-
-  return new Date(`${date}T00:00:00`).toLocaleDateString("fr-FR");
-};
-
 export const formatNumber = (value?: number) => {
   if (value === undefined || value === null) return "-";
 
@@ -33,4 +26,3 @@ export const getAnalysisStatusLabel = (status: number) => {
       return "-";
   }
 };
-
