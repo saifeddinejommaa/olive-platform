@@ -20,10 +20,12 @@ namespace OlivePlatform.Application.Features.Production.Responses
 
         public decimal? OilQuantityLiters { get; set; }
 
+        public decimal? ExpectedOilLiters { get; set; }
+
+        public decimal? OilYieldDeviationLiters { get; set; }
+
         public DateTime? StartTime { get; set; }
 
         public DateTime? EndTime { get; set; }
-
-        public  List<PressingOperationInputResponse> Inputs { get; set; } = [];
     }
 }

@@ -61,8 +61,17 @@ export default function OliveAnalysisDetailsPage() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
 
-  const { analysis, loading, saving, error, fetchAnalysis, update, start, complete, clear } =
-    useOliveAnalysisDetailsStore();
+  const {
+    analysis,
+    loading,
+    saving,
+    error,
+    fetchAnalysis,
+    update,
+    start,
+    complete,
+    clear,
+  } = useOliveAnalysisDetailsStore();
 
   const [form, setForm] = useState<OliveAnalysisForm>(initialForm);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -109,24 +118,33 @@ export default function OliveAnalysisDetailsPage() {
     const isPercentageInvalid = (value?: number) =>
       value !== undefined && (value < 0 || value > 100);
 
-    if (!form.sourceTypeId) validationErrors.sourceTypeId = "Le type de source est obligatoire.";
+    if (!form.sourceTypeId)
+      validationErrors.sourceTypeId = "Le type de source est obligatoire.";
     if (!form.sourceReference?.trim())
       validationErrors.sourceReference = "La source est obligatoire.";
-    if (!form.analysisDate) validationErrors.analysisDate = "La date d'analyse est obligatoire.";
+    if (!form.analysisDate)
+      validationErrors.analysisDate = "La date d'analyse est obligatoire.";
     if (isPercentageInvalid(form.humidityPercentage))
-      validationErrors.humidityPercentage = "L'humidité doit être comprise entre 0 et 100 %.";
+      validationErrors.humidityPercentage =
+        "L'humidité doit être comprise entre 0 et 100 %.";
     if (isPercentageInvalid(form.waterPercentage))
-      validationErrors.waterPercentage = "Le pourcentage d'eau doit être compris entre 0 et 100 %.";
+      validationErrors.waterPercentage =
+        "Le pourcentage d'eau doit être compris entre 0 et 100 %.";
     if (isPercentageInvalid(form.oilPercentage))
-      validationErrors.oilPercentage = "Le pourcentage d'huile doit être compris entre 0 et 100 %.";
+      validationErrors.oilPercentage =
+        "Le pourcentage d'huile doit être compris entre 0 et 100 %.";
     if (isPercentageInvalid(form.acidityPercentage))
-      validationErrors.acidityPercentage = "L'acidité doit être comprise entre 0 et 100 %.";
+      validationErrors.acidityPercentage =
+        "L'acidité doit être comprise entre 0 et 100 %.";
 
     return validationErrors;
   }, [form]);
 
   const updateForm = useCallback(
-    <K extends keyof OliveAnalysisForm>(field: K, value: OliveAnalysisForm[K]) => {
+    <K extends keyof OliveAnalysisForm>(
+      field: K,
+      value: OliveAnalysisForm[K],
+    ) => {
       if (isCompleted) return;
 
       setForm((previous) => ({ ...previous, [field]: value }));
@@ -147,7 +165,9 @@ export default function OliveAnalysisDetailsPage() {
       waterPercentage: form.waterPercentage,
       oilPercentage: form.oilPercentage,
       acidityPercentage: form.acidityPercentage,
-      analysisDate: form.analysisDate ? new Date(form.analysisDate).toISOString() : undefined,
+      analysisDate: form.analysisDate
+        ? new Date(form.analysisDate).toISOString()
+        : undefined,
     }),
     [form],
   );
@@ -160,7 +180,11 @@ export default function OliveAnalysisDetailsPage() {
       await fetchAnalysis(analysis.id);
       toast.success("L'analyse d'olive a été lancée avec succès.");
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Impossible de lancer l'analyse d'olive.");
+      toast.error(
+        err instanceof Error
+          ? err.message
+          : "Impossible de lancer l'analyse d'olive.",
+      );
     }
   }, [analysis, isPlanned, saving, start, fetchAnalysis]);
 
@@ -181,11 +205,23 @@ export default function OliveAnalysisDetailsPage() {
       setErrors({});
       toast.success("Analyse d'olive modifiée avec succès.");
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Impossible de modifier l'analyse d'olive.";
+      const message =
+        err instanceof Error
+          ? err.message
+          : "Impossible de modifier l'analyse d'olive.";
       toast.error(message);
       setErrors({ general: message });
     }
-  }, [analysis, isCompleted, isInProgress, saving, validateForm, buildUpdateRequest, update, fetchAnalysis]);
+  }, [
+    analysis,
+    isCompleted,
+    isInProgress,
+    saving,
+    validateForm,
+    buildUpdateRequest,
+    update,
+    fetchAnalysis,
+  ]);
 
   // Ouvre le drawer de clôture (n'appelle pas complete())
   const handleOpenCompleteDrawer = useCallback(() => {
@@ -194,7 +230,9 @@ export default function OliveAnalysisDetailsPage() {
     const validationErrors = validateForm();
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
-      toast.error("Veuillez corriger les erreurs du formulaire avant de clôturer.");
+      toast.error(
+        "Veuillez corriger les erreurs du formulaire avant de clôturer.",
+      );
       return;
     }
 
@@ -214,7 +252,9 @@ export default function OliveAnalysisDetailsPage() {
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       setCompleteDrawerOpen(false);
-      toast.error("Veuillez corriger les erreurs du formulaire avant de clôturer.");
+      toast.error(
+        "Veuillez corriger les erreurs du formulaire avant de clôturer.",
+      );
       return;
     }
 
@@ -225,11 +265,22 @@ export default function OliveAnalysisDetailsPage() {
       setErrors({});
       toast.success("L'analyse d'olive a été clôturée avec succès.");
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Impossible de clôturer l'analyse d'olive.";
+      const message =
+        err instanceof Error
+          ? err.message
+          : "Impossible de clôturer l'analyse d'olive.";
       toast.error(message);
       setErrors({ general: message });
     }
-  }, [analysis, isInProgress, saving, validateForm, buildUpdateRequest, complete, fetchAnalysis]);
+  }, [
+    analysis,
+    isInProgress,
+    saving,
+    validateForm,
+    buildUpdateRequest,
+    complete,
+    fetchAnalysis,
+  ]);
 
   const handleBack = useCallback(() => {
     if (!saving) navigate("/Olive-analyses");
@@ -247,7 +298,9 @@ export default function OliveAnalysisDetailsPage() {
           <div className="page-header-content">
             <h1 className="page-title">Analyse d'olive{headerReference}</h1>
             <p className="page-description">Consultation de l'analyse.</p>
-            {analysis && <div>{renderStatus(analysis.status, productionStatusConfig)}</div>}
+            {analysis && (
+              <div>{renderStatus(analysis.status, productionStatusConfig)}</div>
+            )}
           </div>
         </div>
         <div className="error-message">Identifiant de l'analyse invalide.</div>
@@ -267,7 +320,9 @@ export default function OliveAnalysisDetailsPage() {
           <div className="page-header-content">
             <h1 className="page-title">Analyse d'olive{headerReference}</h1>
             <p className="page-description">Consultation de l'analyse.</p>
-            {analysis && <div>{renderStatus(analysis.status, productionStatusConfig)}</div>}
+            {analysis && (
+              <div>{renderStatus(analysis.status, productionStatusConfig)}</div>
+            )}
           </div>
         </div>
         <div className="loading">Chargement de l'analyse d'olive...</div>
@@ -282,7 +337,9 @@ export default function OliveAnalysisDetailsPage() {
           <div className="page-header-content">
             <h1 className="page-title">Analyse d'olive{headerReference}</h1>
             <p className="page-description">Consultation de l'analyse.</p>
-            {analysis && <div>{renderStatus(analysis.status, productionStatusConfig)}</div>}
+            {analysis && (
+              <div>{renderStatus(analysis.status, productionStatusConfig)}</div>
+            )}
           </div>
         </div>
         <div className="error-message">{error}</div>
@@ -329,7 +386,11 @@ export default function OliveAnalysisDetailsPage() {
             </Button>
           )}
           {isInProgress && (
-            <Button variant="primary" onClick={handleOpenCompleteDrawer} disabled={saving}>
+            <Button
+              variant="primary"
+              onClick={handleOpenCompleteDrawer}
+              disabled={saving}
+            >
               {saving ? "Clôture..." : "Clôturer l'analyse"}
             </Button>
           )}
@@ -347,13 +408,19 @@ export default function OliveAnalysisDetailsPage() {
         <div className="filters-content">
           <div className="filter-item">
             <label>Type de source</label>
-            <div style={{ marginTop: "6px", fontWeight: 500 }}>{sourceTypeLabel}</div>
-            {errors.sourceTypeId && <span className="field-error">{errors.sourceTypeId}</span>}
+            <div style={{ marginTop: "6px", fontWeight: 500 }}>
+              {sourceTypeLabel}
+            </div>
+            {errors.sourceTypeId && (
+              <span className="field-error">{errors.sourceTypeId}</span>
+            )}
           </div>
 
           <div className="filter-item">
             <label>{sourceReferenceLabel}</label>
-            <div style={{ marginTop: "6px", fontWeight: 500 }}>{form.sourceReference || "-"}</div>
+            <div style={{ marginTop: "6px", fontWeight: 500 }}>
+              {form.sourceReference || "-"}
+            </div>
             {errors.sourceReference && (
               <span className="field-error">{errors.sourceReference}</span>
             )}
@@ -371,7 +438,9 @@ export default function OliveAnalysisDetailsPage() {
             <div style={{ marginTop: "6px", fontWeight: 500 }}>
               {formatAnalysisDate(form.analysisDate)}
             </div>
-            {errors.analysisDate && <span className="field-error">{errors.analysisDate}</span>}
+            {errors.analysisDate && (
+              <span className="field-error">{errors.analysisDate}</span>
+            )}
           </div>
         </div>
       </div>
@@ -395,7 +464,10 @@ export default function OliveAnalysisDetailsPage() {
                 step="0.01"
                 value={form.humidityPercentage ?? ""}
                 onChange={(event) =>
-                  updateForm("humidityPercentage", toOptionalNumber(event.target.value))
+                  updateForm(
+                    "humidityPercentage",
+                    toOptionalNumber(event.target.value),
+                  )
                 }
                 disabled={fieldsDisabled}
               />
@@ -413,7 +485,10 @@ export default function OliveAnalysisDetailsPage() {
                 step="0.01"
                 value={form.waterPercentage ?? ""}
                 onChange={(event) =>
-                  updateForm("waterPercentage", toOptionalNumber(event.target.value))
+                  updateForm(
+                    "waterPercentage",
+                    toOptionalNumber(event.target.value),
+                  )
                 }
                 disabled={fieldsDisabled}
               />
@@ -431,7 +506,10 @@ export default function OliveAnalysisDetailsPage() {
                 step="0.01"
                 value={form.oilPercentage ?? ""}
                 onChange={(event) =>
-                  updateForm("oilPercentage", toOptionalNumber(event.target.value))
+                  updateForm(
+                    "oilPercentage",
+                    toOptionalNumber(event.target.value),
+                  )
                 }
                 disabled={fieldsDisabled}
               />
@@ -449,7 +527,10 @@ export default function OliveAnalysisDetailsPage() {
                 step="0.01"
                 value={form.acidityPercentage ?? ""}
                 onChange={(event) =>
-                  updateForm("acidityPercentage", toOptionalNumber(event.target.value))
+                  updateForm(
+                    "acidityPercentage",
+                    toOptionalNumber(event.target.value),
+                  )
                 }
                 disabled={fieldsDisabled}
               />

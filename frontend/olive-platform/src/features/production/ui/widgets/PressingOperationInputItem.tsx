@@ -1,6 +1,7 @@
 import TextInput from "../../../../common/widgets/textInput/TextInput";
 
-import SourceReference, { type SourceOption } from "./SourceReference";
+import SourceReference from "./SourceReference";
+import type { SourceOption } from "./SourceReference";
 
 import SourceTypeSelector from "./SourceTypeSelector";
 
@@ -61,28 +62,6 @@ export default function PressingOperationInputItem({
   };
 
   // ==========================================================
-  // REFERENCE CHANGE
-  // ==========================================================
-
-  const handleReferenceChange = (value: string) => {
-    onUpdate(input.id, "reference", value);
-
-    // Si l'utilisateur modifie manuellement
-    // la référence, on supprime l'identifiant
-    // précédemment sélectionné.
-
-    if (input.sourceType === "harvest") {
-      onUpdate(input.id, "harvestId", null);
-
-      onUpdate(input.id, "purchaseItemId", null);
-    } else {
-      onUpdate(input.id, "purchaseItemId", null);
-
-      onUpdate(input.id, "harvestId", null);
-    }
-  };
-
-  // ==========================================================
   // SOURCE SELECTION
   // ==========================================================
 
@@ -128,9 +107,7 @@ export default function PressingOperationInputItem({
 
       <SourceReference
         sourceType={input.sourceType}
-        value={input.reference}
         error={errors[`input-${input.id}`] ?? errors[`input-${index}`]}
-        onChange={handleReferenceChange}
         onSelect={handleSelectSource}
       />
 

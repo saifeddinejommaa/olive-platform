@@ -1,32 +1,36 @@
 ﻿using MediatR;
 using OlivePlatform.Application.Common;
 using OlivePlatform.Domain.Entities;
+using OlivePlatform.Domain.Enums;
 using OlivePlatform.Domain.Repositories;
+using YourProject.Application.Constants;
+using YourProject.Application.Services;
 
-namespace OlivePlatform.Application.Features.Analysis.Commands
+namespace OlivePlatform.Application.Features.OilAnalyses.Commands
 {
     public class CreateOilAnalysisCommand : IRequest<int>
     {
         public int SourceTypeId { get; set; }
+
         public int SourceId { get; set; }
 
-        public decimal PrimaryOxidation { get; set; }
-        public decimal SecondaryOxidation { get; set; }
-
-        public DateTime AnalysisDate { get; set; }
+        public DateTime? AnalysisDate { get; set; }
     }
 
     public class CreateOilAnalysisCommandHandler
-    : IRequestHandler<CreateOilAnalysisCommand, int>
+        : IRequestHandler<CreateOilAnalysisCommand, int>
     {
-        private readonly IOilAnalysisRepository _repository;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IOilAnalysisRepository _repository;
+        private readonly IDocumentNumberService _documentNumberService;
 
         public CreateOilAnalysisCommandHandler(
             IOilAnalysisRepository repository,
+            IDocumentNumberService documentNumberService,
             IUnitOfWork unitOfWork)
         {
             _repository = repository;
+            _documentNumberService = documentNumberService;
             _unitOfWork = unitOfWork;
         }
 
@@ -34,35 +38,32 @@ namespace OlivePlatform.Application.Features.Analysis.Commands
             CreateOilAnalysisCommand request,
             CancellationToken cancellationToken)
         {
-            var existing = await _repository.GetBySourceAsync(
-                request.SourceTypeId,
-                request.SourceId,
-                cancellationToken);
-
-            if (existing != null)
-                throw new InvalidOperationException(
-                    "Une analyse d'huile existe déjà pour cette source.");
-
             var now = DateTime.UtcNow;
 
-            var analysis = new OilAnalysis
-            {
-                SourceTypeId = request.SourceTypeId,
-                SourceId = request.SourceId,
-                PrimaryOxidation = request.PrimaryOxidation,
-                SecondaryOxidation = request.SecondaryOxidation,
-                AnalysisDate = request.AnalysisDate,
-                CreatedAt = now,
-                UpdatedAt = now
-            };
+            var reference = await _documentNumberService.GenerateAsync(
+                DocumentTypes.OilAnalysis,
+                DocumentPrefixes.OilAnalysis,
+                now.Year,
+                cancellationToken);
 
+            var oilAnalysis = new OilAnalysis
+            {
+                Reference = reference,
+                SourceTypeId = (OilAnalysisSourceType)request.SourceTypeId,
+                SourceId = request.SourceId,
+                AnalysisDate = request.AnalysisDate.HasValue
+                                ? DateTime.SpecifyKind(request.AnalysisDate.Value, DateTimeKind.Utc)
+                                : null,
+                CreatedAt = now,
+                Status = ProductionStatus.Planned,
+            };
 
             await _unitOfWork.ExecuteInTransactionAsync(async ct =>
             {
-                await _repository.AddAsync(analysis, cancellationToken);
+                await _repository.AddAsync(oilAnalysis, cancellationToken);
             }, cancellationToken);
 
-            return analysis.Id;
+            return oilAnalysis.Id;
         }
     }
 }

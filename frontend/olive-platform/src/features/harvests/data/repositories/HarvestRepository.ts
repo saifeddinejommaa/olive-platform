@@ -3,11 +3,14 @@ import { http, type ApiResponse } from "../../../../core/HttpClient";
 import type { PagedResult } from "../../../../core/PagedResult";
 import { buildQueryParams } from "../../../../core/QueryUtils";
 import type { Harvest } from "../../domain/entities/Harvest";
+import type { HarvestDetails } from "../../domain/entities/HarvestDetails";
 import type { HarvestFilters } from "../../domain/entities/HarvestsFilters";
 import type { CompleteHarvestParams } from "../../domain/params/CompleteHarvestParams";
 import type { CreateHarvestParams } from "../../domain/params/CreateHarvestParams";
 import type { UpdateHarvestParams } from "../../domain/params/UpdateHarvestParams";
+import { HarvestDetailsMapper } from "../mappers/HarvestDetailsMapper";
 import { HarvestMapper } from "../mappers/HarvestMapper";
+import type { HarvestDetailsResponse } from "../responses/HarvestDetailsResponse";
 import type { HarvestResponse } from "../responses/HarvestResponse";
 
 export const HarvestRepository = {
@@ -24,12 +27,12 @@ export const HarvestRepository = {
     };
   },
 
-  getById: async (id: number): Promise<Harvest> => {
-    const httpResponse = await http<ApiResponse<HarvestResponse>>(
+  getHarvestDetails: async (id: number): Promise<HarvestDetails> => {
+    const httpResponse = await http<ApiResponse<HarvestDetailsResponse>>(
       `${API_BASE_URL}harvests/${id}`,
     );
 
-    return HarvestMapper(httpResponse.Response);
+    return HarvestDetailsMapper(httpResponse.Response);
   },
 
   create: (params: CreateHarvestParams) => {

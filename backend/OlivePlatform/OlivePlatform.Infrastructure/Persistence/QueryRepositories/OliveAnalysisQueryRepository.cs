@@ -3,7 +3,6 @@ using OlivePlatform.Application.Common;
 using OlivePlatform.Application.Features.Analysis.Repositories;
 using OlivePlatform.Application.Features.Analysis.Responses;
 using OlivePlatform.Application.Features.Laboratory.Requests;
-using OlivePlatform.Domain.Enums;
 using System.Data;
 using System.Text;
 
@@ -82,20 +81,19 @@ public class OliveAnalysisQueryRepository : IOliveAnalysisQueryRepository
              LIMIT 1;
              """;
 
-                 using var connection = _dbConnection;
+        using var connection = _dbConnection;
 
-                 var command = new CommandDefinition(
-                     sql,
-                     new
-                     {
-                         Id = id
-                     },
-                     cancellationToken: cancellationToken);
+        var command = new CommandDefinition(
+            sql,
+            new
+            {
+                Id = id
+            },
+            cancellationToken: cancellationToken);
 
-                 return await connection.QueryFirstOrDefaultAsync<OliveAnalysisDetailsResponse>(
-                     command);
-             }
-
+        return await connection.QueryFirstOrDefaultAsync<OliveAnalysisDetailsResponse>(
+            command);
+    }
 
     // ============================================================
     // LIST

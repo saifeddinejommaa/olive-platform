@@ -4,7 +4,11 @@ type Props = {
   withBorder?: boolean;
 };
 
-export default function DrawerSummaryRow({ label, value, withBorder = true }: Props) {
+export default function DrawerSummaryRow({
+  label,
+  value,
+  withBorder = true,
+}: Props) {
   return (
     <div
       style={{

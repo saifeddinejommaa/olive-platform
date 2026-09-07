@@ -35,6 +35,12 @@ public class PressingOperationsController : ControllerBase
         return Ok(await _queryRepository.GetPressingOperationDetails(id));
     }
 
+    [HttpGet("{id:int}/inputs")]
+    public async Task<IActionResult> GetPressingOperationInputs(int id)
+    {
+        return Ok(await _queryRepository.GetPressingOperationInputs(id));
+    }
+
     [HttpPost("create")]
     public async Task<IActionResult> Create(
         [FromBody] CreatePressingOperationCommand command)

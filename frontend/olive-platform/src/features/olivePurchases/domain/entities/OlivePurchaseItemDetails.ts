@@ -1,4 +1,3 @@
-import type { OliveAnalysis } from "../../../analyses/oliveAnalyses/domain/entities/OliveAnalysis";
 import type { OliveAnalysisDetails } from "../../../analyses/oliveAnalyses/domain/entities/OliveAnalysisDetails";
 import type { OliveVarieties } from "../../../shared/entities/OliveVarieties";
 

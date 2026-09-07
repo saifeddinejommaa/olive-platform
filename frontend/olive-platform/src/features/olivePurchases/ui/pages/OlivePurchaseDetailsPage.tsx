@@ -57,13 +57,21 @@ export default function OlivePurchaseDetailsPage() {
         </div>
 
         {isDraft && (
-          <Button variant="primary" onClick={() => validate(Number(id))} disabled={saving}>
+          <Button
+            variant="primary"
+            onClick={() => validate(Number(id))}
+            disabled={saving}
+          >
             {saving ? "Lancement..." : "Lancer l'étude"}
           </Button>
         )}
 
         {isPending && (
-          <Button variant="primary" onClick={() => setCloseDrawerOpen(true)} disabled={saving}>
+          <Button
+            variant="primary"
+            onClick={() => setCloseDrawerOpen(true)}
+            disabled={saving}
+          >
             Clôturer l'achat
           </Button>
         )}
@@ -74,10 +82,15 @@ export default function OlivePurchaseDetailsPage() {
       {activeTab === "general" && details && (
         <OlivePurchaseGeneralTab purchase={details} onNotesChange={() => {}} />
       )}
-      {activeTab === "olives" && <OlivePurchaseItemsTab purchaseId={Number(id)} />}
+      {activeTab === "olives" && (
+        <OlivePurchaseItemsTab purchaseId={Number(id)} />
+      )}
 
       <div className="filters-footer">
-        <Button variant="secondary" onClick={() => navigate("/Olive-purchases")}>
+        <Button
+          variant="secondary"
+          onClick={() => navigate("/Olive-purchases")}
+        >
           Retour
         </Button>
       </div>

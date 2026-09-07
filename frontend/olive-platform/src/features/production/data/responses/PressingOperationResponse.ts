@@ -6,9 +6,9 @@ export type PressingOperationResponse = {
   startTime: string | null;
   endTime: string | null;
   status: number;
-
   oilQuantityLiters: number | null;
-
+  expectedOilLiters: number | null;
+  oilYieldDeviationLiters: number | null;
   harvestNumber: string | null;
   purchaseNumber: string | null;
   notes: string | null;

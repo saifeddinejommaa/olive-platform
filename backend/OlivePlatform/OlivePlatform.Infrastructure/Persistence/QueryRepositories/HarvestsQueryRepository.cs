@@ -139,34 +139,23 @@ public class HarvestQueryRepository : IHarvestQueryRepository
         {
             sql.Append(
                 """
+        
+        AND h.status = 3
 
-        AND EXISTS (
-            SELECT 1
-            FROM olive_purchase_items item
-
-            WHERE item.purchase_id = h.id
-
-            AND (
-                item.agreed_quantity_kg
-                -
-                COALESCE(
-                    (
-                        SELECT SUM(poi.quantity_kg)
-                        FROM pressing_operation_inputs poi
-
-                        INNER JOIN pressing_operations po
-                            ON po.id = poi.pressing_operation_id
-
-                        INNER JOIN production_status pstatus
-                            ON pstatus.id = po.status_id
-
-                        WHERE poi.purchase_item_id = item.id
-                            AND poi.status = 0
-                    ),
-                    0
-                )
-            ) > 0
-        )
+        AND (
+            h.quantity_kg
+            - COALESCE(
+                (
+                    SELECT SUM(poi.quantity_kg)
+                    FROM pressing_operation_inputs poi
+                    INNER JOIN pressing_operations po
+                        ON po.id = poi.pressing_operation_id
+                    WHERE poi.harvest_id = h.id
+                      AND poi.status = 0
+                ),
+                0
+            )
+        ) > 0
         """);
         }
 

@@ -1,4 +1,3 @@
-import type { PressingOperationInputDetails } from "./PressingOperationInputDetails";
 import type { ProductionStatus } from "./ProductionStatus";
 
 export type PressingOperationDetails = {
@@ -11,5 +10,6 @@ export type PressingOperationDetails = {
   startTime: string | null;
   endTime: string | null;
   notes: string | null;
-  inputs: PressingOperationInputDetails[];
+  expectedOilLiters: number | null;
+  oilYieldDeviationLiters: number | null;
 };

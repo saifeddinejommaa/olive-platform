@@ -1,4 +1,3 @@
-
 import { useEffect } from "react";
 import { useConstantsStore } from "../../features/appConstants/ConstantsStore";
 import Select from "./select/Select";
@@ -14,11 +13,7 @@ export default function OliveVarietySelector({
   disabled = false,
   onChange,
 }: OliveVarietySelectorProps) {
-  const {
-    Appconstants,
-    loading,
-    fetchConstants,
-  } = useConstantsStore();
+  const { Appconstants, loading, fetchConstants } = useConstantsStore();
 
   const varieties = Appconstants.oliveVarieties;
 
@@ -32,31 +27,17 @@ export default function OliveVarietySelector({
     label: variety.label,
   }));
 
-  const handleChange = (
-    event: React.ChangeEvent<HTMLSelectElement>,
-  ) => {
+  const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedValue = event.target.value;
 
-    onChange(
-      selectedValue === ""
-        ? null
-        : Number(selectedValue),
-    );
+    onChange(selectedValue === "" ? null : Number(selectedValue));
   };
 
   return (
     <Select
       options={options}
-      placeholder={
-        loading
-          ? "Chargement..."
-          : "Sélectionnez une variété"
-      }
-      value={
-        value !== null && value !== undefined
-          ? String(value)
-          : ""
-      }
+      placeholder={loading ? "Chargement..." : "Sélectionnez une variété"}
+      value={value !== null && value !== undefined ? String(value) : ""}
       onChange={handleChange}
       disabled={disabled || loading}
     />

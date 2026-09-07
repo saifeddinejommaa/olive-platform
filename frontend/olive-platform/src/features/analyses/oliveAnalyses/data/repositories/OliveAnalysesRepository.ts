@@ -27,6 +27,7 @@ export const OliveAnalysesRepository = {
   },
 
   getById: async (id: number): Promise<OliveAnalysisDetails> => {
+    console.log("Fetching olive analysis details for ID:", id);
     const httpResponse = await http<ApiResponse<OliveAnalysisDetailsResponse>>(
       `${API_BASE_URL}analyses/olive/${id}`,
     );

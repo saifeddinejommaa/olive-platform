@@ -10,12 +10,13 @@ namespace OlivePlatform.Application.Features.Production.Commands
 
         public DateTime? EndDate { get; set; }
 
-        public int OliveQuantity { get; set; }
+        public int OilQuantity { get; set; }
     }
 
     public class ClosePressingOperationCommandHandler
     : IRequestHandler<ClosePressingOperationCommand, int>
     {
+
         private readonly IPressingOperationsRepository _repository;
         private readonly IPressingOperationInputsRepository _inputsRepository;
 
@@ -55,8 +56,11 @@ namespace OlivePlatform.Application.Features.Production.Commands
             }
 
             pressingOperation.EndTime = request.EndDate;
-            pressingOperation.OilQuantityLiters = request.OliveQuantity;
+            pressingOperation.OilQuantityLiters = request.OilQuantity;
             pressingOperation.Status = ProductionStatus.Completed;
+            pressingOperation.OilYieldDeviationLiters = pressingOperation.ExpectedOilLiters is not null
+                ? request.OilQuantity - pressingOperation.ExpectedOilLiters
+                : null;
 
             await _repository.UpdateAsync(
                 pressingOperation,
@@ -64,5 +68,6 @@ namespace OlivePlatform.Application.Features.Production.Commands
 
             return pressingOperation.Id;
         }
+
     }
 }

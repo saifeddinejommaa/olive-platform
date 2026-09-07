@@ -16,6 +16,7 @@ import type {
 import NewPressingOperationInputsWidget from "../widgets/NewPressingOperationInputsWidget";
 import { useCreatePressingOperation } from "../hooks/UseCreatePressingOperation";
 import type { CreatePressingOperationParams } from "../../domain/params/CreatePressingOperationParams";
+import ProductionStatusSelector from "../../../../common/widgets/ProductionStatusSelector";
 
 type NewPressingOperationForm = {
   pressingDate: string;
@@ -316,19 +317,10 @@ export default function NewPressingOperationPage() {
 
           <div className="filter-item">
             <label>Statut</label>
-            <Select
-              options={statusOptions}
-              placeholder={
-                constantsLoading ? "Chargement..." : "Sélectionnez un statut"
-              }
-              value={form.statusId}
-              onChange={(event) =>
-                updateForm("statusId", Number(event.target.value))
-              }
+            <ProductionStatusSelector
+              value={form.statusId || null}
+              onChange={(statusId) => updateForm("statusId", statusId ?? 0)}
             />
-            {errors.statusId && (
-              <span className="field-error">{errors.statusId}</span>
-            )}
           </div>
 
           <div className="filter-item" style={{ gridColumn: "1 / -1" }}>

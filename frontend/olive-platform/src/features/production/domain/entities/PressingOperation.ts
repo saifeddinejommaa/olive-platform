@@ -11,6 +11,7 @@ export type PressingOperation = {
   status: ProductionStatus;
 
   oilQuantityLiters: number | null;
-
+  expectedOilLiters: number | null;
+  oilYieldDeviationLiters: number | null;
   notes: string | null;
 };

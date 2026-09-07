@@ -1,5 +1,6 @@
 import InfoFieldWidget from "../../../../common/widgets/InfoFieldWidget";
 import type { OliveAnalysisDetails } from "../../../analyses/oliveAnalyses/domain/entities/OliveAnalysisDetails";
+import { formatStringToDateTime } from "../../../shared/utils/DatesUtils";
 
 type Props = {
   analysis: OliveAnalysisDetails;
@@ -10,12 +11,6 @@ const formatPercentage = (value?: number | null) => {
   return value != null ? `${value.toLocaleString("fr-FR")} %` : "-";
 };
 
-const formatDate = (value?: string) => {
-  console.log("Formatting date:", value);
-  if (!value) return "-";
-  return new Date(value).toLocaleDateString("fr-FR");
-};
-
 export default function OliveAnalysisInfoWidget({ analysis }: Props) {
   return (
     <div>
@@ -23,11 +18,26 @@ export default function OliveAnalysisInfoWidget({ analysis }: Props) {
 
       <div className="filters-content">
         <InfoFieldWidget label="Référence" value={analysis.reference} />
-        <InfoFieldWidget label="Taux d'humidité" value={formatPercentage(analysis.humidityPercentage)} />
-        <InfoFieldWidget label="Taux d'eau" value={formatPercentage(analysis.waterPercentage)} />
-        <InfoFieldWidget label="Taux d'huile" value={formatPercentage(analysis.oilPercentage)} />
-        <InfoFieldWidget label="Taux d'acidité" value={formatPercentage(analysis.acidityPercentage)} />
-        <InfoFieldWidget label="Date d'analyse" value={formatDate(analysis.analysisDate)} />
+        <InfoFieldWidget
+          label="Taux d'humidité"
+          value={formatPercentage(analysis.humidityPercentage)}
+        />
+        <InfoFieldWidget
+          label="Taux d'eau"
+          value={formatPercentage(analysis.waterPercentage)}
+        />
+        <InfoFieldWidget
+          label="Taux d'huile"
+          value={formatPercentage(analysis.oilPercentage)}
+        />
+        <InfoFieldWidget
+          label="Taux d'acidité"
+          value={formatPercentage(analysis.acidityPercentage)}
+        />
+        <InfoFieldWidget
+          label="Date d'analyse"
+          value={formatStringToDateTime(analysis.analysisDate)}
+        />
         <InfoFieldWidget label="Statut" value={analysis.status.toString()} />
       </div>
     </div>

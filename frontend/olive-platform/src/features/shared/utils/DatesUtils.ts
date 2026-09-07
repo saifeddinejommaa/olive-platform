@@ -9,6 +9,16 @@ export const formatDateTime = (value: Date) => {
   );
 };
 
+export const formatStringToDateTime = (value?: string) => {
+  if (!value) return "-";
+  return new Date(value).toLocaleString("fr-FR");
+};
+
+export const formatDate = (value: string | null) => {
+  if (!value) return "-";
+  return new Date(value).toLocaleDateString("fr-FR");
+};
+
 export const getTodayDate = () => {
   const today = new Date();
   const year = today.getFullYear();

@@ -25,10 +25,7 @@ export default function OlivePurchaseItemsTab({ purchaseId }: Props) {
 
       <div className="filters-content">
         {items.map((item) => (
-          <OlivePurchaseItemCardWidget
-            key={item.id}
-            item={item}
-          />
+          <OlivePurchaseItemCardWidget key={item.id} item={item} />
         ))}
 
         {items.length === 0 && (

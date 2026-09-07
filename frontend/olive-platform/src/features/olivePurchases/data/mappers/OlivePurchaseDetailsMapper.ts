@@ -2,13 +2,15 @@ import type { OlivePurchaseDetails } from "../../domain/entities/OlivePurchaseDe
 import { PurchaseStatus } from "../../domain/entities/PurchaseStatus";
 import type { OlivePurchaseDetailsResponse } from "../responses/OlivePurchaseDetailsResponse";
 
-export function OlivePurchaseDetailsMapper(response: OlivePurchaseDetailsResponse) :OlivePurchaseDetails {
+export function OlivePurchaseDetailsMapper(
+  response: OlivePurchaseDetailsResponse,
+): OlivePurchaseDetails {
   return {
     id: response.id,
 
     reference: response.reference,
     createdAt: response.createdAt,
-    updatedAt: response.updatedAt, 
+    updatedAt: response.updatedAt,
     notes: response.notes,
     purchaseDate: response.purchaseDate,
     supplierName: response.supplierName,
