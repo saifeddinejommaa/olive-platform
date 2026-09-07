@@ -2,6 +2,7 @@ import { create } from "zustand";
 import type { OlivePurchaseDetails } from "../../domain/entities/OlivePurchaseDetails";
 import { PurchaseStatus } from "../../domain/entities/PurchaseStatus";
 import { GetOlivePurchaseDetails } from "../../domain/usecases/GetOlivePurchaseDetails";
+import { ValidateOlivePurchase } from "../../domain/usecases/ValidateOlivePurchase";
 
 type OlivePurchaseDetailsState = {
   details?: OlivePurchaseDetails;
@@ -45,25 +46,13 @@ export const useOlivePurchaseDetailsStore = create<OlivePurchaseDetailsState>(
     },
 
     validate: async (id: number) => {
+
       set({ saving: true, error: null });
-
-      try {
-        set((state) => ({
-          saving: false,
-          details: state.details
-            ? { ...state.details, status: PurchaseStatus.Pending }
-            : state.details,
-        }));
-      } catch (error) {
-        const message =
-          error instanceof Error
-            ? error.message
-            : "Impossible de valider l'achat d'olives.";
-
-        set({ saving: false, error: message });
-
-        throw error;
-      }
+      
+      await ValidateOlivePurchase(id);
+      
+      var details = await GetOlivePurchaseDetails(id);
+      set({ saving: false, details });
     },
 
     clear: () => {

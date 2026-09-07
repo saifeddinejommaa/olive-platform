@@ -25,8 +25,9 @@ export default function OlivePurchaseGeneralTab({
       </div>
 
       <div className="filters-content">
-        <InfoFieldWidget label="Référence" value={purchase.reference} />
         <InfoFieldWidget label="Fournisseur" value={purchase.supplierName} />
+        <InfoFieldWidget label="Quantité (kg)" value={purchase.totalQuantity?.toString()} />
+        <InfoFieldWidget label="Prix total (en DT)" value={purchase.totalAmount?.toString()} />
         <InfoFieldWidget
           label="Date d'achat"
           value={formatDate(purchase.purchaseDate)}

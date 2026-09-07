@@ -11,8 +11,11 @@ import { getOliveVarietyLabel } from "../../../appConstants/helper/AppConstantsH
 import { renderStatus } from "../../../shared/utils/StatusUtils";
 import { productionStatusConfig } from "../../../shared/status/ProductionStatusConfig";
 import EditIcon from "@mui/icons-material/Edit";
+import { useNavigate } from "react-router-dom";
 
 export default function HarvestsPage() {
+  const navigate = useNavigate();
+  
   const {
     harvests,
     loading,
@@ -53,11 +56,7 @@ export default function HarvestsPage() {
   };
 
   const handleOpenDetails = (id: number) => {
-    window.open(
-      `/harvests/harvest-operation/${id}`,
-      "_blank",
-      "noopener,noreferrer",
-    );
+     navigate(`/harvests/harvest-operation/${id}`);
   };
 
   const columns = [

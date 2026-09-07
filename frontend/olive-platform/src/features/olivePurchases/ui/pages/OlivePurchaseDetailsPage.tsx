@@ -21,7 +21,7 @@ export default function OlivePurchaseDetailsPage() {
   const { details, saving, fetchPurchase, validate, clear } =
     useOlivePurchaseDetailsStore();
 
-  const { fetchItems, clear: clearItems } = useOlivePurchaseItemsStore();
+  const { fetchItems, clear: clearItems, items } = useOlivePurchaseItemsStore();
 
   const isDraft = details?.status === PurchaseStatus.Draft;
   const isPending = details?.status === PurchaseStatus.Pending;
@@ -30,11 +30,6 @@ export default function OlivePurchaseDetailsPage() {
     if (!id) return;
     fetchPurchase(Number(id));
   }, [id, fetchPurchase]);
-
-  useEffect(() => {
-    if (!id || activeTab !== "olives") return;
-    fetchItems(Number(id));
-  }, [id, activeTab, fetchItems]);
 
   useEffect(() => {
     return () => {
@@ -47,6 +42,13 @@ export default function OlivePurchaseDetailsPage() {
     await validate(Number(id));
     setCloseDrawerOpen(false);
   };
+
+  const handleOpenCloseDrawer = async () => {
+  if(details) {
+    await fetchItems(details.id);
+    setCloseDrawerOpen(true);
+  }
+};
 
   return (
     <div className="feature-page">
@@ -100,6 +102,7 @@ export default function OlivePurchaseDetailsPage() {
           open={closeDrawerOpen}
           saving={saving}
           purchase={details}
+          items={items}
           onClose={() => setCloseDrawerOpen(false)}
           onConfirm={handleConfirmClose}
         />

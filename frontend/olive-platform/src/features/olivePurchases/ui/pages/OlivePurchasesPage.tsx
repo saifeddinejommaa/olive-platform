@@ -6,13 +6,14 @@ import TextInput from "../../../../common/widgets/textInput/TextInput";
 import Select from "../../../../common/widgets/select/Select";
 import EditIcon from "@mui/icons-material/Edit";
 
-import type { OlivePurchase } from "../../domain/entities/OlivePurchase";
 import type { OlivePurchasesFilter } from "../../domain/entities/OlivePurchaseFilter";
 
 import { useOlivePurchasesStore } from "../stores/OlivePurchaseStore";
 import { useConstantsStore } from "../../../appConstants/ConstantsStore";
 import { renderStatus } from "../../../shared/utils/StatusUtils";
 import { purchaseStatusConfig } from "../../../shared/status/PurchaseStatusConfig";
+import type { OlivePurchaseForList } from "../../domain/entities/OlivePurchaseForList";
+import { productionStatusConfig } from "../../../shared/status/ProductionStatusConfig";
 
 export default function OlivePurchasesPage() {
   const navigate = useNavigate();
@@ -75,40 +76,58 @@ export default function OlivePurchasesPage() {
   ];
 
   const handleOpenDetails = (id: number) => {
-    window.open(`/olive-purchases/${id}`, "_blank", "noopener,noreferrer");
+         navigate(`/olive-purchases/${id}`);
   };
 
   const columns = [
     {
-      key: "purchaseNumber" as keyof OlivePurchase,
+      key: "reference" as keyof OlivePurchaseForList,
       label: "N° Achat",
     },
 
     {
-      key: "supplierName" as keyof OlivePurchase,
+      key: "supplierName" as keyof OlivePurchaseForList,
       label: "Fournisseur",
     },
 
     {
-      key: "purchaseDate" as keyof OlivePurchase,
+      key: "purchaseDate" as keyof OlivePurchaseForList,
       label: "Date",
-      render: (item: OlivePurchase) =>
+      render: (item: OlivePurchaseForList) =>
         new Date(item.purchaseDate).toLocaleDateString("fr-FR"),
+    },
+    {
+      key: "quantityKg" as keyof OlivePurchaseForList,
+      label: "Quantité (kg)",
+    },
+    {
+      key: "analyseStatus" as keyof OlivePurchaseForList,
+      label: "Analyse",
+      render: (item: OlivePurchaseForList) =>
+        renderStatus(item.analyseStatus, productionStatusConfig),
+    },
+    {
+      key: "pressed" as keyof OlivePurchaseForList,
+      label: "Pressé",
+      render: (item: OlivePurchaseForList) =>
+      renderStatus(item.pressed, productionStatusConfig),
     },
 
     {
-      key: "status" as keyof OlivePurchase,
-      label: "Statut",
-      render: (item: OlivePurchase) =>
+      key: "status" as keyof OlivePurchaseForList,
+      label: "Etat",
+      render: (item: OlivePurchaseForList) =>
         renderStatus(item.status, purchaseStatusConfig),
     },
 
-    {
-      key: "id" as keyof OlivePurchase,
 
+
+
+    {
+      key: "id" as keyof OlivePurchaseForList,
       label: "Actions",
 
-      render: (item: OlivePurchase) => (
+      render: (item: OlivePurchaseForList) => (
         <button
           type="button"
           title="Modifier l'analyse"

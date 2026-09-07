@@ -1,5 +1,5 @@
-import EventAvailableIcon from "@mui/icons-material/EventAvailable";
-import AutorenewIcon from "@mui/icons-material/Autorenew";
+import AutorenewIcon from '@mui/icons-material/Autorenew';
+import DonutLargeIcon from '@mui/icons-material/DonutLarge';
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
 
@@ -12,25 +12,25 @@ import {
 export const productionStatusConfig: StatusConfig<ProductionStatusType> = {
   [ProductionStatus.Planned]: {
     label: "Planifiée",
-    icon: EventAvailableIcon,
-    color: "info",
+    icon: AutorenewIcon,
+    color: "#f59e0b",
   },
 
   [ProductionStatus.InProgress]: {
     label: "En cours",
-    icon: AutorenewIcon,
-    color: "warning",
+    icon: DonutLargeIcon,
+    color: "#2563eb",
   },
 
   [ProductionStatus.Completed]: {
     label: "Terminée",
     icon: CheckCircleIcon,
-    color: "success",
+    color: "#16a34a",
   },
 
   [ProductionStatus.Cancelled]: {
     label: "Annulée",
     icon: CancelIcon,
-    color: "error",
+    color: "#dc2626",
   },
 };

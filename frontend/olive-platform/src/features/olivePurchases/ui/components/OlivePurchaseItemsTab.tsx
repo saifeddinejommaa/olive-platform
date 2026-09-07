@@ -10,7 +10,6 @@ export default function OlivePurchaseItemsTab({ purchaseId }: Props) {
   const { items, fetchItems } = useOlivePurchaseItemsStore();
 
   useEffect(() => {
-    console.log("Fetching items for purchaseId:", purchaseId);
     fetchItems(purchaseId);
   }, [purchaseId, fetchItems]);
 

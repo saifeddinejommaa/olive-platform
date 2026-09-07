@@ -1,11 +1,11 @@
 import { create } from "zustand";
 import type { PagedResult } from "../../../../core/PagedResult";
 import type { OlivePurchasesFilter } from "../../domain/entities/OlivePurchaseFilter";
-import type { OlivePurchase } from "../../domain/entities/OlivePurchase";
 import { GetOlivePurchases } from "../../domain/usecases/GetOlivePurchases";
+import type { OlivePurchaseForList } from "../../domain/entities/OlivePurchaseForList";
 
 type OlivePurchasesStore = {
-  olivePurchases: PagedResult<OlivePurchase>;
+  olivePurchases: PagedResult<OlivePurchaseForList>;
   loading: boolean;
   error: string | null;
   filters: OlivePurchasesFilter;

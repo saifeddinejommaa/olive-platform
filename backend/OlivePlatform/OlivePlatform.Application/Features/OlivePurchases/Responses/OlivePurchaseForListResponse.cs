@@ -19,4 +19,8 @@ public class OlivePurchaseForListResponse
     public DateTime CreatedAt { get; set; }
 
     public decimal TotalQuantityKg { get; set; }
+
+    public ProductionStatus Pressed { get; set; }
+
+    public ProductionStatus AnalyseStatus { get; set; }
 }

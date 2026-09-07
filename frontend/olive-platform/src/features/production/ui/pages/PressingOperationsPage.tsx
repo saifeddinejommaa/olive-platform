@@ -9,8 +9,11 @@ import { formatDateTime } from "../../../shared/utils/DatesUtils";
 import { productionStatusConfig } from "../../../shared/status/ProductionStatusConfig";
 import { renderStatus } from "../../../shared/utils/StatusUtils";
 import EditIcon from "@mui/icons-material/Edit";
+import { useNavigate } from "react-router-dom";
 
 export default function PressingOperationsPage() {
+    const navigate = useNavigate();
+  
   const {
     PressingOperations,
     filters,
@@ -48,11 +51,7 @@ export default function PressingOperationsPage() {
   };
 
   const handleOpenDetails = (id: number) => {
-    window.open(
-      `/production/pressing-operations/${id}`,
-      "_blank",
-      "noopener,noreferrer",
-    );
+     navigate(`/production/pressing-operations/${id}`);
   };
 
   const columns = [

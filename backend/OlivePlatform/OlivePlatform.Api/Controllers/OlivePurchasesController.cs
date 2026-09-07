@@ -61,4 +61,16 @@ public class OlivePurchasesController : ControllerBase
 
         return Ok(await _mediator.Send(command));
     }
+
+    [HttpPost("{id:int}/validate")]
+    public async Task<IActionResult> Validate(
+        int id)
+    {
+        var command = new ValidateOlivePurchaseCommand
+        {
+            Id = id
+        };
+
+        return Ok(await _mediator.Send(command));
+    }
 }

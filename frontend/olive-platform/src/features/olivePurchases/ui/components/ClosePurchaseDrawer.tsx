@@ -1,16 +1,17 @@
 import Button from "../../../../common/widgets/button/Button";
 import Drawer from "../../../../common/widgets/drawer/Drawer";
 import DrawerInfoCard from "../../../../common/widgets/drawerInfoCard/DrawerInfoCard";
-import { renderStatus } from "../../../shared/utils/StatusUtils";
-import { purchaseStatusConfig } from "../../../shared/status/PurchaseStatusConfig";
 import type { OlivePurchaseDetails } from "../../domain/entities/OlivePurchaseDetails";
 import DrawerConfirmationNotice from "../../../../common/widgets/DrawerConfirmationNotice";
 import { formatDate } from "../../../shared/utils/DatesUtils";
+import type { OlivePurchaseItemDetails } from "../../domain/entities/OlivePurchaseItemDetails";
+import { ProductionStatus } from "../../../production/domain/entities/ProductionStatus";
 
 type Props = {
   open: boolean;
   saving: boolean;
   purchase: OlivePurchaseDetails;
+  items: OlivePurchaseItemDetails[];
   onClose: () => void;
   onConfirm: () => void;
 };
@@ -19,9 +20,14 @@ export default function ClosePurchaseDrawer({
   open,
   saving,
   purchase,
+  items,
   onClose,
   onConfirm,
 }: Props) {
+  const hasPendingAnalysis = items?.some(
+    (item) => item.analysis?.status !== ProductionStatus.Completed
+  );
+  
   return (
     <Drawer
       open={open}
@@ -53,13 +59,23 @@ export default function ClosePurchaseDrawer({
           {formatDate(purchase.purchaseDate)}
         </DrawerInfoCard>
 
-        <DrawerInfoCard label="Statut actuel">
-          {renderStatus(purchase.status, purchaseStatusConfig)}
+        <DrawerInfoCard label="Quantité d'olives (kg)">
+          {purchase.totalQuantity?.toLocaleString() || "-"}
+        </DrawerInfoCard>
+
+        <DrawerInfoCard label="Prix total (dt)">
+          {purchase.totalAmount?.toLocaleString() || "-"}
         </DrawerInfoCard>
 
         <DrawerConfirmationNotice title="Confirmation">
           Une fois l'achat clôturé, il ne pourra plus être modifié.
         </DrawerConfirmationNotice>
+        {hasPendingAnalysis && (
+          <DrawerConfirmationNotice title="Analyse en attente">
+            Cet achat contient au moins une analyse qui n'est pas encore traitée.
+            Veuillez la traiter avant de clôturer l'achat.
+          </DrawerConfirmationNotice>
+        )}
       </div>
     </Drawer>
   );
