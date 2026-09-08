@@ -23,4 +23,6 @@ public class OlivePurchaseForListResponse
     public ProductionStatus Pressed { get; set; }
 
     public ProductionStatus AnalyseStatus { get; set; }
+
+    public bool CanLaunchPression { get; set; }
 }

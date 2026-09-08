@@ -15,5 +15,6 @@ export function OlivePurchaseForListMapper(
     pressed: response.pressed,
     analyseStatus: response.analyseStatus,
     quantityKg: response.totalQuantityKg,
+    canBePressed: response.canLaunchPression,
   };
 }

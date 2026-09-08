@@ -11,4 +11,5 @@ export type OlivePurchaseForList = {
   pressed: ProductionStatus;
   analyseStatus: ProductionStatus;
   quantityKg: number;
+  canBePressed: boolean;
 };

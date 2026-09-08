@@ -25,5 +25,8 @@ namespace OlivePlatform.Application.Features.OlivePurchases.Responses
         public decimal TotalAmount { get; set; }
 
         public string? Notes { get; set; }
+
+        public bool CanLaunchPression { get; set; }
+        
     }
 }

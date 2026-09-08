@@ -14,6 +14,9 @@ import { renderStatus } from "../../../shared/utils/StatusUtils";
 import { purchaseStatusConfig } from "../../../shared/status/PurchaseStatusConfig";
 import type { OlivePurchaseForList } from "../../domain/entities/OlivePurchaseForList";
 import { productionStatusConfig } from "../../../shared/status/ProductionStatusConfig";
+import PlayArrowIcon from "@mui/icons-material/PlayArrow";
+import { toast } from "react-toastify";
+
 
 export default function OlivePurchasesPage() {
   const navigate = useNavigate();
@@ -26,6 +29,7 @@ export default function OlivePurchasesPage() {
     setFilter,
     clearFilters,
     fetchOlivePurchases,
+    launchPressing,
   } = useOlivePurchasesStore();
 
   const {
@@ -76,8 +80,18 @@ export default function OlivePurchasesPage() {
   ];
 
   const handleOpenDetails = (id: number) => {
-         navigate(`/olive-purchases/${id}`);
+    navigate(`/olive-purchases/${id}`);
   };
+
+ const handleLaunchPressing = async (purchaseId: number) => {
+  try {
+    const id = await launchPressing(purchaseId);
+    toast.success("Opération de pression créée avec succès.");
+    navigate(`/production/pressing-operations/${id}`);
+  } catch {
+    toast.error("Impossible de créer l'opération de pression.");
+  }
+};
 
   const columns = [
     {
@@ -110,7 +124,7 @@ export default function OlivePurchasesPage() {
       key: "pressed" as keyof OlivePurchaseForList,
       label: "Pressé",
       render: (item: OlivePurchaseForList) =>
-      renderStatus(item.pressed, productionStatusConfig),
+        renderStatus(item.pressed, productionStatusConfig),
     },
 
     {
@@ -124,15 +138,37 @@ export default function OlivePurchasesPage() {
 
 
     {
-      key: "id" as keyof OlivePurchaseForList,
-      label: "Actions",
+  key: "id" as keyof OlivePurchaseForList,
+  label: "Actions",
 
-      render: (item: OlivePurchaseForList) => (
+  render: (item: OlivePurchaseForList) => (
+    <div style={{ display: "flex", gap: "4px" }}>
+      <button
+        type="button"
+        title="Modifier l'analyse"
+        aria-label="Modifier l'analyse"
+        onClick={() => handleOpenDetails(item.id)}
+        style={{
+          background: "none",
+          border: "none",
+          cursor: "pointer",
+          padding: "6px",
+        }}
+      >
+        <EditIcon
+          fontSize="small"
+          sx={{
+            color: "var(--color-olive-900)",
+          }}
+        />
+      </button>
+
+      {item.canBePressed && (
         <button
           type="button"
-          title="Modifier l'analyse"
-          aria-label="Modifier l'analyse"
-          onClick={() => handleOpenDetails(item.id)}
+          title="Lancer la pression"
+          aria-label="Lancer la pression"
+          onClick={() => handleLaunchPressing(item.id)}
           style={{
             background: "none",
             border: "none",
@@ -140,15 +176,18 @@ export default function OlivePurchasesPage() {
             padding: "6px",
           }}
         >
-          <EditIcon
+          <PlayArrowIcon
             fontSize="small"
             sx={{
               color: "var(--color-olive-900)",
             }}
           />
         </button>
-      ),
-    },
+      )}
+    </div>
+  ),
+},
+
   ];
 
   return (

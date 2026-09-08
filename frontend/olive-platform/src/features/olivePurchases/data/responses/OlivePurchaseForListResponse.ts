@@ -11,4 +11,5 @@ export type OlivePurchaseForListResponse = {
   pressed: ProductionStatus;
   analyseStatus: ProductionStatus;
   totalQuantityKg: number;
+  canLaunchPression: boolean;
 };
