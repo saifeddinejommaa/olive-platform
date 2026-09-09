@@ -138,6 +138,7 @@ public class CreateOlivePurchaseCommandHandler
                     SourceType = InputSourceType.Purchase,
                     SourceId = itemEntity.Id,
                     CreatedAt = now,
+                    UpdatedAt = now,
                     Status = ProductionStatus.Planned
                 };
 

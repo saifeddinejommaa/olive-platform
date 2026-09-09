@@ -11,4 +11,5 @@ export type OlivePurchaseDetails = {
   totalQuantity: number;
   totalAmount: number;
   notes: string | null;
+  canBePressed: boolean;
 };

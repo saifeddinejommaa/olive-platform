@@ -7,7 +7,6 @@ export function OlivePurchaseDetailsMapper(
 ): OlivePurchaseDetails {
   return {
     id: response.id,
-
     reference: response.reference,
     createdAt: response.createdAt,
     updatedAt: response.updatedAt,
@@ -17,5 +16,6 @@ export function OlivePurchaseDetailsMapper(
     status: response.status as PurchaseStatus,
     totalQuantity: response.totalQuantity,
     totalAmount: response.totalAmount,
+    canBePressed: response.canLaunchPression,
   };
 }

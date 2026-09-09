@@ -1,4 +1,5 @@
 import type { OliveAnalysisDetailsResponse } from "../../../analyses/oliveAnalyses/data/responses/OliveAnalysesDetailsResponse";
+import type { ProductionStatus } from "../../../production/domain/entities/ProductionStatus";
 import type { OliveVarieties } from "../../../shared/entities/OliveVarieties";
 
 export type OlivePurchaseItemDetailsResponse = {
@@ -8,7 +9,7 @@ export type OlivePurchaseItemDetailsResponse = {
 
   purchaseId: number;
 
-  variety: OliveVarieties;
+  varietyId: OliveVarieties;
 
   agreedQuantityKg: number;
 

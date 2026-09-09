@@ -1,4 +1,6 @@
-﻿namespace OlivePlatform.Application.Features.Harvests.Responses;
+﻿using OlivePlatform.Domain.Enums;
+
+namespace OlivePlatform.Application.Features.Harvests.Responses;
 
 public class HarvestForListResponse
 {
@@ -34,4 +36,10 @@ public class HarvestForListResponse
     public DateTime? EndTime { get; set; }
 
     public DateTime? UpdatedAt { get; set; }
+
+    public ProductionStatus? Pressing { get; set; }
+
+    public ProductionStatus? Analysis { get; set; }
+
+    public bool CanBePressed { get; set; }
 }

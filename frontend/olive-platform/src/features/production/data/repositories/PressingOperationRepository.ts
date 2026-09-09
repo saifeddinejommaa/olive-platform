@@ -29,7 +29,7 @@ export const PressingOperationRepository = {
 
   createPressingOperation: async (params: CreatePressingOperationParams) => {
     var data = CreatePressingOperationMapper(params);
-    return await http<ApiResponse<boolean>>(
+     await http<ApiResponse<number>>(
       `${API_BASE_URL}pressingoperations/create`,
       {
         method: "POST",

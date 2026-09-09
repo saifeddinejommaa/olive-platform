@@ -19,36 +19,95 @@ public class OlivePurchaseQueryRepository : IOlivePurchaseQueryRepository
         _dbConnection = dbConnection;
     }
 
-    // ============================================================
-    // GET OLIVE PURCHASES - PAGINATED
-    // ============================================================
-
     public async Task<PagedResult<OlivePurchaseForListResponse>> GetOlivePurchases(
         OlivePurchasesRequestFilter filter)
     {
-        var sql = new StringBuilder(
-            $"""
-            SELECT
-                COUNT(*) OVER() AS Total,
+        var sql = new StringBuilder($@"
+        SELECT
 
-                op.id AS {nameof(OlivePurchaseForListResponse.Id)},
-                op.reference AS {nameof(OlivePurchaseForListResponse.Reference)},
-                op.supplier_name AS {nameof(OlivePurchaseForListResponse.SupplierName)},
-                op.purchase_date AS {nameof(OlivePurchaseForListResponse.PurchaseDate)},
-                op.created_at AS {nameof(OlivePurchaseForListResponse.CreatedAt)},
-                ps.id AS {nameof(OlivePurchaseForListResponse.Status)},
-                COALESCE(SUM(opi.agreed_quantity_kg), 0) AS {nameof(OlivePurchaseForListResponse.TotalQuantityKg)}
+            COUNT(*) OVER() AS Total,
 
+            op.id AS {nameof(OlivePurchaseForListResponse.Id)},
+            op.reference AS {nameof(OlivePurchaseForListResponse.Reference)},
+            op.supplier_name AS {nameof(OlivePurchaseForListResponse.SupplierName)},
+            op.purchase_date AS {nameof(OlivePurchaseForListResponse.PurchaseDate)},
+            op.created_at AS {nameof(OlivePurchaseForListResponse.CreatedAt)},
+            ps.id AS {nameof(OlivePurchaseForListResponse.Status)},
+            COALESCE(SUM(opi.agreed_quantity_kg), 0) AS {nameof(OlivePurchaseForListResponse.TotalQuantityKg)},
+            COALESCE(
+                (
+                    SELECT
+                        CASE
+                            WHEN BOOL_OR(oa.status = 2) THEN 2 -- InProgress
+                            WHEN BOOL_OR(oa.status = 1) THEN 1 -- Planned
+                            WHEN BOOL_OR(oa.status = 3) THEN 3 -- Completed
+                            WHEN BOOL_OR(oa.status = 4) THEN 4 -- Cancelled
+                            ELSE 0
+                        END
+                    FROM olive_purchase_items item
+                    INNER JOIN olive_analyses oa
+                        ON oa.source_id = item.id
+                        AND oa.source_type = 2
+                    WHERE item.purchase_id = op.id
+                ),
+                0
+            ) AS {nameof(OlivePurchaseForListResponse.AnalyseStatus)},
+            COALESCE(
+                (
+                    SELECT
+                        CASE
+                            WHEN BOOL_OR(po.status_id = 2) THEN 2 -- InProgress
+                            WHEN BOOL_OR(po.status_id = 1) THEN 1 -- Planned
+                            WHEN BOOL_OR(po.status_id = 3) THEN 3 -- Completed
+                            WHEN BOOL_OR(po.status_id = 4) THEN 4 -- Cancelled
+                            ELSE 0
+                        END
+                    FROM pressing_operation_inputs poi
+                    INNER JOIN pressing_operations po
+                        ON po.id = poi.pressing_operation_id
+                    INNER JOIN olive_purchase_items item
+                        ON item.id = poi.purchase_item_id
+                    WHERE item.purchase_id = op.id
+                ),
+                0
+            ) AS {nameof(OlivePurchaseForListResponse.Pressed)},
+            (
+                op.status_id = 3 -- Approved
+                AND EXISTS (
+                    SELECT 1
+                    FROM olive_purchase_items item
+                    WHERE item.purchase_id = op.id
+                )
+                AND NOT EXISTS (
+                    SELECT 1
+                    FROM olive_purchase_items item
+                    WHERE item.purchase_id = op.id
+                    AND NOT EXISTS (
+                        SELECT 1
+                        FROM olive_analyses oa
+                        WHERE oa.source_id = item.id
+                          AND oa.source_type = 2
+                          AND oa.status = 3 -- Completed
+                    )
+                )
+                AND NOT EXISTS (
+                        SELECT 1
+                        FROM pressing_operation_inputs poi
+                        INNER JOIN pressing_operations po
+                            ON po.id = poi.pressing_operation_id
+                        INNER JOIN olive_purchase_items item
+                            ON item.id = poi.purchase_item_id
+                        WHERE item.purchase_id = op.id
+                          AND po.status_id IN (1, 3) -- Planned, Completed
+                    )
+            ) AS {nameof(OlivePurchaseForListResponse.CanLaunchPression)}
             FROM olive_purchases op
-
             INNER JOIN purchase_status ps
                 ON ps.id = op.status_id
-
             LEFT JOIN olive_purchase_items opi
                 ON opi.purchase_id = op.id
-
             WHERE 1 = 1
-            """);
+        ");
 
         var parameters = new DynamicParameters();
 
@@ -66,11 +125,10 @@ public class OlivePurchaseQueryRepository : IOlivePurchaseQueryRepository
 
         if (!string.IsNullOrWhiteSpace(filter.PurchaseNumber))
         {
-            sql.Append(
-                """
+            sql.Append(@"
 
                 AND op.reference ILIKE @PurchaseNumber
-                """);
+                ");
 
             parameters.Add(
                 "PurchaseNumber",
@@ -125,7 +183,7 @@ public class OlivePurchaseQueryRepository : IOlivePurchaseQueryRepository
 
             parameters.Add(
                 "FromDate",
-                filter.FromDate.Value);
+                filter.FromDate.Value.ToDateTime(TimeOnly.MinValue));
         }
 
         // ========================================================
@@ -142,7 +200,7 @@ public class OlivePurchaseQueryRepository : IOlivePurchaseQueryRepository
 
             parameters.Add(
                 "ToDate",
-                filter.ToDate.Value);
+                filter.ToDate.Value.ToDateTime(TimeOnly.MinValue));
         }
 
         // ========================================================
@@ -188,8 +246,7 @@ public class OlivePurchaseQueryRepository : IOlivePurchaseQueryRepository
         // GROUP BY
         // ========================================================
 
-        sql.Append(
-            """
+        sql.Append(@"
 
             GROUP BY
                 op.id,
@@ -197,21 +254,20 @@ public class OlivePurchaseQueryRepository : IOlivePurchaseQueryRepository
                 op.supplier_name,
                 op.purchase_date,
                 ps.id
-
-            """);
-
-        // ========================================================
-        // Pagination
-        // ========================================================
-
-        sql.Append(
-            """
-
+            
+            ");
+            
+                    // ========================================================
+                    // Pagination
+                    // ========================================================
+            
+                    sql.Append(@"
+            
             ORDER BY op.purchase_date DESC, op.reference
-
+            
             LIMIT @PageSize
             OFFSET @Offset
-            """);
+            ");
 
         using var connection = _dbConnection;
 
@@ -241,8 +297,7 @@ public class OlivePurchaseQueryRepository : IOlivePurchaseQueryRepository
     public async Task<OlivePurchaseDetailsResponse?> GetOlivePurchaseDetails(
     int id)
     {
-        const string purchaseSql =
-            $"""
+        const string purchaseSql = $@"
         SELECT
             op.id AS {nameof(OlivePurchaseDetailsResponse.Id)},
 
@@ -278,7 +333,37 @@ public class OlivePurchaseQueryRepository : IOlivePurchaseQueryRepository
                 0
             ) AS {nameof(OlivePurchaseDetailsResponse.TotalAmount)},
 
-            op.notes AS {nameof(OlivePurchaseDetailsResponse.Notes)}
+            op.notes AS {nameof(OlivePurchaseDetailsResponse.Notes)},
+            (
+                op.status_id = 3 -- Approved
+                AND EXISTS (
+                    SELECT 1
+                    FROM olive_purchase_items item
+                    WHERE item.purchase_id = op.id
+                )
+                AND NOT EXISTS (
+                    SELECT 1
+                    FROM olive_purchase_items item
+                    WHERE item.purchase_id = op.id
+                    AND NOT EXISTS (
+                        SELECT 1
+                        FROM olive_analyses oa
+                        WHERE oa.source_id = item.id
+                          AND oa.source_type = 2
+                          AND oa.status = 3 -- Completed
+                    )
+                )
+                AND NOT EXISTS (
+                        SELECT 1
+                        FROM pressing_operation_inputs poi
+                        INNER JOIN pressing_operations po
+                            ON po.id = poi.pressing_operation_id
+                        INNER JOIN olive_purchase_items item
+                            ON item.id = poi.purchase_item_id
+                        WHERE item.purchase_id = op.id
+                          AND po.status_id IN (1, 3) -- Planned, Completed
+                    )
+            ) AS {nameof(OlivePurchaseDetailsResponse.CanLaunchPression)}
 
         FROM olive_purchases op
 
@@ -286,7 +371,7 @@ public class OlivePurchaseQueryRepository : IOlivePurchaseQueryRepository
             ON ps.id = op.status_id
 
         WHERE op.id = @Id
-        """;
+        ";
 
         using var connection = _dbConnection;
 
@@ -309,29 +394,28 @@ public class OlivePurchaseQueryRepository : IOlivePurchaseQueryRepository
         string purchaseNumber,
         CancellationToken cancellationToken = default)
     {
-        const string sql =
-            """
-            SELECT
-                op.id AS Id,
+        const string sql = @"
+SELECT
+    op.id AS Id,
 
-                op.purchase_number AS PurchaseNumber,
+    op.purchase_number AS PurchaseNumber,
 
-                op.supplier_name AS SupplierName,
+    op.supplier_name AS SupplierName,
 
-                op.purchase_date AS PurchaseDate,
+    op.purchase_date AS PurchaseDate,
 
-                op.status_id AS StatusId,
+    op.status_id AS StatusId,
 
-                op.notes AS Notes,
+    op.notes AS Notes,
 
-                op.created_at AS CreatedAt,
+    op.created_at AS CreatedAt,
 
-                op.updated_at AS UpdatedAt
+    op.updated_at AS UpdatedAt
 
-            FROM olive_purchases op
+FROM olive_purchases op
 
-            WHERE op.purchase_number = @PurchaseNumber
-            """;
+WHERE op.purchase_number = @PurchaseNumber
+";
 
         using var connection = _dbConnection;
 
@@ -351,7 +435,7 @@ public class OlivePurchaseQueryRepository : IOlivePurchaseQueryRepository
     public async Task<List<OlivePurchaseItemDetailsResponse>> GetOlivePurchaseItems(
         int purchaseId)
     {
-        var sql = $"""
+        var sql = $@"
         SELECT
             opi.id AS {nameof(OlivePurchaseItemDetailsResponse.Id)},
             opi.reference AS {nameof(OlivePurchaseItemDetailsResponse.Reference)},
@@ -401,7 +485,7 @@ public class OlivePurchaseQueryRepository : IOlivePurchaseQueryRepository
         FROM olive_purchase_items opi
         WHERE opi.purchase_id = @PurchaseId
         ORDER BY opi.id DESC;
-        """;
+";
 
         using var connection = _dbConnection;
 

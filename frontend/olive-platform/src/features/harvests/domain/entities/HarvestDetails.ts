@@ -1,6 +1,6 @@
 import type { ProductionStatus } from "../../../production/domain/entities/ProductionStatus";
 import type { OliveVarieties } from "../../../shared/entities/OliveVarieties";
-import type { HarvestStock } from "./HarvestStock";
+
 
 export interface HarvestDetails {
   id: number;
@@ -17,5 +17,4 @@ export interface HarvestDetails {
   status: ProductionStatus;
   startTime: string | null;
   endTime: string | null;
-  stocks?: HarvestStock[];
 }

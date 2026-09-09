@@ -9,4 +9,5 @@ export type OlivePurchaseDetailsResponse = {
   totalQuantity: number;
   totalAmount: number;
   notes: string | null;
+  canLaunchPression: boolean;
 };

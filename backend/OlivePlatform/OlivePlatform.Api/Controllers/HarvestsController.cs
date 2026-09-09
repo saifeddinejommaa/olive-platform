@@ -6,7 +6,6 @@ using OlivePlatform.Application.Features.Harvests.Commands.StartHarvest;
 using OlivePlatform.Application.Features.Harvests.Commands.UpdateHarvest;
 using OlivePlatform.Application.Features.Harvests.Requests;
 using OlivePlatform.Domain.Entities;
-using OlivePlatform.Domain.Interfaces.Repositories;
 using OlivePlatform.Domain.QueryRepositories;
 
 namespace OlivePlatform.Api.Controllers;
@@ -53,13 +52,12 @@ public class HarvestsController : ControllerBase
     }
 
     [HttpGet("{id:int}/stocks")]
-    public async Task<ActionResult> GetHarvestStocks(
+    public async Task<ActionResult> GetHarvestStocksDetails(
         int id,
-        [FromQuery] HarvestStocksRequestFilter filter,
         CancellationToken cancellationToken)
     {
         var stocks =
-            await _harvestQueryRepository.GetHarvestStocks(id,filter,
+            await _harvestQueryRepository.GetHarvestStocks(id,
                 cancellationToken);
 
         if (stocks is null)
@@ -69,6 +67,25 @@ public class HarvestsController : ControllerBase
 
         return Ok(stocks);
     }
+
+
+    [HttpGet("{id:int}/olive-analysis")]
+    public async Task<ActionResult> GetHarvestAnalysis(
+        int id,
+        CancellationToken cancellationToken)
+    {
+        var stocks =
+            await _harvestQueryRepository.GetAnalysisDetails(id,
+                cancellationToken);
+
+        if (stocks is null)
+        {
+            return NotFound();
+        }
+
+        return Ok(stocks);
+    }
+
 
     [HttpPost]
     public async Task<IActionResult> Create(

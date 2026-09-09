@@ -3,26 +3,25 @@ import { http, type ApiResponse } from "../../../../core/HttpClient";
 import type { PagedResult } from "../../../../core/PagedResult";
 import { buildQueryParams } from "../../../../core/QueryUtils";
 import type { OlivePurchasesFilter } from "../../domain/entities/OlivePurchaseFilter";
-import type { OlivePurchaseItemDetails } from "../../domain/entities/OlivePurchaseItemDetails";
 import type { CreateOlivePurchaseParams } from "../../domain/params/CreateOlivePurchaseParams";
 import { OlivePurchaseDetailsMapper } from "../mappers/OlivePurchaseDetailsMapper";
+import { OlivePurchaseForListMapper } from "../mappers/OlivePurchaseForListMapper";
 import { OlivePurchaseItemDetailsMapper } from "../mappers/OlivePurchaseItemDetailsMapper";
-import { OlivePurchaseMapper } from "../mappers/OlivePurchaseMapper";
 import type { OlivePurchaseDetailsResponse } from "../responses/OlivePurchaseDetailsResponse";
-import type { OlivePurchaseItemDetailsResponse } from "../responses/OLivePurchaseItemDetailsResponse";
-import type { OlivePurchaseResponse } from "../responses/OlivePurchaseResponse";
+import type { OlivePurchaseForListResponse } from "../responses/OlivePurchaseForListResponse";
+import type { OlivePurchaseItemDetailsResponse } from "../responses/OlivePurchaseItemDetailsResponse";
 
 export const OlivePurchaseRepository = {
   getAll: async (filters?: OlivePurchasesFilter) => {
     const params = buildQueryParams(filters as any);
     const httpResponse = await http<
-      ApiResponse<PagedResult<OlivePurchaseResponse>>
+      ApiResponse<PagedResult<OlivePurchaseForListResponse>>
     >(`${API_BASE_URL}olivepurchases?${params.toString()}`);
     return {
       pageNumber: httpResponse.Response.pageNumber,
       pageSize: httpResponse.Response.pageSize,
       totalCount: httpResponse.Response.totalCount,
-      items: httpResponse.Response.items.map(OlivePurchaseMapper),
+      items: httpResponse.Response.items.map(OlivePurchaseForListMapper),
     };
   },
 
@@ -38,7 +37,6 @@ export const OlivePurchaseRepository = {
     const httpResponse = await http<
       ApiResponse<OlivePurchaseItemDetailsResponse[]>
     >(`${API_BASE_URL}olivepurchases/items/${id}`);
-
     return httpResponse.Response.map(OlivePurchaseItemDetailsMapper);
   },
 
@@ -48,4 +46,10 @@ export const OlivePurchaseRepository = {
       body: params,
     });
   },
+
+  validate: (id: number) => {
+    return http<ApiResponse<void>>(`${API_BASE_URL}olivepurchases/${id}/validate`, {
+      method: "POST",
+    });
+  }
 };

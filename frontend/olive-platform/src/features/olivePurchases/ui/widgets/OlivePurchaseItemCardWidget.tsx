@@ -2,6 +2,7 @@ import CollapsibleCard from "../../../../common/widgets/collapsibleCard/Collapsi
 import OlivePurchaseItemInfo from "./OlivePurchaseItemInfo";
 import OliveAnalysisInfoWidget from "./OliveAnalysisInfoWidget";
 import type { OlivePurchaseItemDetails } from "../../domain/entities/OlivePurchaseItemDetails";
+import { getOliveVarietyLabel } from "../../../appConstants/helper/AppConstantsHelper";
 
 type Props = {
   item: OlivePurchaseItemDetails;
@@ -9,7 +10,7 @@ type Props = {
 
 export default function OlivePurchaseItemCardWidget({ item }: Props) {
   return (
-    <CollapsibleCard title={`${item.reference} — ${item.variety}`}>
+    <CollapsibleCard title={`${item.reference} — ${getOliveVarietyLabel(item.variety)}`}>
       <OlivePurchaseItemInfo item={item} />
 
       {item.analysis && <OliveAnalysisInfoWidget analysis={item.analysis} />}

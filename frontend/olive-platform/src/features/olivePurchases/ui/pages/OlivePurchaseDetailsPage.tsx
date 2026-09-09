@@ -18,10 +18,10 @@ export default function OlivePurchaseDetailsPage() {
   const [activeTab, setActiveTab] = useState<PurchaseTab>("general");
   const [closeDrawerOpen, setCloseDrawerOpen] = useState(false);
 
-  const { details, saving, fetchPurchase, validate, clear } =
+  const { details, saving, fetchPurchase, validate, clear, launchPressing, } =
     useOlivePurchaseDetailsStore();
 
-  const { fetchItems, clear: clearItems } = useOlivePurchaseItemsStore();
+  const { fetchItems, clear: clearItems, items } = useOlivePurchaseItemsStore();
 
   const isDraft = details?.status === PurchaseStatus.Draft;
   const isPending = details?.status === PurchaseStatus.Pending;
@@ -30,11 +30,6 @@ export default function OlivePurchaseDetailsPage() {
     if (!id) return;
     fetchPurchase(Number(id));
   }, [id, fetchPurchase]);
-
-  useEffect(() => {
-    if (!id || activeTab !== "olives") return;
-    fetchItems(Number(id));
-  }, [id, activeTab, fetchItems]);
 
   useEffect(() => {
     return () => {
@@ -46,6 +41,13 @@ export default function OlivePurchaseDetailsPage() {
   const handleConfirmClose = async () => {
     await validate(Number(id));
     setCloseDrawerOpen(false);
+  };
+
+  const handleOpenCloseDrawer = async () => {
+    if (details) {
+      await fetchItems(details.id);
+      setCloseDrawerOpen(true);
+    }
   };
 
   return (
@@ -75,12 +77,21 @@ export default function OlivePurchaseDetailsPage() {
             Clôturer l'achat
           </Button>
         )}
+        {details?.canBePressed && (
+          <Button
+            variant="primary"
+            onClick={() => launchPressing(Number(id))}
+            disabled={saving}
+          >
+            {saving ? "Lancement..." : "Lancer une pression"}
+          </Button>
+        )}
       </div>
 
       <PurchaseTabs activeTab={activeTab} onChange={setActiveTab} />
 
       {activeTab === "general" && details && (
-        <OlivePurchaseGeneralTab purchase={details} onNotesChange={() => {}} />
+        <OlivePurchaseGeneralTab purchase={details} onNotesChange={() => { }} />
       )}
       {activeTab === "olives" && (
         <OlivePurchaseItemsTab purchaseId={Number(id)} />
@@ -100,6 +111,7 @@ export default function OlivePurchaseDetailsPage() {
           open={closeDrawerOpen}
           saving={saving}
           purchase={details}
+          items={items}
           onClose={() => setCloseDrawerOpen(false)}
           onConfirm={handleConfirmClose}
         />

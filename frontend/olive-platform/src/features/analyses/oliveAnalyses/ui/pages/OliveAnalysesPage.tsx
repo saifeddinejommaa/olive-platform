@@ -2,7 +2,7 @@ import { useEffect } from "react";
 
 import type { OliveAnalysis } from "../../domain/entities/OliveAnalysis";
 import type { OliveAnalysesFilters } from "../../domain/entities/OliveAnalysesFilter";
-
+import { useNavigate } from "react-router-dom";
 import EditIcon from "@mui/icons-material/Edit";
 import { useOliveAnalysesStore } from "../store/OliveAnalysesStore";
 import { renderStatus } from "../../../../shared/utils/StatusUtils";
@@ -13,10 +13,7 @@ import Button from "../../../../../common/widgets/button/Button";
 import DataTable from "../../../../../common/widgets/tables/OrdersTable";
 
 export default function OliveAnalysesPage() {
-  // ============================================================
-  // STORE
-  // ============================================================
-
+ const navigate = useNavigate();
   const {
     analyses,
     total,
@@ -28,17 +25,9 @@ export default function OliveAnalysesPage() {
     clear,
   } = useOliveAnalysesStore();
 
-  // ============================================================
-  // INITIAL LOAD
-  // ============================================================
-
   useEffect(() => {
     fetchAnalyses();
   }, [fetchAnalyses]);
-
-  // ============================================================
-  // FILTER UPDATE
-  // ============================================================
 
   const updateFilter = (
     field: keyof OliveAnalysesFilters,
@@ -48,10 +37,6 @@ export default function OliveAnalysesPage() {
       [field]: value,
     });
   };
-
-  // ============================================================
-  // SEARCH
-  // ============================================================
 
   const handleSearch = async () => {
     await fetchAnalyses({
@@ -87,7 +72,7 @@ export default function OliveAnalysesPage() {
   // ============================================================
 
   const handleOpenDetails = (id: number) => {
-    window.open(`/Olive-analyses/${id}`, "_blank", "noopener,noreferrer");
+    navigate(`/Olive-analyses/${id}`);
   };
 
   // ============================================================

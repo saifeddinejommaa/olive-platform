@@ -1,43 +1,43 @@
 import EditNoteIcon from "@mui/icons-material/EditNote";
-import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
+import PendingIcon from '@mui/icons-material/Pending';
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+
 import InventoryIcon from "@mui/icons-material/Inventory";
 import CancelIcon from "@mui/icons-material/Cancel";
-
-import type { StatusConfig } from "../utils/StatusUtils";
 import {
   PurchaseStatus,
   type PurchaseStatus as PurchaseStatusType,
 } from "../../olivePurchases/domain/entities/PurchaseStatus";
+import type { StatusConfig } from "../utils/StatusUtils";
 
 export const purchaseStatusConfig: StatusConfig<PurchaseStatusType> = {
   [PurchaseStatus.Draft]: {
     label: "Brouillon",
     icon: EditNoteIcon,
-    color: "secondary",
+   color: "#f59e0b",
   },
 
   [PurchaseStatus.Pending]: {
     label: "En attente",
-    icon: HourglassEmptyIcon,
-    color: "warning",
+   icon: PendingIcon,
+    color: "#f59e0b",
   },
 
   [PurchaseStatus.Approved]: {
     label: "Approuvé",
     icon: CheckCircleIcon,
-    color: "info",
+    color: "#2563eb",
   },
 
   [PurchaseStatus.Received]: {
     label: "Réceptionné",
     icon: InventoryIcon,
-    color: "success",
+    color: "#16a34a",
   },
 
   [PurchaseStatus.Cancelled]: {
     label: "Annulé",
     icon: CancelIcon,
-    color: "error",
+    color: "#dc2626",
   },
 };

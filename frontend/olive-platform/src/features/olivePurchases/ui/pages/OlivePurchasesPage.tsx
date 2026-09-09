@@ -6,13 +6,17 @@ import TextInput from "../../../../common/widgets/textInput/TextInput";
 import Select from "../../../../common/widgets/select/Select";
 import EditIcon from "@mui/icons-material/Edit";
 
-import type { OlivePurchase } from "../../domain/entities/OlivePurchase";
 import type { OlivePurchasesFilter } from "../../domain/entities/OlivePurchaseFilter";
 
 import { useOlivePurchasesStore } from "../stores/OlivePurchaseStore";
 import { useConstantsStore } from "../../../appConstants/ConstantsStore";
 import { renderStatus } from "../../../shared/utils/StatusUtils";
 import { purchaseStatusConfig } from "../../../shared/status/PurchaseStatusConfig";
+import type { OlivePurchaseForList } from "../../domain/entities/OlivePurchaseForList";
+import { productionStatusConfig } from "../../../shared/status/ProductionStatusConfig";
+import PlayArrowIcon from "@mui/icons-material/PlayArrow";
+import { toast } from "react-toastify";
+
 
 export default function OlivePurchasesPage() {
   const navigate = useNavigate();
@@ -25,6 +29,7 @@ export default function OlivePurchasesPage() {
     setFilter,
     clearFilters,
     fetchOlivePurchases,
+    launchPressing,
   } = useOlivePurchasesStore();
 
   const {
@@ -75,45 +80,95 @@ export default function OlivePurchasesPage() {
   ];
 
   const handleOpenDetails = (id: number) => {
-    window.open(`/olive-purchases/${id}`, "_blank", "noopener,noreferrer");
+    navigate(`/olive-purchases/${id}`);
   };
+
+ const handleLaunchPressing = async (purchaseId: number) => {
+  try {
+    const id = await launchPressing(purchaseId);
+    toast.success("Opération de pression créée avec succès.");
+    navigate(`/production/pressing-operations/${id}`);
+  } catch {
+    toast.error("Impossible de créer l'opération de pression.");
+  }
+};
 
   const columns = [
     {
-      key: "purchaseNumber" as keyof OlivePurchase,
+      key: "reference" as keyof OlivePurchaseForList,
       label: "N° Achat",
     },
 
     {
-      key: "supplierName" as keyof OlivePurchase,
+      key: "supplierName" as keyof OlivePurchaseForList,
       label: "Fournisseur",
     },
 
     {
-      key: "purchaseDate" as keyof OlivePurchase,
+      key: "purchaseDate" as keyof OlivePurchaseForList,
       label: "Date",
-      render: (item: OlivePurchase) =>
+      render: (item: OlivePurchaseForList) =>
         new Date(item.purchaseDate).toLocaleDateString("fr-FR"),
+    },
+    {
+      key: "quantityKg" as keyof OlivePurchaseForList,
+      label: "Quantité (kg)",
+    },
+    {
+      key: "analyseStatus" as keyof OlivePurchaseForList,
+      label: "Analyse",
+      render: (item: OlivePurchaseForList) =>
+        renderStatus(item.analyseStatus, productionStatusConfig),
+    },
+    {
+      key: "pressed" as keyof OlivePurchaseForList,
+      label: "Pressé",
+      render: (item: OlivePurchaseForList) =>
+        renderStatus(item.pressed, productionStatusConfig),
     },
 
     {
-      key: "status" as keyof OlivePurchase,
-      label: "Statut",
-      render: (item: OlivePurchase) =>
+      key: "status" as keyof OlivePurchaseForList,
+      label: "Etat",
+      render: (item: OlivePurchaseForList) =>
         renderStatus(item.status, purchaseStatusConfig),
     },
 
+
+
+
     {
-      key: "id" as keyof OlivePurchase,
+  key: "id" as keyof OlivePurchaseForList,
+  label: "Actions",
 
-      label: "Actions",
+  render: (item: OlivePurchaseForList) => (
+    <div style={{ display: "flex", gap: "4px" }}>
+      <button
+        type="button"
+        title="Modifier l'analyse"
+        aria-label="Modifier l'analyse"
+        onClick={() => handleOpenDetails(item.id)}
+        style={{
+          background: "none",
+          border: "none",
+          cursor: "pointer",
+          padding: "6px",
+        }}
+      >
+        <EditIcon
+          fontSize="small"
+          sx={{
+            color: "var(--color-olive-900)",
+          }}
+        />
+      </button>
 
-      render: (item: OlivePurchase) => (
+      {item.canBePressed && (
         <button
           type="button"
-          title="Modifier l'analyse"
-          aria-label="Modifier l'analyse"
-          onClick={() => handleOpenDetails(item.id)}
+          title="Lancer la pression"
+          aria-label="Lancer la pression"
+          onClick={() => handleLaunchPressing(item.id)}
           style={{
             background: "none",
             border: "none",
@@ -121,15 +176,18 @@ export default function OlivePurchasesPage() {
             padding: "6px",
           }}
         >
-          <EditIcon
+          <PlayArrowIcon
             fontSize="small"
             sx={{
               color: "var(--color-olive-900)",
             }}
           />
         </button>
-      ),
-    },
+      )}
+    </div>
+  ),
+},
+
   ];
 
   return (

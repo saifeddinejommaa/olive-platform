@@ -1,8 +1,8 @@
+import { mapOliveAnalysisDetails } from "../../../analyses/oliveAnalyses/data/mappers/OliveAnalysisDetailsMapper";
 import type { ProductionStatus } from "../../../production/domain/entities/ProductionStatus";
 import type { OliveVarieties } from "../../../shared/entities/OliveVarieties";
 import type { HarvestDetails } from "../../domain/entities/HarvestDetails";
 import type { HarvestDetailsResponse } from "../responses/HarvestDetailsResponse";
-import { HarvestStockDetailsMapper } from "./HarvestStockDetailsMapper";
 
 export function HarvestDetailsMapper(
   response: HarvestDetailsResponse,
@@ -35,7 +35,6 @@ export function HarvestDetailsMapper(
     endTime: response.endTime,
 
     updatedAt: response.updatedAt,
-
-    stocks: response.stocks?.map(HarvestStockDetailsMapper),
+    oliveAnalysis :  response.oliveAnalysis ? mapOliveAnalysisDetails(response.oliveAnalysis) : null
   };
 }

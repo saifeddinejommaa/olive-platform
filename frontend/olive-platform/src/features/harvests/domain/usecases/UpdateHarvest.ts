@@ -5,6 +5,6 @@ import type { UpdateHarvestParams } from "../params/UpdateHarvestParams";
 export async function updateHarvest(
   id: number,
   params: UpdateHarvestParams,
-): Promise<Harvest> {
+): Promise<void> {
   return await HarvestRepository.update(id, params);
 }
