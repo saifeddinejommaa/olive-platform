@@ -1,12 +1,11 @@
-import { mapOliveAnalysisDetails } from "../../../analyses/oliveAnalyses/data/mappers/OliveAnalysisDetailsMapper";
 import type { ProductionStatus } from "../../../production/domain/entities/ProductionStatus";
 import type { OliveVarieties } from "../../../shared/entities/OliveVarieties";
-import type { HarvestDetails } from "../../domain/entities/HarvestDetails";
-import type { HarvestDetailsResponse } from "../responses/HarvestDetailsResponse";
+import type { HarvestForList } from "../../domain/entities/HarvestForList";
+import type { HarvestForListResponse } from "../responses/HarvestForListResponse";
 
-export function HarvestDetailsMapper(
-  response: HarvestDetailsResponse,
-): HarvestDetails {
+export function HarvestForListMapper(
+  response: HarvestForListResponse,
+): HarvestForList {
   return {
     id: response.id,
 
@@ -22,7 +21,7 @@ export function HarvestDetailsMapper(
 
     plannedTrees: response.plannedTrees,
 
-    variety: response.variety as OliveVarieties,
+    variety: response.varietyId as OliveVarieties,
 
     notes: response.notes,
 
@@ -35,6 +34,8 @@ export function HarvestDetailsMapper(
     endTime: response.endTime,
 
     updatedAt: response.updatedAt,
-    oliveAnalysis :  response.oliveAnalysis ? mapOliveAnalysisDetails(response.oliveAnalysis) : null
+    canBePressed: response.canBePressed,
+    pressed: response.pressing,
+    analysis: response.analysis
   };
 }

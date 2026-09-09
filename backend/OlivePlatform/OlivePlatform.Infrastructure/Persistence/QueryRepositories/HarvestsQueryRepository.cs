@@ -1,8 +1,10 @@
 ﻿using Dapper;
 using OlivePlatform.Application.Common;
+using OlivePlatform.Application.Features.Analysis.Responses;
 using OlivePlatform.Application.Features.Harvests.Requests;
 using OlivePlatform.Application.Features.Harvests.Responses;
 using OlivePlatform.Domain.Entities;
+using OlivePlatform.Domain.Enums;
 using OlivePlatform.Domain.QueryRepositories;
 using System.Data;
 using System.Text;
@@ -44,7 +46,37 @@ public class HarvestQueryRepository : IHarvestQueryRepository
                 h.start_time AS {nameof(HarvestForListResponse.StartTime)},
                 h.end_time AS {nameof(HarvestForListResponse.EndTime)},
                 h.created_at AS {nameof(HarvestForListResponse.CreatedAt)},
-                h.updated_at AS {nameof(HarvestForListResponse.UpdatedAt)}
+                h.updated_at AS {nameof(HarvestForListResponse.UpdatedAt)},
+                (
+                    SELECT po.status_id
+                    FROM pressing_operation_inputs poi
+                    INNER JOIN pressing_operations po
+                        ON po.id = poi.pressing_operation_id
+                    WHERE poi.harvest_id = h.id
+                    ORDER BY po.created_at DESC
+                    LIMIT 1
+                ) AS {nameof(HarvestForListResponse.Pressing)},
+                (
+                    SELECT oa.status
+                    FROM olive_analyses oa
+                    WHERE oa.source_id = h.id
+                      AND oa.source_type = 1
+                    ORDER BY oa.created_at DESC
+                    LIMIT 1
+                ) AS {nameof(HarvestForListResponse.Analysis)},
+
+                NOT EXISTS (
+                    SELECT 1
+                    FROM pressing_operation_inputs poi
+                    INNER JOIN pressing_operations po
+                        ON po.id = poi.pressing_operation_id
+                    WHERE poi.harvest_id = h.id
+                      AND po.status_id IN (
+                          {(int)ProductionStatus.Planned},
+                          {(int)ProductionStatus.InProgress},
+                          {(int)ProductionStatus.Completed}
+                      )
+                ) AS {nameof(HarvestForListResponse.CanBePressed)}
 
             FROM harvests h
             INNER JOIN plots p ON p.id = h.plot_id
@@ -111,7 +143,7 @@ public class HarvestQueryRepository : IHarvestQueryRepository
 
             parameters.Add(
                 "HarvestDateFrom",
-                filter.FromDate.Value);
+                filter.FromDate.Value.ToDateTime(TimeOnly.MinValue));
         }
 
         // ----------------------------------------------------
@@ -128,7 +160,7 @@ public class HarvestQueryRepository : IHarvestQueryRepository
 
             parameters.Add(
                 "HarvestDateTo",
-                filter.ToDate.Value);
+                filter.ToDate.Value.ToDateTime(TimeOnly.MinValue));
         }
 
         // ========================================================
@@ -216,36 +248,7 @@ public class HarvestQueryRepository : IHarvestQueryRepository
             h.end_time {nameof(HarvestDetailsResponse.EndTime)},
             h.created_at {nameof(HarvestDetailsResponse.CreatedAt)},
             h.updated_at {nameof(HarvestDetailsResponse.UpdatedAt)},
-            h.variety_id {nameof(HarvestDetailsResponse.VarietyId)},
-
-            COALESCE(
-                json_agg(
-                    json_build_object(
-                        '{nameof(HarvestStockForListResponse.Id)}',
-                            hs.id,
-
-                        '{nameof(HarvestStockForListResponse.HarvestId)}',
-                            hs.harvest_id,
-
-                        '{nameof(HarvestStockForListResponse.Reference)}',
-                            hs.reference,
-
-                        '{nameof(HarvestStockForListResponse.QuantityKg)}',
-                            hs.quantity_kg,
-
-                        '{nameof(HarvestStockForListResponse.Status)}',
-                            hs.status,
-
-                        '{nameof(HarvestStockForListResponse.CreatedAt)}',
-                            hs.created_at,
-
-                        '{nameof(HarvestStockForListResponse.UpdatedAt)}',
-                            hs.updated_at
-                    )
-                    ORDER BY hs.created_at DESC
-                ) FILTER (WHERE hs.id IS NOT NULL),
-                '[]'::json
-            ) AS {nameof(HarvestDetailsResponse.Stocks)}
+            h.variety_id {nameof(HarvestDetailsResponse.VarietyId)}
 
         FROM public.harvests h
 
@@ -334,65 +337,72 @@ public class HarvestQueryRepository : IHarvestQueryRepository
         return result.ToList();
     }
 
-    public async Task<PagedResult<HarvestStockForListResponse>> GetHarvestStocks(int id, HarvestStocksRequestFilter filter, CancellationToken cancellationToken = default)
+    public async Task<List<HarvestStockDetailsResponse>> GetHarvestStocks(
+        int id,
+        CancellationToken cancellationToken = default)
     {
-        var sql = new StringBuilder(
-           $"""
-            SELECT
-                COUNT(*) OVER() AS {nameof(HarvestStockForListResponse.Total)},
-
-                id {nameof(HarvestStockForListResponse.Id)} ,
-                harvest_id {nameof(HarvestStockForListResponse.HarvestId)},
-                reference {nameof(HarvestStockForListResponse.HarvestId)},
-                quantity_kg {nameof(HarvestStockForListResponse.HarvestId)},
-                status {nameof(HarvestStockForListResponse.Status)},
-                created_at {nameof(HarvestStockForListResponse.CreatedAt)},
-                updated_at {nameof(HarvestStockForListResponse.UpdatedAt)}
-            FROM public.harvest_stock
-            WHERE harvest_id = @HarvestId
-            ORDER BY created_at DESC
-            """);
-
-        var parameters = new DynamicParameters();
-
-        parameters.Add(
-            "HarvestId",
-            id);
-
-        // ----------------------------------------------------
-        // Pagination
-        // ----------------------------------------------------
-
-        sql.Append(
-            """
-
-            ORDER BY
-                h.harvest_date DESC,
-                h.reference
-
-            LIMIT @PageSize
-            OFFSET @Offset
-            """);
+        const string sql = """
+        SELECT
+            hs.id AS Id,
+            hs.reference AS Reference,
+            hs.quantity_kg AS QuantityKg,
+            hs.status AS Status,
+            hs.created_at AS CreatedAt,
+            hs.updated_at AS UpdatedAt
+        FROM harvest_stock hs
+        WHERE hs.harvest_id = @HarvestId
+        ORDER BY hs.created_at DESC;
+        """;
 
         using var connection = _dbConnection;
 
-        var result =
-            await connection.QueryAsync<HarvestStockForListResponse>(
-                sql.ToString(),
-                parameters);
+        var command = new CommandDefinition(
+            sql,
+            new
+            {
+                HarvestId = id
+            },
+            cancellationToken: cancellationToken);
 
-        var items = result.ToList();
+        var stocks = await connection.QueryAsync<HarvestStockDetailsResponse>(
+            command);
 
-        var total =
-            items.FirstOrDefault()?.Total ?? 0;
-
-        return new PagedResult<HarvestStockForListResponse>
-        {
-            PageNumber = filter.PageNumber,
-            PageSize = filter.PageSize,
-            TotalCount = total,
-            Items = items
-        };
-
+        return stocks.ToList();
     }
+
+    public async Task<OliveAnalysisDetailsResponse?> GetAnalysisDetails(int id, CancellationToken cancellationToken = default)
+    {
+        const string sql = $"""
+            SELECT
+                oa.id AS {nameof(OliveAnalysisDetailsResponse.Id)},
+                oa.reference AS {nameof(OliveAnalysisDetailsResponse.Reference)},
+                oa.source_type AS {nameof(OliveAnalysisDetailsResponse.SourceTypeId)},
+                oa.humidity_percentage AS {nameof(OliveAnalysisDetailsResponse.HumidityPercentage)},
+                oa.water_percentage AS {nameof(OliveAnalysisDetailsResponse.WaterPercentage)},
+                oa.oil_percentage AS {nameof(OliveAnalysisDetailsResponse.OilPercentage)},
+                oa.acidity_percentage AS {nameof(OliveAnalysisDetailsResponse.AcidityPercentage)},
+                oa.analysis_date AS {nameof(OliveAnalysisDetailsResponse.AnalysisDate)},
+                oa.created_at AS {nameof(OliveAnalysisDetailsResponse.CreatedAt)},
+                oa.updated_at AS {nameof(OliveAnalysisDetailsResponse.UpdatedAt)},
+                oa.status AS {nameof(OliveAnalysisDetailsResponse.Status)}
+            FROM olive_analyses oa
+            WHERE oa.source_type = 1
+              AND oa.source_id = @HarvestId
+            ORDER BY oa.created_at DESC
+            LIMIT 1;
+            """;
+
+        using var connection = _dbConnection;
+
+        var command = new CommandDefinition(
+            sql,
+            new
+            {
+                HarvestId = id
+            },
+            cancellationToken: cancellationToken);
+
+        return await connection.QueryFirstOrDefaultAsync<OliveAnalysisDetailsResponse>(
+            command);
+}
 }

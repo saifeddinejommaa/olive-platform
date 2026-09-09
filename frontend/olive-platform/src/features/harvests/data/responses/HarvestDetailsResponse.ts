@@ -1,6 +1,6 @@
+import type { OliveAnalysisDetailsResponse } from "../../../analyses/oliveAnalyses/data/responses/OliveAnalysesDetailsResponse";
 import type { ProductionStatus } from "../../../production/domain/entities/ProductionStatus";
 import type { OliveVarieties } from "../../../shared/entities/OliveVarieties";
-import type { HarvestStockResponse } from "./HarvestStockResponse";
 
 export interface HarvestDetailsResponse {
   id: number;
@@ -17,5 +17,5 @@ export interface HarvestDetailsResponse {
   status: ProductionStatus;
   startTime: string | null;
   endTime: string | null;
-  stocks?: HarvestStockResponse[];
+  oliveAnalysis?: OliveAnalysisDetailsResponse
 }

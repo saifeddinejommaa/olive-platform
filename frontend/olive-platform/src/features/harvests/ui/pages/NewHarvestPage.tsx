@@ -111,7 +111,7 @@ export default function NewHarvestPage() {
 
       if (success) {
         toast.success("Récolte créée avec succès.");
-        navigate("/production");
+        navigate("/harvests");
         return;
       }
 

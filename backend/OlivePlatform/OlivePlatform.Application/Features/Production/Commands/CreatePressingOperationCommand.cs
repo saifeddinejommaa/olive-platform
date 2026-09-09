@@ -8,7 +8,7 @@ using YourProject.Application.Services;
 
 namespace OlivePlatform.Application.Features.ProductionBatches.Commands;
 
-public class CreatePressingOperationCommand : IRequest<int>
+public class CreatePressingOperationCommand : IRequest<Unit>
 {
     public required List<NewPressingOperationInputRequest> Inputs { get; set; }
 
@@ -28,7 +28,7 @@ public class CreatePressingOperationCommand : IRequest<int>
 }
 
 public class CreateProductionBatchCommandHandler
-    : IRequestHandler<CreatePressingOperationCommand, int>
+    : IRequestHandler<CreatePressingOperationCommand, Unit>
 {
     private readonly IPressingOperationsRepository _repository;
     private readonly IOliveAnalysisRepository _oliveAnalysisRepository;
@@ -46,7 +46,7 @@ public class CreateProductionBatchCommandHandler
         _oliveAnalysisRepository = oliveAnalysisRepository;
     }
 
-    public async Task<int> Handle(
+    public async Task<Unit> Handle(
         CreatePressingOperationCommand request,
         CancellationToken cancellationToken)
     {
@@ -95,7 +95,7 @@ public class CreateProductionBatchCommandHandler
             inputs,
             cancellationToken);
 
-        return pressingOperation.Id;
+        return Unit.Value;
     }
 
     private async Task<decimal?> CalculateExpectedOilLitersAsync(

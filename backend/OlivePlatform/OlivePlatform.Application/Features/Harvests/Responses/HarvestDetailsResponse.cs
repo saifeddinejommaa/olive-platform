@@ -1,6 +1,6 @@
 ﻿
 
-using OlivePlatform.Domain.Entities;
+using OlivePlatform.Application.Features.Analysis.Responses;
 using OlivePlatform.Domain.Enums;
 
 namespace OlivePlatform.Application.Features.Harvests.Responses
@@ -21,8 +21,6 @@ namespace OlivePlatform.Application.Features.Harvests.Responses
         public DateTime? EndTime { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
-
-        public List<HarvestStockForListResponse> Stocks { get; set; } = [];
     }
 }
 

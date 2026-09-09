@@ -21,9 +21,6 @@ namespace OlivePlatform.Infrastructure
         {
 
             SqlMapper.AddTypeHandler(
-                new JsonObjectTypeHandler<List<HarvestStockForListResponse>>());
-
-            SqlMapper.AddTypeHandler(
                 new JsonObjectTypeHandler<OliveAnalysisInfoResponse>());
         }
     }
