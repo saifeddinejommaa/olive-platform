@@ -12,8 +12,6 @@ public class CreateHarvestCommand : IRequest<int>
     public int PlotId { get; set; }
     public int VarietyId { get; set; }
     public DateOnly HarvestDate { get; set; }
-    public DateTime? StartTime { get; set; }
-    public ProductionStatus Status { get; set; }
     public int PlannedTrees { get; set; }
     public string? Notes { get; set; }
 }
@@ -46,7 +44,7 @@ public class CreateHarvestCommandHandler : IRequestHandler<CreateHarvestCommand,
             Reference = operationNumber,
             PlotId = request.PlotId,
             HarvestDate = request.HarvestDate,
-            Status = request.Status,
+            Status = ProductionStatus.Planned,
             Notes = request.Notes,
             VarietyId = request.VarietyId,
             StartTime = null,

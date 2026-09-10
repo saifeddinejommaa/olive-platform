@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import type { Plot } from "../../domain/entities/Plot";
 import { GetPlots } from "../../domain/usecases/GetPlots";
+import type { PlotForList } from "../../domain/entities/PlotForList";
 
 export function usePlotsAutocomplete(search: string) {
-  const [results, setResults] = useState<Plot[]>([]);
+  const [results, setResults] = useState<PlotForList[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {

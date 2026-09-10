@@ -13,6 +13,8 @@ export function HarvestDetailsMapper(
     reference: response.reference,
 
     plotId: response.plotId,
+    
+    plotReference: response.plotReference,
 
     harvestDate: response.harvestDate,
 
@@ -35,6 +37,5 @@ export function HarvestDetailsMapper(
     endTime: response.endTime,
 
     updatedAt: response.updatedAt,
-    oliveAnalysis :  response.oliveAnalysis ? mapOliveAnalysisDetails(response.oliveAnalysis) : null
   };
 }

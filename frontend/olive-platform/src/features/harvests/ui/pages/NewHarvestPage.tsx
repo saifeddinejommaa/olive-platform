@@ -102,7 +102,6 @@ export default function NewHarvestPage() {
         plotId: form.plotId,
         varietyId: form.varietyId,
         plannedTrees: form.plannedTrees,
-        status: ProductionStatus.Planned,
         harvestDate: form.harvestDate,
         notes: form.notes || null,
       };
