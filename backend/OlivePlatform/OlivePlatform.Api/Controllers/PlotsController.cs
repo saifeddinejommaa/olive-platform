@@ -1,99 +1,39 @@
-﻿using MediatR;
+﻿// Api/Controllers/PlotsController.cs
 using Microsoft.AspNetCore.Mvc;
-using OlivePlatform.Application.Features.Plots.Commands;
+using OlivePlatform.Application.Common;
 using OlivePlatform.Application.Features.Plots.Repositories;
+using OlivePlatform.Application.Features.Plots.Responses;
+using OlivePlatform.Domain.Entities;
 using OlivePlatform.Domain.Interfaces.Repositories;
 
-namespace OlivePlatform.Api.Controllers;
-
-[ApiController]
-[Route("api/[controller]")]
-public class PlotsController : ControllerBase
+namespace OlivePlatform.Api.Controllers
 {
-    private readonly IPlotQueryRepository _plotQueryRepository;
-    private readonly IPlotRepository _plotRepository;
-    private readonly IMediator _mediator;
-
-    public PlotsController(
-        IPlotQueryRepository plotQueryRepository,
-        IPlotRepository plotRepository,
-        IMediator mediator)
+    [ApiController]
+    [Route("api/[controller]")]
+    public class PlotsController : ControllerBase
     {
-        _plotQueryRepository = plotQueryRepository;
-        _plotRepository = plotRepository;
-        _mediator = mediator;
-    }
+        private readonly IPlotRepository _plotRepository;
+        private readonly IPlotQueryRepository _plotQueryRepository;
 
-    [HttpGet]
-    public async Task<IActionResult> GetPlots(
-        [FromQuery] PlotsRequestFilter filter,
-        CancellationToken cancellationToken)
-    {
-        var result =
-            await _plotQueryRepository.GetPlots(filter);
-
-        return Ok(result);
-    }
-
-    [HttpGet("{id:int}")]
-    public async Task<IActionResult> GetDetails(
-        int id,
-        CancellationToken cancellationToken)
-    {
-        var result =
-            await _plotQueryRepository.GetPlotById(id);
-
-        if (result is null)
+        public PlotsController(IPlotRepository plotRepository, IPlotQueryRepository plotQueryRepository)
         {
-            return NotFound();
+            _plotRepository = plotRepository;
+            _plotQueryRepository = plotQueryRepository;
         }
 
-        return Ok(result);
-    }
+        [HttpGet]
+        public async Task<ActionResult<PagedResult<PlotForListResponse>>> GetList([FromQuery] PlotsRequestFilter parameters)
+        {
+            var result = await _plotQueryRepository.GetPagedListAsync(parameters);
+            return Ok(result);
+        }
 
-    [HttpGet("available-trees")]
-    public async Task<ActionResult<int>> GetAvailableTrees(
-       [FromQuery] int plotId,
-       [FromQuery] int varietyId,
-       [FromQuery] DateOnly harvestDate,
-       CancellationToken cancellationToken)
-    {
-        var availableTrees = await _plotRepository.GetAvailableTreesAsync(
-            plotId,
-            varietyId,
-            harvestDate,
-            cancellationToken);
-
-        return Ok(availableTrees);
-    }
-
-    [HttpPut("{id:int}")]
-    public async Task<IActionResult> Update(
-        int id,
-        [FromBody] UpdatePlotCommand command,
-        CancellationToken cancellationToken)
-    {
-        command.Id = id;
-
-        await _mediator.Send(
-            command,
-            cancellationToken);
-
-        return Ok(true);
-    }
-
-    [HttpPut("varieties/{id:int}")]
-    public async Task<IActionResult> UpdateVariety(
-    int id,
-    [FromBody] UpdatePlotVarietyCommand command,
-    CancellationToken cancellationToken)
-    {
-        command.Id = id;
-
-        await _mediator.Send(
-            command,
-            cancellationToken);
-
-        return Ok(true);
+        [HttpGet("{id:int}")]
+        public async Task<ActionResult<PlotDetailResponse>> GetPlotDetails(int id)
+        {
+            var plot = await _plotQueryRepository.GetDetailAsync(id);
+            if (plot is null) return NotFound();
+            return Ok(plot);
+        }
     }
 }

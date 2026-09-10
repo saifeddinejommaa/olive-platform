@@ -15,6 +15,16 @@ type MenuSection = {
 
 const menuSections: MenuSection[] = [
   {
+    label: "Parcelles",
+    icon: "🫒",
+    items: [
+      {
+        label: "Liste des parcelles",
+        path: "/plots",
+      },
+    ],
+  },
+  {
     label: "Achats d'olives",
     icon: "🫒",
     items: [

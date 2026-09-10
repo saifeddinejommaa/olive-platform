@@ -76,7 +76,8 @@ public class HarvestQueryRepository : IHarvestQueryRepository
                           {(int)ProductionStatus.InProgress},
                           {(int)ProductionStatus.Completed}
                       )
-                ) AS {nameof(HarvestForListResponse.CanBePressed)}
+                )
+                AND h.status = {(int)ProductionStatus.Completed} AS {nameof(HarvestForListResponse.CanBePressed)}
 
             FROM harvests h
             INNER JOIN plots p ON p.id = h.plot_id

@@ -49,6 +49,9 @@ import OliveAnalysisDetailsPage from "./features/analyses/oliveAnalyses/ui/pages
 import OilAnalysesPage from "./features/analyses/oilAnalyses/ui/pages/OilAnalysesPage";
 import OilAnalysisDetailsPage from "./features/analyses/oilAnalyses/ui/pages/OilAnalysisDetailsPage";
 import NewOilAnalysisPage from "./features/analyses/oilAnalyses/ui/pages/NewOilAnalysisPage";
+import PlotsPage from "./features/plots/ui/pages/PlotsPage";
+import PlotDetailPage from "./features/plots/ui/pages/PlotDetailsPage";
+
 
 function App() {
   const { fetchConstants } = useConstantsStore();
@@ -66,6 +69,12 @@ function App() {
             {/* ================================================== */}
 
             <Route path="/" element={<DashboardPage />} />
+
+            <Route path="/plots" element={<PlotsPage />}/>
+            <Route
+              path="/plots/plot-details/:id"
+              element={<PlotDetailPage />}
+            />
 
             {/* ================================================== */}
             {/* OLIVE PURCHASES */}

@@ -1300,3 +1300,31 @@
   text-transform: uppercase;
   letter-spacing: 0.03em;
 }
+
+.varieties-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.variety-card {
+  border: 1px solid var(--color-olive-100, #e5e5e0);
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.variety-title {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--color-olive-900);
+}
+
+.variety-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}

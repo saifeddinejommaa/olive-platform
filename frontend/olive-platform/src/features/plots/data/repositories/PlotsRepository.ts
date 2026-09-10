@@ -2,15 +2,17 @@ import { API_BASE_URL } from "../../../../constants";
 import { http, type ApiResponse } from "../../../../core/HttpClient";
 import type { PagedResult } from "../../../../core/PagedResult";
 import { buildQueryParams } from "../../../../core/QueryUtils";
-import type { Plot } from "../../domain/entities/Plot";
-import type { PlotsFilter } from "../../domain/entities/PlotsFilter";
+import type { PlotDetails } from "../../domain/entities/PlotDetails";
+import type { PlotForList } from "../../domain/entities/PlotForList";
+import type { PlotsRequestFilter } from "../../domain/entities/PlotsRequestFilter";
 import type { AvailableTreesParams } from "../../domain/params/AvailableTreesParams";
-
+import { PlotDetailsMapper } from "../mappers/PlotDetailsMapper";
+import type { PlotDetailsResponse } from "../responses/PlotDetailsResponse";
 export const PlotRepository = {
-  getAll: async (filters?: PlotsFilter) => {
+  getAll: async (filters?: PlotsRequestFilter) => {
     const params = buildQueryParams(filters as any);
 
-    const httpResponse = await http<ApiResponse<PagedResult<Plot>>>(
+    const httpResponse = await http<ApiResponse<PagedResult<PlotForList>>>(
       `${API_BASE_URL}plots?${params.toString()}`,
     );
 
@@ -22,13 +24,6 @@ export const PlotRepository = {
     };
   },
 
-  getById: async (id: number) => {
-    const httpResponse = await http<ApiResponse<Plot>>(
-      `${API_BASE_URL}plots/${id}`,
-    );
-
-    return httpResponse.Response;
-  },
   getAvailableTrees: async (params: AvailableTreesParams) => {
     const httpResponse = await http<ApiResponse<number>>(
       `${API_BASE_URL}plots/available-trees?plotId=${params.plotId}&varietyId=${params.varietyId}&harvestDate=${params.harvestDate}`,
@@ -36,4 +31,9 @@ export const PlotRepository = {
 
     return httpResponse.Response;
   },
+
+  async getPlotDetails(id: number): Promise<PlotDetails> {
+    const response = await http<ApiResponse<PlotDetailsResponse>>(`${API_BASE_URL}plots/${id}`);
+    return PlotDetailsMapper(response.Response);
+  }
 };

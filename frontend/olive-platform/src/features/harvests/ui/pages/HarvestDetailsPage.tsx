@@ -4,17 +4,13 @@ import { useNavigate, useParams } from "react-router-dom";
 import Button from "../../../../common/widgets/button/Button";
 
 import { useHarvestDetailsStore } from "../stores/HarvestDetailsStore";
-
 import HarvestTabs, { type HarvestTab } from "../components/HarvestTabs";
 import HarvestGeneralTab from "../components/HarvestGeneralTab";
 import HarvestStocksTab from "../components/HarvestStockTab";
-
 import { renderStatus } from "../../../shared/utils/StatusUtils";
 import { productionStatusConfig } from "../../../shared/status/ProductionStatusConfig";
 import { ProductionStatus } from "../../../production/domain/entities/ProductionStatus";
-
 import CloseHarvestDrawer from "../components/CompleteHarvestDrawer";
-
 import type { HarvestStockParams } from "../../domain/params/HarvestStockParams";
 import { toast } from "react-toastify";
 
@@ -89,7 +85,6 @@ export default function HarvestDetailsPage() {
       );
 
       setCloseDrawerOpen(false);
-
       await fetchHarvest(harvest.id);
 
       toast.success("Opération terminée avec succèes")

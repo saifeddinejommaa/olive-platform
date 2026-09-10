@@ -1,7 +1,7 @@
 import { PlotRepository } from "../../data/repositories/PlotsRepository";
-import type { PlotsFilter } from "../entities/PlotsFilter";
+import type { PlotsRequestFilter } from "../entities/PlotsRequestFilter";
 
-export const GetPlots = async (filters?: PlotsFilter) => {
+export const GetPlots = async (filters?: PlotsRequestFilter) => {
   const harvests = await PlotRepository.getAll(filters);
 
   return harvests;

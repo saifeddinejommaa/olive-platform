@@ -226,8 +226,8 @@ export default function HarvestGeneralTab({
         <InfoFieldWidget
           label="Parcelle"
           value={
-            harvest.plotId
-              ? harvest.plotId.toString()
+            harvest.plotReference
+              ? harvest.plotReference.toString()
               : "-"
           }
         />

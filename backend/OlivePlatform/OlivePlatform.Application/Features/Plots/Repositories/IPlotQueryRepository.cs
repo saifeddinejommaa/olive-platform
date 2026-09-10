@@ -3,11 +3,10 @@ using OlivePlatform.Application.Features.Plots.Responses;
 
 namespace OlivePlatform.Application.Features.Plots.Repositories;
 
-public interface IPlotQueryRepository
+public interface IPlotQueryRepository 
 {
-    Task<PagedResult<PlotForListResponse>> GetPlots(
-        PlotsRequestFilter filter);
+    Task<PagedResult<PlotForListResponse>> GetPagedListAsync(PlotsRequestFilter parameters);
 
-    Task<PlotForDetailsResponse?> GetPlotById(
-        int id);
+    Task<PlotDetailResponse?> GetDetailAsync(int id);
+
 }

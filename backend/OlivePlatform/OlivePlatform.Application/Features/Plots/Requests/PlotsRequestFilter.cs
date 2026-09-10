@@ -1,4 +1,5 @@
 ﻿using OlivePlatform.Application.Common;
+using OlivePlatform.Domain.Entities;
 
 public class PlotsRequestFilter : PaginationRequest
 {
@@ -6,5 +7,5 @@ public class PlotsRequestFilter : PaginationRequest
 
     public string? Name { get; set; }
 
-    public bool? IsActive { get; set; }
+    public OliveVariety? OliveVariety { get; set; }
 }
