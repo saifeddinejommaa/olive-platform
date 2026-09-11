@@ -1,34 +1,16 @@
-import { useLocation } from "react-router-dom";
-
-const pageTitles: Record<string, string> = {
-  "/": "Tableau de bord",
-  "/olive-purchases": "Achats d'olives",
-  "/payments": "Paiements",
-  "/tanks": "Citernes",
-  "/workers": "Ouvriers",
-  "/harvests": "Récoltes",
-  "/production": "Production",
-  "/oil-movements": "Mouvements d'huile",
-  "/invoices": "Factures",
-  "/settings": "Paramètres",
-};
+import { usePageTitleStore } from "../../stores/usePageTittleStore";
 
 export default function Topbar() {
-  const location = useLocation();
-
-  const title =
-    Object.entries(pageTitles).find(([path]) =>
-      path === "/"
-        ? location.pathname === "/"
-        : location.pathname.startsWith(path),
-    )?.[1] ?? "Olive Platform";
-
+  const dynamicTitle = usePageTitleStore((state) => state.title);
+  const dynamicSubTitle = usePageTitleStore((state) => state.subTitle);
+  const title = dynamicTitle ?? "Olive Platform";
+  const subTitle = dynamicSubTitle ?? "Olive Platform";
   return (
     <header className="topbar">
       <div>
         <h1 className="topbar-title">{title}</h1>
 
-        <div className="topbar-breadcrumb">Olive Platform / {title}</div>
+        <div className="topbar-breadcrumb">{subTitle}</div>
       </div>
 
       <div className="topbar-actions">

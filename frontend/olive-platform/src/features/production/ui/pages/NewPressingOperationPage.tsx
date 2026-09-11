@@ -316,8 +316,8 @@ export default function NewPressingOperationPage() {
           </div>
 
           <div className="filter-item">
-            <label>Statut</label>
             <ProductionStatusSelector
+            label="Statut"
               value={form.statusId || null}
               onChange={(statusId) => updateForm("statusId", statusId ?? 0)}
             />

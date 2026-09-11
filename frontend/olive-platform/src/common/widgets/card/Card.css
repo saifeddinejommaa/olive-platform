@@ -1,11 +1,13 @@
+
 .card {
   grid-column: 1 / -1;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 20px;
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--space-4);
 }
 
 .card-header {
@@ -15,12 +17,13 @@
 }
 
 .card-title {
-  font-weight: 600;
-  font-size: 14px;
+  font-weight: 800;
+  font-size: var(--fs-md);
+  color: var(--color-ink);
 }
 
 .card-body {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--space-4);
 }

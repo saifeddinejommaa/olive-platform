@@ -132,7 +132,7 @@ public class PlotQueryRepository : IPlotQueryRepository
 
         FROM public.plots p
         LEFT JOIN public.harvests h ON h.plot_id = p.id
-        GROUP BY p.id, p.reference, p.name, p.number_of_trees
+        WHERE 1 = 1
         """);
 
         var parameters = new DynamicParameters();
@@ -189,7 +189,8 @@ public class PlotQueryRepository : IPlotQueryRepository
 
         sql.Append(
             """
-            
+
+            GROUP BY p.id, p.reference, p.name, p.number_of_trees
             ORDER BY p.reference
             LIMIT @PageSize
             OFFSET @Offset
