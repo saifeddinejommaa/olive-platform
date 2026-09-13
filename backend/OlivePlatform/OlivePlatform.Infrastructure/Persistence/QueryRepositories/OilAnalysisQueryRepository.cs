@@ -104,6 +104,7 @@ namespace OlivePlatform.Infrastructure.Persistence.QueryRepositories
             if (!string.IsNullOrWhiteSpace(filter.Reference))
             {
                 where.Append("""
+
                     AND oa.reference ILIKE @Reference
                     """);
 
@@ -116,6 +117,7 @@ namespace OlivePlatform.Infrastructure.Persistence.QueryRepositories
             if (filter.AnalysisDate.HasValue)
             {
                 where.Append("""
+
                      AND oa.analysis_date::date = @AnalysisDate
                      """);
 
@@ -128,6 +130,7 @@ namespace OlivePlatform.Infrastructure.Persistence.QueryRepositories
             if (filter.Status.HasValue)
             {
                 where.Append("""
+
                     AND oa.status = @Status
                     """);
 

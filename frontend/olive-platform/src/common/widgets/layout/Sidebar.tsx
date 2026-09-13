@@ -1,357 +1,63 @@
-import { useState } from "react";
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 
 type MenuItem = {
   label: string;
+  icon: string;
   path: string;
 };
 
-type MenuSection = {
-  label: string;
-  icon: string;
-  items?: MenuItem[];
-  sections?: MenuSection[];
-};
-
-const menuSections: MenuSection[] = [
-  {
-    label: "Parcelles",
-    icon: "🫒",
-    items: [
-      {
-        label: "Liste des parcelles",
-        path: "/plots",
-      },
-    ],
-  },
-  {
-    label: "Achats d'olives",
-    icon: "🫒",
-    items: [
-      {
-        label: "Liste des achats",
-        path: "/olive-purchases",
-      },
-      {
-        label: "Nouvel achat",
-        path: "/olive-purchases/new",
-      },
-    ],
-  },
-
-  {
-    label: "Récoltes",
-    icon: "🌿",
-    items: [
-      {
-        label: "Liste des récoltes",
-        path: "/harvests",
-      },
-      {
-        label: "Nouvelle récolte",
-        path: "/harvests/new",
-      },
-    ],
-  },
-
-  {
-    label: "Production",
-    icon: "⚙️",
-    items: [
-      {
-        label: "Opérations de pression",
-        path: "/production",
-      },
-      {
-        label: "Nouvelle opération de pression",
-        path: "/production/new",
-      },
-    ],
-  },
-
-  // =========================
-  // ANALYSES
-  // =========================
-  {
-    label: "Analyses",
-    icon: "🧪",
-    sections: [
-      {
-        label: "Analyses d'olive",
-        icon: "🫒",
-        items: [
-          {
-            label: "Opérations d'analyse",
-            path: "/Olive-analyses",
-          },
-          {
-            label: "Nouvelle opération d'analyse",
-            path: "/Olive-analyses/new",
-          },
-        ],
-      },
-
-      {
-        label: "Analyses d'huile",
-        icon: "🫙",
-        items: [
-          {
-            label: "Opérations d'analyse",
-            path: "/Oil-analyses",
-          },
-          {
-            label: "Nouvelle opération d'analyse",
-            path: "/Oil-analyses/new",
-          },
-        ],
-      },
-    ],
-  },
-
-  {
-    label: "Mouvements d'huile",
-    icon: "↔️",
-    items: [
-      {
-        label: "Liste des mouvements",
-        path: "/oil-movements",
-      },
-      {
-        label: "Nouveau mouvement",
-        path: "/oil-movements/new",
-      },
-    ],
-  },
-
-  {
-    label: "Citernes",
-    icon: "🛢️",
-    items: [
-      {
-        label: "Liste des citernes",
-        path: "/tanks",
-      },
-      {
-        label: "Nouvelle citerne",
-        path: "/tanks/new",
-      },
-    ],
-  },
-
-  {
-    label: "Paiements",
-    icon: "💶",
-    items: [
-      {
-        label: "Liste des paiements",
-        path: "/payments",
-      },
-      {
-        label: "Nouveau paiement",
-        path: "/payments/new",
-      },
-    ],
-  },
-
-  {
-    label: "Factures",
-    icon: "🧾",
-    items: [
-      {
-        label: "Liste des factures",
-        path: "/invoices",
-      },
-      {
-        label: "Nouvelle facture",
-        path: "/invoices/new",
-      },
-    ],
-  },
-
-  {
-    label: "Ouvriers",
-    icon: "👷",
-    items: [
-      {
-        label: "Liste des ouvriers",
-        path: "/workers",
-      },
-      {
-        label: "Nouvel ouvrier",
-        path: "/workers/new",
-      },
-    ],
-  },
+const menuItems: MenuItem[] = [
+  { label: "Parcelles", icon: "ti-map-2", path: "/plots" },
+  { label: "Achats d'olives", icon: "ti-shopping-cart", path: "/olive-purchases" },
+  { label: "Récoltes", icon: "ti-basket", path: "/harvests" },
+  { label: "Production", icon: "ti-droplet", path: "/production" },
+  { label: "Analyses d'olive", icon: "ti-flask", path: "/Olive-analyses" },
+  { label: "Analyses d'huile", icon: "ti-flask-2", path: "/Oil-analyses" },
+  { label: "Mouvements d'huile", icon: "ti-arrows-exchange", path: "/oil-movements" },
+  { label: "Citernes", icon: "ti-building-warehouse", path: "/tanks" },
+  { label: "Paiements", icon: "ti-cash", path: "/payments" },
+  { label: "Factures", icon: "ti-file-invoice", path: "/invoices" },
+  { label: "Ouvriers", icon: "ti-users", path: "/workers" },
 ];
 
 export default function Sidebar() {
-  const location = useLocation();
-
-  const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
-
-  const toggleSection = (label: string) => {
-    setOpenSections((previous) => ({
-      ...previous,
-      [label]: !previous[label],
-    }));
-  };
-
-  const isSectionActive = (section: MenuSection): boolean => {
-    if (
-      section.items?.some((item) => location.pathname.startsWith(item.path))
-    ) {
-      return true;
-    }
-
-    if (section.sections?.some((subSection) => isSectionActive(subSection))) {
-      return true;
-    }
-
-    return false;
-  };
-
-  const renderItems = (items: MenuItem[]) => {
-    return (
-      <div className="submenu">
-        {items.map((item) => (
-          <NavLink
-            key={item.path}
-            to={item.path}
-            end
-            className={({ isActive }) =>
-              `submenu-item ${isActive ? "active" : ""}`
-            }
-          >
-            <span className="submenu-indicator" />
-
-            <span>{item.label}</span>
-          </NavLink>
-        ))}
-      </div>
-    );
-  };
-
-  const renderSubSection = (section: MenuSection) => {
-    const active = isSectionActive(section);
-
-    const isOpen = openSections[section.label] ?? active;
-
-    return (
-      <div key={section.label} className="menu-subsection">
-        <button
-          type="button"
-          className={`menu-subsection-parent ${active ? "active-parent" : ""}`}
-          onClick={() => toggleSection(section.label)}
-        >
-          <span className="nav-icon">{section.icon}</span>
-
-          <span className="menu-subsection-label">{section.label}</span>
-
-          <span className={`menu-chevron ${isOpen ? "open" : ""}`}>›</span>
-        </button>
-
-        {isOpen && section.items && (
-          <div className="submenu nested">
-            {section.items.map((item) => (
-              <NavLink
-                key={item.path}
-                to={item.path}
-                end
-                className={({ isActive }) =>
-                  `submenu-item ${isActive ? "active" : ""}`
-                }
-              >
-                <span className="submenu-indicator" />
-
-                <span>{item.label}</span>
-              </NavLink>
-            ))}
-          </div>
-        )}
-      </div>
-    );
-  };
-
   return (
     <aside className="sidebar">
-      {/* =========================
-          BRAND
-      ========================== */}
       <div className="sidebar-brand">
-        <div className="brand-icon">🫒</div>
+        <div className="brand-icon">
+          <i className="ti ti-leaf" aria-hidden="true"></i>
+        </div>
 
         <div>
           <div className="brand-title">Olive Platform</div>
-
           <div className="brand-subtitle">Gestion de l'huilerie</div>
         </div>
       </div>
 
-      {/* =========================
-          NAVIGATION
-      ========================== */}
       <nav className="sidebar-nav">
-        {/* ACCUEIL */}
         <NavLink
           to="/"
           end
           className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
         >
-          <span className="nav-icon">⌂</span>
-
+          <i className="ti ti-layout-dashboard nav-icon" aria-hidden="true"></i>
           <span>Tableau de bord</span>
         </NavLink>
 
         <div className="nav-section-title">GESTION</div>
 
-        {/* =========================
-            MENU
-        ========================== */}
-        {menuSections.map((section) => {
-          const active = isSectionActive(section);
-
-          const isOpen = openSections[section.label] ?? active;
-
-          return (
-            <div key={section.label} className="menu-section">
-              {/* PARENT */}
-              <button
-                type="button"
-                className={`menu-parent ${active ? "active-parent" : ""}`}
-                onClick={() => toggleSection(section.label)}
-              >
-                <span className="nav-icon">{section.icon}</span>
-
-                <span className="menu-parent-label">{section.label}</span>
-
-                <span className={`menu-chevron ${isOpen ? "open" : ""}`}>
-                  ›
-                </span>
-              </button>
-
-              {/* =========================
-                  ITEMS DIRECTS
-              ========================== */}
-              {isOpen && section.items && renderItems(section.items)}
-
-              {/* =========================
-                  SOUS-SECTIONS
-              ========================== */}
-              {isOpen && section.sections && (
-                <div className="submenu sections-container">
-                  {section.sections.map((subSection) =>
-                    renderSubSection(subSection),
-                  )}
-                </div>
-              )}
-            </div>
-          );
-        })}
+        {menuItems.map((item) => (
+          <NavLink
+            key={item.path}
+            to={item.path}
+            className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
+          >
+            <i className={`ti ${item.icon} nav-icon`} aria-hidden="true"></i>
+            <span>{item.label}</span>
+          </NavLink>
+        ))}
       </nav>
 
-      {/* =========================
-          SYSTEM
-      ========================== */}
       <div className="sidebar-bottom">
         <div className="nav-section-title">SYSTÈME</div>
 
@@ -359,8 +65,7 @@ export default function Sidebar() {
           to="/settings"
           className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
         >
-          <span className="nav-icon">⚙</span>
-
+          <i className="ti ti-settings nav-icon" aria-hidden="true"></i>
           <span>Paramètres</span>
         </NavLink>
 

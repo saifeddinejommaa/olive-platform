@@ -1,5 +1,6 @@
 import React from "react";
 import Button from "../button/Button";
+import Card from "../card/Card";
 
 type Column<T> = {
   key: keyof T;
@@ -31,7 +32,7 @@ export default function DataTable<T>({
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
 
   return (
-    <div className="glass-card">
+    <Card>
       <div className="table-wrapper">
         <table className="modern-table">
           <thead>
@@ -92,6 +93,6 @@ export default function DataTable<T>({
           Next
         </Button>
       </div>
-    </div>
+    </Card>
   );
 }

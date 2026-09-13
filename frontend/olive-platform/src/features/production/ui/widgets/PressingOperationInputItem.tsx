@@ -7,10 +7,6 @@ import SourceTypeSelector from "./SourceTypeSelector";
 
 import type { PressingOperationInput, InputSourceType } from "./InputTypes";
 
-// ============================================================
-// TYPES
-// ============================================================
-
 type PressingOperationInputItemProps = {
   input: PressingOperationInput;
 
@@ -29,10 +25,6 @@ type PressingOperationInputItemProps = {
   onSelectSource: (id: string, source: SourceOption) => void;
 };
 
-// ============================================================
-// COMPONENT
-// ============================================================
-
 export default function PressingOperationInputItem({
   input,
   index,
@@ -41,13 +33,8 @@ export default function PressingOperationInputItem({
   onChangeSource,
   onSelectSource,
 }: PressingOperationInputItemProps) {
-  // ==========================================================
-  // CHANGE SOURCE TYPE
-  // ==========================================================
 
   const handleChangeSource = (sourceType: InputSourceType) => {
-    // On remet à zéro les informations liées
-    // à l'ancienne source.
 
     onUpdate(input.id, "reference", "");
 
@@ -57,28 +44,16 @@ export default function PressingOperationInputItem({
 
     onUpdate(input.id, "quantityKg", "");
 
-    // Puis on change le type de source.
     onChangeSource(input.id, sourceType);
   };
 
-  // ==========================================================
-  // SOURCE SELECTION
-  // ==========================================================
-
   const handleSelectSource = (source: SourceOption) => {
     onSelectSource(input.id, source);
-
-    // Si la source possède une quantité disponible,
-    // on la récupère automatiquement.
 
     if (source.quantityKg !== undefined) {
       onUpdate(input.id, "quantityKg", source.quantityKg);
     }
   };
-
-  // ==========================================================
-  // RENDER
-  // ==========================================================
 
   return (
     <div
@@ -92,28 +67,17 @@ export default function PressingOperationInputItem({
         gap: "16px",
       }}
     >
-      {/* ======================================================
-          SOURCE TYPE
-      ====================================================== */}
 
       <SourceTypeSelector
         value={input.sourceType}
         onChange={handleChangeSource}
       />
 
-      {/* ======================================================
-          SOURCE REFERENCE
-      ====================================================== */}
-
       <SourceReference
         sourceType={input.sourceType}
         error={errors[`input-${input.id}`] ?? errors[`input-${index}`]}
         onSelect={handleSelectSource}
       />
-
-      {/* ======================================================
-          QUANTITY
-      ====================================================== */}
 
       <div>
         <TextInput

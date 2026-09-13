@@ -4,179 +4,134 @@ import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import Button from "../../../../common/widgets/button/Button";
-import InfoFieldWidget from "../../../../common/widgets/InfoFieldWidget";
 import ProgressBar from "../../../../common/widgets/progressBar/ProgressBar";
+import Card from "../../../../common/widgets/card/Card";
 
 import { usePlotDetailStore } from "../stores/UsePlotDetailStore";
 import { formatStringToDateTime } from "../../../shared/utils/DatesUtils";
 import PlotVarietyCardWidget from "../widgets/PlotVarietyCardWidget";
+import { usePageTitle } from "../../../../common/hooks/usePageTitle";
+import InfoFieldWidget from "../../../../common/widgets/InfoFieldWidget";
 
 export default function PlotDetailPage() {
-    const { id } = useParams<{ id: string }>();
-    const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
 
-    const { plot, loading, error, fetchPlotDetail, reset } = usePlotDetailStore();
+  const { plot, loading, error, fetchPlotDetail, reset } = usePlotDetailStore();
 
-    const plotId = Number(id);
+  const plotId = Number(id);
 
-    useEffect(() => {
-        if (!id) {
-            return;
-        }
+  usePageTitle(
+    plot?.name,
+    plot ? `Référence : ${plot.reference}` : "-",
+  );
 
-        fetchPlotDetail(plotId);
-    }, [id, plotId, fetchPlotDetail]);
+  useEffect(() => {
+    if (!id) {
+      return;
+    }
 
-    useEffect(() => {
-        return () => {
-            reset();
-        };
-    }, [reset]);
+    fetchPlotDetail(plotId);
+  }, [id, plotId, fetchPlotDetail]);
 
-    const handleLaunchHarvest = () => {
-        if (plot) {
-            navigate(`/production/plots/${plot.id}/launch-harvest`);
-        }
+  useEffect(() => {
+    return () => {
+      reset();
     };
+  }, [reset]);
 
-    if (loading) {
-        return (
-            <div className="filters">
-                <div className="filters-header">
-                    <div>
-                        <h3>Informations générales</h3>
-                        <span>Informations relatives à la parcelle</span>
-                    </div>
-                </div>
-
-                <div className="filters-content">
-                    <div className="filter-item" style={{ gridColumn: "1 / -1" }}>
-                        <span className="filter-item-label">Chargement</span>
-                        <span>Chargement des informations de la parcelle...</span>
-                    </div>
-                </div>
-            </div>
-        );
-    }
-
-    if (error) {
-        return (
-            <div className="filters">
-                <div className="filters-header">
-                    <div>
-                        <h3>Informations générales</h3>
-                        <span>Informations relatives à la parcelle</span>
-                    </div>
-                </div>
-
-                <div className="filters-content">
-                    <div className="filter-item" style={{ gridColumn: "1 / -1" }}>
-                        <span className="filter-item-label">Erreur</span>
-                        <span>{error}</span>
-                    </div>
-                </div>
-            </div>
-        );
-    }
-
-    if (!plot) {
-        return null;
-    }
-
+  if (loading) {
     return (
-        <div className="feature-page">
-            <div className="page-header">
-                <div className="page-header-content">
-                    <h1 className="page-title">{plot.name}</h1>
-                    <span>Référence : {plot.reference}</span>
-                </div>
-
-                {plot.canLaunchHarvest && (
-                    <Button variant="primary" onClick={handleLaunchHarvest}>
-                        Lancer la récolte
-                    </Button>
-                )}
-            </div>
-
-            <div className="filters">
-                <div className="filters-header">
-                    <div>
-                        <h3>Suivi de récolte</h3>
-                        <span>Avancement global de la récolte sur la parcelle</span>
-                    </div>
-                </div>
-
-                <div className="filters-content">
-                    <div className="filter-item" style={{ gridColumn: "1 / -1" }}>
-                        <ProgressBar value={plot.harvestedTreesPercentage} showValue />
-                    </div>
-                </div>
-            </div>
-
-            <div className="filters">
-                <div className="filters-header">
-                    <div>
-                        <h3>Informations générales</h3>
-                        <span>Informations relatives à la parcelle</span>
-                    </div>
-                </div>
-
-                <div className="filters-content">
-                    <InfoFieldWidget label="Localisation" value={plot.location ?? "-"} />
-
-                    <InfoFieldWidget
-                        label="Superficie"
-                        value={plot.areaHectares !== null ? `${plot.areaHectares} ha` : "-"}
-                    />
-
-                    <InfoFieldWidget
-                        label="Année de plantation"
-                        value={plot.plantingYear ? plot.plantingYear.toString() : "-"}
-                    />
-
-                    <InfoFieldWidget
-                        label="Nombre d'arbres"
-                        value={plot.numberOfTrees.toLocaleString("fr-FR")}
-                    />
-
-                    <InfoFieldWidget
-                        label="Créée le"
-                        value={formatStringToDateTime(plot.createdAt)}
-                    />
-
-                    {plot.notes && (
-                        <div className="filter-item" style={{ gridColumn: "1 / -1" }}>
-                            <span className="filter-item-label">Notes</span>
-                            <span>{plot.notes}</span>
-                        </div>
-                    )}
-                </div>
-            </div>
-
-            <div className="filters">
-                <div className="filters-header">
-                    <div>
-                        <h3>Variétés</h3>
-                        <span>Répartition et avancement de récolte par variété</span>
-                    </div>
-                </div>
-                <div className="filters-content">
-                    {plot.varieties.map((variety) => (
-                        <PlotVarietyCardWidget
-                            key={variety.varietyId}
-                            plotId={plot.id}
-                            variety={variety}
-                            onHarvestLaunched={() => fetchPlotDetail(plotId)}
-                        />
-                    ))}
-                </div>
-            </div>
-
-            <div className="filters-footer">
-                <Button variant="secondary" onClick={() => navigate("/production/plots")}>
-                    Retour
-                </Button>
-            </div>
-        </div>
+      <div className="feature-page">
+        <h2 className="section-title">Informations générales</h2>
+        <Card>
+          <span>Chargement des informations de la parcelle...</span>
+        </Card>
+      </div>
     );
+  }
+
+  if (error) {
+    return (
+      <div className="feature-page">
+        <h2 className="section-title">Informations générales</h2>
+        <Card>
+          <span>{error}</span>
+        </Card>
+      </div>
+    );
+  }
+
+  if (!plot) {
+    return null;
+  }
+
+  return (
+    <div className="feature-page">
+      <div>
+        <h2 className="section-title">Suivi de récolte</h2>
+        <p className="section-subtitle">Avancement global sur la parcelle</p>
+      </div>
+      <Card>
+        <div className="progress-header">
+          <span className="progress-label">Progression</span>
+          <span className="progress-value">
+            {plot.harvestedTreesPercentage.toFixed(0)}% récolté
+            {plot.plannedTreesPercentage !== undefined &&
+              ` · ${plot.plannedTreesPercentage.toFixed(0)}% planifié`}
+          </span>
+        </div>
+        <ProgressBar
+          value={plot.harvestedTreesPercentage}
+          secondaryValue={plot.plannedTreesPercentage}
+          showValue={false}
+        />
+      </Card>
+
+      <h2 className="section-title">Informations générales</h2>
+      <Card>
+        <div className="info-grid">
+          <InfoFieldWidget label="Localisation" value={plot.location ?? "-"} />
+
+          <InfoFieldWidget
+            label="Superficie"
+            value={plot.areaHectares !== null ? `${plot.areaHectares} ha` : "-"}
+          />
+
+          <InfoFieldWidget
+            label="Année de plantation"
+            value={plot.plantingYear ? plot.plantingYear.toString() : "-"}
+          />
+
+          <InfoFieldWidget
+            label="Nombre d'arbres"
+            value={plot.numberOfTrees.toLocaleString("fr-FR")}
+          />
+
+          <InfoFieldWidget
+            label="Créée le"
+            value={formatStringToDateTime(plot.createdAt)}
+          />
+
+          {plot.notes && (
+            <div style={{ gridColumn: "1 / -1" }}>
+              <InfoFieldWidget label="Notes" value={plot.notes} />
+            </div>
+          )}
+        </div>
+      </Card>
+
+      <h2 className="section-title">Variétés</h2>
+      <div className="variety-list">
+        {plot.varieties.map((variety) => (
+          <PlotVarietyCardWidget
+            key={variety.varietyId}
+            plotId={plot.id}
+            variety={variety}
+            onHarvestLaunched={() => fetchPlotDetail(plotId)}
+          />
+        ))}
+      </div>
+    </div>
+  );
 }

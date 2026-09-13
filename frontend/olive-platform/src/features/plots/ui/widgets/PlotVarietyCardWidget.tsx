@@ -1,10 +1,10 @@
-// src/features/production/plots/presentation/components/PlotVarietyCard.tsx
+// src/features/production/plots/presentation/widgets/PlotVarietyCardWidget.tsx
 
 import { useState } from "react";
 
 import Button from "../../../../common/widgets/button/Button";
-import InfoFieldWidget from "../../../../common/widgets/InfoFieldWidget";
 import ProgressBar from "../../../../common/widgets/progressBar/ProgressBar";
+import Card from "../../../../common/widgets/card/Card";
 
 import LaunchHarvestCard from "./LaunchHarvestCard";
 
@@ -28,29 +28,29 @@ export default function PlotVarietyCardWidget({
     onHarvestLaunched();
   };
 
-  return (
-    <div className="filter-item" style={{ gridColumn: "1 / -1" }}>
-      <span className="filter-item-label">{variety.varietyLabel}</span>
+  const isCompleted = variety.remainingTreesToHarvest === 0;
 
-      <ProgressBar
-        value={variety.harvestedPercentage}
-        secondaryValue={variety.plannedTreesPercentage}
-        showValue
-      />
-      <div style={{ display: "flex", gap: "24px", marginTop: "8px" }}>
-        <InfoFieldWidget
-          label="Nombre total d'arbres"
-          value={variety.numberOfTrees.toLocaleString("fr-FR")}
-        />
-        <InfoFieldWidget
-          label="Reste à récolter"
-          value={variety.remainingTreesToHarvest.toLocaleString("fr-FR")}
-        />
+  return (
+    <Card>
+      <div className="variety-card-header">
+        <span className="variety-card-title">{variety.varietyLabel}</span>
+
+        <span
+          className={`status-badge ${
+            isCompleted ? "status-badge--success" : "status-badge--warning"
+          }`}
+        >
+          {isCompleted
+            ? "Terminée"
+            : `${variety.remainingTreesToHarvest.toLocaleString("fr-FR")} restants`}
+        </span>
       </div>
 
-      {variety.remainingTreesToHarvest > 0 && !showLaunchForm && (
-        <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "12px" }}>
-          <Button variant="primary" onClick={() => setShowLaunchForm(true)}>
+      <ProgressBar value={variety.harvestedPercentage} showValue={false} />
+
+      {!isCompleted && !showLaunchForm && (
+        <div className="variety-card-footer">
+          <Button variant="secondary" onClick={() => setShowLaunchForm(true)}>
             Lancer la récolte
           </Button>
         </div>
@@ -65,6 +65,6 @@ export default function PlotVarietyCardWidget({
           onSuccess={handleSuccess}
         />
       )}
-    </div>
+    </Card>
   );
 }

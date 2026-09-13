@@ -13,3 +13,16 @@
 .collapsible-card-chevron--expanded {
   transform: rotate(180deg);
 }
+
+.collapsible-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.collapsible-card-title {
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  color: var(--color-ink);
+}

@@ -11,6 +11,7 @@ export default function OlivePurchaseItemsTab({ purchaseId }: Props) {
 
   useEffect(() => {
     fetchItems(purchaseId);
+    console.log(items)
   }, [purchaseId, fetchItems]);
 
   return (
@@ -22,7 +23,7 @@ export default function OlivePurchaseItemsTab({ purchaseId }: Props) {
         </div>
       </div>
 
-      <div className="filters-content">
+      <div className="grid-content">
         {items.map((item) => (
           <OlivePurchaseItemCardWidget key={item.id} item={item} />
         ))}

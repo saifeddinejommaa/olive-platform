@@ -18,7 +18,6 @@ export default function PressingOperationOliveCardWidget({
   input,
   canEditInputs,
   saving,
-  onUpdateQuantity,
   onRemove,
 }: Props) {
   const sourceLabel = input.sourceType === "harvest" ? "Récolte" : "Achat";

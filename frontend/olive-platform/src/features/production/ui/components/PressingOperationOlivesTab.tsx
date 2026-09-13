@@ -127,7 +127,7 @@ export default function PressingOperationOlivesTab({
             ))}
 
             <div className="pressing-olive-total">
-              <span>Total</span>
+              <span>Total </span>
 
               <strong>{oliveQuantityKg.toLocaleString("fr-FR")} kg</strong>
             </div>

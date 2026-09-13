@@ -1,7 +1,9 @@
-import AutorenewIcon from '@mui/icons-material/Autorenew';
-import DonutLargeIcon from '@mui/icons-material/DonutLarge';
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import CancelIcon from "@mui/icons-material/Cancel";
+import {
+   IconCalendarTime,
+  IconLoader2,
+  IconCircleCheck,
+  IconX,
+} from "@tabler/icons-react";
 
 import type { StatusConfig } from "../utils/StatusUtils";
 import {
@@ -12,25 +14,25 @@ import {
 export const productionStatusConfig: StatusConfig<ProductionStatusType> = {
   [ProductionStatus.Planned]: {
     label: "Planifiée",
-    icon: AutorenewIcon,
+    icon: IconCalendarTime,
     color: "#f59e0b",
   },
 
   [ProductionStatus.InProgress]: {
     label: "En cours",
-    icon: DonutLargeIcon,
+    icon: IconLoader2,
     color: "#2563eb",
   },
 
   [ProductionStatus.Completed]: {
     label: "Terminée",
-    icon: CheckCircleIcon,
+    icon: IconCircleCheck,
     color: "#16a34a",
   },
 
   [ProductionStatus.Cancelled]: {
     label: "Annulée",
-    icon: CancelIcon,
+    icon: IconX,
     color: "#dc2626",
   },
 };

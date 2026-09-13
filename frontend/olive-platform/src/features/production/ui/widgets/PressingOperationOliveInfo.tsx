@@ -14,7 +14,7 @@ export default function PressingOperationOliveInfo({ input }: Props) {
   const sourceType = input.sourceType === "harvest" ? "Récolte" : "Achat";
 
   return (
-    <div className="filters-content">
+    <div className="info-grid">
       <InfoFieldWidget label="Type" value={sourceType} />
 
       <InfoFieldWidget label="Référence" value={input.sourceReference || "-"} />

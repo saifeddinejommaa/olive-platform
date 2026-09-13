@@ -16,29 +16,33 @@ export default function CollapsibleCard({
 }: Props) {
   const [expanded, setExpanded] = useState(defaultExpanded);
 
-  const chevron = (
-    <button
-      type="button"
-      onClick={() => setExpanded((previous) => !previous)}
-      className="collapsible-card-toggle"
-      aria-label={expanded ? "Réduire" : "Développer"}
-    >
-      <span
-        className={`collapsible-card-chevron ${
-          expanded ? "collapsible-card-chevron--expanded" : ""
-        }`}
+  const header = (
+    <div className="collapsible-card-header">
+      <span className="collapsible-card-title">{title}</span>
+
+      <button
+        type="button"
+        onClick={() => setExpanded((previous) => !previous)}
+        className="collapsible-card-toggle"
+        aria-label={expanded ? "Réduire" : "Développer"}
       >
-        ▼
-      </span>
-    </button>
+        <span
+          className={`collapsible-card-chevron ${
+            expanded ? "collapsible-card-chevron--expanded" : ""
+          }`}
+        >
+          ▼
+        </span>
+      </button>
+    </div>
   );
 
   if (!expanded) {
-    return <Card title={title} headerAction={chevron} children={null} />;
+    return <Card headerAction={header} />;
   }
 
   return (
-    <Card title={title} headerAction={chevron}>
+    <Card headerAction={header}>
       {children}
     </Card>
   );

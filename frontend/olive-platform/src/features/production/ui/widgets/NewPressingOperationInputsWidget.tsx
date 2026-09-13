@@ -34,10 +34,6 @@ type NewPressingOperationInputsWidgetProps = {
   showAddButton?: boolean;
 };
 
-// ============================================================
-// COMPONENT
-// ============================================================
-
 export default function NewPressingOperationInputsWidget({
   inputs,
   errors,

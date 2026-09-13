@@ -1,3 +1,5 @@
+// src/features/production/olivePurchases/presentation/components/OlivePurchaseGeneralTab.tsx
+
 import TextEditor from "../../../../common/widgets/textEditor/TextEditor";
 import InfoFieldWidget from "../../../../common/widgets/InfoFieldWidget";
 import type { OlivePurchaseDetails } from "../../domain/entities/OlivePurchaseDetails";
@@ -5,6 +7,7 @@ import {
   formatDate,
   formatStringToDateTime,
 } from "../../../shared/utils/DatesUtils";
+import Card from "../../../../common/widgets/card/Card";
 
 type Props = {
   purchase: OlivePurchaseDetails;
@@ -16,40 +19,39 @@ export default function OlivePurchaseGeneralTab({
   onNotesChange,
 }: Props) {
   return (
-    <div className="filters">
-      <div className="filters-header">
-        <div>
-          <h3>Informations générales</h3>
-          <span>Informations relatives à l'achat d'olives</span>
-        </div>
-      </div>
+    <Card>
+    <div className="info-grid">
+      <InfoFieldWidget label="Fournisseur" value={purchase.supplierName} />
+      <InfoFieldWidget
+        label="Quantité (kg)"
+        value={purchase.totalQuantity?.toString()}
+      />
+      <InfoFieldWidget
+        label="Prix total (en DT)"
+        value={purchase.totalAmount?.toString()}
+      />
+      <InfoFieldWidget
+        label="Date d'achat"
+        value={formatDate(purchase.purchaseDate)}
+      />
+      <InfoFieldWidget
+        label="Créé le"
+        value={formatStringToDateTime(purchase.createdAt)}
+      />
+      <InfoFieldWidget
+        label="Modifié le"
+        value={formatStringToDateTime(purchase.updatedAt)}
+      />
 
-      <div className="filters-content">
-        <InfoFieldWidget label="Fournisseur" value={purchase.supplierName} />
-        <InfoFieldWidget label="Quantité (kg)" value={purchase.totalQuantity?.toString()} />
-        <InfoFieldWidget label="Prix total (en DT)" value={purchase.totalAmount?.toString()} />
-        <InfoFieldWidget
-          label="Date d'achat"
-          value={formatDate(purchase.purchaseDate)}
+      <div style={{ gridColumn: "1 / -1" }}>
+        <span className="filter-item-label">Notes</span>
+        <TextEditor
+          value={purchase.notes ?? ""}
+          placeholder="Notes concernant l'achat..."
+          onChange={onNotesChange}
         />
-        <InfoFieldWidget
-          label="Créé le"
-          value={formatStringToDateTime(purchase.createdAt)}
-        />
-        <InfoFieldWidget
-          label="Modifié le"
-          value={formatStringToDateTime(purchase.updatedAt)}
-        />
-
-        <div className="filter-item" style={{ gridColumn: "1 / -1" }}>
-          <span className="filter-item-label">Notes</span>
-          <TextEditor
-            value={purchase.notes ?? ""}
-            placeholder="Notes concernant l'achat..."
-            onChange={onNotesChange}
-          />
-        </div>
       </div>
     </div>
+    </Card>
   );
 }

@@ -134,3 +134,14 @@
 
   font-size: var(--fs-xs);
 }
+
+.text-input[type="number"]::-webkit-outer-spin-button,
+.text-input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.text-input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}

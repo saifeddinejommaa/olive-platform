@@ -7,6 +7,7 @@ import { useHarvestOliveAnalysisStore } from "../stores/HarvestOliveAnalysisStor
 
 import HarvestStockInfo from "../widgets/HarvestStockInfo";
 import OliveAnalysisInfoWidget from "../../../olivePurchases/ui/widgets/OliveAnalysisInfoWidget";
+import { EmptyStockWidget } from "../widgets/EmptyStockWidget";
 
 type Props = {
     harvestId: number;
@@ -52,11 +53,25 @@ export default function HarvestStocksTab({ harvestId }: Props) {
                     </div>
                 </div>
 
-                <div className="filters-content">
+                <div
+                    className="filters-content"
+                    style={
+                        !stocksLoading &&
+                        !stocksError &&
+                        !hasStocks
+                            ? {
+                                  display: "grid",
+                                  placeItems: "center",
+                              }
+                            : undefined
+                    }
+                >
                     {stocksLoading && (
                         <div
                             className="filter-item"
-                            style={{ gridColumn: "1 / -1" }}
+                            style={{
+                                gridColumn: "1 / -1",
+                            }}
                         >
                             <span className="filter-item-value">
                                 Chargement des stocks...
@@ -67,7 +82,9 @@ export default function HarvestStocksTab({ harvestId }: Props) {
                     {!stocksLoading && stocksError && (
                         <div
                             className="filter-item"
-                            style={{ gridColumn: "1 / -1" }}
+                            style={{
+                                gridColumn: "1 / -1",
+                            }}
                         >
                             <span className="filter-item-label">
                                 Erreur
@@ -92,23 +109,16 @@ export default function HarvestStocksTab({ harvestId }: Props) {
 
                     {!stocksLoading &&
                         !stocksError &&
-                        !hasStocks && (
-                            <div
-                                className="filter-item"
-                                style={{ gridColumn: "1 / -1" }}
-                            >
-                                <span className="filter-item-value">
-                                    Aucun stock pour cette récolte.
-                                </span>
-                            </div>
-                        )}
+                        !hasStocks && <EmptyStockWidget />}
                 </div>
             </div>
 
             {!stocksLoading && !stocksError && hasStocks && (
                 <div
                     className="filters"
-                    style={{ marginTop: "20px" }}
+                    style={{
+                        marginTop: "20px",
+                    }}
                 >
                     <div className="filters-header">
                         <div>
