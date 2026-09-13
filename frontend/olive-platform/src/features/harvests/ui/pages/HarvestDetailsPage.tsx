@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 
 import Button from "../../../../common/widgets/button/Button";
 
@@ -13,15 +13,15 @@ import { ProductionStatus } from "../../../production/domain/entities/Production
 import CloseHarvestDrawer from "../components/CompleteHarvestDrawer";
 import type { HarvestStockParams } from "../../domain/params/HarvestStockParams";
 import { toast } from "react-toastify";
+import { usePageTitle } from "../../../../common/hooks/usePageTitle";
 
 export default function HarvestDetailsPage() {
-  const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
 
   const [closeDrawerOpen, setCloseDrawerOpen] = useState(false);
   const [activeTab, setActiveTab] =
     useState<HarvestTab>("general");
-
+  
   const {
     harvest,
     saving,
@@ -38,6 +38,11 @@ export default function HarvestDetailsPage() {
 
   const isInProgress =
     harvest?.status === ProductionStatus.InProgress;
+
+     usePageTitle(
+        `Récolte ${harvest?.reference}`,
+        "Gestion des récoltes d'olives et suivi de leur qualité.",
+      );
 
   useEffect(() => {
     if (!id) {
@@ -97,10 +102,6 @@ export default function HarvestDetailsPage() {
     <div className="feature-page">
       <div className="page-header">
         <div className="page-header-content">
-          <h1 className="page-title">
-            Récolte {harvest?.reference}
-          </h1>
-
           {harvest &&
             renderStatus(
               harvest.status,
@@ -148,15 +149,6 @@ export default function HarvestDetailsPage() {
           harvestId={harvest.id}
         />
       )}
-
-      <div className="filters-footer">
-        <Button
-          variant="secondary"
-          onClick={() => navigate("/harvests")}
-        >
-          Retour
-        </Button>
-      </div>
 
       {harvest && (
         <CloseHarvestDrawer

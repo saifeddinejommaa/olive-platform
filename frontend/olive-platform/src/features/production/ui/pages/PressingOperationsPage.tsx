@@ -1,49 +1,35 @@
+// src/features/production/pressingOperations/presentation/pages/PressingOperationsPage.tsx
+
+import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
+
 import DataTable from "../../../../common/widgets/tables/OrdersTable";
-import Button from "../../../../common/widgets/button/Button";
-import TextInput from "../../../../common/widgets/textInput/TextInput";
+import ActionCard from "../../../../common/widgets/actionCard/ActionCard";
+import PressingOperationsFilterComponent from "../components/PressingOperationsFilterComponent";
+import { usePageTitle } from "../../../../common/hooks/usePageTitle";
+
 import { usePressingOperationsStore } from "../stores/pressingOperationStore";
 import type { PressingOperation } from "../../domain/entities/PressingOperation";
-import type { PressingOperationFilters } from "../../domain/entities/PressingOperationFilters";
 import { formatDateTime } from "../../../shared/utils/DatesUtils";
 import { productionStatusConfig } from "../../../shared/status/ProductionStatusConfig";
 import { renderStatus } from "../../../shared/utils/StatusUtils";
-import EditIcon from "@mui/icons-material/Edit";
-import { useNavigate } from "react-router-dom";
+import Button from "../../../../common/widgets/button/Button";
+import { IconPlus } from "@tabler/icons-react";
 
 export default function PressingOperationsPage() {
-    const navigate = useNavigate();
-  
-  const {
-    PressingOperations,
-    filters,
-    loading,
-    setFilter,
-    fetchPressingOperations,
-  } = usePressingOperationsStore();
+  const navigate = useNavigate();
+
+  usePageTitle(
+    "Opérations de pression",
+    "Gestion des opérations de pression des olives et de la production d'huile.",
+  );
+
+  const { PressingOperations, setFilter, fetchPressingOperations } =
+    usePressingOperationsStore();
 
   useEffect(() => {
     fetchPressingOperations();
   }, []);
-
-  const updateFilter = (
-    field: keyof PressingOperationFilters,
-    value: string,
-  ) => {
-    setFilter(field, value);
-  };
-
-  const handleSearch = async () => {
-    await fetchPressingOperations();
-  };
-
-  const handleReset = async () => {
-    setFilter("pressingNumber", "");
-    setFilter("pressingDate", "");
-    setFilter("harvestNumber", "");
-    setFilter("purchaseNumber", "");
-    await fetchPressingOperations();
-  };
 
   const handlePageChange = async (pageNumber: number) => {
     setFilter("pageNumber", pageNumber);
@@ -51,7 +37,7 @@ export default function PressingOperationsPage() {
   };
 
   const handleOpenDetails = (id: number) => {
-     navigate(`/production/pressing-operations/${id}`);
+    navigate(`/production/pressing-operations/${id}`);
   };
 
   const columns = [
@@ -82,99 +68,31 @@ export default function PressingOperationsPage() {
       key: "id" as keyof PressingOperation,
       label: "Actions",
       render: (item: PressingOperation) => (
-        <button
-          type="button"
-          title="Modifier l'opération"
-          aria-label="Modifier l'opération"
+        <ActionCard
+          type="edit"
+          title="Détails"
           onClick={() => handleOpenDetails(item.id)}
-          style={{
-            background: "none",
-            border: "none",
-            cursor: "pointer",
-            padding: "6px",
-          }}
-        >
-          <EditIcon fontSize="small" sx={{ color: "var(--color-olive-900)" }} />
-        </button>
+        />
       ),
     },
   ];
 
+  const handleCreate = () => {
+    navigate("/production/new");
+  };
+
   return (
     <div className="feature-page">
-      <div className="page-header">
-        <div className="page-header-content">
-          <h1 className="page-title">Opérations de pression</h1>
-          <p className="page-description">
-            Gestion des opérations de pression des olives et de la production
-            d’huile.
-          </p>
-        </div>
+      <div className="page-header page-header-actions">
+        <Button
+          variant="primary"
+          onClick={handleCreate}
+        >
+          <IconPlus size={18} stroke={2} />
+          Nouvelle récolte
+        </Button>
       </div>
-
-      <div className="filters">
-        <div className="filters-header">
-          <div>
-            <h3>Filtres de recherche</h3>
-            <span>Rechercher une opération de pression</span>
-          </div>
-        </div>
-
-        <div className="filters-content">
-          <div className="filter-item">
-            <TextInput
-              label="N° Pression"
-              placeholder="PRESS-2026-001"
-              value={filters.operationNumber}
-              onChange={(event) =>
-                updateFilter("operationNumber", event.target.value)
-              }
-            />
-          </div>
-
-          <div className="filter-item">
-            <TextInput
-              label="Date de pression"
-              type="date"
-              value={filters.pressingDate}
-              onChange={(event) =>
-                updateFilter("pressingDate", event.target.value)
-              }
-            />
-          </div>
-
-          <div className="filter-item">
-            <TextInput
-              label="N° Récolte"
-              placeholder="HARV-2026-001"
-              value={filters.harvestNumber}
-              onChange={(event) =>
-                updateFilter("harvestNumber", event.target.value)
-              }
-            />
-          </div>
-
-          <div className="filter-item">
-            <TextInput
-              label="N° Achat"
-              placeholder="ACH-2026-001"
-              value={filters.purchaseNumber}
-              onChange={(event) =>
-                updateFilter("purchaseNumber", event.target.value)
-              }
-            />
-          </div>
-        </div>
-
-        <div className="filters-footer">
-          <Button variant="secondary" onClick={handleReset}>
-            Réinitialiser
-          </Button>
-          <Button variant="primary" onClick={handleSearch}>
-            {loading ? "Recherche..." : "Rechercher"}
-          </Button>
-        </div>
-      </div>
+      <PressingOperationsFilterComponent />
 
       <DataTable
         data={PressingOperations?.items ?? []}

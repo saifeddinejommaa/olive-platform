@@ -16,7 +16,7 @@ type OlivePurchaseDetailsState = {
 
   fetchPurchase: (id: number) => Promise<void>;
   validate: (id: number) => Promise<void>;
-  launchPressing: (purchaseId: number) => Promise<number>;
+  launchPressing: (purchaseId: number) => Promise<void>;
   clear: () => void;
 };
 
@@ -54,9 +54,7 @@ export const useOlivePurchaseDetailsStore = create<OlivePurchaseDetailsState>(
           inputs,
         };
 
-        const id = (await CreatePressingOperation(request)).Response;
-
-        return id;
+        await CreatePressingOperation(request);
       } catch (error: any) {
         const message =
           error?.message ?? "Impossible de créer l'opération de pression.";

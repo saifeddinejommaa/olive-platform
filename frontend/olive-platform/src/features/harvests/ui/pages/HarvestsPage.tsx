@@ -1,13 +1,11 @@
+// src/features/production/harvests/presentation/pages/HarvestsPage.tsx
+
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-
-import PlayArrowIcon from "@mui/icons-material/PlayArrow";
-import EditIcon from "@mui/icons-material/Edit";
 
 import { toast } from "react-toastify";
 
 import type { HarvestForList } from "../../domain/entities/HarvestForList";
-import type { HarvestFilters } from "../../domain/entities/HarvestsFilters";
 import { useHarvestsStore } from "../stores/HarvestsStore";
 import { useConstantsStore } from "../../../appConstants/ConstantsStore";
 import { getOliveVarietyLabel } from "../../../appConstants/helper/AppConstantsHelper";
@@ -15,24 +13,23 @@ import { getOliveVarietyLabel } from "../../../appConstants/helper/AppConstantsH
 import { renderStatus } from "../../../shared/utils/StatusUtils";
 import { productionStatusConfig } from "../../../shared/status/ProductionStatusConfig";
 
-import Button from "../../../../common/widgets/button/Button";
-import Select from "../../../../common/widgets/select/Select";
-import TextInput from "../../../../common/widgets/textInput/TextInput";
 import DataTable from "../../../../common/widgets/tables/OrdersTable";
+import ActionCard from "../../../../common/widgets/actionCard/ActionCard";
+import HarvestsFilterComponent from "../components/HarvestsFilterComponent";
+import { usePageTitle } from "../../../../common/hooks/usePageTitle";
+import Button from "../../../../common/widgets/button/Button";
+import { IconPlus } from "@tabler/icons-react";
 
 export default function HarvestsPage() {
   const navigate = useNavigate();
 
-  const {
-    harvests,
-    loading,
-    error,
-    filters,
-    setFilter,
-    clearFilters,
-    fetchHarvests,
-    launchPressingOperation,
-  } = useHarvestsStore();
+  usePageTitle(
+    "Récoltes",
+    "Gestion des récoltes d'olives et suivi de leur qualité.",
+  );
+
+  const { harvests, loading, error, fetchHarvests, launchPressingOperation } =
+    useHarvestsStore();
 
   const { fetchConstants } = useConstantsStore();
 
@@ -41,25 +38,8 @@ export default function HarvestsPage() {
     fetchHarvests();
   }, [fetchConstants, fetchHarvests]);
 
-  const updateFilter = (
-    field: keyof HarvestFilters,
-    value: string | number | null,
-  ) => {
-    setFilter(field, value);
-  };
-
-  const handleSearch = async () => {
-    setFilter("pageNumber", 1);
-    await fetchHarvests();
-  };
-
-  const handleReset = async () => {
-    clearFilters();
-    await fetchHarvests();
-  };
-
   const handlePageChange = async (page: number) => {
-    setFilter("pageNumber", page);
+    useHarvestsStore.getState().setFilter("pageNumber", page);
     await fetchHarvests();
   };
 
@@ -70,9 +50,7 @@ export default function HarvestsPage() {
   const handleLaunchPressing = async (id: number) => {
     try {
       await launchPressingOperation(id);
-
       toast.success("La pression a été lancée avec succès.");
-
       await fetchHarvests();
     } catch {
       toast.error("Une erreur est survenue lors du lancement de la pression.");
@@ -108,8 +86,7 @@ export default function HarvestsPage() {
     {
       key: "varietyId" as keyof HarvestForList,
       label: "Variété",
-      render: (item: HarvestForList) =>
-        getOliveVarietyLabel(item.variety),
+      render: (item: HarvestForList) => getOliveVarietyLabel(item.variety),
     },
     {
       key: "status" as keyof HarvestForList,
@@ -121,187 +98,54 @@ export default function HarvestsPage() {
       key: "analysis" as keyof HarvestForList,
       label: "Analyse",
       render: (item: HarvestForList) =>
-        item.analysis
-          ? renderStatus(item.analysis, productionStatusConfig)
-          : "",
+        item.analysis ? renderStatus(item.analysis, productionStatusConfig) : "",
     },
     {
       key: "pressed" as keyof HarvestForList,
       label: "Pression",
       render: (item: HarvestForList) =>
-        item.pressed
-          ? renderStatus(item.pressed, productionStatusConfig)
-          : "",
+        item.pressed ? renderStatus(item.pressed, productionStatusConfig) : "",
     },
     {
       key: "id" as keyof HarvestForList,
       label: "Actions",
       render: (item: HarvestForList) => (
         <div style={{ display: "flex", gap: "4px" }}>
-          <button
-            type="button"
-            title="Modifier l'opération"
-            aria-label="Modifier l'opération"
+          <ActionCard
+            type="edit"
+            title="Détails"
             onClick={() => handleOpenDetails(item.id)}
-            style={{
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              padding: "6px",
-            }}
-          >
-            <EditIcon
-              fontSize="small"
-              sx={{ color: "var(--color-olive-900)" }}
-            />
-          </button>
+          />
 
           {item.canBePressed && (
-            <button
-              type="button"
+            <ActionCard
+              type="launch"
               title="Lancer la pression"
-              aria-label="Lancer la pression"
               onClick={() => handleLaunchPressing(item.id)}
-              style={{
-                background: "none",
-                border: "none",
-                cursor: "pointer",
-                padding: "6px",
-              }}
-            >
-              <PlayArrowIcon
-                fontSize="small"
-                sx={{
-                  color: "var(--color-olive-900)",
-                }}
-              />
-            </button>
+            />
           )}
         </div>
       ),
     },
   ];
 
+  const handleCreate = () => {
+    navigate("/harvests/new");
+  };
+
   return (
     <div className="feature-page">
-      <div className="page-header">
-        <div className="page-header-content">
-          <h1 className="page-title">Récoltes</h1>
-
-          <p className="page-description">
-            Gestion des récoltes d’olives et suivi de leur qualité.
-          </p>
-        </div>
+      <div className="page-header page-header-actions">
+        <Button
+          variant="primary"
+          onClick={handleCreate}
+        >
+          <IconPlus size={18} stroke={2} />
+          Nouvelle récolte
+        </Button>
       </div>
-
-      <div className="filters">
-        <div className="filters-header">
-          <div>
-            <h3>Filtres de recherche</h3>
-            <span>Rechercher une récolte</span>
-          </div>
-        </div>
-
-        <div className="filters-content">
-          <div className="filter-item">
-            <TextInput
-              label="N° Récolte"
-              placeholder="REC-2026-001"
-              value={filters.harvestNumber}
-              onChange={(event) =>
-                updateFilter("harvestNumber", event.target.value)
-              }
-            />
-          </div>
-
-          <div className="filter-item">
-            <TextInput
-              label="Parcelle"
-              placeholder="ID parcelle"
-              type="number"
-              value={
-                filters.plotId !== null ? String(filters.plotId) : ""
-              }
-              onChange={(event) =>
-                updateFilter(
-                  "plotId",
-                  event.target.value
-                    ? Number(event.target.value)
-                    : null,
-                )
-              }
-            />
-          </div>
-
-          <div className="filter-item">
-            <TextInput
-              label="Du"
-              type="date"
-              value={filters.fromDate}
-              onChange={(event) =>
-                updateFilter("fromDate", event.target.value)
-              }
-            />
-          </div>
-
-          <div className="filter-item">
-            <TextInput
-              label="Au"
-              type="date"
-              value={filters.toDate}
-              onChange={(event) =>
-                updateFilter("toDate", event.target.value)
-              }
-            />
-          </div>
-
-          <div className="filter-item">
-            <Select
-              label="Qualité"
-              value={filters.qualityGrade}
-              onChange={(event) =>
-                updateFilter("qualityGrade", event.target.value)
-              }
-              options={[
-                {
-                  value: "",
-                  label: "Toutes les qualités",
-                },
-                {
-                  value: "A",
-                  label: "Qualité A",
-                },
-                {
-                  value: "B",
-                  label: "Qualité B",
-                },
-                {
-                  value: "C",
-                  label: "Qualité C",
-                },
-              ]}
-            />
-          </div>
-        </div>
-
-        <div className="filters-footer">
-          <Button
-            variant="secondary"
-            onClick={handleReset}
-            disabled={loading}
-          >
-            Réinitialiser
-          </Button>
-
-          <Button
-            variant="primary"
-            onClick={handleSearch}
-            disabled={loading}
-          >
-            {loading ? "Recherche..." : "Rechercher"}
-          </Button>
-        </div>
-      </div>
+      
+      <HarvestsFilterComponent />
 
       {error && <div className="error-message">{error}</div>}
 
@@ -314,11 +158,7 @@ export default function HarvestsPage() {
         onPageChange={handlePageChange}
       />
 
-      {loading && (
-        <div className="loading">
-          Chargement des récoltes...
-        </div>
-      )}
+      {loading && <div className="loading">Chargement des récoltes...</div>}
     </div>
   );
 }

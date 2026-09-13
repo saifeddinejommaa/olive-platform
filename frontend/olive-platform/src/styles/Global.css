@@ -531,10 +531,6 @@ textarea {
   color: var(--color-muted);
 }
 
-.filters{
-  padding: var(--space-5);
-}
-
 .filters-content-row {
   display: flex;
   flex-wrap: wrap;
@@ -553,6 +549,25 @@ textarea {
   justify-content: flex-end;
 }
 
+.filter-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.filter-item-label {
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  color: var(--color-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.filter-item-value {
+  font-size: var(--fs-sm);
+  color: var(--color-ink);
+}
+
 .filter-title {
   font-family: var(--font-display);
   font-weight: 600;
@@ -568,6 +583,12 @@ textarea {
   display: block;
 }
 
+.grid-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
 .feature-page{
   gap:20px;
   display: flex;
@@ -577,4 +598,196 @@ textarea {
 .page-header-actions {
   display: flex;
   justify-content: flex-end;
+}
+
+.section-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--fs-lg);
+  color: var(--color-ink);
+  margin: 0 0 4px;
+}
+
+.section-subtitle {
+  font-size: var(--fs-sm);
+  color: var(--color-muted);
+  margin: 0 0 12px;
+}
+
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+}
+
+.progress-label {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+.progress-value {
+  font-size: var(--fs-sm);
+  color: var(--color-muted);
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: var(--space-4);
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.info-label {
+  font-size: var(--fs-xs);
+  color: var(--color-muted);
+}
+
+.info-value {
+  font-size: var(--fs-sm);
+  color: var(--color-ink);
+}
+
+.variety-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.variety-card-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+
+/* à ajouter dans global.css */
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+
+  width: fit-content;
+  height: 24px;
+
+  padding: 0 10px;
+
+  border-radius: 20px;
+  border: none;
+
+  font-family: inherit;
+  font-size: 11.5px;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.status-badge--success {
+  background: var(--color-success-bg);
+  color: var(--color-success);
+}
+
+.status-badge--warning {
+  background: var(--color-warning-bg);
+  color: var(--color-warning);
+}
+
+.variety-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.variety-card-title {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-2);
+}
+
+/* à ajouter dans global.css */
+
+.steps-tabs {
+  display: flex;
+  align-items: center;
+  padding: var(--space-3) 0;
+  margin-bottom: var(--space-4);
+}
+
+.steps-tabs__step {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.steps-tabs__circle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--color-border-strong);
+  color: var(--color-muted);
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.steps-tabs__step--active .steps-tabs__circle {
+  background: var(--color-olive-700);
+  border-color: var(--color-olive-700);
+  color: white;
+}
+
+.steps-tabs__label {
+  font-size: var(--fs-sm);
+  color: var(--color-muted);
+  transition: color 0.15s ease, font-weight 0.15s ease;
+}
+
+.steps-tabs__step--active .steps-tabs__label {
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+.steps-tabs__connector {
+  flex: 0 0 60px;
+  height: 2px;
+  background: var(--color-border);
+  margin: 0 16px;
+}
+
+.steps-tabs__connector--filled {
+  background: var(--color-olive-500);
+}
+
+.analysis-block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.filters-header{
+  gap: var(--space-3);
+}
+
+.filters{
+  display: flex;
+   flex-direction: column;
+  gap: var(--space-3);
 }

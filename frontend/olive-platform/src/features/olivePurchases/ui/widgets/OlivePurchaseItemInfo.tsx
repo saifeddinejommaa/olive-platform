@@ -11,7 +11,7 @@ const formatPrice = (value: number) => `${value.toLocaleString("fr-FR")} DT`;
 
 export default function OlivePurchaseItemInfo({ item }: Props) {
   return (
-    <div className="filters-content">
+    <div className="info-grid">
       <InfoFieldWidget label="Référence" value={item.reference} />
       <InfoFieldWidget
         label="Variété"

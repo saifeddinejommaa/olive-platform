@@ -7,6 +7,7 @@
   box-shadow: var(--shadow-md);
   display: flex;
   flex-direction: column;
+  padding: var(--space-5);
   gap: var(--space-4);
 }
 

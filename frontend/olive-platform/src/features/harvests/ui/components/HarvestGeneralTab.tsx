@@ -15,6 +15,7 @@ import { ProductionStatus } from "../../../production/domain/entities/Production
 
 import { useHarvestDetailsStore } from "../stores/HarvestDetailsStore";
 import TextInput from "../../../../common/widgets/textInput/TextInput";
+import Card from "../../../../common/widgets/card/Card";
 
 type Props = {
   harvestId: number;
@@ -210,41 +211,23 @@ export default function HarvestGeneralTab({
   }
 
   return (
+    <Card>
     <div className="filters">
       <div className="filters-header">
         <div>
           <h3>Informations générales</h3>
-
-          <span>
-            Informations relatives à la récolte
-          </span>
         </div>
       </div>
 
-      <div className="filters-content">
-        {/* Parcelle */}
-        <InfoFieldWidget
-          label="Parcelle"
-          value={
-            harvest.plotReference
-              ? harvest.plotReference.toString()
-              : "-"
-          }
-        />
-
-        {/* Variété */}
+      <div className="info-grid">
         <InfoFieldWidget
           label="Variété"
           value={getOliveVarietyLabel(harvest.variety)}
         />
-
-        {/* Date de récolte */}
         <InfoFieldWidget
           label="Date de récolte"
           value={formatDate(harvest.harvestDate)}
         />
-
-        {/* Quantité */}
         {isInProgress ? (
           <TextInput
             label="Quantité (kg)"
@@ -363,5 +346,6 @@ export default function HarvestGeneralTab({
         </div>
       )}
     </div>
+    </Card>
   );
 }

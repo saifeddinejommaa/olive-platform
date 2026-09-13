@@ -14,10 +14,12 @@ const formatPercentage = (value?: number | null) => {
 
 export default function OliveAnalysisInfoWidget({ analysis }: Props) {
   return (
-    <div>
-      <h4 style={{ marginBottom: "12px" }}>Analyse {renderStatus(analysis.status, productionStatusConfig)}  </h4>
+    <div className="analysis-block">
+      <h4 className="analysis-title">Analyse</h4>
 
-      <div className="filters-content">
+      {renderStatus(analysis.status, productionStatusConfig)}
+
+      <div className="info-grid">
         <InfoFieldWidget label="Référence" value={analysis.reference} />
         <InfoFieldWidget
           label="Taux d'humidité"

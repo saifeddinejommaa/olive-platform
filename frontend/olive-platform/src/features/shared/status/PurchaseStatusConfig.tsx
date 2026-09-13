@@ -1,9 +1,13 @@
-import EditNoteIcon from "@mui/icons-material/EditNote";
-import PendingIcon from '@mui/icons-material/Pending';
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+// src/features/shared/status/PurchaseStatusConfig.tsx
 
-import InventoryIcon from "@mui/icons-material/Inventory";
-import CancelIcon from "@mui/icons-material/Cancel";
+import {
+  IconEdit,
+  IconClock,
+  IconCircleCheck,
+  IconBox,
+  IconX,
+} from "@tabler/icons-react";
+
 import {
   PurchaseStatus,
   type PurchaseStatus as PurchaseStatusType,
@@ -13,31 +17,31 @@ import type { StatusConfig } from "../utils/StatusUtils";
 export const purchaseStatusConfig: StatusConfig<PurchaseStatusType> = {
   [PurchaseStatus.Draft]: {
     label: "Brouillon",
-    icon: EditNoteIcon,
-   color: "#f59e0b",
+    icon: IconEdit,
+    color: "#f59e0b",
   },
 
   [PurchaseStatus.Pending]: {
     label: "En attente",
-   icon: PendingIcon,
+    icon: IconClock,
     color: "#f59e0b",
   },
 
   [PurchaseStatus.Approved]: {
     label: "Approuvé",
-    icon: CheckCircleIcon,
+    icon: IconCircleCheck,
     color: "#2563eb",
   },
 
   [PurchaseStatus.Received]: {
     label: "Réceptionné",
-    icon: InventoryIcon,
+    icon: IconBox,
     color: "#16a34a",
   },
 
   [PurchaseStatus.Cancelled]: {
     label: "Annulé",
-    icon: CancelIcon,
+    icon: IconX,
     color: "#dc2626",
   },
 };

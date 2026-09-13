@@ -17,19 +17,13 @@ export default function TextInput({
   ...props
 }: TextInputProps) {
   return (
-    <div className="text-input-field">
-      {/* Label */}
-
+    <div className="filter-item">
       {label && (
-        <label className="text-input-label">
+        <label className="filter-item-label">
           {label}
-
           {required && <span className="text-input-required">*</span>}
         </label>
       )}
-
-      {/* Input */}
-
       <input
         {...props}
         required={required}
@@ -37,12 +31,7 @@ export default function TextInput({
           .filter(Boolean)
           .join(" ")}
       />
-
-      {/* Error */}
-
       {error && <div className="text-input-error-message">{error}</div>}
-
-      {/* Hint */}
 
       {!error && hint && <div className="text-input-hint">{hint}</div>}
     </div>

@@ -5,6 +5,5 @@ export type HarvestFilters = PaginationFilter & {
   plotId?: number;
   fromDate?: string;
   toDate?: string;
-  qualityGrade?: string;
   toPressing?: boolean;
 };

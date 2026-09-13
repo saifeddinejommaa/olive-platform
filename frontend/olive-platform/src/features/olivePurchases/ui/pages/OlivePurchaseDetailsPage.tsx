@@ -1,3 +1,5 @@
+// src/features/production/olivePurchases/presentation/pages/OlivePurchaseDetailsPage.tsx
+
 import { useNavigate, useParams } from "react-router-dom";
 import type { PurchaseTab } from "../types/PurchaseTab";
 import { useEffect, useState } from "react";
@@ -11,20 +13,25 @@ import PurchaseTabs from "../components/PurchaseTabs";
 import OlivePurchaseGeneralTab from "../components/OlivePurchaseGeneralTab";
 import OlivePurchaseItemsTab from "../components/OlivePurchaseItemsTab";
 import ClosePurchaseDrawer from "../components/ClosePurchaseDrawer";
+import { usePageTitle } from "../../../../common/hooks/usePageTitle";
 
 export default function OlivePurchaseDetailsPage() {
-  const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const [activeTab, setActiveTab] = useState<PurchaseTab>("general");
   const [closeDrawerOpen, setCloseDrawerOpen] = useState(false);
 
-  const { details, saving, fetchPurchase, validate, clear, launchPressing, } =
+  const { details, saving, fetchPurchase, validate, clear, launchPressing } =
     useOlivePurchaseDetailsStore();
 
   const { fetchItems, clear: clearItems, items } = useOlivePurchaseItemsStore();
 
   const isDraft = details?.status === PurchaseStatus.Draft;
   const isPending = details?.status === PurchaseStatus.Pending;
+
+  usePageTitle(
+    details ? `Achat d'olives ${details.reference}` : undefined,
+    details ? `N° ${details.reference}` : undefined,
+  );
 
   useEffect(() => {
     if (!id) return;
@@ -52,59 +59,51 @@ export default function OlivePurchaseDetailsPage() {
 
   return (
     <div className="feature-page">
-      <div className="page-header">
-        <div className="page-header-content">
-          <h1 className="page-title">Achat d'olives {details?.reference}</h1>
-          {details && renderStatus(details.status, purchaseStatusConfig)}
+      <div className="section-header">
+        {details && renderStatus(details.status, purchaseStatusConfig)}
+
+        <div style={{ display: "flex", gap: "8px", marginLeft: "auto" }}>
+          {isDraft && (
+            <Button
+              variant="primary"
+              onClick={() => validate(Number(id))}
+              disabled={saving}
+            >
+              {saving ? "Lancement..." : "Lancer l'étude"}
+            </Button>
+          )}
+
+          {isPending && (
+            <Button
+              variant="primary"
+              onClick={handleOpenCloseDrawer}
+              disabled={saving}
+            >
+              Clôturer l'achat
+            </Button>
+          )}
+
+          {details?.canBePressed && (
+            <Button
+              variant="primary"
+              onClick={() => launchPressing(Number(id))}
+              disabled={saving}
+            >
+              {saving ? "Lancement..." : "Lancer une pression"}
+            </Button>
+          )}
         </div>
-
-        {isDraft && (
-          <Button
-            variant="primary"
-            onClick={() => validate(Number(id))}
-            disabled={saving}
-          >
-            {saving ? "Lancement..." : "Lancer l'étude"}
-          </Button>
-        )}
-
-        {isPending && (
-          <Button
-            variant="primary"
-            onClick={() => setCloseDrawerOpen(true)}
-            disabled={saving}
-          >
-            Clôturer l'achat
-          </Button>
-        )}
-        {details?.canBePressed && (
-          <Button
-            variant="primary"
-            onClick={() => launchPressing(Number(id))}
-            disabled={saving}
-          >
-            {saving ? "Lancement..." : "Lancer une pression"}
-          </Button>
-        )}
       </div>
 
       <PurchaseTabs activeTab={activeTab} onChange={setActiveTab} />
 
       {activeTab === "general" && details && (
-        <OlivePurchaseGeneralTab purchase={details} onNotesChange={() => { }} />
+        <OlivePurchaseGeneralTab purchase={details} onNotesChange={() => {}} />
       )}
+
       {activeTab === "olives" && (
         <OlivePurchaseItemsTab purchaseId={Number(id)} />
       )}
-
-      <div className="filters-footer">
-        <Button
-          variant="secondary"
-          onClick={() => navigate("/Olive-purchases")}
-        >
-          Retour
-        </Button>
-      </div>
 
       {details && (
         <ClosePurchaseDrawer

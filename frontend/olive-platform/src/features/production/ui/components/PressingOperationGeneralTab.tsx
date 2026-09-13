@@ -3,6 +3,7 @@ import InfoFieldWidget from "../../../../common/widgets/InfoFieldWidget";
 
 import type { PressingOperationDetails } from "../../domain/entities/PressingOperationDetails";
 import { formatDate } from "../../../shared/utils/DatesUtils";
+import Card from "../../../../common/widgets/card/Card";
 
 type Props = {
   operation: PressingOperationDetails;
@@ -39,25 +40,16 @@ const formatDeviation = (value: number | null | undefined) => {
 export default function PressingOperationGeneralTab({
   operation,
   yieldPercentage,
-  canEditOperation,
   onNotesChange,
 }: Props) {
   return (
+    <Card>
     <div className="filters">
       <div className="filters-header">
-        <div>
           <h3>Informations générales</h3>
-
-          <span>Informations relatives à l'opération de pression</span>
-        </div>
       </div>
 
-      <div className="filters-content">
-        <InfoFieldWidget
-          label="Numéro d'opération"
-          value={operation.operationNumber}
-        />
-
+      <div className="info-grid">
         <InfoFieldWidget
           label="Date de planification"
           value={formatDate(operation.pressingDate)}
@@ -109,5 +101,6 @@ export default function PressingOperationGeneralTab({
         </div>
       </div>
     </div>
+    </Card>
   );
 }

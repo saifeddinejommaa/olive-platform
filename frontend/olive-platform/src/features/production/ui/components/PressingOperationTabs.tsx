@@ -1,64 +1,89 @@
+import {
+  IconClipboardText,
+  IconBasket,
+} from "@tabler/icons-react";
+
 export type PressingOperationTab = "general" | "olives";
 
-type PressingOperationTabsProps = {
+type Props = {
   activeTab: PressingOperationTab;
   onChange: (tab: PressingOperationTab) => void;
 };
 
+const steps: {
+  id: PressingOperationTab;
+  label: string;
+  icon: typeof IconClipboardText;
+}[] = [
+  {
+    id: "general",
+    label: "Informations générales",
+    icon: IconClipboardText,
+  },
+  {
+    id: "olives",
+    label: "Olives pressées",
+    icon: IconBasket,
+  },
+];
+
 export default function PressingOperationTabs({
   activeTab,
   onChange,
-}: PressingOperationTabsProps) {
-  return (
-    <div
-      style={{
-        display: "flex",
-        borderBottom: "1px solid #e5e7eb",
-        marginBottom: "20px",
-        gap: "5px",
-      }}
-    >
-      <button
-        type="button"
-        onClick={() => onChange("general")}
-        style={{
-          border: "none",
-          background: activeTab === "general" ? "#fff" : "transparent",
-          borderBottom:
-            activeTab === "general"
-              ? "2px solid #1976d2"
-              : "2px solid transparent",
-          padding: "12px 18px",
-          cursor: "pointer",
-          fontSize: "14px",
-          fontWeight: activeTab === "general" ? 600 : 500,
-          color: activeTab === "general" ? "#1976d2" : "#6b7280",
-          marginBottom: "-1px",
-        }}
-      >
-        Informations générales
-      </button>
+}: Props) {
+  const activeIndex = steps.findIndex(
+    (step) => step.id === activeTab,
+  );
 
-      <button
-        type="button"
-        onClick={() => onChange("olives")}
-        style={{
-          border: "none",
-          background: activeTab === "olives" ? "#fff" : "transparent",
-          borderBottom:
-            activeTab === "olives"
-              ? "2px solid #1976d2"
-              : "2px solid transparent",
-          padding: "12px 18px",
-          cursor: "pointer",
-          fontSize: "14px",
-          fontWeight: activeTab === "olives" ? 600 : 500,
-          color: activeTab === "olives" ? "#1976d2" : "#6b7280",
-          marginBottom: "-1px",
-        }}
-      >
-        Olives
-      </button>
+  return (
+    <div className="steps-tabs">
+      {steps.map((step, index) => {
+        const Icon = step.icon;
+
+        const isActive = step.id === activeTab;
+        const isPastOrActive = index <= activeIndex;
+
+        return (
+          <div
+            key={step.id}
+            style={{
+              display: "flex",
+              alignItems: "center",
+            }}
+          >
+            <button
+              type="button"
+              className={`steps-tabs__step ${
+                isActive
+                  ? "steps-tabs__step--active"
+                  : ""
+              }`}
+              onClick={() => onChange(step.id)}
+            >
+              <span className="steps-tabs__circle">
+                <Icon
+                  size={16}
+                  stroke={2}
+                />
+              </span>
+
+              <span className="steps-tabs__label">
+                {step.label}
+              </span>
+            </button>
+
+            {index < steps.length - 1 && (
+              <div
+                className={`steps-tabs__connector ${
+                  isPastOrActive
+                    ? "steps-tabs__connector--filled"
+                    : ""
+                }`}
+              />
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }
