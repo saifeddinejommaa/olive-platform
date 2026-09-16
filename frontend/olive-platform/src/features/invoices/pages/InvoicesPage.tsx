@@ -48,21 +48,6 @@ export default function InvoicesPage() {
   };
 
   const handleSearch = () => {
-    const request = {
-      invoiceNumber: filters.invoiceNumber || null,
-
-      invoiceType: filters.invoiceType || null,
-
-      supplierName: filters.supplierName || null,
-
-      customerName: filters.customerName || null,
-
-      status: filters.status || null,
-
-      fromDate: filters.fromDate || null,
-
-      toDate: filters.toDate || null,
-    };
 
     setPageNumber(1);
 

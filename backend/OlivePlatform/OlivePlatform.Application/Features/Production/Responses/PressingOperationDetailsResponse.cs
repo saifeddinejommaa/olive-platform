@@ -27,5 +27,7 @@ namespace OlivePlatform.Application.Features.Production.Responses
         public DateTime? StartTime { get; set; }
 
         public DateTime? EndTime { get; set; }
+
+        public PressingParametersResponse? Parameters { get; set; }
     }
 }

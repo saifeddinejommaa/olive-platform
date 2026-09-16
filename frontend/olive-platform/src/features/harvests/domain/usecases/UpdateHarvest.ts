@@ -1,5 +1,4 @@
 import { HarvestRepository } from "../../data/repositories/HarvestRepository";
-import type { Harvest } from "../entities/Harvest";
 import type { UpdateHarvestParams } from "../params/UpdateHarvestParams";
 
 export async function updateHarvest(

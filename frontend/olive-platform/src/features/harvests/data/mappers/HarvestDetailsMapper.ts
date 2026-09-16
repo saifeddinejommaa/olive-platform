@@ -1,4 +1,3 @@
-import { mapOliveAnalysisDetails } from "../../../analyses/oliveAnalyses/data/mappers/OliveAnalysisDetailsMapper";
 import type { ProductionStatus } from "../../../production/domain/entities/ProductionStatus";
 import type { OliveVarieties } from "../../../shared/entities/OliveVarieties";
 import type { HarvestDetails } from "../../domain/entities/HarvestDetails";
@@ -37,5 +36,6 @@ export function HarvestDetailsMapper(
     endTime: response.endTime,
 
     updatedAt: response.updatedAt,
+    costs : response.costs
   };
 }

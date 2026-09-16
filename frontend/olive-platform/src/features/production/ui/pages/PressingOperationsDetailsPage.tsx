@@ -772,6 +772,7 @@ export default function PressingOperationDetailsPage() {
           canEditOperation={
             canEditOperation
           }
+          onParametersChange={()=>{}}
         />
       )}
 

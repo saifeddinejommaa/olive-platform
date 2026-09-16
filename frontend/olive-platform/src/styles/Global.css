@@ -561,6 +561,10 @@ textarea {
   color: var(--color-muted);
   text-transform: uppercase;
   letter-spacing: 0.03em;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .filter-item-value {
@@ -632,8 +636,20 @@ textarea {
 
 .info-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  grid-template-columns: repeat(3, minmax(160px, 1fr));
   gap: var(--space-4);
+}
+
+@media (max-width: 720px) {
+  .info-grid {
+    grid-template-columns: repeat(2, minmax(160px, 1fr));
+  }
+}
+
+@media (max-width: 420px) {
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .info-item {

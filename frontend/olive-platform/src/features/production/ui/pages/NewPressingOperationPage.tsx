@@ -5,7 +5,6 @@ import { toast } from "react-toastify";
 import Button from "../../../../common/widgets/button/Button";
 import TextInput from "../../../../common/widgets/textInput/TextInput";
 import TextEditor from "../../../../common/widgets/textEditor/TextEditor";
-import Select from "../../../../common/widgets/select/Select";
 
 import { useConstantsStore } from "../../../appConstants/ConstantsStore";
 import type { SourceOption } from "../widgets/SourceReference";
@@ -35,16 +34,11 @@ const initialForm: NewPressingOperationForm = {
 export default function NewPressingOperationPage() {
   const navigate = useNavigate();
   const { createPressingOperationAction, error } = useCreatePressingOperation();
-  const { Appconstants, loading: constantsLoading } = useConstantsStore();
+  const { loading: constantsLoading } = useConstantsStore();
 
   const [form, setForm] = useState<NewPressingOperationForm>(initialForm);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
-
-  const statusOptions = Appconstants.productionStatus.map((status) => ({
-    value: status.id.toString(),
-    label: status.label,
-  }));
 
   const getValidationErrors = useCallback((): Record<string, string> => {
     const validationErrors: Record<string, string> = {};

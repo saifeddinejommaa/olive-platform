@@ -19,7 +19,7 @@ public class PlotQueryRepository : IPlotQueryRepository
 
     public async Task<PlotDetailResponse?> GetDetailAsync(int id)
     {
-         string sql = $"""
+        string sql = $"""
         SELECT
             p.id AS {nameof(PlotDetailResponse.Id)},
             p.reference AS {nameof(PlotDetailResponse.Reference)},
@@ -221,5 +221,58 @@ public class PlotQueryRepository : IPlotQueryRepository
             TotalCount = total,
             Items = items
         };
+    }
+
+    public async Task<PlotVarietyDetail?> GetPlotVarieties(int plotId, int varietyId)
+    {
+         string sql = $"""
+    SELECT
+        pv.variety_id AS "{nameof(PlotVarietyDetail.VarietyId)}",
+        ov.label AS "{nameof(PlotVarietyDetail.VarietyLabel)}",
+        pv.number_of_trees AS "{nameof(PlotVarietyDetail.NumberOfTrees)}",
+
+        GREATEST(
+            pv.number_of_trees - COALESCE(SUM(hh.harvested_trees), 0), 0
+        ) AS "{nameof(PlotVarietyDetail.RemainingTreesToHarvest)}",
+
+        CASE
+            WHEN pv.number_of_trees = 0 THEN 0
+            ELSE ROUND(
+                LEAST(COALESCE(SUM(hh.harvested_trees), 0), pv.number_of_trees) * 100.0
+                / pv.number_of_trees, 2)
+        END AS "{nameof(PlotVarietyDetail.HarvestedPercentage)}",
+
+        CASE
+            WHEN pv.number_of_trees = 0 THEN 0
+            ELSE ROUND(
+                LEAST(
+                    COALESCE(SUM(hh.planned_trees) FILTER (
+                        WHERE hh.status IN (
+                            {(int)ProductionStatus.Planned},
+                            {(int)ProductionStatus.InProgress}
+                        )
+                    ), 0),
+                    pv.number_of_trees
+                ) * 100.0 / pv.number_of_trees, 2)
+        END AS "{nameof(PlotVarietyDetail.PlannedTreesPercentage)}"
+
+    FROM public.plot_varieties pv
+    INNER JOIN public.olive_varieties ov ON ov.id = pv.variety_id
+    LEFT JOIN public.harvests hh
+        ON hh.plot_id = pv.plot_id AND hh.variety_id = pv.variety_id
+
+    WHERE pv.plot_id = @PlotId
+      AND pv.variety_id = @VarietyId
+
+    GROUP BY pv.variety_id, ov.label, pv.number_of_trees
+    """;
+
+        using var connection = _dbConnection;
+
+        var result = await connection.QueryFirstOrDefaultAsync<PlotVarietyDetail>(
+            sql,
+            new { PlotId = plotId, VarietyId = varietyId });
+
+        return result;
     }
 }

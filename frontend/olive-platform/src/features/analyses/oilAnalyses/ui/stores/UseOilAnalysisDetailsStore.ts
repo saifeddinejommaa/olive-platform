@@ -29,7 +29,7 @@ export const useOilAnalysisDetailsStore = create<OilAnalysisDetailsState>(
     loading: false,
     saving: false,
     error: null,
-    abandon: async (id: number) => {
+    abandon: async () => {
       set({ saving: true, error: null });
     },
     fetchAnalysis: async (id: number) => {
@@ -37,7 +37,6 @@ export const useOilAnalysisDetailsStore = create<OilAnalysisDetailsState>(
 
       try {
         const analysis = await GetOilAnalysisDetails(id);
-        console.log("Fetched analysis:", analysis);
         set({ analysis, error: null });
       } catch (error) {
         set({

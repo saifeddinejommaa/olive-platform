@@ -58,6 +58,12 @@ public class ReferenceDataQueryRepository
             FROM payment_method
             WHERE is_active = TRUE
             ORDER BY name;
+
+            SELECT id AS {nameof(AppConstantItemResponse.Id)},
+                label AS {nameof(AppConstantItemResponse.Name)}
+            FROM cost_line_type
+            WHERE is_active = TRUE
+            ORDER BY name;
             """;
 
         using var connection = _dbConnection;
@@ -92,6 +98,10 @@ public class ReferenceDataQueryRepository
                 .ToList(),
 
             PaymentMethods =
+                (await multi.ReadAsync<AppConstantItemResponse>())
+                .ToList(),
+
+                CostLineType =
                 (await multi.ReadAsync<AppConstantItemResponse>())
                 .ToList()
         };

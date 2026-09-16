@@ -6,7 +6,7 @@ import "./App.css";
 import Layout from "./common/widgets/layout/Layout";
 
 // Dashboard
-import DashboardPage from "./features/dashboard/ui/pages/DashboardPage";
+import DashboardPage from "./features/dashboard/ui/pages/dashboardPage/DashboardPage";
 
 // Olive Purchases
 import OlivePurchasesPage from "./features/olivePurchases/ui/pages/OlivePurchasesPage";
@@ -54,6 +54,7 @@ import PlotDetailPage from "./features/plots/ui/pages/PlotDetailsPage";
 
 
 function App() {
+  
   const { fetchConstants } = useConstantsStore();
 
   useEffect(() => {

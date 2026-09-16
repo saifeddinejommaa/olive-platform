@@ -22,11 +22,10 @@ export function useAvailableTrees(plotId: number, varietyId: number) {
         const data = await GetAvailableTrees({
           plotId: plotId,
           varietyId: varietyId,
-          harvestDate: new Date().toISOString().split("T")[0],
         });
 
         if (!cancelled) {
-          setAvailableTrees(data);
+          setAvailableTrees(data.remainingTreesToHarvest);
         }
       } catch {
         if (!cancelled) {

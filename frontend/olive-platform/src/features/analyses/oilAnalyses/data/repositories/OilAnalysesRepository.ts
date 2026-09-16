@@ -33,7 +33,6 @@ export const OilAnalysesRepository = {
   },
 
   create: async (params: CreateOilAnalysisParams): Promise<number> => {
-    console.log("Creating olive analysis with params:", params);
     const response = await http<ApiResponse<number>>(
       `${API_BASE_URL}analyses/oil`,
       {

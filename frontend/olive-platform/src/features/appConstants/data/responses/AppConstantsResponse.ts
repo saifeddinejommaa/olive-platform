@@ -8,4 +8,5 @@ export type AppConstantsResponse = {
   invoiceStatuses: AppConstantItemResponse[];
   paymentMethods: AppConstantItemResponse[];
   purchaseStatus: AppConstantItemResponse[];
+  costLineType: AppConstantItemResponse[];
 };

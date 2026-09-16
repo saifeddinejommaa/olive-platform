@@ -21,6 +21,7 @@ const initialConstants: AppConstants = {
   invoiceStatuses: [],
   paymentMethods: [],
   purchaseStatus: [],
+  costLineTypes: []
 };
 
 export const useConstantsStore = create<AppConstantsState>()(
@@ -30,7 +31,6 @@ export const useConstantsStore = create<AppConstantsState>()(
       loading: false,
       loaded: false,
       hydrated: false,
-
       fetchConstants: async () => {
         if (get().loaded || get().loading) {
           return;
@@ -42,7 +42,6 @@ export const useConstantsStore = create<AppConstantsState>()(
 
         try {
           const data = await getAppConstants();
-
           set({
             Appconstants: data,
             loaded: true,

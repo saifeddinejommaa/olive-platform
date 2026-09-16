@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import type { OlivePurchase } from "../../domain/entities/OlivePurchase";
 import { GetOlivePurchases } from "../../domain/usecases/GetOlivePurchases";
+import type { OlivePurchaseForList } from "../../domain/entities/OlivePurchaseForList";
 
 export function UseOlivePurchaseAutoComplete(serialNumber: string) {
-  const [results, setResults] = useState<OlivePurchase[]>([]);
+  const [results, setResults] = useState<OlivePurchaseForList[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {

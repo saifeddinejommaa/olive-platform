@@ -6,14 +6,14 @@ import Button from "../../../../common/widgets/button/Button";
 import TextInput from "../../../../common/widgets/textInput/TextInput";
 import TextEditor from "../../../../common/widgets/textEditor/TextEditor";
 import { Autocomplete } from "../../../../common/widgets/autoComplete/AutoComplete";
-import Select from "../../../../common/widgets/select/Select";
 
 import { useCreateHarvest } from "../hooks/UseCreateHarvest";
 import type { CreateHarvestParams } from "../../domain/params/CreateHarvestParams";
 import { usePlotsAutocomplete } from "../../../plots/ui/hooks/UsePlotsAutocomplete";
-import { useConstantsStore } from "../../../appConstants/ConstantsStore";
 import { useAvailableTrees } from "../../../plots/ui/hooks/UseAvailableTrees";
-import { ProductionStatus } from "../../../production/domain/entities/ProductionStatus";
+import OliveVarietySelector from "../../../../common/widgets/OliveVarietySelector";
+import { usePageTitle } from "../../../../common/hooks/usePageTitle";
+import Card from "../../../../common/widgets/card/Card";
 
 type NewHarvestForm = {
   plotId: number;
@@ -37,22 +37,12 @@ export default function NewHarvestPage() {
   const [form, setForm] = useState<NewHarvestForm>(initialForm);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
-  const { Appconstants, loading: constantsLoading } = useConstantsStore();
 
   const {
     availableTrees,
     loading: availableTreesLoading,
     error: availableTreesError,
   } = useAvailableTrees(form.plotId, form.varietyId);
-
-  const varietyOptions = useMemo(
-    () =>
-      Appconstants.oliveVarieties.map((variety) => ({
-        value: String(variety.id),
-        label: variety.label,
-      })),
-    [Appconstants.oliveVarieties],
-  );
 
   const getValidationErrors = useCallback((): Record<string, string> => {
     const validationErrors: Record<string, string> = {};
@@ -69,7 +59,8 @@ export default function NewHarvestPage() {
     }
     return validationErrors;
   }, [form, availableTrees]);
-
+  
+  usePageTitle("Nouvelle récolte","Créer une nouvelle récolte et renseigner les informations associées.");
   const isFormValid = useMemo(
     () => Object.keys(getValidationErrors()).length === 0,
     [getValidationErrors],
@@ -129,15 +120,6 @@ export default function NewHarvestPage() {
 
   return (
     <div className="feature-page">
-      <div className="page-header">
-        <div className="page-header-content">
-          <h1 className="page-title">Nouvelle récolte</h1>
-          <p className="page-description">
-            Créer une nouvelle récolte et renseigner les informations associées.
-          </p>
-        </div>
-      </div>
-
       <div className="filters">
         <div className="filters-header">
           <div>
@@ -145,8 +127,9 @@ export default function NewHarvestPage() {
             <span>Informations relatives à la récolte</span>
           </div>
         </div>
-
-        <div className="filters-content">
+        
+        <Card>
+        <div className="info-grid">
           <div className="filter-item">
             <label>Parcelle</label>
             <div style={{ width: "100%", minWidth: 0 }}>
@@ -164,17 +147,12 @@ export default function NewHarvestPage() {
           </div>
 
           <div className="filter-item">
-            <Select
-              label="Variété"
-              value={String(form.varietyId)}
+            <label>Variété</label>
+            <OliveVarietySelector
+              value={form.varietyId}
               onChange={(event) =>
-                updateForm("varietyId", Number(event.target.value))
+                updateForm("varietyId", Number(event))
               }
-              options={[
-                { value: "0", label: "Sélectionnez une variété" },
-                ...varietyOptions,
-              ]}
-              disabled={constantsLoading}
             />
             {errors.varietyId && (
               <span className="field-error">{errors.varietyId}</span>
@@ -246,6 +224,7 @@ export default function NewHarvestPage() {
             />
           </div>
         </div>
+        </Card>
       </div>
 
       {errors.general && (

@@ -5,6 +5,7 @@ import { buildQueryParams } from "../../../../core/QueryUtils";
 import type { PlotDetails } from "../../domain/entities/PlotDetails";
 import type { PlotForList } from "../../domain/entities/PlotForList";
 import type { PlotsRequestFilter } from "../../domain/entities/PlotsRequestFilter";
+import type { PlotVarietyDetail } from "../../domain/entities/PlotVarietyDetail";
 import type { AvailableTreesParams } from "../../domain/params/AvailableTreesParams";
 import { PlotDetailsMapper } from "../mappers/PlotDetailsMapper";
 import type { PlotDetailsResponse } from "../responses/PlotDetailsResponse";
@@ -24,9 +25,9 @@ export const PlotRepository = {
     };
   },
 
-  getAvailableTrees: async (params: AvailableTreesParams) => {
-    const httpResponse = await http<ApiResponse<number>>(
-      `${API_BASE_URL}plots/available-trees?plotId=${params.plotId}&varietyId=${params.varietyId}&harvestDate=${params.harvestDate}`,
+  getAvailableTrees: async (params: AvailableTreesParams): Promise<PlotVarietyDetail> => {
+    const httpResponse = await http<ApiResponse<PlotVarietyDetail>>(
+      `${API_BASE_URL}plots/${params.plotId}/available-trees?varietyId=${params.varietyId}`,
     );
 
     return httpResponse.Response;

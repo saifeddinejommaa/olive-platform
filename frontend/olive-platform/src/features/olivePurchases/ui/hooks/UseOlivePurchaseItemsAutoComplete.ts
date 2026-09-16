@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { GetOlivePurchaseItems } from "../../domain/usecases/GetOlivePurchaseItems";
-import type { OlivePurchaseItem } from "../../domain/entities/OlivePurchaseItem";
+import type { OlivePurchaseItemDetails } from "../../domain/entities/OlivePurchaseItemDetails";
 
 export function UseOlivePurchaseItems(purchaseId: number | null) {
-  const [results, setResults] = useState<OlivePurchaseItem[]>([]);
+  const [results, setResults] = useState<OlivePurchaseItemDetails[]>([]);
 
   const [loading, setLoading] = useState(false);
 
@@ -18,12 +18,9 @@ export function UseOlivePurchaseItems(purchaseId: number | null) {
       setLoading(true);
 
       try {
-        const data = await GetOlivePurchaseItems(purchaseId, {
-          pageNumber: 1,
-          pageSize: 50,
-        });
+        const data = await GetOlivePurchaseItems(purchaseId);
 
-        setResults(data.items);
+        setResults(data);
       } catch (error) {
         setResults([]);
       } finally {

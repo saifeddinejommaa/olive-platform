@@ -2,6 +2,7 @@
 using OlivePlatform.Application.Features.Production.Requests;
 using OlivePlatform.Domain.Entities;
 using OlivePlatform.Domain.Interfaces.Repositories;
+using OlivePlatform.Domain.Repositories;
 
 namespace OlivePlatform.Application.Features.ProductionBatches.Commands;
 
@@ -13,6 +14,8 @@ public class UpdatePressingOperationCommand : IRequest<bool>
 
     public List<NewPressingOperationInputRequest>? Inputs { get; set; }
 
+    public PressingParametersRequest? Parameters { get; set; }
+
     public string? Notes { get; set; }
 }
 
@@ -21,13 +24,16 @@ public class UpdatePressingOperationCommandHandler
 {
     private readonly IPressingOperationsRepository _repository;
     private readonly IPressingOperationInputsRepository _inputRepository;
+    private readonly IPressingParametersRepository _parametersRepository;
 
     public UpdatePressingOperationCommandHandler(
         IPressingOperationsRepository repository,
-        IPressingOperationInputsRepository inputRepository)
+        IPressingOperationInputsRepository inputRepository,
+        IPressingParametersRepository parametersRepository)
     {
         _repository = repository;
         _inputRepository = inputRepository;
+        _parametersRepository = parametersRepository;
     }
 
     public async Task<bool> Handle(
@@ -78,6 +84,61 @@ public class UpdatePressingOperationCommandHandler
             {
                 await _repository.AddInputsAsync(
                     inputs,
+                    cancellationToken);
+            }
+        }
+
+        if (request.Parameters is not null)
+        {
+            var existingParameters = await _parametersRepository.GetByPressingOperationIdAsync(
+                request.Id,
+                cancellationToken);
+
+            if (existingParameters is null)
+            {
+                var newParameters = new PressingParameters
+                {
+                    PressingOperationId = request.Id,
+                    ProcessTypeId = request.Parameters.ProcessTypeId,
+                    MillId = request.Parameters.MillId,
+                    MalaxingTemperatureC = request.Parameters.MalaxingTemperatureC,
+                    MalaxingDurationMinutes = request.Parameters.MalaxingDurationMinutes,
+                    MalaxingSpeedRpm = request.Parameters.MalaxingSpeedRpm,
+                    FeedRateKgH = request.Parameters.FeedRateKgH,
+                    DecanterSpeedRpm = request.Parameters.DecanterSpeedRpm,
+                    DecanterDifferentialRpm = request.Parameters.DecanterDifferentialRpm,
+                    CentrifugeSpeedRpm = request.Parameters.CentrifugeSpeedRpm,
+                    AddedWaterLiters = request.Parameters.AddedWaterLiters,
+                    WaterTemperatureC = request.Parameters.WaterTemperatureC,
+                    WaitingTimeBeforeExtractionMinutes = request.Parameters.WaitingTimeBeforeExtractionMinutes,
+                    Notes = request.Parameters.Notes,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                };
+
+                await _parametersRepository.AddAsync(
+                    newParameters,
+                    cancellationToken);
+            }
+            else
+            {
+                existingParameters.ProcessTypeId = request.Parameters.ProcessTypeId;
+                existingParameters.MillId = request.Parameters.MillId;
+                existingParameters.MalaxingTemperatureC = request.Parameters.MalaxingTemperatureC;
+                existingParameters.MalaxingDurationMinutes = request.Parameters.MalaxingDurationMinutes;
+                existingParameters.MalaxingSpeedRpm = request.Parameters.MalaxingSpeedRpm;
+                existingParameters.FeedRateKgH = request.Parameters.FeedRateKgH;
+                existingParameters.DecanterSpeedRpm = request.Parameters.DecanterSpeedRpm;
+                existingParameters.DecanterDifferentialRpm = request.Parameters.DecanterDifferentialRpm;
+                existingParameters.CentrifugeSpeedRpm = request.Parameters.CentrifugeSpeedRpm;
+                existingParameters.AddedWaterLiters = request.Parameters.AddedWaterLiters;
+                existingParameters.WaterTemperatureC = request.Parameters.WaterTemperatureC;
+                existingParameters.WaitingTimeBeforeExtractionMinutes = request.Parameters.WaitingTimeBeforeExtractionMinutes;
+                existingParameters.Notes = request.Parameters.Notes;
+                existingParameters.UpdatedAt = DateTime.UtcNow;
+
+                await _parametersRepository.UpdateAsync(
+                    existingParameters,
                     cancellationToken);
             }
         }
