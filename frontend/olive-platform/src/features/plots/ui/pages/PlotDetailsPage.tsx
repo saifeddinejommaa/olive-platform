@@ -1,9 +1,6 @@
 // src/features/production/plots/presentation/pages/PlotDetailPage.tsx
 
 import { useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-
-import Button from "../../../../common/widgets/button/Button";
 import ProgressBar from "../../../../common/widgets/progressBar/ProgressBar";
 import Card from "../../../../common/widgets/card/Card";
 
@@ -12,10 +9,10 @@ import { formatStringToDateTime } from "../../../shared/utils/DatesUtils";
 import PlotVarietyCardWidget from "../widgets/PlotVarietyCardWidget";
 import { usePageTitle } from "../../../../common/hooks/usePageTitle";
 import InfoFieldWidget from "../../../../common/widgets/InfoFieldWidget";
+import { useParams } from "react-router-dom";
 
 export default function PlotDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
 
   const { plot, loading, error, fetchPlotDetail, reset } = usePlotDetailStore();
 

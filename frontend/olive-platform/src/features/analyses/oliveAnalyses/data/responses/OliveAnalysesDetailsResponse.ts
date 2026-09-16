@@ -1,4 +1,4 @@
-import type { ProductionStatus } from "../../../../../production/domain/entities/ProductionStatus";
+import type { ProductionStatus } from "../../../../production/domain/entities/ProductionStatus";
 
 export type OliveAnalysisDetailsResponse = {
   id: number;

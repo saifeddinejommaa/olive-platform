@@ -5,7 +5,6 @@ import { buildQueryParams } from "../../../../core/QueryUtils";
 import { mapOliveAnalysisDetails } from "../../../analyses/oliveAnalyses/data/mappers/OliveAnalysisDetailsMapper";
 import type { OliveAnalysisDetailsResponse } from "../../../analyses/oliveAnalyses/data/responses/OliveAnalysesDetailsResponse";
 import type { OliveAnalysisDetails } from "../../../analyses/oliveAnalyses/domain/entities/OliveAnalysisDetails";
-import type { Harvest } from "../../domain/entities/Harvest";
 import type { HarvestDetails } from "../../domain/entities/HarvestDetails";
 import type { HarvestFilters } from "../../domain/entities/HarvestsFilters";
 import type { CompleteHarvestParams } from "../../domain/params/CompleteHarvestParams";
@@ -13,7 +12,6 @@ import type { CreateHarvestParams } from "../../domain/params/CreateHarvestParam
 import type { UpdateHarvestParams } from "../../domain/params/UpdateHarvestParams";
 import { HarvestDetailsMapper } from "../mappers/HarvestDetailsMapper";
 import { HarvestForListMapper } from "../mappers/HarvestForListMapper";
-import { HarvestMapper } from "../mappers/HarvestMapper";
 import { HarvestStockDetailsMapper } from "../mappers/HarvestStockDetailsMapper";
 import type { HarvestDetailsResponse } from "../responses/HarvestDetailsResponse";
 import type { HarvestForListResponse } from "../responses/HarvestForListResponse";

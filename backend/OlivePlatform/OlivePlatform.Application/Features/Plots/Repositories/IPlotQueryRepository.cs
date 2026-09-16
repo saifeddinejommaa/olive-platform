@@ -9,4 +9,6 @@ public interface IPlotQueryRepository
 
     Task<PlotDetailResponse?> GetDetailAsync(int id);
 
+    Task<PlotVarietyDetail?> GetPlotVarieties(int plotId, int varietyId);
+
 }

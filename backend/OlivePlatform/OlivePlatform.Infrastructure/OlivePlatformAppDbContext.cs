@@ -18,6 +18,8 @@ public class OlivePlatformAppDbContext : DbContext
     public DbSet<Harvest> Harvests => Set<Harvest>();
     public DbSet<HarvestStock> HarvestStocks => Set<HarvestStock>();
 
+    public DbSet<HarvestCostLine> HarvestCostLine => Set<HarvestCostLine>();
+
     public DbSet<OlivePurchase> OlivePurchases => Set<OlivePurchase>();
     public DbSet<OlivePurchaseItem> OlivePurchaseItems => Set<OlivePurchaseItem>();
 

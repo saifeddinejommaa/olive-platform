@@ -11,7 +11,6 @@ export default function OlivePurchaseItemsTab({ purchaseId }: Props) {
 
   useEffect(() => {
     fetchItems(purchaseId);
-    console.log(items)
   }, [purchaseId, fetchItems]);
 
   return (

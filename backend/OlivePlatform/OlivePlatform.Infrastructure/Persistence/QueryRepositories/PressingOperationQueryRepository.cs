@@ -3,7 +3,6 @@ using OlivePlatform.Application.Common;
 using OlivePlatform.Application.Features.Analysis.Responses;
 using OlivePlatform.Application.Features.Production.Requests;
 using OlivePlatform.Application.Features.Production.Responses;
-using OlivePlatform.Domain.Entities;
 using OlivePlatform.Domain.QueryRepositories;
 using System.Data;
 using System.Text;
@@ -169,7 +168,27 @@ public class PressingOperationQueryRepository : IPressiongOperationQueryReposito
             COALESCE(
                 SUM(poi.quantity_kg),
                 0
-            ) AS {nameof(PressingOperationDetailsResponse.OliveQuantityKg)}
+            ) AS {nameof(PressingOperationDetailsResponse.OliveQuantityKg)},
+
+            (
+            SELECT json_build_object(
+                'id', pp.id,
+                'processTypeId', pp.process_type_id,
+                'malaxingTemperatureC', pp.malaxing_temperature_c,
+                'malaxingDurationMinutes', pp.malaxing_duration_minutes,
+                'malaxingSpeedRpm', pp.malaxing_speed_rpm,
+                'feedRateKgH', pp.feed_rate_kg_h,
+                'decanterSpeedRpm', pp.decanter_speed_rpm,
+                'decanterDifferentialRpm', pp.decanter_differential_rpm,
+                'centrifugeSpeedRpm', pp.centrifuge_speed_rpm,
+                'addedWaterLiters', pp.added_water_liters,
+                'waterTemperatureC', pp.water_temperature_c,
+                'waitingTimeBeforeExtractionMinutes', pp.waiting_time_before_extraction_minutes,
+                'notes', pp.notes
+            )
+            FROM pressing_parameters pp
+            WHERE pp.pressing_operation_id = po.id
+        ) AS {nameof(PressingOperationDetailsResponse.Parameters)}
 
         FROM pressing_operations po
 

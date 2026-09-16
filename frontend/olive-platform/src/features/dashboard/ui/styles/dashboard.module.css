@@ -252,3 +252,27 @@
   .kpiRow { grid-template-columns: repeat(2, 1fr); }
   .grid { grid-template-columns: 1fr; }
 }
+
+
+.pipelineRow { display: flex; align-items: center; padding: 6px 0; }
+.pipelineStep { display: flex; flex-direction: column; align-items: center; flex: 1; }
+.pipelineValue { font-family: var(--font-display); font-size: 24px; font-weight: 600; }
+.pipelineLabel { font-size: 11.5px; color: var(--olv-ink-soft); margin-top: 2px; }
+.pipelineConnector { flex: 0.4; height: 1px; background: var(--olv-border); margin-top: -18px; }
+
+/* donut */
+.donutWrap { display: flex; align-items: center; gap: 20px; }
+.donutCenter {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+}
+.donutCenterValue { font-family: var(--font-display); font-size: 20px; font-weight: 600; }
+.donutCenterLabel { font-size: 11px; color: var(--olv-ink-soft); }
+.donutLegend { list-style: none; margin: 0; padding: 0; font-size: 12.5px; display: flex; flex-direction: column; gap: 8px; }
+.donutLegend li { display: flex; align-items: center; gap: 8px; }
+.legendDotHarvested, .legendDotPlanned, .legendDotRemaining {
+  width: 8px; height: 8px; border-radius: 50%; display: inline-block;
+}
+.legendDotHarvested { background: #66763F; }
+.legendDotPlanned { background: #96741F; }
+.legendDotRemaining { background: #CFC7AA; }

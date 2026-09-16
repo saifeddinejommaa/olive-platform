@@ -58,8 +58,6 @@ export const useOilAnalysesListStore = create<OilAnalysesListState>(
           pageSize,
         });
 
-        console.log("Fetched oil analyses:", result);
-
         set({
           items: result.items,
           totalCount: result.totalCount,

@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Autocomplete } from "../../../../common/widgets/autoComplete/AutoComplete";
 import { useHarvestsAutocomplete } from "../../../harvests/ui/hooks/UseHarvestsAutoComplete";
-import { useHarvestDetails } from "../../../harvests/ui/hooks/UseHarvestDetails";
 import type { SourceOption } from "../../../production/ui/widgets/SourceReference";
+import { useHarvestStocks } from "../hooks/UseHarvestStock";
 
 type HarvestOption = {
   id: number;
@@ -20,9 +20,9 @@ export default function HarvestAutoCompleteWidget({ onSelect }: Props) {
   const [selectedHarvestReference, setSelectedHarvestReference] = useState("");
   const [selectedStockIds, setSelectedStockIds] = useState<number[]>([]);
 
-  const { harvest, loading: loadingStocks } =
-    useHarvestDetails(selectedHarvestId);
-  const stocks = harvest?.stocks ?? [];
+  const { HarvestStock, loading: loadingStocks } =
+    useHarvestStocks(selectedHarvestId);
+  const stocks = HarvestStock ?? [];
 
   const handleSelectHarvest = (option: HarvestOption) => {
     setSelectedHarvestId(option.id);

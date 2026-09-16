@@ -4,6 +4,8 @@ import { toast } from "react-toastify";
 import TextEditor from "../../../../common/widgets/textEditor/TextEditor";
 import InfoFieldWidget from "../../../../common/widgets/InfoFieldWidget";
 import Button from "../../../../common/widgets/button/Button";
+import TextInput from "../../../../common/widgets/textInput/TextInput";
+import Card from "../../../../common/widgets/card/Card";
 
 import {
   formatDate,
@@ -14,8 +16,7 @@ import { getOliveVarietyLabel } from "../../../appConstants/helper/AppConstantsH
 import { ProductionStatus } from "../../../production/domain/entities/ProductionStatus";
 
 import { useHarvestDetailsStore } from "../stores/HarvestDetailsStore";
-import TextInput from "../../../../common/widgets/textInput/TextInput";
-import Card from "../../../../common/widgets/card/Card";
+import HarvestCostsWidget from "../widgets/HarvestCostsWidget";
 
 type Props = {
   harvestId: number;
@@ -211,141 +212,142 @@ export default function HarvestGeneralTab({
   }
 
   return (
-    <Card>
-    <div className="filters">
-      <div className="filters-header">
-        <div>
-          <h3>Informations générales</h3>
-        </div>
-      </div>
+    <>
+      <Card>
+        <div className="filters">
+          <div className="filters-header">
+            <div>
+              <h3>Informations générales</h3>
+            </div>
+          </div>
 
-      <div className="info-grid">
-        <InfoFieldWidget
-          label="Variété"
-          value={getOliveVarietyLabel(harvest.variety)}
-        />
-        <InfoFieldWidget
-          label="Date de récolte"
-          value={formatDate(harvest.harvestDate)}
-        />
-        {isInProgress ? (
-          <TextInput
-            label="Quantité (kg)"
-            type="number"
-            min="0"
-            step="0.01"
-            value={quantityKg}
-            onChange={(event) =>
-              setQuantityKg(event.target.value)
-            }
-          />
-        ) : (
-          <InfoFieldWidget
-            label="Quantité (kg)"
-            value={
-              harvest.quantityKg !== null
-                ? harvest.quantityKg.toLocaleString(
-                    "fr-FR",
-                  )
-                : "-"
-            }
-          />
-        )}
+          <div className="info-grid">
+            <InfoFieldWidget
+              label="Variété"
+              value={getOliveVarietyLabel(harvest.variety)}
+            />
 
-        {/* Arbres récoltés */}
-        {isInProgress ? (
-          <TextInput
-            label="Arbres récoltés"
-            type="number"
-            min="0"
-            step="1"
-            value={harvestedTrees}
-            onChange={(event) =>
-              setHarvestedTrees(event.target.value)
-            }
-          />
-        ) : (
-          <InfoFieldWidget
-            label="Arbres récoltés"
-            value={harvest.harvestedTrees.toLocaleString(
-              "fr-FR",
+            <InfoFieldWidget
+              label="Date de récolte"
+              value={formatDate(harvest.harvestDate)}
+            />
+
+            {isInProgress ? (
+              <TextInput
+                label="Quantité (kg)"
+                type="number"
+                min="0"
+                step="0.01"
+                value={quantityKg}
+                onChange={(event) =>
+                  setQuantityKg(event.target.value)
+                }
+              />
+            ) : (
+              <InfoFieldWidget
+                label="Quantité (kg)"
+                value={
+                  harvest.quantityKg !== null
+                    ? harvest.quantityKg.toLocaleString(
+                        "fr-FR",
+                      )
+                    : "-"
+                }
+              />
             )}
-          />
-        )}
 
-        {/* Arbres prévus */}
-        <InfoFieldWidget
-          label="Arbres prévus"
-          value={harvest.plannedTrees.toLocaleString(
-            "fr-FR",
+            {isInProgress ? (
+              <TextInput
+                label="Arbres récoltés"
+                type="number"
+                min="0"
+                step="1"
+                value={harvestedTrees}
+                onChange={(event) =>
+                  setHarvestedTrees(event.target.value)
+                }
+              />
+            ) : (
+              <InfoFieldWidget
+                label="Arbres récoltés"
+                value={harvest.harvestedTrees.toLocaleString(
+                  "fr-FR",
+                )}
+              />
+            )}
+
+            <InfoFieldWidget
+              label="Arbres prévus"
+              value={harvest.plannedTrees.toLocaleString(
+                "fr-FR",
+              )}
+            />
+
+            <InfoFieldWidget
+              label="Heure de début"
+              value={harvest.startTime ?? "-"}
+            />
+
+            <InfoFieldWidget
+              label="Heure de fin"
+              value={harvest.endTime ?? "-"}
+            />
+
+            <InfoFieldWidget
+              label="Créé le"
+              value={formatStringToDateTime(
+                harvest.createdAt,
+              )}
+            />
+
+            <InfoFieldWidget
+              label="Modifié le"
+              value={
+                harvest.updatedAt
+                  ? formatStringToDateTime(
+                      harvest.updatedAt,
+                    )
+                  : "-"
+              }
+            />
+
+            <div
+              className="filter-item"
+              style={{
+                gridColumn: "1 / -1",
+              }}
+            >
+              <span className="filter-item-label">
+                Notes
+              </span>
+
+              <TextEditor
+                value={harvest.notes ?? ""}
+                placeholder="Notes concernant la récolte..."
+                onChange={onNotesChange}
+              />
+            </div>
+          </div>
+
+          {isInProgress && (
+            <div className="filters-footer">
+              <Button
+                variant="primary"
+                onClick={handleSave}
+                disabled={saving}
+              >
+                {saving
+                  ? "Enregistrement..."
+                  : "Enregistrer"}
+              </Button>
+            </div>
           )}
-        />
-
-        {/* Heure de début */}
-        <InfoFieldWidget
-          label="Heure de début"
-          value={harvest.startTime ?? "-"}
-        />
-
-        {/* Heure de fin */}
-        <InfoFieldWidget
-          label="Heure de fin"
-          value={harvest.endTime ?? "-"}
-        />
-
-        {/* Créé le */}
-        <InfoFieldWidget
-          label="Créé le"
-          value={formatStringToDateTime(
-            harvest.createdAt,
-          )}
-        />
-
-        {/* Modifié le */}
-        <InfoFieldWidget
-          label="Modifié le"
-          value={
-            harvest.updatedAt
-              ? formatStringToDateTime(
-                  harvest.updatedAt,
-                )
-              : "-"
-          }
-        />
-
-        {/* Notes */}
-        <div
-          className="filter-item"
-          style={{
-            gridColumn: "1 / -1",
-          }}
-        >
-          <span className="filter-item-label">
-            Notes
-          </span>
-
-          <TextEditor
-            value={harvest.notes ?? ""}
-            placeholder="Notes concernant la récolte..."
-            onChange={onNotesChange}
-          />
         </div>
-      </div>
+      </Card>
 
-      {isInProgress && (
-        <div className="filters-footer">
-          <Button
-            variant="primary"
-            onClick={handleSave}
-            disabled={saving}
-          >
-            {saving
-              ? "Enregistrement..."
-              : "Enregistrer"}
-          </Button>
-        </div>
-      )}
-    </div>
-    </Card>
+      <HarvestCostsWidget
+        costs={harvest.costs}
+      />
+    </>
   );
 }

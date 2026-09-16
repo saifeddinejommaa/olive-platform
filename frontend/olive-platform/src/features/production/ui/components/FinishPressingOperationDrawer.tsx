@@ -7,6 +7,13 @@ import DrawerConfirmationNotice from "../../../../common/widgets/DrawerConfirmat
 import { renderStatus } from "../../../shared/utils/StatusUtils";
 import { productionStatusConfig } from "../../../shared/status/ProductionStatusConfig";
 import { formatDate } from "../../../shared/utils/DatesUtils";
+import {
+  formatFlowRate,
+  formatMinutes,
+  formatSpeed,
+  formatTemperature,
+  formatWaterQuantity,
+} from "../../../shared/utils/formatter";
 import type { PressingOperationDetails } from "../../domain/entities/PressingOperationDetails";
 import type { PressingOperationInputDetails } from "../../domain/entities/PressingOperationInputDetails";
 import DrawerSummarySection from "../../../../common/widgets/DrawerSummarySection";
@@ -19,7 +26,10 @@ type Props = {
   operation: PressingOperationDetails;
   inputs: PressingOperationInputDetails[];
   onClose: () => void;
-  onConfirm: (oilQuantityLiters: number, proceedOilAnalysis: boolean) => void;
+  onConfirm: (
+    oilQuantityLiters: number,
+    proceedOilAnalysis: boolean,
+  ) => void;
 };
 
 const formatLiters = (value: number | null | undefined) =>
@@ -52,18 +62,23 @@ export default function FinishPressingOperationDrawer({
     0,
   );
 
-  // Valeur déjà calculée et persistée côté backend à la création
-  // de l'opération, à partir des analyses des inputs.
   const expectedOilLiters = operation.expectedOilLiters ?? null;
+  const parameters = operation.parameters;
 
   const enteredOilQuantity = Number(oilQuantity);
+
   const hasValidEntry =
     oilQuantity !== "" && Number.isFinite(enteredOilQuantity);
 
   const deviation = useMemo(() => {
     if (expectedOilLiters === null || !hasValidEntry) return null;
+
     return enteredOilQuantity - expectedOilLiters;
-  }, [expectedOilLiters, hasValidEntry, enteredOilQuantity]);
+  }, [
+    expectedOilLiters,
+    hasValidEntry,
+    enteredOilQuantity,
+  ]);
 
   const deviationPercentage =
     deviation !== null && expectedOilLiters
@@ -74,11 +89,14 @@ export default function FinishPressingOperationDrawer({
     const quantity = Number(oilQuantity);
 
     if (!oilQuantity || !Number.isFinite(quantity) || quantity <= 0) {
-      setError("Veuillez renseigner une quantité d'huile produite valide.");
+      setError(
+        "Veuillez renseigner une quantité d'huile produite valide.",
+      );
       return;
     }
 
     setError(null);
+
     onConfirm(quantity, proceedOilAnalysis);
   };
 
@@ -86,21 +104,35 @@ export default function FinishPressingOperationDrawer({
     <Drawer
       open={open}
       title="Clôturer la pression"
-      description="Vérifiez les olives utilisées et renseignez la quantité d'huile obtenue avant de confirmer la clôture."
+      description="Vérifiez les olives utilisées, la configuration de pression et renseignez la quantité d'huile obtenue avant de confirmer la clôture."
       onClose={onClose}
       footer={
         <>
-          <Button variant="secondary" onClick={onClose} disabled={saving}>
+          <Button
+            variant="secondary"
+            onClick={onClose}
+            disabled={saving}
+          >
             Annuler
           </Button>
 
-          <Button variant="primary" onClick={handleConfirm} disabled={saving}>
+          <Button
+            variant="primary"
+            onClick={handleConfirm}
+            disabled={saving}
+          >
             {saving ? "Clôture..." : "Confirmer et clôturer"}
           </Button>
         </>
       }
     >
-      <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "20px",
+        }}
+      >
         <DrawerInfoCard label="Opération">
           {operation.operationNumber || "-"}
         </DrawerInfoCard>
@@ -110,7 +142,10 @@ export default function FinishPressingOperationDrawer({
         </DrawerInfoCard>
 
         <DrawerInfoCard label="Statut actuel">
-          {renderStatus(operation.status, productionStatusConfig)}
+          {renderStatus(
+            operation.status,
+            productionStatusConfig,
+          )}
         </DrawerInfoCard>
 
         <DrawerSummarySection
@@ -118,13 +153,22 @@ export default function FinishPressingOperationDrawer({
           description="Résumé des sources d'olives et de leurs analyses."
         >
           {inputs.length === 0 && (
-            <div style={{ padding: "12px 0", color: "#666", fontSize: "13px" }}>
+            <div
+              style={{
+                padding: "12px 0",
+                color: "#666",
+                fontSize: "13px",
+              }}
+            >
               Aucune source d'olives.
             </div>
           )}
 
           {inputs.map((input) => (
-            <FinishPressingInputSummaryRow key={input.id} input={input} />
+            <FinishPressingInputSummaryRow
+              key={input.id}
+              input={input}
+            />
           ))}
 
           {inputs.length > 0 && (
@@ -137,7 +181,112 @@ export default function FinishPressingOperationDrawer({
               }}
             >
               <span>Quantité totale d'olives</span>
-              <strong>{oliveQuantityKg.toLocaleString("fr-FR")} kg</strong>
+
+              <strong>
+                {oliveQuantityKg.toLocaleString("fr-FR")} kg
+              </strong>
+            </div>
+          )}
+        </DrawerSummarySection>
+
+        <DrawerSummarySection
+          title="Configuration de pression"
+          description="Paramètres utilisés pendant l'opération de pression."
+        >
+          {!parameters ? (
+            <div
+              style={{
+                padding: "12px 0",
+                color: "#666",
+                fontSize: "13px",
+              }}
+            >
+              Aucune configuration de pression renseignée.
+            </div>
+          ) : (
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns:
+                  "repeat(2, minmax(0, 1fr))",
+                gap: "12px 20px",
+              }}
+            >
+              <DrawerInfoCard label="Type de procédé">
+                {parameters.processTypeId ?? "-"}
+              </DrawerInfoCard>
+
+              <DrawerInfoCard label="Température de malaxage">
+                {formatTemperature(
+                  parameters.malaxingTemperatureC,
+                )}
+              </DrawerInfoCard>
+
+              <DrawerInfoCard label="Durée de malaxage">
+                {formatMinutes(
+                  parameters.malaxingDurationMinutes,
+                )}
+              </DrawerInfoCard>
+
+              <DrawerInfoCard label="Vitesse de malaxage">
+                {formatSpeed(
+                  parameters.malaxingSpeedRpm,
+                )}
+              </DrawerInfoCard>
+
+              <DrawerInfoCard label="Débit d'alimentation">
+                {formatFlowRate(
+                  parameters.feedRateKgH,
+                )}
+              </DrawerInfoCard>
+
+              <DrawerInfoCard label="Vitesse du décanteur">
+                {formatSpeed(
+                  parameters.decanterSpeedRpm,
+                )}
+              </DrawerInfoCard>
+
+              <DrawerInfoCard label="Différentiel du décanteur">
+                {formatSpeed(
+                  parameters.decanterDifferentialRpm,
+                )}
+              </DrawerInfoCard>
+
+              <DrawerInfoCard label="Vitesse de la centrifugeuse">
+                {formatSpeed(
+                  parameters.centrifugeSpeedRpm,
+                )}
+              </DrawerInfoCard>
+
+              <DrawerInfoCard label="Eau ajoutée">
+                {formatWaterQuantity(
+                  parameters.addedWaterLiters,
+                )}
+              </DrawerInfoCard>
+
+              <DrawerInfoCard label="Température de l'eau">
+                {formatTemperature(
+                  parameters.waterTemperatureC,
+                )}
+              </DrawerInfoCard>
+
+              <DrawerInfoCard label="Temps d'attente avant extraction">
+                {formatMinutes(
+                  parameters.waitingTimeBeforeExtractionMinutes,
+                )}
+              </DrawerInfoCard>
+
+              {parameters.notes && (
+                <div
+                  style={{
+                    gridColumn: "1 / -1",
+                  }}
+                >
+                  <DrawerInfoCard label="Notes de configuration">
+                    {parameters.notes}
+                  </DrawerInfoCard>
+                </div>
+              )}
             </div>
           )}
         </DrawerSummarySection>
@@ -150,11 +299,19 @@ export default function FinishPressingOperationDrawer({
             value={oilQuantity}
             onChange={(event) => {
               setOilQuantity(event.target.value);
-              if (error) setError(null);
+
+              if (error) {
+                setError(null);
+              }
             }}
             disabled={saving}
           />
-          {error && <span className="field-error">{error}</span>}
+
+          {error && (
+            <span className="field-error">
+              {error}
+            </span>
+          )}
 
           {expectedOilLiters !== null && (
             <div
@@ -167,9 +324,17 @@ export default function FinishPressingOperationDrawer({
                 fontSize: "13px",
               }}
             >
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                }}
+              >
                 <span>Huile attendue (selon analyses)</span>
-                <strong>{formatLiters(expectedOilLiters)}</strong>
+
+                <strong>
+                  {formatLiters(expectedOilLiters)}
+                </strong>
               </div>
 
               {deviation !== null && (
@@ -179,15 +344,23 @@ export default function FinishPressingOperationDrawer({
                     display: "flex",
                     justifyContent: "space-between",
                     fontWeight: 600,
-                    color: deviation >= 0 ? "#1a7a3c" : "#b3261e",
+                    color:
+                      deviation >= 0
+                        ? "#1a7a3c"
+                        : "#b3261e",
                   }}
                 >
                   <span>Écart avec la saisie</span>
+
                   <span>
                     {deviation >= 0 ? "+" : ""}
-                    {deviation.toLocaleString("fr-FR")} L
+                    {deviation.toLocaleString("fr-FR")} L{" "}
                     {deviationPercentage !== null &&
-                      ` (${deviationPercentage >= 0 ? "+" : ""}${deviationPercentage.toFixed(1)} %)`}
+                      `(${
+                        deviationPercentage >= 0
+                          ? "+"
+                          : ""
+                      }${deviationPercentage.toFixed(1)} %)`}
                   </span>
                 </div>
               )}
@@ -204,7 +377,8 @@ export default function FinishPressingOperationDrawer({
         />
 
         <DrawerConfirmationNotice title="Confirmation">
-          Une fois la pression clôturée, elle ne pourra plus être modifiée.
+          Une fois la pression clôturée, elle ne pourra plus être
+          modifiée.
         </DrawerConfirmationNotice>
       </div>
     </Drawer>

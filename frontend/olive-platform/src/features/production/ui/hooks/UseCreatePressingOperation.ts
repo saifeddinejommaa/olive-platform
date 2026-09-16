@@ -12,13 +12,7 @@ export const useCreatePressingOperation = () => {
     setLoading(true);
     setError(null);
     try {
-      const success = await CreatePressingOperation(request);
-
-      if (!success) {
-        throw new Error("Failed to add depot reffil");
-      }
-
-      return true;
+       await CreatePressingOperation(request);
     } catch (e: any) {
       setError(e.message ?? "Unexpected error");
       return false;

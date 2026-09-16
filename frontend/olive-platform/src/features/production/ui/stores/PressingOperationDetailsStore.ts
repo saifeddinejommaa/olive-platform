@@ -46,10 +46,6 @@ export const usePressingOperationDetailsStore =
 
     error: null,
 
-    // ============================================================
-    // GET DETAILS
-    // ============================================================
-
     fetchOperation: async (id: number) => {
       set({
         loading: true,

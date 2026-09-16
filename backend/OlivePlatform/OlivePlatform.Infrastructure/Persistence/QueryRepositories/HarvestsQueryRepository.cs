@@ -228,28 +228,82 @@ public class HarvestQueryRepository : IHarvestQueryRepository
         };
     }
 
-
     public async Task<HarvestDetailsResponse?> GetHarvestDetails(
     int id,
-    CancellationToken cancellationToken = default)
+     CancellationToken cancellationToken = default)
     {
-        const string sql =
-            $"""
+        const string sql = $"""
         SELECT
-            h.id {nameof(HarvestDetailsResponse.Id)},
-            h.reference {nameof(HarvestDetailsResponse.Reference)},
-            p.reference {nameof(HarvestDetailsResponse.PlotReference)},
-            h.harvest_date {nameof(HarvestDetailsResponse.HarvestDate)},
-            h.quantity_kg  {nameof(HarvestDetailsResponse.QuantityKg)},
-            h.planned_trees {nameof(HarvestDetailsResponse.PlannedTrees)},
-            h.harvested_trees {nameof(HarvestDetailsResponse.HarvestedTrees)},
-            h.notes {nameof(HarvestDetailsResponse.Notes)},
-            h.status {nameof(HarvestDetailsResponse.Status)},
-            h.start_time {nameof(HarvestDetailsResponse.StartTime)},
-            h.end_time {nameof(HarvestDetailsResponse.EndTime)},
-            h.created_at {nameof(HarvestDetailsResponse.CreatedAt)},
-            h.updated_at {nameof(HarvestDetailsResponse.UpdatedAt)},
-            h.variety_id {nameof(HarvestDetailsResponse.VarietyId)}
+            h.id AS "{nameof(HarvestDetailsResponse.Id)}",
+            h.reference AS "{nameof(HarvestDetailsResponse.Reference)}",
+            p.reference AS "{nameof(HarvestDetailsResponse.PlotReference)}",
+            h.harvest_date AS "{nameof(HarvestDetailsResponse.HarvestDate)}",
+            h.quantity_kg AS "{nameof(HarvestDetailsResponse.QuantityKg)}",
+            h.notes AS "{nameof(HarvestDetailsResponse.Notes)}",
+            h.status AS "{nameof(HarvestDetailsResponse.Status)}",
+            h.start_time AS "{nameof(HarvestDetailsResponse.StartTime)}",
+            h.end_time AS "{nameof(HarvestDetailsResponse.EndTime)}",
+            h.created_at AS "{nameof(HarvestDetailsResponse.CreatedAt)}",
+            h.updated_at AS "{nameof(HarvestDetailsResponse.UpdatedAt)}",
+
+            COALESCE(
+                (
+                    SELECT json_agg(
+                        json_build_object(
+                            '{nameof(HarvestCostSummaryResponse.CostLineTypeId)}',
+                            c.type_id,
+
+                            '{nameof(HarvestCostSummaryResponse.TotalAmount)}',
+                            c.total_amount
+                        )
+                        ORDER BY c.type_id
+                    )
+                    FROM (
+                        SELECT
+                            clt.id AS type_id,
+                            clt.label,
+
+                            COALESCE(
+                                SUM(hcl.total_amount),
+                                0
+                            ) AS total_amount,
+
+                            COALESCE(
+                                SUM(
+                                    CASE
+                                        WHEN hcl.is_paid = TRUE
+                                        THEN hcl.total_amount
+                                        ELSE 0
+                                    END
+                                ),
+                                0
+                            ) AS paid_amount,
+
+                            COALESCE(
+                                SUM(
+                                    CASE
+                                        WHEN hcl.is_paid = FALSE
+                                        THEN hcl.total_amount
+                                        ELSE 0
+                                    END
+                                ),
+                                0
+                            ) AS unpaid_amount
+
+                        FROM public.harvest_cost_line hcl
+
+                        INNER JOIN public.cost_line_type clt
+                            ON clt.id = hcl.type_id
+
+                        WHERE hcl.harvest_id = h.id
+
+                        GROUP BY
+                            clt.id,
+                            clt.label
+                    ) c
+                ),
+                '[]'::json
+            ) AS "{nameof(HarvestDetailsResponse.Costs)}"
 
         FROM public.harvests h
 
@@ -405,5 +459,5 @@ public class HarvestQueryRepository : IHarvestQueryRepository
 
         return await connection.QueryFirstOrDefaultAsync<OliveAnalysisDetailsResponse>(
             command);
-}
+    }
 }

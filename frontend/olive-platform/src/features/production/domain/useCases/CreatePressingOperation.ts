@@ -4,7 +4,5 @@ import type { CreatePressingOperationParams } from "../params/CreatePressingOper
 export const CreatePressingOperation = async (
   data: CreatePressingOperationParams,
 ) => {
-  const result =
     await PressingOperationRepository.createPressingOperation(data);
-  return result;
 };

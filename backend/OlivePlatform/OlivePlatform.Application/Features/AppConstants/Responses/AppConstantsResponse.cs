@@ -1,4 +1,6 @@
-﻿namespace OlivePlatform.Application.Features.AppConstants.Responses
+﻿using System.Security.Principal;
+
+namespace OlivePlatform.Application.Features.AppConstants.Responses
 {
     public class AppConstantsResponse
     {
@@ -17,5 +19,6 @@
 
         public IReadOnlyList<AppConstantItemResponse> PaymentMethods { get; init; } = [];
 
+        public IReadOnlyList<AppConstantItemResponse> CostLineType { get; init; } = [];
     }
 }

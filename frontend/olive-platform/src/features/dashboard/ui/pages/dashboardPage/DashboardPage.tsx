@@ -1,35 +1,97 @@
-import React from 'react';
-import styles from '../../styles/dashboard.module.css'
-import { alerts, harvestTrend, kpis, oilAnalyses, pressingBatches, recentPurchases, stockTanks } from '../../../data/mockDashboardData';
-import { AlertsFeed, HarvestTrendChart, KpiCard, OilQualityPanel, PressingYieldWidget, RecentPurchasesTable, StockLevelWidget } from '../../widgets';
+import React, { useEffect } from "react";
+import styles from "../../styles/dashboard.module.css";
+import ProductionPipelineCard from "../../widgets/ProductionPipelineCard";
+import HarvestYieldChart from "../../widgets/HarvestYieldChart";
+import PressingComparisonChart from "../../widgets/PressingComparisonChart";
+import TreesCoverageDonut from "../../widgets/TreesCoverageDonut";
+import TankOccupancyGauge from "../../widgets/TankOccupancyGauge";
+import { useDashboardStore } from "../../stores/useDahsbordStore";
+import { usePageTitle } from "../../../../../common/hooks/usePageTitle";
 
 export const DashboardPage: React.FC = () => {
+  const {
+    summary,
+    loading,
+    error,
+    fetchSummary,
+  } = useDashboardStore();
+
+  useEffect(() => {
+    fetchSummary();
+  }, [fetchSummary]);
+
+  usePageTitle("Tableau de bord", "Campagne 2026/2027")
+  if (loading && !summary) {
+    return (
+      <div className={styles.loading}>
+        Chargement du tableau de bord...
+      </div>
+    );
+  }
+
+  if (error && !summary) {
+    return (
+      <div className={styles.error}>
+        <p>{error}</p>
+
+        <button type="button" onClick={fetchSummary}>
+          Réessayer
+        </button>
+      </div>
+    );
+  }
+
+  if (!summary) {
+    return (
+      <div className={styles.empty}>
+        Aucune donnée disponible.
+      </div>
+    );
+  }
+
   return (
     <div>
-      <div className={styles.header}>
-        <div>
-          <h1 className={styles.title}>Tableau de bord</h1>
-          <div className={styles.subtitle}>Campagne 2026/2027 — mise à jour il y a 12 min</div>
+      {error && (
+        <div className={styles.error}>
+          {error}
         </div>
-        <span className={styles.range}>1 sept. – 13 sept. 2026</span>
-      </div>
+      )}
 
       <div className={styles.kpiRow}>
-        {kpis.map((k) => (
-          <KpiCard key={k.label} {...k} />
-        ))}
+        <ProductionPipelineCard
+          title="Récolte"
+          data={summary.harvestPipeline}
+        />
+
+        <ProductionPipelineCard
+          title="Pression"
+          data={summary.pressingPipeline}
+        />
       </div>
 
       <div className={styles.grid}>
-        <div>
-          <HarvestTrendChart data={harvestTrend} />
-          <RecentPurchasesTable data={recentPurchases} />
+        <div className={styles.column}>
+          <div className="filters">
+            <HarvestYieldChart
+              data={summary.harvestYield}
+            />
+
+            <PressingComparisonChart
+              data={summary.pressingComparison}
+            />
+          </div>
         </div>
-        <div>
-          <PressingYieldWidget data={pressingBatches} />
-          <OilQualityPanel data={oilAnalyses} />
-          <StockLevelWidget data={stockTanks} />
-          <AlertsFeed data={alerts} />
+
+        <div className={styles.column}>
+          <div className="filters">
+            <TreesCoverageDonut
+              data={summary.treesCoverage}
+            />
+
+            <TankOccupancyGauge
+              data={summary.tankOccupancy}
+            />
+          </div>
         </div>
       </div>
     </div>

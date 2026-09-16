@@ -15,7 +15,7 @@ export default function PlotsPage() {
   const navigate = useNavigate();
 
   usePageTitle("Parcelles", "Liste des parcelles");
-  const { fetchPlots, error, setFilter, Plots, filters, loading } = usePlotsStore();
+  const { fetchPlots, setFilter, Plots, filters, loading } = usePlotsStore();
 
   useEffect(() => {
     fetchPlots();

@@ -18,7 +18,7 @@ type OlivePurchasesStore = {
   setFilter: (key: keyof OlivePurchasesFilter, value: any) => void;
   clearFilters: () => void;
   fetchOlivePurchases: () => Promise<void>;
-  launchPressing: (purchaseId: number) => Promise<number>;
+  launchPressing: (purchaseId: number) => Promise<void>;
 };
 
 export const useOlivePurchasesStore = create<OlivePurchasesStore>(
@@ -120,9 +120,7 @@ export const useOlivePurchasesStore = create<OlivePurchasesStore>(
           inputs,
         };
 
-        const id = (await CreatePressingOperation(request)).Response;
-
-        return id;
+        await CreatePressingOperation(request);
       } catch (error: any) {
         const message =
           error?.message ?? "Impossible de créer l'opération de pression.";

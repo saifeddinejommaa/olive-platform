@@ -54,6 +54,7 @@ import PlotDetailPage from "./features/plots/ui/pages/PlotDetailsPage";
 
 
 function App() {
+  
   const { fetchConstants } = useConstantsStore();
 
   useEffect(() => {

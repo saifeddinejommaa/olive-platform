@@ -18,7 +18,6 @@ import CompleteOliveAnalysisDrawer from "../widgets/CompleteOliveAnalysisDrawer"
 import { usePageTitle } from "../../../../../common/hooks/usePageTitle";
 import InfoFieldWidget from "../../../../../common/widgets/InfoFieldWidget";
 import Card from "../../../../../common/widgets/card/Card";
-import OliveAnalysisInfoWidget from "../../../../olivePurchases/ui/widgets/OliveAnalysisInfoWidget";
 
 type OliveAnalysisForm = {
   reference: string;

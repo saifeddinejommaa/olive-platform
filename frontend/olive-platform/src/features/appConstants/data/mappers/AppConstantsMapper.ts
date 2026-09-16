@@ -13,6 +13,7 @@ export function mapConstantsResponseToModel(
     invoiceStatuses: mapConstantItemResponseToModel(response.invoiceStatuses),
     paymentMethods: mapConstantItemResponseToModel(response.paymentMethods),
     purchaseStatus: mapConstantItemResponseToModel(response.purchaseStatus),
+    costLineTypes : mapConstantItemResponseToModel(response.costLineType),
   };
 }
 

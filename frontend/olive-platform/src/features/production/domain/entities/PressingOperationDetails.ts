@@ -1,3 +1,4 @@
+import type { PressingParametersDetails } from "./PressingParametersDetails";
 import type { ProductionStatus } from "./ProductionStatus";
 
 export type PressingOperationDetails = {
@@ -12,4 +13,5 @@ export type PressingOperationDetails = {
   notes: string | null;
   expectedOilLiters: number | null;
   oilYieldDeviationLiters: number | null;
+  parameters: PressingParametersDetails | null;
 };

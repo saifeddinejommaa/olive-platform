@@ -1,6 +1,6 @@
 // src/features/production/olivePurchases/presentation/pages/OlivePurchaseDetailsPage.tsx
 
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import type { PurchaseTab } from "../types/PurchaseTab";
 import { useEffect, useState } from "react";
 import { useOlivePurchaseDetailsStore } from "../stores/OlivePurchaseDetailsStore";
