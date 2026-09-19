@@ -11,6 +11,8 @@ export interface HarvestDetails {
 
   plotReference: string;
 
+  harvestType: number;
+
   variety: OliveVarieties;
 
   harvestedTrees: number;

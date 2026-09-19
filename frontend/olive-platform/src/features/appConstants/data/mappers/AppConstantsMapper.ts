@@ -14,6 +14,7 @@ export function mapConstantsResponseToModel(
     paymentMethods: mapConstantItemResponseToModel(response.paymentMethods),
     purchaseStatus: mapConstantItemResponseToModel(response.purchaseStatus),
     costLineTypes : mapConstantItemResponseToModel(response.costLineType),
+    harvestTypes : mapConstantItemResponseToModel(response.harvestTypes),
   };
 }
 

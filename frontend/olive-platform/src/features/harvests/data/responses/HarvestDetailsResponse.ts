@@ -21,4 +21,5 @@ export interface HarvestDetailsResponse {
   endTime: string | null;
   oliveAnalysis?: OliveAnalysisDetailsResponse;
    costs: HarvestCostSummary[];
+   harvestType: number
 }

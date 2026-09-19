@@ -807,3 +807,14 @@ textarea {
    flex-direction: column;
   gap: var(--space-3);
 }
+
+.harvest-general-actions {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  justify-content: flex-end;
+  padding: 16px 0;
+  margin-top: 24px;
+  background: var(--background-color);
+  z-index: 10;
+}

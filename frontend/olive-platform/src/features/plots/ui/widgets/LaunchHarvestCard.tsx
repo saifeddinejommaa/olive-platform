@@ -6,6 +6,7 @@ import { toast } from "react-toastify";
 import Button from "../../../../common/widgets/button/Button";
 import TextInput from "../../../../common/widgets/textInput/TextInput";
 import { createHarvestUseCase } from "../../../harvests/domain/usecases/createHarvest";
+import HarvestTypeSelector from "../../../../common/widgets/HarvestTypeSelector";
 
 
 type Props = {
@@ -25,6 +26,9 @@ export default function LaunchHarvestCard({
 }: Props) {
   const [harvestDate, setHarvestDate] = useState(
     new Date().toISOString().slice(0, 10)
+  );
+  const [harvestType, setHarvestType] = useState(
+    1
   );
   const [plannedTrees, setPlannedTrees] = useState(
     defaultPlannedTrees.toString()
@@ -46,6 +50,7 @@ export default function LaunchHarvestCard({
         varietyId,
         harvestDate,
         plannedTrees: parsedPlannedTrees,
+        harvestType
       });
 
       toast.success("Récolte lancée avec succès");
@@ -84,6 +89,13 @@ export default function LaunchHarvestCard({
             step="1"
             value={plannedTrees}
             onChange={(event) => setPlannedTrees(event.target.value)}
+          />
+        </div>
+        <div className="filter-item">
+          <label>Type de récolte</label>
+          <HarvestTypeSelector
+            value={harvestType}
+            onChange={(event) => setHarvestType(event??0)}
           />
         </div>
       </div>

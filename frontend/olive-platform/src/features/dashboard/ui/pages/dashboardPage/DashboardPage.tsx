@@ -7,6 +7,7 @@ import TreesCoverageDonut from "../../widgets/TreesCoverageDonut";
 import TankOccupancyGauge from "../../widgets/TankOccupancyGauge";
 import { useDashboardStore } from "../../stores/useDahsbordStore";
 import { usePageTitle } from "../../../../../common/hooks/usePageTitle";
+import ChargesCoverageDonut from "../../widgets/ChargesCoverageDonut";
 
 export const DashboardPage: React.FC = () => {
   const {
@@ -87,7 +88,8 @@ export const DashboardPage: React.FC = () => {
             <TreesCoverageDonut
               data={summary.treesCoverage}
             />
-
+            <ChargesCoverageDonut 
+            data={summary.chargesCoverage} />
             <TankOccupancyGauge
               data={summary.tankOccupancy}
             />

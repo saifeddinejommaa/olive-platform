@@ -4,4 +4,5 @@ export interface CreateHarvestParams {
   harvestDate: string;
   notes?: string | null;
   plannedTrees: number;
+  harvestType: number
 }

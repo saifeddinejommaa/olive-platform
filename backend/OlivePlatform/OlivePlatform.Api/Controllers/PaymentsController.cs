@@ -10,36 +10,49 @@ namespace OlivePlatform.Api.Controllers;
 [Route("api/[controller]")]
 public class PaymentsController : ControllerBase
 {
-    private readonly IPaymentQueryRepository _queryRepository;
+    private readonly IPaymentQueryRepository _paymentQueryRepository;
     private readonly IMediator _mediator;
 
-    public PaymentsController(
-        IPaymentQueryRepository queryRepository,
-        IMediator mediator)
+    public PaymentsController(IPaymentQueryRepository paymentQueryRepository, IMediator mediator)
     {
-        _queryRepository = queryRepository;
+        _paymentQueryRepository = paymentQueryRepository;
         _mediator = mediator;
     }
 
-    [HttpGet]
-    public async Task<IActionResult> GetAll(
-        [FromQuery] PaymentsRequestFilter filter)
+    [HttpGet("pending")]
+    public async Task<IActionResult> GetPending(
+        [FromQuery] PendingPaymentFilter filter,
+        CancellationToken cancellationToken)
     {
-        return Ok(await _queryRepository.GetPayments(filter));
+        var result = await _paymentQueryRepository.GetPendingPayments(filter,cancellationToken);
+        return Ok(result);
     }
 
-    [HttpGet("{id:int}")]
-    public async Task<IActionResult> GetById(int id)
+    [HttpGet("history")]
+    public async Task<IActionResult> GetHistory(
+        [FromQuery] PaymentHistoryFilter filter, 
+        CancellationToken cancellationToken)
     {
-        var result = await _queryRepository.GetByIdAsync(id);
-
-        return result is null ? NotFound() : Ok(result);
+        var result = await _paymentQueryRepository.GetPaymentHistory(filter,cancellationToken);
+        return Ok(result);
     }
 
-    [HttpPost]
-    public async Task<IActionResult> Create(
-        [FromBody] CreatePaymentCommand command)
+    [HttpGet("pending-details")]
+    public async Task<IActionResult> GetPendingDetails(
+        [FromQuery] GetPendingPaymentDetailsRequest filter,
+        CancellationToken cancellationToken)
     {
-        return Ok(await _mediator.Send(command));
+        var result = await _paymentQueryRepository.GetPendingPaymentDetails(filter, cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpPost("pay")]
+    public async Task<IActionResult> Pay(
+       [FromBody] PayPaymentsCommand command,
+       CancellationToken cancellationToken)
+    {
+        await _mediator.Send(command, cancellationToken);
+
+        return Ok();
     }
 }

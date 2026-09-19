@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using OlivePlatform.Domain.Entities;
+using OlivePlatform.Domain.Enums;
 using OlivePlatform.Domain.Repositories;
 
 namespace OlivePlatform.Infrastructure.Persistence.Repositories
@@ -29,6 +30,17 @@ namespace OlivePlatform.Infrastructure.Persistence.Repositories
                             .FirstOrDefaultAsync(
                                 x => x.Id == id,
                                 cancellationToken);
+        }
+
+        public async Task<IEnumerable<HarvestCostLine>> GetCostLinesForPaymentAsync(int[] sourceIds, CostLineType sourceType, CancellationToken cancellationToken)
+        {
+            return await _context.HarvestCostLine
+                            .Where(x =>
+                                sourceIds.Contains((int)x.Id) &&
+                                x.Type == (int)sourceType &&
+                                x.UnpaidAmount > 0)
+                            .OrderBy(x => x.Id)
+                            .ToListAsync(cancellationToken);
         }
 
         public async Task UpdateAsync(HarvestCostLine entity, CancellationToken cancellationToken = default)

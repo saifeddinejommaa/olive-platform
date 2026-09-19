@@ -6,5 +6,5 @@ namespace OlivePlatform.Domain.Interfaces.Repositories;
 public interface IOlivePurchaseRepository
     : IRepository<OlivePurchase>
 {
-    
+    Task<IEnumerable<OlivePurchase>> GetOlivePurchasesForPaymentAsync(int[] sourceIds, CancellationToken cancellationToken);
 }

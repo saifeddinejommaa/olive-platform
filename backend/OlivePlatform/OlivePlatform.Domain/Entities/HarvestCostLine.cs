@@ -29,15 +29,6 @@ namespace OlivePlatform.Domain.Entities
         [Column("worker_identifier")]
         public string? WorkerIdentifier { get; set; }
 
-        [Column("quantity")]
-        public decimal Quantity { get; set; }
-
-        [Column("unit")]
-        public string? Unit { get; set; }
-
-        [Column("unit_price")]
-        public decimal UnitPrice { get; set; }
-
         [Column("total_amount")]
         public decimal TotalAmount { get; set; }
 

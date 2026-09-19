@@ -2,8 +2,7 @@
 
 public enum PaymentMethod
 {
-    Cash = 1,
-    BankTransfer = 2,
-    Cheque = 3,
-    Card = 4
+    Espece = 1,
+    Cheque = 2,
+    Virement = 3
 }

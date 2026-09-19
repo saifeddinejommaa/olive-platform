@@ -64,6 +64,12 @@ public class ReferenceDataQueryRepository
             FROM cost_line_type
             WHERE is_active = TRUE
             ORDER BY name;
+
+            SELECT id AS {nameof(AppConstantItemResponse.Id)},
+                label AS {nameof(AppConstantItemResponse.Name)}
+            FROM harvest_type
+            WHERE is_active = TRUE
+            ORDER BY name;
             """;
 
         using var connection = _dbConnection;
@@ -101,8 +107,10 @@ public class ReferenceDataQueryRepository
                 (await multi.ReadAsync<AppConstantItemResponse>())
                 .ToList(),
 
-                CostLineType =
+            CostLineType =
                 (await multi.ReadAsync<AppConstantItemResponse>())
+                .ToList(),
+            HarvestTypes = (await multi.ReadAsync<AppConstantItemResponse>())
                 .ToList()
         };
     }

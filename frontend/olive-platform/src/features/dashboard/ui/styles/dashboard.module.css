@@ -270,9 +270,10 @@
 .donutCenterLabel { font-size: 11px; color: var(--olv-ink-soft); }
 .donutLegend { list-style: none; margin: 0; padding: 0; font-size: 12.5px; display: flex; flex-direction: column; gap: 8px; }
 .donutLegend li { display: flex; align-items: center; gap: 8px; }
-.legendDotHarvested, .legendDotPlanned, .legendDotRemaining {
+.legendDotHarvested, .legendDotPlanned, .legendDotRemaining, .legendDotUnpaid {
   width: 8px; height: 8px; border-radius: 50%; display: inline-block;
 }
 .legendDotHarvested { background: #66763F; }
 .legendDotPlanned { background: #96741F; }
 .legendDotRemaining { background: #CFC7AA; }
+.legendDotUnpaid { background: var(--olv-clay); }

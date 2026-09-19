@@ -93,6 +93,33 @@ public class DashboardQueryRepository : IDashboardQueryRepository
             WHERE source_tank_id IS NOT NULL
             GROUP BY source_tank_id
         ) outflow ON outflow.tank_id = t.id;
+
+        -- 7) Charges : total / réglé / restant (récolte + achats d'olives)
+        SELECT
+            COALESCE(harvest_totals.total, 0) + COALESCE(purchase_totals.total, 0)
+                AS {nameof(ChargesCoverageResponse.TotalAmount)},
+
+            COALESCE(harvest_totals.paid, 0) + COALESCE(purchase_totals.paid, 0)
+                AS {nameof(ChargesCoverageResponse.PaidAmount)},
+
+            COALESCE(harvest_totals.unpaid, 0) + COALESCE(purchase_totals.unpaid, 0)
+                AS {nameof(ChargesCoverageResponse.UnpaidAmount)}
+
+        FROM (
+            SELECT
+                SUM(total_amount) AS total,
+                SUM(paid_amount) AS paid,
+                SUM(unpaid_amount) AS unpaid
+            FROM public.harvest_cost_line
+        ) harvest_totals
+
+        CROSS JOIN (
+            SELECT
+                SUM(paid_amount + unpaid_amount) AS total,
+                SUM(paid_amount) AS paid,
+                SUM(unpaid_amount) AS unpaid
+            FROM public.olive_purchases
+        ) purchase_totals;
         """;
 
         using var connection = _dbConnection;
@@ -111,6 +138,8 @@ public class DashboardQueryRepository : IDashboardQueryRepository
         var harvestYield = (await multi.ReadAsync<HarvestYieldPointResponse>()).AsList();
         var pressingComparison = (await multi.ReadAsync<PressingComparisonPointResponse>()).AsList();
         var tankOccupancy = await multi.ReadSingleAsync<TankOccupancyResponse>();
+        var chargesCoverage = await multi.ReadSingleAsync<ChargesCoverageResponse>();
+
 
         return new DashboardSummaryResponse
         {
@@ -120,6 +149,7 @@ public class DashboardQueryRepository : IDashboardQueryRepository
             HarvestYield = harvestYield,
             PressingComparison = pressingComparison,
             TankOccupancy = tankOccupancy,
+            ChargesCoverage = chargesCoverage,
         };
     }
 }

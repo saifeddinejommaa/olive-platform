@@ -12,11 +12,12 @@ import {
   formatStringToDateTime,
 } from "../../../shared/utils/DatesUtils";
 
-import { getOliveVarietyLabel } from "../../../appConstants/helper/AppConstantsHelper";
+import { getHarvestTypeLabel, getOliveVarietyLabel } from "../../../appConstants/helper/AppConstantsHelper";
 import { ProductionStatus } from "../../../production/domain/entities/ProductionStatus";
 
 import { useHarvestDetailsStore } from "../stores/HarvestDetailsStore";
 import HarvestCostsWidget from "../widgets/HarvestCostsWidget";
+import HarvestTypeSelector from "../../../../common/widgets/HarvestTypeSelector";
 
 type Props = {
   harvestId: number;
@@ -38,6 +39,7 @@ export default function HarvestGeneralTab({
 
   const [quantityKg, setQuantityKg] = useState("");
   const [harvestedTrees, setHarvestedTrees] = useState("");
+  const [harvestType, setHarvestType] = useState(0);
 
   useEffect(() => {
     if (!harvestId) {
@@ -61,6 +63,8 @@ export default function HarvestGeneralTab({
     setHarvestedTrees(
       harvest.harvestedTrees.toString(),
     );
+
+    setHarvestType(harvest.harvestType);
   }, [harvest]);
 
   const isInProgress =
@@ -106,6 +110,7 @@ export default function HarvestGeneralTab({
       await update(harvest.id, {
         quantityKg: parsedQuantityKg,
         harvestedTrees: parsedHarvestedTrees,
+        harvestType: harvestType,
       });
 
       await fetchHarvest(harvest.id);
@@ -126,7 +131,6 @@ export default function HarvestGeneralTab({
         <div className="filters-header">
           <div>
             <h3>Informations générales</h3>
-
             <span>
               Informations relatives à la récolte
             </span>
@@ -157,7 +161,6 @@ export default function HarvestGeneralTab({
         <div className="filters-header">
           <div>
             <h3>Informations générales</h3>
-
             <span>
               Informations relatives à la récolte
             </span>
@@ -186,7 +189,6 @@ export default function HarvestGeneralTab({
         <div className="filters-header">
           <div>
             <h3>Informations générales</h3>
-
             <span>
               Informations relatives à la récolte
             </span>
@@ -232,6 +234,59 @@ export default function HarvestGeneralTab({
               value={formatDate(harvest.harvestDate)}
             />
 
+            <InfoFieldWidget
+              label="Arbres prévus"
+              value={harvest.plannedTrees.toLocaleString(
+                "fr-FR",
+              )}
+            />
+
+            <InfoFieldWidget
+              label="Heure de début"
+              value={harvest.startTime ?? "-"}
+            />
+
+            <InfoFieldWidget
+              label="Heure de fin"
+              value={harvest.endTime ?? "-"}
+            />
+
+            <InfoFieldWidget
+              label="Créé le"
+              value={formatStringToDateTime(
+                harvest.createdAt,
+              )}
+            />
+
+            <InfoFieldWidget
+              label="Modifié le"
+              value={
+                harvest.updatedAt
+                  ? formatStringToDateTime(
+                      harvest.updatedAt,
+                    )
+                  : "-"
+              }
+            />
+
+            {isInProgress ? (
+              <div className="filter-item">
+                <label>Type de récolte</label>
+
+                <HarvestTypeSelector
+                  value={harvestType}
+                  onChange={(value) =>
+                    setHarvestType(value ?? 0)
+                  }
+                />
+              </div>
+            ) : (
+              <InfoFieldWidget
+                label="Type de récolte"
+                value={getHarvestTypeLabel(harvest.harvestType) ?? "-"}
+              />
+            )}
+
             {isInProgress ? (
               <TextInput
                 label="Quantité (kg)"
@@ -276,41 +331,6 @@ export default function HarvestGeneralTab({
               />
             )}
 
-            <InfoFieldWidget
-              label="Arbres prévus"
-              value={harvest.plannedTrees.toLocaleString(
-                "fr-FR",
-              )}
-            />
-
-            <InfoFieldWidget
-              label="Heure de début"
-              value={harvest.startTime ?? "-"}
-            />
-
-            <InfoFieldWidget
-              label="Heure de fin"
-              value={harvest.endTime ?? "-"}
-            />
-
-            <InfoFieldWidget
-              label="Créé le"
-              value={formatStringToDateTime(
-                harvest.createdAt,
-              )}
-            />
-
-            <InfoFieldWidget
-              label="Modifié le"
-              value={
-                harvest.updatedAt
-                  ? formatStringToDateTime(
-                      harvest.updatedAt,
-                    )
-                  : "-"
-              }
-            />
-
             <div
               className="filter-item"
               style={{
@@ -328,26 +348,26 @@ export default function HarvestGeneralTab({
               />
             </div>
           </div>
-
-          {isInProgress && (
-            <div className="filters-footer">
-              <Button
-                variant="primary"
-                onClick={handleSave}
-                disabled={saving}
-              >
-                {saving
-                  ? "Enregistrement..."
-                  : "Enregistrer"}
-              </Button>
-            </div>
-          )}
         </div>
       </Card>
 
       <HarvestCostsWidget
         costs={harvest.costs}
       />
+
+      {isInProgress && (
+        <div className="harvest-general-actions">
+          <Button
+            variant="primary"
+            onClick={handleSave}
+            disabled={saving}
+          >
+            {saving
+              ? "Enregistrement..."
+              : "Enregistrer"}
+          </Button>
+        </div>
+      )}
     </>
   );
 }

@@ -15,4 +15,6 @@ public static class DocumentTypes
     public const string OliveAnalyse = "OLIVE_ANALYSE";
 
     public const string OilAnalysis = "OIL_ANALYSIS";
+
+    public const string Supplier = "SUPPLIER";
 }

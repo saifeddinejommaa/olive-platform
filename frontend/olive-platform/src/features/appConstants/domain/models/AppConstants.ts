@@ -8,5 +8,6 @@ export type AppConstants = {
   invoiceStatuses: AppConstantItem[];
   paymentMethods: AppConstantItem[];
   purchaseStatus: AppConstantItem[];
-  costLineTypes: AppConstantItem[]
+  costLineTypes: AppConstantItem[];
+  harvestTypes: AppConstantItem[]
 };

@@ -20,6 +20,8 @@ public class OlivePlatformAppDbContext : DbContext
 
     public DbSet<HarvestCostLine> HarvestCostLine => Set<HarvestCostLine>();
 
+    public DbSet<FinancialPayment> FinancialPayment => Set<FinancialPayment>();
+
     public DbSet<OlivePurchase> OlivePurchases => Set<OlivePurchase>();
     public DbSet<OlivePurchaseItem> OlivePurchaseItems => Set<OlivePurchaseItem>();
 
@@ -41,7 +43,8 @@ public class OlivePlatformAppDbContext : DbContext
     public DbSet<Payment> Payments => Set<Payment>();
 
     public DbSet<Worker> Workers => Set<Worker>();
-    public DbSet<WorkSession> WorkSessions => Set<WorkSession>();
+
+    public DbSet<Supplier> Suppliers => Set<Supplier>();
     public DbSet<DocumentCounter> DocumentCounters { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

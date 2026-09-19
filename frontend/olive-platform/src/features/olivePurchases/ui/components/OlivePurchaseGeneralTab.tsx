@@ -1,5 +1,3 @@
-// src/features/production/olivePurchases/presentation/components/OlivePurchaseGeneralTab.tsx
-
 import TextEditor from "../../../../common/widgets/textEditor/TextEditor";
 import InfoFieldWidget from "../../../../common/widgets/InfoFieldWidget";
 import type { OlivePurchaseDetails } from "../../domain/entities/OlivePurchaseDetails";
@@ -21,7 +19,8 @@ export default function OlivePurchaseGeneralTab({
   return (
     <Card>
     <div className="info-grid">
-      <InfoFieldWidget label="Fournisseur" value={purchase.supplierName} />
+      <InfoFieldWidget label="Fournisseur" 
+      value={purchase.supplierDetails?purchase.supplierDetails?.name: "-"} />
       <InfoFieldWidget
         label="Quantité (kg)"
         value={purchase.totalQuantity?.toString()}

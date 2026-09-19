@@ -9,4 +9,5 @@ export type AppConstantsResponse = {
   paymentMethods: AppConstantItemResponse[];
   purchaseStatus: AppConstantItemResponse[];
   costLineType: AppConstantItemResponse[];
+  harvestTypes:AppConstantItemResponse[];
 };

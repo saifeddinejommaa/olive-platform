@@ -10,6 +10,8 @@ namespace OlivePlatform.Application.Features.Harvests.Responses
         public int Id { get; set; }
         public string Reference { get; set; } = string.Empty;
         public string PlotReference { get; set; } = string.Empty;
+
+        public HarvestType HarvestType { get; set; }
         public DateOnly HarvestDate { get; set; }
         public decimal QuantityKg { get; set; }
         public int PlannedTrees { get; set; }

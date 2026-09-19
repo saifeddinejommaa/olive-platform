@@ -36,6 +36,7 @@ export function HarvestDetailsMapper(
     endTime: response.endTime,
 
     updatedAt: response.updatedAt,
-    costs : response.costs
+    costs : response.costs,
+    harvestType: response.harvestType
   };
 }

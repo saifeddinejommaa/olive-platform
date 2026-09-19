@@ -242,6 +242,7 @@ public class HarvestQueryRepository : IHarvestQueryRepository
             h.notes AS "{nameof(HarvestDetailsResponse.Notes)}",
             h.status AS "{nameof(HarvestDetailsResponse.Status)}",
             h.start_time AS "{nameof(HarvestDetailsResponse.StartTime)}",
+            h.harvest_type_id AS "{nameof(HarvestDetailsResponse.HarvestType)}",
             h.end_time AS "{nameof(HarvestDetailsResponse.EndTime)}",
             h.created_at AS "{nameof(HarvestDetailsResponse.CreatedAt)}",
             h.updated_at AS "{nameof(HarvestDetailsResponse.UpdatedAt)}",

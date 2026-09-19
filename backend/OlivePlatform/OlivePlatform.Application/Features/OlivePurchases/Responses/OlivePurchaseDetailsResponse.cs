@@ -10,8 +10,6 @@ namespace OlivePlatform.Application.Features.OlivePurchases.Responses
 
         public string Reference { get; set; } = string.Empty;
 
-        public string SupplierName { get; set; } = string.Empty;
-
         public DateOnly PurchaseDate { get; set; }
 
         public PurchaseStatus Status { get; set; }
@@ -27,6 +25,8 @@ namespace OlivePlatform.Application.Features.OlivePurchases.Responses
         public string? Notes { get; set; }
 
         public bool CanLaunchPression { get; set; }
-        
+
+        public SupplierDetailsResponse? Supplier { get; set; }
+
     }
 }

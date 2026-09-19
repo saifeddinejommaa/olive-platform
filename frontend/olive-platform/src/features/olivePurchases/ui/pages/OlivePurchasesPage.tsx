@@ -136,7 +136,7 @@ export default function OlivePurchasesPage() {
                 onClick={handleCreate}
               >
                 <IconPlus size={18} stroke={2} />
-                Nouvelle récolte
+                Nouvel Achat
               </Button>
             </div>
       <OlivePurchasesFilterComponent />

@@ -38,3 +38,21 @@ export interface DashboardSummary {
   pressingComparison: PressingComparisonPoint[];
   tankOccupancy: TankOccupancy;
 }
+
+export interface ChargesCoverage {
+  totalAmount: number;
+  paidAmount: number;
+  unpaidAmount: number;
+}
+
+// dans DashboardSummary
+export interface DashboardSummary {
+  harvestPipeline: ProductionPipeline;
+  pressingPipeline: ProductionPipeline;
+  treesCoverage: TreesCoverage;
+  harvestYield: HarvestYieldPoint[];
+  pressingComparison: PressingComparisonPoint[];
+  tankOccupancy: TankOccupancy;
+  chargesCoverage: ChargesCoverage; // nouveau
+}
+

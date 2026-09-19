@@ -52,5 +52,14 @@ namespace OlivePlatform.Application.Features.Dashboard.Responses
         public List<HarvestYieldPointResponse> HarvestYield { get; set; } = new();
         public List<PressingComparisonPointResponse> PressingComparison { get; set; } = new();
         public TankOccupancyResponse TankOccupancy { get; set; } = null!;
+        public ChargesCoverageResponse ChargesCoverage { get; set; } = null!; // nouveau
+
+    }
+
+    public class ChargesCoverageResponse
+    {
+        public decimal TotalAmount { get; set; }
+        public decimal PaidAmount { get; set; }
+        public decimal UnpaidAmount { get; set; }
     }
 }

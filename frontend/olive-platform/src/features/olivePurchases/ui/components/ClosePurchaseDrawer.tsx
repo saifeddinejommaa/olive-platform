@@ -52,7 +52,7 @@ export default function ClosePurchaseDrawer({
         </DrawerInfoCard>
 
         <DrawerInfoCard label="Fournisseur">
-          {purchase.supplierName || "-"}
+          {purchase.supplierDetails?.name || "-"}
         </DrawerInfoCard>
 
         <DrawerInfoCard label="Date d'achat">

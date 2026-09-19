@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using OlivePlatform.Domain.Entities;
 using OlivePlatform.Domain.Interfaces.Repositories;
+using System.Security.AccessControl;
 
 namespace OlivePlatform.Infrastructure.Persistence.Repositories;
 
@@ -25,6 +26,16 @@ public class OlivePurchaseRepository
     {
         return await _context.OlivePurchases
             .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+    }
+
+    public async Task<IEnumerable<OlivePurchase>> GetOlivePurchasesForPaymentAsync(int[] sourceIds, CancellationToken cancellationToken)
+    {
+        return await _context.OlivePurchases
+                            .Where(x =>
+                                sourceIds.Contains(x.Id) &&
+                                x.UnpaidAmount > 0)
+                            .OrderBy(x => x.Id)
+                            .ToListAsync(cancellationToken);
     }
 
     public async Task UpdateAsync(OlivePurchase entity, CancellationToken cancellationToken = default)

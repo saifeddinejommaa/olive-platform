@@ -16,8 +16,8 @@ public class OlivePurchase
     [Column("reference")]
     public string Reference { get; set; } = null!;
 
-    [Column("supplier_name")]
-    public string SupplierName { get; set; } = null!;
+    [Column("supplier_id")]
+    public int? SupplierId { get; set; }
 
     [Column("purchase_date")]
     public DateOnly PurchaseDate { get; set; }
@@ -33,6 +33,15 @@ public class OlivePurchase
 
     [Column("notes")]
     public string? Notes { get;   set; }
+
+    [Column("paid_amount")]
+    public decimal? PaidAmount { get; set; }
+
+    [Column("unpaid_amount")]
+    public decimal? UnpaidAmount { get; set; }
+
+    [Column("is_paid")]
+    public bool IsPaid { get; set; }
 
     public ICollection<OlivePurchaseItem> Items { get; set; }
        = new List<OlivePurchaseItem>();

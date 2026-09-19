@@ -14,12 +14,14 @@ import { useAvailableTrees } from "../../../plots/ui/hooks/UseAvailableTrees";
 import OliveVarietySelector from "../../../../common/widgets/OliveVarietySelector";
 import { usePageTitle } from "../../../../common/hooks/usePageTitle";
 import Card from "../../../../common/widgets/card/Card";
+import HarvestTypeSelector from "../../../../common/widgets/HarvestTypeSelector";
 
 type NewHarvestForm = {
   plotId: number;
   varietyId: number;
   plannedTrees: number;
   harvestDate: string;
+  harvestType: number;
   notes: string;
 };
 
@@ -27,6 +29,7 @@ const initialForm: NewHarvestForm = {
   plotId: 0,
   varietyId: 0,
   plannedTrees: 0,
+  harvestType: 0,
   harvestDate: new Date().toISOString().split("T")[0],
   notes: "",
 };
@@ -95,6 +98,7 @@ export default function NewHarvestPage() {
         plannedTrees: form.plannedTrees,
         harvestDate: form.harvestDate,
         notes: form.notes || null,
+        harvestType: form.harvestType
       };
 
       const success = await createHarvestAction(request);
@@ -166,6 +170,20 @@ export default function NewHarvestPage() {
               value={form.harvestDate}
               onChange={(event) =>
                 updateForm("harvestDate", event.target.value)
+              }
+            />
+            {errors.harvestDate && (
+              <span className="field-error">{errors.harvestDate}</span>
+            )}
+          </div>
+
+          <div className="filter-item">
+             <label>Type de Récolte</label>
+            <HarvestTypeSelector
+              value={form.harvestType}
+              onChange={(event) =>{
+                updateForm("harvestType", event??0)
+              }
               }
             />
             {errors.harvestDate && (

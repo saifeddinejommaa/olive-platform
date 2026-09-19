@@ -21,7 +21,8 @@ const initialConstants: AppConstants = {
   invoiceStatuses: [],
   paymentMethods: [],
   purchaseStatus: [],
-  costLineTypes: []
+  costLineTypes: [],
+  harvestTypes: []
 };
 
 export const useConstantsStore = create<AppConstantsState>()(

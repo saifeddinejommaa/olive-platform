@@ -12,6 +12,7 @@ public class CreateHarvestCommand : IRequest<int>
     public int PlotId { get; set; }
     public int VarietyId { get; set; }
     public DateOnly HarvestDate { get; set; }
+    public HarvestType HarvestType { get; set; }
     public int PlannedTrees { get; set; }
     public string? Notes { get; set; }
 }
@@ -51,8 +52,8 @@ public class CreateHarvestCommandHandler : IRequestHandler<CreateHarvestCommand,
             EndTime = null,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow,
-            PlannedTrees = request.PlannedTrees
-            
+            PlannedTrees = request.PlannedTrees,
+            HarvestType = request.HarvestType
         };
 
         await _repository.AddAsync(entity, cancellationToken);

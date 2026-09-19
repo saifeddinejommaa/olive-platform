@@ -1,7 +1,8 @@
+import type { SupplierDetailsResponse } from "./SupplierDetailsResponse";
+
 export type OlivePurchaseDetailsResponse = {
   id: number;
   reference: string;
-  supplierName: string;
   purchaseDate: string;
   status: number;
   createdAt: string;
@@ -10,4 +11,5 @@ export type OlivePurchaseDetailsResponse = {
   totalAmount: number;
   notes: string | null;
   canLaunchPression: boolean;
+  supplier: SupplierDetailsResponse | null;
 };

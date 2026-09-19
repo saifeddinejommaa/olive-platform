@@ -4,6 +4,7 @@ using OlivePlatform.Application.Features.OlivePurchases.Requests;
 using OlivePlatform.Domain.Entities;
 using OlivePlatform.Domain.Enums;
 using OlivePlatform.Domain.Interfaces.Repositories;
+using OlivePlatform.Domain.Repositories;
 using YourProject.Application.Constants;
 using YourProject.Application.Services;
 
@@ -11,8 +12,9 @@ namespace OlivePlatform.Application.Features.OlivePurchases.Commands.CreateOlive
 
 public class CreateOlivePurchaseCommand : IRequest<int>
 {
-    public string SupplierName { get; set; } = null!;
     public DateOnly PurchaseDate { get; set; }
+    public int? SupplierId { get; set; }
+    public NewSupplierRequest? NewSupplier { get; set; }
     public PurchaseStatus Status { get; set; }
     public string? Notes { get; set; }
     public required List<NewOlivePurchaseItemRequest> Items { get; set; }
@@ -23,17 +25,20 @@ public class CreateOlivePurchaseCommandHandler
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IOlivePurchaseRepository _repository;
+    private readonly ISupplierRepository _supplierRepository;
     private readonly IDocumentNumberService _documentNumberService;
     private readonly IOliveAnalysisRepository _oliveAnalysisRepository;
 
     public CreateOlivePurchaseCommandHandler(
         IUnitOfWork unitOfWork,
         IOlivePurchaseRepository repository,
+        ISupplierRepository supplierRepository,
         IDocumentNumberService documentNumberService,
         IOliveAnalysisRepository oliveAnalysisRepository)
     {
         _unitOfWork = unitOfWork;
         _repository = repository;
+        _supplierRepository = supplierRepository;
         _documentNumberService = documentNumberService;
         _oliveAnalysisRepository = oliveAnalysisRepository;
     }
@@ -42,15 +47,14 @@ public class CreateOlivePurchaseCommandHandler
         CreateOlivePurchaseCommand request,
         CancellationToken cancellationToken)
     {
+        if (request.SupplierId is null && request.NewSupplier is null)
+            throw new InvalidOperationException(
+                "Vous devez fournir un fournisseur existant (SupplierId) ou les informations d'un nouveau fournisseur (NewSupplier).");
+
         var purchaseId = 0;
 
         await _unitOfWork.ExecuteInTransactionAsync(async ct =>
         {
-
-            if (string.IsNullOrWhiteSpace(request.SupplierName))
-                throw new InvalidOperationException(
-                    "Le fournisseur est obligatoire.");
-
             if (request.Items.Count == 0)
                 throw new InvalidOperationException(
                     "Au moins une ligne d'achat doit être renseignée.");
@@ -68,6 +72,34 @@ public class CreateOlivePurchaseCommandHandler
 
             var now = DateTime.UtcNow;
 
+            int supplierId;
+
+            if (request.SupplierId is not null)
+            {
+                supplierId = request.SupplierId.Value;
+            }
+            else
+            {
+                var supplierReference = await _documentNumberService.GenerateAsync(
+                        DocumentTypes.Supplier,
+                        DocumentPrefixes.Supplier,
+                        now.Year,
+                        ct);
+                var newSupplier = new Supplier
+                {
+                    Reference = supplierReference,
+                    Name = request.NewSupplier!.Name,
+                    Address = request.NewSupplier.Address,
+                    Phone = request.NewSupplier.Phone,
+                    IsActive = true
+                };
+
+                await _supplierRepository.AddAsync(newSupplier, ct);
+                await _unitOfWork.SaveChangesAsync(ct);
+
+                supplierId = newSupplier.Id;
+            }
+
             var purchaseNumber =
                 await _documentNumberService.GenerateAsync(
                     DocumentTypes.OlivePurchase,
@@ -78,12 +110,15 @@ public class CreateOlivePurchaseCommandHandler
             var purchase = new OlivePurchase
             {
                 Reference = purchaseNumber,
-                SupplierName = request.SupplierName,
+                SupplierId = supplierId,
                 PurchaseDate = request.PurchaseDate,
                 Status = request.Status,
                 Notes = request.Notes,
+                UnpaidAmount = 0m,
+                PaidAmount = 0m,
                 CreatedAt = now,
                 UpdatedAt = now
+
             };
 
             var itemsForAnalysis =
@@ -107,6 +142,10 @@ public class CreateOlivePurchaseCommandHandler
                     CreatedAt = now,
                     UpdatedAt = now
                 };
+
+                purchase.UnpaidAmount += item.AgreedQuantityKg * item.PricePerKg;
+                purchase.PaidAmount = 0;
+                purchase.IsPaid = false;
 
                 purchase.Items.Add(itemEntity);
 

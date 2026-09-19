@@ -12,6 +12,9 @@ public class Harvest
     [Column("reference")]
     public string Reference { get; set; } = null!;
 
+    [Column("harvest_type_id")]
+    public HarvestType HarvestType { get; set; }
+
     [Column("plot_id")]
     public int PlotId { get; set; }
 

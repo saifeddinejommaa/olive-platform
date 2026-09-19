@@ -6,4 +6,5 @@ export interface UpdateHarvestParams {
   harvestDate?: string;
   startTime?: string;
   notes?: string;
+  harvestType: number;
 }

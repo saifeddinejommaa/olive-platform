@@ -2,7 +2,7 @@
 using OlivePlatform.Application.Common;
 using OlivePlatform.Application.Features.Payments.Requests;
 using OlivePlatform.Application.Features.Payments.Responses;
-using OlivePlatform.Domain.Entities;
+using OlivePlatform.Domain.Enums;
 using OlivePlatform.Domain.QueryRepositories;
 using System.Data;
 using System.Text;
@@ -18,49 +18,121 @@ public class PaymentQueryRepository : IPaymentQueryRepository
         _dbConnection = dbConnection;
     }
 
-    // ============================================================
-    // GET PAYMENTS - PAGINATED
-    // ============================================================
-
-    public async Task<PagedResult<PaymentForListResponse>> GetPayments(
-        PaymentsRequestFilter filter)
+    public async Task<PagedResult<PendingPaymentResponse>> GetPendingPayments(
+        PendingPaymentFilter filter,
+        CancellationToken cancellationToken = default)
     {
-        var sql = new StringBuilder(
-            """
+        var sql = new StringBuilder($"""
+            WITH pending_payments AS
+            (
+                -- ========================================================
+                -- MAIN D'OEUVRE
+                -- ========================================================
+                SELECT
+                    hcl.worker_name AS "RecipientName",
+
+                    1 AS "SourceType",
+
+                    ARRAY_AGG(
+                        hcl.id::integer
+                        ORDER BY hcl.id
+                    ) AS "PaymentSources",
+
+                    SUM(hcl.unpaid_amount) AS "AmountDue"
+
+                FROM public.harvest_cost_line hcl
+
+                WHERE hcl.type_id = 1
+                  AND hcl.unpaid_amount > 0
+
+                GROUP BY
+                    hcl.worker_name,
+                    hcl.worker_identifier
+
+
+                UNION ALL
+
+
+                -- ========================================================
+                -- TRANSPORT
+                -- ========================================================
+                SELECT
+                    hcl.worker_name AS "RecipientName",
+
+                    2 AS "SourceType",
+
+                    ARRAY_AGG(
+                        hcl.id::integer
+                        ORDER BY hcl.id
+                    ) AS "PaymentSources",
+
+                    SUM(hcl.unpaid_amount) AS "AmountDue"
+
+                FROM public.harvest_cost_line hcl
+
+                WHERE hcl.type_id = 2
+                  AND hcl.unpaid_amount > 0
+
+                GROUP BY
+                    hcl.worker_name,
+                    hcl.worker_identifier
+
+
+                UNION ALL
+
+
+                -- ========================================================
+                -- ACHAT D'OLIVES
+                -- ========================================================
+                SELECT
+                    s.name AS "RecipientName",
+
+                    7 AS "SourceType",
+
+                    ARRAY_AGG(
+                        op.id::integer
+                        ORDER BY op.id
+                    ) AS "PaymentSources",
+
+                    SUM(op.unpaid_amount) AS "AmountDue"
+
+                FROM public.olive_purchases op
+
+                INNER JOIN public.supplier s
+                    ON s.id = op.supplier_id
+
+                WHERE op.unpaid_amount > 0
+
+                GROUP BY
+                    s.id,
+                    s.name
+            )
+
             SELECT
-                COUNT(*) OVER() AS Total,
+                COUNT(*) OVER() AS {nameof(PendingPaymentResponse.Total)},
 
-                p.id AS Id,
-                p.payment_number AS PaymentNumber,
+                p."RecipientName"
+                    AS {nameof(PendingPaymentResponse.RecipientName)},
 
-                p.payment_date AS PaymentDate,
+                p."SourceType"
+                    AS {nameof(PendingPaymentResponse.SourceType)},
 
-                p.amount AS Amount,
+                p."PaymentSources"
+                    AS {nameof(PendingPaymentResponse.PaymentSources)},
 
-                pm.id AS PaymentMethod,
+                p."AmountDue"
+                    AS {nameof(PendingPaymentResponse.AmountDue)}
 
-                p.invoice_id AS InvoiceId,
-
-                i.invoice_number AS InvoiceNumber,
-
-                p.supplier_name AS SupplierName,
-
-                p.worker_name AS WorkerName,
-
-                p.reference AS Reference
-
-            FROM payments p
-
-            INNER JOIN payment_method pm
-                ON pm.id = p.payment_method_id
-
-            LEFT JOIN invoices i
-                ON i.id = p.invoice_id
+            FROM pending_payments p
 
             WHERE 1 = 1
             """);
 
         var parameters = new DynamicParameters();
+
+        // ========================================================
+        // Pagination
+        // ========================================================
 
         parameters.Add(
             "PageSize",
@@ -70,274 +142,433 @@ public class PaymentQueryRepository : IPaymentQueryRepository
             "Offset",
             (filter.PageNumber - 1) * filter.PageSize);
 
+
         // ========================================================
-        // Payment Number
+        // Recipient
         // ========================================================
 
-        if (!string.IsNullOrWhiteSpace(filter.PaymentNumber))
+        if (!string.IsNullOrWhiteSpace(filter.RecipientName))
         {
-            sql.Append(
-                """
-
-                AND p.payment_number ILIKE @PaymentNumber
+            sql.Append("""
+                
+                AND p."RecipientName" ILIKE @RecipientName
                 """);
 
             parameters.Add(
-                "PaymentNumber",
-                $"%{filter.PaymentNumber}%");
+                "RecipientName",
+                $"%{filter.RecipientName}%");
+        }
+
+
+        // ========================================================
+        // Cost Type
+        // ========================================================
+
+        if (filter.CostType.HasValue)
+        {
+            sql.Append("""
+                
+                AND p."SourceType" = @CostType
+                """);
+
+            parameters.Add(
+                "CostType",
+                (int)filter.CostType.Value);
+        }
+
+
+        // ========================================================
+        // Montant minimum
+        // ========================================================
+
+        if (filter.MinAmount.HasValue)
+        {
+            sql.Append("""
+                
+                AND p."AmountDue" >= @MinAmount
+                """);
+
+            parameters.Add(
+                "MinAmount",
+                filter.MinAmount.Value);
+        }
+
+
+        // ========================================================
+        // Montant maximum
+        // ========================================================
+
+        if (filter.MaxAmount.HasValue)
+        {
+            sql.Append("""
+                
+                AND p."AmountDue" <= @MaxAmount
+                """);
+
+            parameters.Add(
+                "MaxAmount",
+                filter.MaxAmount.Value);
+        }
+
+
+        // ========================================================
+        // Pagination SQL
+        // ========================================================
+
+        sql.Append("""
+            
+            ORDER BY
+                p."RecipientName",
+                p."SourceType"
+
+            LIMIT @PageSize
+            OFFSET @Offset
+            """);
+
+
+        // ========================================================
+        // Exécution
+        // ========================================================
+
+        using var connection = _dbConnection;
+
+        var result = await connection.QueryAsync<PendingPaymentResponse>(
+            new CommandDefinition(
+                sql.ToString(),
+                parameters,
+                cancellationToken: cancellationToken));
+
+        var items = result.AsList();
+
+
+        // ========================================================
+        // Total
+        // ========================================================
+
+        var total = items.FirstOrDefault()?.Total ?? 0;
+
+
+        // ========================================================
+        // Résultat paginé
+        // ========================================================
+
+        return new PagedResult<PendingPaymentResponse>
+        {
+            Items = items,
+            TotalCount = total,
+            PageNumber = filter.PageNumber,
+            PageSize = filter.PageSize
+        };
+    }
+
+
+    public async Task<PagedResult<ProcessedPaymentResponse>> GetPaymentHistory(
+    PaymentHistoryFilter filter,
+    CancellationToken cancellationToken = default)
+    {
+        var parameters = new DynamicParameters();
+
+        var where = new StringBuilder();
+
+        // ========================================================
+        // Recipient
+        // ========================================================
+
+        if (!string.IsNullOrWhiteSpace(filter.RecipientName))
+        {
+            where.Append("""
+            AND recipient_name ILIKE @RecipientName
+            """);
+
+            parameters.Add(
+                "RecipientName",
+                $"%{filter.RecipientName}%");
         }
 
         // ========================================================
-        // Invoice
+        // Date début
         // ========================================================
 
-        if (filter.InvoiceId.HasValue)
+        if (filter.PaymentDateFrom.HasValue)
         {
-            sql.Append(
-                """
-
-                AND p.invoice_id = @InvoiceId
-                """);
+            where.Append("""
+            AND payment_date >= @PaymentDateFrom
+            """);
 
             parameters.Add(
-                "InvoiceId",
-                filter.InvoiceId.Value);
+                "PaymentDateFrom",
+                filter.PaymentDateFrom.Value);
         }
 
         // ========================================================
-        // Payment Method
+        // Date fin
         // ========================================================
 
-        if (filter.PaymentMethod.HasValue)
+        if (filter.PaymentDateTo.HasValue)
         {
-            sql.Append(
-                """
-
-                AND p.payment_method_id = @PaymentMethod
-                """);
+            where.Append("""
+            AND payment_date <= @PaymentDateTo
+            """);
 
             parameters.Add(
-                "PaymentMethod",
-                (int)filter.PaymentMethod.Value);
-        }
-
-        // ========================================================
-        // From Date
-        // ========================================================
-
-        if (filter.FromDate.HasValue)
-        {
-            sql.Append(
-                """
-
-                AND p.payment_date >= @FromDate
-                """);
-
-            parameters.Add(
-                "FromDate",
-                filter.FromDate.Value);
-        }
-
-        // ========================================================
-        // To Date
-        // ========================================================
-
-        if (filter.ToDate.HasValue)
-        {
-            sql.Append(
-                """
-
-                AND p.payment_date <= @ToDate
-                """);
-
-            parameters.Add(
-                "ToDate",
-                filter.ToDate.Value);
+                "PaymentDateTo",
+                filter.PaymentDateTo.Value);
         }
 
         // ========================================================
         // Pagination
         // ========================================================
 
-        sql.Append(
-            """
+        var offset =
+            (filter.PageNumber - 1) * filter.PageSize;
 
-            ORDER BY
-                p.payment_date DESC,
-                p.payment_number
+        parameters.Add("Offset", offset);
+        parameters.Add("PageSize", filter.PageSize);
 
-            LIMIT @PageSize
-            OFFSET @Offset
-            """);
+        // ========================================================
+        // SQL
+        // ========================================================
+
+        var sql = $"""
+        WITH payment_history AS
+        (
+            SELECT
+                fp.id AS {nameof(ProcessedPaymentResponse.Id)},
+
+                fp.payment_date
+                    AS {nameof(ProcessedPaymentResponse.PaymentDate)},
+
+                recipient.recipient_name
+                    AS {nameof(ProcessedPaymentResponse.RecipientName)},
+
+                fp.amount
+                    AS {nameof(ProcessedPaymentResponse.Amount)},
+
+                fp.payment_method_id
+                    AS {nameof(ProcessedPaymentResponse.paymentMethod)},
+
+                fp.notes
+                    AS {nameof(ProcessedPaymentResponse.Notes)},
+
+                fp.created_at
+                    AS {nameof(ProcessedPaymentResponse.CreatedAt)}
+
+            FROM public.financial_payment fp
+
+            LEFT JOIN LATERAL
+            (
+                SELECT
+                    STRING_AGG(
+                        DISTINCT recipients.recipient_name,
+                        ', '
+                    ) AS recipient_name
+
+                FROM
+                (
+                    -- ====================================================
+                    -- Harvest Cost Lines
+                    -- ====================================================
+
+                    SELECT
+                        hcl.worker_name AS recipient_name
+
+                    FROM public.financial_payment_source fps
+
+                    INNER JOIN public.harvest_cost_line hcl
+                        ON hcl.id = fps.source_id
+
+                    WHERE fps.financial_payment_id = fp.id
+                      AND fps.source_type_id != {(int)CostLineType.olivePurchase}
+
+                    UNION
+
+                    -- ====================================================
+                    -- Olive Purchases
+                    -- ====================================================
+
+                    SELECT
+                        s.name AS recipient_name
+
+                    FROM public.financial_payment_source fps
+
+                    INNER JOIN public.olive_purchases op
+                        ON op.id = fps.source_id
+
+                    INNER JOIN public.supplier s
+                        ON s.id = op.supplier_id
+
+                    WHERE fps.financial_payment_id = fp.id
+                      AND fps.source_type_id = 7
+
+                ) recipients
+            ) recipient
+                ON TRUE
+        )
+
+        SELECT
+            *,
+            COUNT(*) OVER()
+                AS {nameof(ProcessedPaymentResponse.Total)}
+
+        FROM payment_history
+
+        WHERE 1 = 1
+
+        {where}
+
+        ORDER BY
+            PaymentDate DESC
+
+        OFFSET @Offset
+        LIMIT @PageSize;
+        """;
 
         using var connection = _dbConnection;
 
-        var result =
-            await connection.QueryAsync<PaymentForListResponse>(
-                sql.ToString(),
-                parameters);
+        var items =
+            (
+                await connection.QueryAsync<ProcessedPaymentResponse>(
+                    new CommandDefinition(
+                        sql,
+                        parameters,
+                        cancellationToken: cancellationToken))
+            ).AsList();
 
-        var items = result.ToList();
+        var totalCount = items.Count > 0
+            ? items[0].Total
+            : 0;
 
-        var total =
-            items.FirstOrDefault()?.Total ?? 0;
-
-        return new PagedResult<PaymentForListResponse>
+        return new PagedResult<ProcessedPaymentResponse>
         {
+            Items = items,
+            TotalCount = totalCount,
             PageNumber = filter.PageNumber,
-            PageSize = filter.PageSize,
-            TotalCount = total,
-            Items = items
+            PageSize = filter.PageSize
         };
     }
 
-    // ============================================================
-    // GET BY ID
-    // ============================================================
-
-    public async Task<Payment?> GetByIdAsync(
-        int id,
-        CancellationToken cancellationToken = default)
+    public async Task<PendingPaymentDetailsResponse> GetPendingPaymentDetails(
+    GetPendingPaymentDetailsRequest request,
+    CancellationToken cancellationToken = default)
     {
-        const string sql =
-            """
-            SELECT
-                p.id AS Id,
+        var response = new PendingPaymentDetailsResponse
+        {
+            Type = request.SourceType,
+            Details = []
+        };
 
-                p.payment_number AS PaymentNumber,
+        if (request.SourceIds == null || request.SourceIds.Length == 0)
+        {
+            return response;
+        }
 
-                p.payment_date AS PaymentDate,
+        var parameters = new DynamicParameters();
 
-                p.amount AS Amount,
-
-                p.payment_method_id AS PaymentMethodId,
-
-                p.invoice_id AS InvoiceId,
-
-                p.supplier_name AS SupplierName,
-
-                p.worker_name AS WorkerName,
-
-                p.reference AS Reference,
-
-                p.notes AS Notes,
-
-                p.created_at AS CreatedAt
-
-            FROM payments p
-
-            WHERE p.id = @Id
-            """;
+        parameters.Add(
+            "SourceIds",
+            request.SourceIds);
 
         using var connection = _dbConnection;
 
-        return await connection.QuerySingleOrDefaultAsync<Payment>(
-            sql,
-            new
-            {
-                Id = id
-            });
-    }
+        /*
+         * Main d'oeuvre / Transport
+         */
+        if (request.SourceType == CostLineType.MainOeuvre ||
+            request.SourceType == CostLineType.Transport)
+        {
+            parameters.Add(
+                "SourceType",
+                (int)request.SourceType);
 
-    // ============================================================
-    // GET ALL
-    // ============================================================
-
-    public async Task<IReadOnlyList<Payment>> GetAllAsync(
-        CancellationToken cancellationToken = default)
-    {
-        const string sql =
-            """
+            var sql = $"""
             SELECT
-                p.id AS Id,
+                hcl.id AS {nameof(PendingPaymentCostLineDetailResponse.SourceId)},
+                h.reference AS {nameof(PendingPaymentCostLineDetailResponse.SourceReference)},
+                hcl.type_id AS {nameof(PendingPaymentCostLineDetailResponse.CostLineType)},
+                hcl.date AS {nameof(PendingPaymentCostLineDetailResponse.OperationDate)},
+                hcl.total_amount AS {nameof(PendingPaymentCostLineDetailResponse.TotalAmount)},
+                hcl.unpaid_amount AS {nameof(PendingPaymentCostLineDetailResponse.AmountDue)},
+                hcl.notes AS {nameof(PendingPaymentCostLineDetailResponse.Notes)}
+            FROM public.harvest_cost_line hcl
+                INNER JOIN public.harvests h
+                    ON h.id = hcl.harvest_id
+            WHERE hcl.id = ANY(@SourceIds)
+              AND hcl.type_id = @SourceType
+            ORDER BY hcl.date DESC, hcl.id DESC;
+            """;
 
-                p.payment_number AS PaymentNumber,
+            var details =
+                await connection.QueryAsync<PendingPaymentCostLineDetailResponse>(
+                    new CommandDefinition(
+                        sql,
+                        parameters,
+                        cancellationToken: cancellationToken));
 
-                p.payment_date AS PaymentDate,
+            response.Details = details.AsList();
 
-                p.amount AS Amount,
+            return response;
+        }
 
-                p.payment_method_id AS PaymentMethodId,
-
-                p.invoice_id AS InvoiceId,
-
-                p.supplier_name AS SupplierName,
-
-                p.worker_name AS WorkerName,
-
-                p.reference AS Reference,
-
-                p.notes AS Notes,
-
-                p.created_at AS CreatedAt
-
-            FROM payments p
-
+        /*
+         * Achat d'olives
+         */
+        if (request.SourceType == CostLineType.olivePurchase)
+        {
+            var sql = $"""
+            SELECT
+                op.id AS {nameof(PendingPaymentCostLineDetailResponse.SourceId)},
+                op.reference AS {nameof(PendingPaymentCostLineDetailResponse.SourceReference)},
+                @SourceType AS {nameof(PendingPaymentCostLineDetailResponse.CostLineType)},
+                op.purchase_date AS {nameof(PendingPaymentCostLineDetailResponse.OperationDate)},
+            
+                COALESCE(
+                    SUM(
+                        opi.agreed_quantity_kg * opi.price_per_kg
+                    ),
+                    0
+                ) AS {nameof(PendingPaymentCostLineDetailResponse.TotalAmount)},
+            
+                op.unpaid_amount AS {nameof(PendingPaymentCostLineDetailResponse.AmountDue)},
+            
+                op.notes AS {nameof(PendingPaymentCostLineDetailResponse.Notes)}
+            
+            FROM public.olive_purchases op
+            
+            LEFT JOIN public.olive_purchase_items opi
+                ON opi.purchase_id = op.id
+            
+            WHERE op.id = ANY(@SourceIds)
+            
+            GROUP BY
+                op.id,
+                op.reference,
+                op.purchase_date,
+                op.unpaid_amount,
+                op.notes
+            
             ORDER BY
-                p.payment_date DESC,
-                p.payment_number
+                op.purchase_date DESC,
+                op.id DESC;
             """;
 
-        using var connection = _dbConnection;
+            parameters.Add(
+                "SourceType",
+                (int)request.SourceType);
 
-        var result =
-            await connection.QueryAsync<Payment>(sql);
+            var details =
+                await connection.QueryAsync<PendingPaymentCostLineDetailResponse>(
+                    new CommandDefinition(
+                        sql,
+                        parameters,
+                        cancellationToken: cancellationToken));
 
-        return result.ToList();
+            response.Details = details.AsList();
+
+            return response;
+        }
+
+        return response;
     }
 
-    // ============================================================
-    // GET BY INVOICE ID
-    // ============================================================
-
-    public async Task<IReadOnlyList<Payment>> GetByInvoiceIdAsync(
-        int invoiceId,
-        CancellationToken cancellationToken = default)
-    {
-        const string sql =
-            """
-            SELECT
-                p.id AS Id,
-
-                p.payment_number AS PaymentNumber,
-
-                p.payment_date AS PaymentDate,
-
-                p.amount AS Amount,
-
-                p.payment_method_id AS PaymentMethodId,
-
-                p.invoice_id AS InvoiceId,
-
-                p.supplier_name AS SupplierName,
-
-                p.worker_name AS WorkerName,
-
-                p.reference AS Reference,
-
-                p.notes AS Notes,
-
-                p.created_at AS CreatedAt
-
-            FROM payments p
-
-            WHERE p.invoice_id = @InvoiceId
-
-            ORDER BY
-                p.payment_date DESC,
-                p.payment_number
-            """;
-
-        using var connection = _dbConnection;
-
-        var result =
-            await connection.QueryAsync<Payment>(
-                sql,
-                new
-                {
-                    InvoiceId = invoiceId
-                });
-
-        return result.ToList();
-    }
 }
+

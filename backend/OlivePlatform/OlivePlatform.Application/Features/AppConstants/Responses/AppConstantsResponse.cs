@@ -20,5 +20,7 @@ namespace OlivePlatform.Application.Features.AppConstants.Responses
         public IReadOnlyList<AppConstantItemResponse> PaymentMethods { get; init; } = [];
 
         public IReadOnlyList<AppConstantItemResponse> CostLineType { get; init; } = [];
+
+        public IReadOnlyList<AppConstantItemResponse> HarvestTypes { get; init; } = [];
     }
 }

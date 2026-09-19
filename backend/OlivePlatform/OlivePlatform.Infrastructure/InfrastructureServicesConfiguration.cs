@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using OlivePlatform.Application.Features.Analysis.Responses;
 using OlivePlatform.Application.Features.Harvests.Responses;
+using OlivePlatform.Application.Features.OlivePurchases.Responses;
 using OlivePlatform.Application.Features.Plots.Responses;
 using OlivePlatform.Application.Features.Production.Responses;
 
@@ -30,6 +31,8 @@ namespace OlivePlatform.Infrastructure
                 new JsonObjectTypeHandler<PressingParametersResponse>());
             SqlMapper.AddTypeHandler(
                new JsonObjectTypeHandler<List<HarvestCostSummaryResponse>>());
+            SqlMapper.AddTypeHandler(
+               new JsonObjectTypeHandler<SupplierDetailsResponse>());
         }
     }
 }

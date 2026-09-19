@@ -39,7 +39,6 @@ public class UpdateOlivePurchaseCommandHandler
                 $"Purchase with id '{request.Id}' was not found.");
 
         entity.Reference = request.PurchaseNumber;
-        entity.SupplierName = request.SupplierName;
         entity.PurchaseDate = request.PurchaseDate;
         entity.Status = request.Status;
         entity.Notes = request.Notes;

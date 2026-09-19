@@ -15,4 +15,6 @@ public static class DocumentPrefixes
     public const string OlivePurchaseItem = "ACH_ITEM";
 
     public const string OilAnalysis = "OIL_ANALYSIS";
+
+    public const string Supplier = "SUPPLIER";
 }
