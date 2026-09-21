@@ -15,8 +15,6 @@ public class UpdateHarvestCommand : IRequest<Unit>
 
     public DateOnly? HarvestDate { get; set; }
 
-    public DateTime? StartTime { get; set; }
-
     public string? Notes { get; set; }
 }
 
@@ -81,11 +79,6 @@ public class UpdateHarvestCommandHandler
         if (request.HarvestDate.HasValue)
         {
             entity.HarvestDate = request.HarvestDate.Value;
-        }
-
-        if (request.StartTime.HasValue)
-        {
-            entity.StartTime = request.StartTime.Value;
         }
 
         if (request.Notes != null)

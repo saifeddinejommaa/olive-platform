@@ -31,17 +31,16 @@ public class Harvest
     public int VarietyId { get; set; }
 
     [Column("start_time")]
-    public DateTime? StartTime { get; set; }
+    public TimeOnly? StartTime { get; set; }
 
     [Column("end_time")]
-    public DateTime? EndTime { get; set; }
+    public TimeOnly? EndTime { get; set; }
 
     [Column("harvested_trees")]
     public int? HarvestedTrees { get; set; }
 
     [Column("planned_trees")]
     public int? PlannedTrees { get; set; }
-
 
     [Column("created_at")]
     public DateTime CreatedAt { get; set; }

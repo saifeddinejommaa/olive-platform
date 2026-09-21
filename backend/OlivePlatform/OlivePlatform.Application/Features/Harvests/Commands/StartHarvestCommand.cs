@@ -40,9 +40,11 @@ public class StartHarvestCommandHandler
                 "Seule une récolte planifiée peut être lancée.");
         }
 
+        var now = DateTime.UtcNow;
+
         entity.Status = ProductionStatus.InProgress;
-        entity.StartTime = DateTime.UtcNow;
-        entity.UpdatedAt = DateTime.UtcNow;
+        entity.StartTime = TimeOnly.FromDateTime(now);
+        entity.UpdatedAt = now;
 
         await _repository.UpdateAsync(
             entity,
