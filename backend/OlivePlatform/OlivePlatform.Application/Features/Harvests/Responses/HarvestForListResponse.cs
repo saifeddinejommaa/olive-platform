@@ -31,9 +31,9 @@ public class HarvestForListResponse
 
     public DateTime CreatedAt { get; set; }
 
-    public DateTime? StartTime { get; set; }
+    public TimeOnly? StartTime { get; set; }
 
-    public DateTime? EndTime { get; set; }
+    public TimeOnly? EndTime { get; set; }
 
     public DateTime? UpdatedAt { get; set; }
 
