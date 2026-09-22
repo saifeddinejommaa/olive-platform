@@ -1,5 +1,5 @@
 {
-  "name": "My Platform",
+  "name": "MyPlatform",
   "version": "1.0.0",
   "main": "expo-router/entry",
   "dependencies": {
