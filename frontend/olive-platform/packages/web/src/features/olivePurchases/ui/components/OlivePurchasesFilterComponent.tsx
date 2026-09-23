@@ -3,9 +3,8 @@ import Select from "../../../../common/widgets/select/Select";
 import Button from "../../../../common/widgets/button/Button";
 import Card from "../../../../common/widgets/card/Card";
 import { useOlivePurchasesStore } from "@olive-platform/core/features/olivePurchases/stores/OlivePurchaseStore";
-import { useConstantsStore } from "@olive-platform/core/features/appConstants/ConstantsStore";
 import type { OlivePurchasesFilter } from "@olive-platform/core/features/olivePurchases/domain/entities/OlivePurchaseFilter";
-
+import { useConstantsStore } from "../../../../stores/ConstantsStore";
 export default function OlivePurchasesFilterComponent() {
   const {
     filters,

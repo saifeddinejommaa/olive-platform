@@ -36,7 +36,7 @@ import InvoicesPage from "./features/invoices/pages/InvoicesPage";
 // Settings
 import SettingsPage from "./features/settings/pages/SettingsPage";
 import { useEffect } from "react";
-import { useConstantsStore } from "@olive-platform/core/features/appConstants/ConstantsStore";
+import { useConstantsStore } from "./stores/ConstantsStore";
 import NewPressingOperationPage from "./features/production/ui/pages/NewPressingOperationPage";
 import { ToastContainer } from "react-toastify";
 import PressingOperationDetailsPage from "./features/production/ui/pages/PressingOperationsDetailsPage";

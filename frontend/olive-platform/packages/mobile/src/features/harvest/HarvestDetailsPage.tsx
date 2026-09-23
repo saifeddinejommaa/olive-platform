@@ -3,7 +3,6 @@ import { Alert, ScrollView, StyleSheet, View } from "react-native";
 import { useHarvestDetailsStore } from "@olive-platform/core/features/harvests/stores/HarvestDetailsStore";
 import { ProductionStatus } from "@olive-platform/core/features/production/domain/entities/ProductionStatus";
 import { Screen } from "../../components/Screen";
-import { HarvestMobileTab, HarvestTabs } from "./components/HarvestTabs";
 import { HarvestCostsSection } from "./widgets/HarvestCostsSection";
 import { CloseHarvestSheet } from "./components/details/CloseHarvestSheet";
 import { spacing } from "../../consts/spacing";
@@ -12,6 +11,7 @@ import { HarvestActionCard } from "./components/details/HarvestActionCard";
 import { HarvestDetailsHeader } from "./components/details/HarvestDetailsHeader";
 import { HarvestSummaryCard } from "./components/details/HarvestSummaryCard";
 import { HarvestGeneralSection } from "./components/details/HarvestGeneralSection";
+import { HarvestMobileTab, HarvestTabs } from "./components/details/HarvestTabs";
 
 type Props = { harvestId: number };
 
@@ -72,7 +72,7 @@ export function HarvestDetailsPage({ harvestId }: Props) {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.content}
       >
-        <HarvestDetailsHeader reference={harvest.reference} />
+        <HarvestDetailsHeader/>
 
         <HarvestSummaryCard harvest={harvest} />
 

@@ -18,7 +18,7 @@ export function HarvestGeneralSection({ harvest, editable }: Props) {
       />
 
       <View style={styles.card}>
-        <HarvestGeneralInfoCard harvest={harvest} editable={editable} />
+        <HarvestGeneralInfoCard harvest={harvest} />
       </View>
     </View>
   );

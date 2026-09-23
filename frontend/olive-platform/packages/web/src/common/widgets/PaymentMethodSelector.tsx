@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useConstantsStore } from "@olive-platform/core/features/appConstants/ConstantsStore";
+import { useConstantsStore } from "../../stores/ConstantsStore";
 import Select from "./select/Select";
 
 type PaymentMethodSelectorProps = {

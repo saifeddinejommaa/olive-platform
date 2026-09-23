@@ -49,7 +49,7 @@ export function HarvestCostsSection({
               </Text>
             </View>
             <Text style={styles.costAmount}>
-              {item.amount.toLocaleString("fr-FR")} DT
+              {item.amount && item.amount.toLocaleString("fr-FR")} DT
             </Text>
           </View>
         )}

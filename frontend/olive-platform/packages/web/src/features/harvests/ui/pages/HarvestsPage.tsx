@@ -12,7 +12,7 @@ import { usePageTitle } from "../../../../common/hooks/usePageTitle";
 import Button from "../../../../common/widgets/button/Button";
 import { IconPlus } from "@tabler/icons-react";
 import { useHarvestsStore } from "@olive-platform/core/features/harvests/stores/HarvestsStore";
-import { useConstantsStore } from "@olive-platform/core/features/appConstants/ConstantsStore";
+import { useConstantsStore } from "../../../../stores/ConstantsStore";
 import type { HarvestForList } from "@olive-platform/core/features/harvests/domain/entities/HarvestForList"
 import { renderStatus } from "../../../../common/status/StatusUtils";
 import { productionStatusConfig } from "../../../../common/status/ProductionStatusConfig";
