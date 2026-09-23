@@ -1,7 +1,7 @@
 import { useHarvestsStore } from '@olive-platform/core/features/harvests/stores/HarvestsStore';
 import { useEffect } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { ListScreen } from '../../../app/components/ListScreen';
+import { ListScreen } from '../../../components/ListScreen';
 import { HarvestListItem } from '../widgets/HarvestListItem';
 
 export const HarvestPage = () => {

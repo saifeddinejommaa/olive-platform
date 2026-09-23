@@ -19,10 +19,11 @@ export async function http<T>(
   options: RequestOptions = {},
 ): Promise<T> {
   const { apiBaseUrl } = getCoreConfig();
+  
 
   const { method = "GET", body, headers = {} } = options;
   const url = `${apiBaseUrl.replace(/\/$/, "")}/${path.replace(/^\//, "")}`; 
-  
+  console.log(url)
   const isGet = method.toUpperCase() === "GET";
   const response = await fetch(url, {
     method,

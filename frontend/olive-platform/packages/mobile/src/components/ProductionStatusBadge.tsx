@@ -9,9 +9,9 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import { ProductionStatus } from '@olive-platform/core/features/production/domain/entities/ProductionStatus';
 
-import { colors } from '../../consts/Colors';
-import { radius, spacing } from '../../consts/spacing';
-import { typography } from '../../consts/Typography';
+import { colors } from '../consts/Colors';
+import { radius, spacing } from '../consts/spacing';
+import { typography } from '../consts/Typography';
 
 type StatusConfig = {
   label: string;

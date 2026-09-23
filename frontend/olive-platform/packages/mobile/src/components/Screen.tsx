@@ -16,7 +16,6 @@ export function Screen({ children }: ScreenProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 24,
   },
   title: {
     fontSize: 32,

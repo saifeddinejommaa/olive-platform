@@ -1,13 +1,14 @@
 {
   "expo": {
-    "name": "mobile",
+    "name": "MyPlatform",
     "slug": "mobile",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "package": "com.jommaa.myplatform"
     },
     "android": {
       "adaptiveIcon": {
@@ -17,7 +18,7 @@
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.anonymous.mobile"
+      "package": "com.jommaa.myplatform"
     },
     "web": {
       "favicon": "./assets/favicon.png"

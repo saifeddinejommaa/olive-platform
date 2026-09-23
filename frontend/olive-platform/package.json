@@ -3,7 +3,9 @@
   "private": true,
   "version": "1.0.0",
   "workspaces": [
-    "packages/*"
+    "packages/core",
+    "packages/web",
+    "packages/mobile"
   ],
   "scripts": {
     "dev:web": "npm run dev --workspace=@olive-platform/web",
