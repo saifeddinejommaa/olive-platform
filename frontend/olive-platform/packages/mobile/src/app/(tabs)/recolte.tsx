@@ -1,4 +1,4 @@
-import { HarvestPage } from '../../features/harvest/components/HarvestPage';
+import { HarvestPage } from '../../features/harvest/HarvestPage';
 import { Screen } from '../../components/Screen';
 
 export default function RecolteScreen() {
