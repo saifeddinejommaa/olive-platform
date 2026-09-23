@@ -13,7 +13,7 @@ import { HarvestForList } from '@olive-platform/core/features/harvests/domain/en
 import { colors } from '../../../consts/Colors';
 import { radius, shadow, spacing } from '../../../consts/spacing';
 import { typography } from '../../../consts/Typography';
-import { ProductionStatusBadge } from '../../../app/components/ProductionStatusBadge';
+import { ProductionStatusBadge } from '../../../components/ProductionStatusBadge';
 
 type HarvestListItemProps = {
   harvest: HarvestForList;

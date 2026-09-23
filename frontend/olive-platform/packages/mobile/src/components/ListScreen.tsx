@@ -12,9 +12,9 @@ import {
 } from '@tabler/icons-react-native';
 
 import { FilterModal } from './FilterModal';
-import { colors } from '../../consts/Colors';
-import { typography } from '../../consts/Typography';
-import { radius, shadow, spacing } from '../../consts/spacing';
+import { colors } from '../consts/Colors';
+import { typography } from '../consts/Typography';
+import { radius, shadow, spacing } from '../consts/spacing';
 
 type ListScreenProps<T> = {
   title: string;

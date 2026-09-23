@@ -1,5 +1,5 @@
 {
-  "name": "MyPlatform",
+  "name": "@olive-platform/mobile",
   "version": "1.0.0",
   "main": "expo-router/entry",
   "dependencies": {

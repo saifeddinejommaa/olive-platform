@@ -6,18 +6,21 @@ import {
   IconShoppingCart,
   IconChartBar,
 } from '@tabler/icons-react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function TabsLayout() {
+  const insets = useSafeAreaInsets();
   return (
+     
     <Tabs
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: '#000000',
         tabBarInactiveTintColor: '#8A8A8A',
         tabBarStyle: {
-          height: 64,
-          paddingBottom: 8,
+          height: 64 + insets.bottom,
           paddingTop: 8,
+          paddingBottom: insets.bottom + 8,
         },
         tabBarLabelStyle: {
           fontSize: 12,
