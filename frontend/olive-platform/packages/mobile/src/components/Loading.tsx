@@ -1,11 +1,11 @@
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import { Screen } from "./Screen";
+import { semanticColors } from "../consts/Colors";
+import { spacing } from "../consts/spacing";
+import { typography } from "../consts/Typography";
 
-import { spacing } from "../../../../consts/spacing";
-import {semanticColors } from "../../../../consts/Colors";
-import { Screen } from "../../../../components/Screen";
-import { typography } from "../../../../consts/Typography";
 
-export function HarvestDetailsLoading() {
+export function Loading() {
   return (
     <Screen>
       <View style={styles.container}>

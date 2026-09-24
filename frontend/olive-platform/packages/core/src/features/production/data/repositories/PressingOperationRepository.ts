@@ -2,8 +2,6 @@ import { http, type ApiResponse } from "../../../../core/HttpClient";
 import type { PagedResult } from "../../../../core/PagedResult";
 import { buildQueryParams } from "../../../../core/QueryUtils";
 import type { PressingOperationFilters } from "../../domain/entities/PressingOperationFilters";
-import { PressingOperationMapper } from "../mappers/PressingOperationMapper";
-import type { PressingOperationResponse } from "../responses/PressingOperationResponse";
 import type { CreatePressingOperationParams } from "../../domain/params/CreatePressingOperationParams";
 import { CreatePressingOperationMapper } from "../mappers/requests/CreatePressingOperationMapper";
 import type { PressingOperationDetails } from "../../domain/entities/PressingOperationDetails";
@@ -11,18 +9,19 @@ import type { StartPressingOperationRequest } from "../requests/StartPressingOpe
 import type { ClosePressingOperationRequest } from "../requests/ClosePressingOperationRequest";
 import type { PressingOperationInputDetails } from "../../domain/entities/PressingOperationInputDetails";
 import type { UpdatePressingOperationParams } from "../../domain/params/UpdatePressingOperationParams";
+import type { PressingOperationForList } from "../../domain/entities/PressingOperationForList";
 
 export const PressingOperationRepository = {
   getAll: async (filters?: PressingOperationFilters) => {
     const params = buildQueryParams(filters as any);
     const httpResponse = await http<
-      ApiResponse<PagedResult<PressingOperationResponse>>
+      ApiResponse<PagedResult<PressingOperationForList>>
     >(`pressingoperations?${params.toString()}`);
     return {
       pageNumber: httpResponse.Response.pageNumber,
       pageSize: httpResponse.Response.pageSize,
       totalCount: httpResponse.Response.totalCount,
-      items: httpResponse.Response.items.map(PressingOperationMapper),
+      items: httpResponse.Response.items,
     };
   },
 
@@ -64,11 +63,10 @@ export const PressingOperationRepository = {
   },
 
   startPressingOperation: async (
-    operationId: number,
     params: StartPressingOperationRequest,
   ) => {
     return await http<ApiResponse<PressingOperationDetails>>(
-      `pressingoperations/start?id=${operationId}`,
+      `pressingoperations/start?id=${params.operationId}`,
       {
         method: "PUT",
         body: params,
@@ -77,11 +75,10 @@ export const PressingOperationRepository = {
   },
 
   closePressingOperation: async (
-    operationId: number,
     params: ClosePressingOperationRequest,
   ) => {
     return await http<ApiResponse<number>>(
-      `pressingoperations/close?id=${operationId}`,
+      `pressingoperations/close?id=${params.id}`,
       {
         method: "PUT",
         body: params,

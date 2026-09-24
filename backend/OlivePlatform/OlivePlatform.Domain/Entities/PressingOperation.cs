@@ -13,10 +13,10 @@ public class PressingOperation
     public string OperationNumber { get; set; } = null!;
 
     [Column("start_time")]
-    public DateTime? StartTime { get; set; }
+    public TimeOnly? StartTime { get; set; }
 
     [Column("end_time")]
-    public DateTime? EndTime { get; set; }
+    public TimeOnly? EndTime { get; set; }
 
     [Column("status_id")]
     public ProductionStatus Status { get; set; }
@@ -29,6 +29,12 @@ public class PressingOperation
 
     [Column("created_at")]
     public DateTime CreatedAt { get; set; }
+
+    [Column("pressing_date")]
+    public DateOnly PressingDate { get; set; }
+
+    [Column("updated_at")]
+    public DateTime UpdatedAt { get; set; }
 
     [Column("expected_oil_liters")]
     public decimal? ExpectedOilLiters { get; set; }

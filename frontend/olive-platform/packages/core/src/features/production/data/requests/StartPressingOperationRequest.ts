@@ -1,3 +1,3 @@
 export type StartPressingOperationRequest = {
-  startDate: string;
+  operationId: number
 };

@@ -12,7 +12,7 @@ public class PressingOperationForListResponse
 
     public ProductionStatus Status { get; set; }
 
-    public DateTime CreatedAt { get; set; }
+    public DateOnly PressingDate { get; set; }
 
     public decimal? OliveQuantityKg { get; set; }
 
@@ -20,7 +20,11 @@ public class PressingOperationForListResponse
 
     public decimal? YieldPercentage { get; set; }
 
-    public DateTime? StartTime { get; set; }
+    public TimeOnly? StartTime { get; set; }
 
-    public DateTime? EndTime { get; set; }
+    public TimeOnly? EndTime { get; set; }
+
+    public ProductionStatus? OliveAnalysis { get; set; }
+
+    public ProductionStatus? OilAnalysis { get; set; }
 }

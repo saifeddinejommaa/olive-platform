@@ -1,14 +1,14 @@
 import { create } from "zustand";
 import type { PagedResult } from "../../../core/PagedResult";
 import type { PressingOperationFilters } from "../domain/entities/PressingOperationFilters";
-import type { PressingOperation } from "../domain/entities/PressingOperation";
 import { GetPressingOperations } from "../domain/useCases/GetPressingOperations";
+import type { PressingOperationForList } from "../domain/entities/PressingOperationForList";
 
 type PressingOperations = {
-  PressingOperations: PagedResult<PressingOperation>;
+  PressingOperations: PagedResult<PressingOperationForList>;
   loading: boolean;
   filters: PressingOperationFilters;
-
+  error: string | null,
   setFilter: (key: string, value: any) => void;
   clearFilters: () => void;
   fetchPressingOperations: () => Promise<void>;
@@ -31,6 +31,7 @@ export const usePressingOperationsStore = create<PressingOperations>(
       pageNumber: 1,
       pageSize: 10,
     },
+    error: null,
     setFilter: (key, value) =>
       set((state) => ({
         filters: {

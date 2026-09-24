@@ -1,7 +1,5 @@
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import {
-  IconCalendarEvent,
-  IconChevronRight,
   IconClock,
   IconDroplet,
   IconFlask2,
@@ -11,45 +9,22 @@ import {
 
 import { HarvestForList } from '@olive-platform/core/features/harvests/domain/entities/HarvestForList';
 import { colors } from '../../../consts/Colors';
-import { radius, shadow, spacing } from '../../../consts/spacing';
+import { radius, spacing } from '../../../consts/spacing';
 import { typography } from '../../../consts/Typography';
-import { ProductionStatusBadge } from '../../../components/ProductionStatusBadge';
+import { formatDateOnly, formatTimeOnly } from '../../../utils/formatter';
+import { ListItemCard } from '../../../components/ListItemCard';
+import { ListItemHeader } from '../../../components/ListItemHeader';
+import { StepIndicatorRow } from '../../../components/StepIndicatorRow';
+import { ProductionStatus } from '@olive-platform/core/features/production/domain/entities/ProductionStatus';
 
 type HarvestListItemProps = {
   harvest: HarvestForList;
   onPress?: (harvest: HarvestForList) => void;
 };
 
-
-
-function formatTime(time: string | null): string | null {
-  if (!time) return null;
-
-  // TimeOnly arrive depuis l'API sous la forme "08:30:00"
-  // On affiche uniquement "08:30"
-  return time.slice(0, 5);
-}
-
-function formatDate(date: string | null): string | null {
-  if (!date) return null;
-
-  // DateOnly arrive sous la forme "2026-09-21"
-  const parts = date.split('-');
-
-  if (parts.length !== 3) return null;
-
-  const [year, month, day] = parts;
-
-  return `${day}/${month}`;
-}
-
-export function HarvestListItem({
-  harvest,
-  onPress,
-}: HarvestListItemProps) {
-
-  const startTime = formatTime(harvest.startTime);
-  const endTime = formatTime(harvest.endTime);
+export function HarvestListItem({ harvest, onPress }: HarvestListItemProps) {
+  const startTime = formatTimeOnly(harvest.startTime);
+  const endTime = formatTimeOnly(harvest.endTime);
 
   let period = 'Horaire non défini';
 
@@ -62,42 +37,25 @@ export function HarvestListItem({
   }
 
   return (
-    <TouchableOpacity
-      style={styles.card}
-      activeOpacity={0.8}
-      onPress={() => onPress?.(harvest)}
-    >
-      {/* En-tête */}
-      <View style={styles.header}>
-        <View style={styles.headerMain}>
-          <Text style={styles.reference} numberOfLines={1}>
-            {harvest.reference}
-          </Text>
-
-          <Text style={styles.date}>
-            {formatDate(harvest.harvestDate)}
-          </Text>
-        </View>
-
-        <ProductionStatusBadge status={harvest.status}/>
-      </View>
+    <ListItemCard onPress={() => onPress?.(harvest)}>
+      <ListItemHeader
+        title={harvest.reference}
+        subtitle={formatDateOnly(harvest.harvestDate) ?? undefined}
+        status={harvest.status}
+      />
 
       {/* Parcelle + variété */}
       <View style={styles.metaRow}>
         <View style={styles.metaItem}>
           <IconMapPin size={14} color={colors.textMuted} />
-          <Text style={styles.metaText}>
-            Parcelle #{harvest.plotId}
-          </Text>
+          <Text style={styles.metaText}>Parcelle #{harvest.plotId}</Text>
         </View>
 
         <View style={styles.metaDot} />
 
         <View style={styles.metaItem}>
           <IconTree size={14} color={colors.textMuted} />
-          <Text style={styles.metaText}>
-            {harvest.variety}
-          </Text>
+          <Text style={styles.metaText}>{harvest.variety}</Text>
         </View>
       </View>
 
@@ -106,103 +64,53 @@ export function HarvestListItem({
         <IconClock size={18} color={colors.olive[700]} />
 
         <View>
-          <Text style={styles.timeLabel}>
-            Horaire de récolte
-          </Text>
-
-          <Text style={styles.timeValue}>
-            {period}
-          </Text>
+          <Text style={styles.timeLabel}>Horaire de récolte</Text>
+          <Text style={styles.timeValue}>{period}</Text>
         </View>
       </View>
 
-      {/* Footer */}
-      <View style={styles.footer}>
-        <View style={styles.footerRight}>
-          {harvest.pressed && (
-            <View style={styles.stepIcon}>
-              <IconDroplet
-                size={14}
-                color={colors.teal[700]}
-              />
-            </View>
-          )}
-
-          {harvest.analysis && (
-            <View style={styles.stepIcon}>
-              <IconFlask2
-                size={14}
-                color={colors.gold[700]}
-              />
-            </View>
-          )}
-
-          <IconChevronRight
-            size={18}
-            color={colors.textMuted}
-          />
-        </View>
-      </View>
-    </TouchableOpacity>
+      <StepIndicatorRow
+        steps={[
+          {
+            key: 'pressed',
+            visible: harvest.pressed == ProductionStatus.Completed,
+            icon: IconDroplet,
+            color: colors.teal[700],
+          },
+          {
+            key: 'analysis',
+            visible: harvest.analysis == ProductionStatus.Completed,
+            icon: IconFlask2,
+            color: colors.gold[700],
+          },
+        ]}
+      />
+    </ListItemCard>
   );
 }
 
 const styles = StyleSheet.create({
-  card: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.lg,
-    padding: spacing.lg,
-    marginBottom: spacing.md,
-    ...shadow.card,
-  },
-
-  header: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
-    gap: spacing.sm,
-  },
-
-  headerMain: {
-    flex: 1,
-  },
-
-  reference: {
-    ...typography.h3,
-    color: colors.textPrimary,
-  },
-
-  date: {
-    ...typography.caption,
-    color: colors.textMuted,
-    marginTop: 2,
-  },
-
   metaRow: {
     flexDirection: 'row',
     alignItems: 'center',
     marginTop: spacing.sm,
     gap: spacing.sm,
   },
-
   metaItem: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
   },
-
   metaText: {
     ...typography.caption,
     color: colors.textSecondary,
   },
-
   metaDot: {
     width: 3,
     height: 3,
     borderRadius: radius.pill,
     backgroundColor: colors.textMuted,
   },
-
   timeBlock: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -212,41 +120,13 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
     backgroundColor: colors.background,
   },
-
   timeLabel: {
     ...typography.caption,
     color: colors.textMuted,
   },
-
   timeValue: {
     ...typography.label,
     color: colors.textPrimary,
     marginTop: 2,
   },
-
-  footer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-    marginTop: spacing.md,
-    paddingTop: spacing.md,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-  },
-
-  footerRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-  },
-
-  stepIcon: {
-    width: 24,
-    height: 24,
-    borderRadius: radius.pill,
-    backgroundColor: colors.background,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
 });
-

@@ -10,7 +10,7 @@ public class UpdatePressingOperationCommand : IRequest<bool>
 {
     public int Id { get; set; }
 
-    public DateTime? PlanificationDate { get; set; }
+    public DateOnly? PlanificationDate { get; set; }
 
     public List<NewPressingOperationInputRequest>? Inputs { get; set; }
 
@@ -49,7 +49,7 @@ public class UpdatePressingOperationCommandHandler
 
         if (request.PlanificationDate.HasValue)
         {
-            pressingOperation.CreatedAt =
+            pressingOperation.PressingDate =
                 request.PlanificationDate.Value;
         }
 

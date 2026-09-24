@@ -2,8 +2,7 @@ import { PressingOperationRepository } from "../../data/repositories/PressingOpe
 import type { ClosePressingOperationRequest } from "../../data/requests/ClosePressingOperationRequest";
 
 export const ClosePressingOperation = async (
-  id: number,
   request: ClosePressingOperationRequest,
 ) => {
-  return await PressingOperationRepository.closePressingOperation(id, request);
+  return await PressingOperationRepository.closePressingOperation(request);
 };

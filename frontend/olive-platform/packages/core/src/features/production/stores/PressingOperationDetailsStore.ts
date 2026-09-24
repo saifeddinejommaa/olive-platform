@@ -132,8 +132,8 @@ export const usePressingOperationDetailsStore =
       });
 
       try {
-        const result = await StartPressingOperation(id, {
-          startDate: new Date().toISOString(),
+        const result = await StartPressingOperation( {
+          operationId: id,
         });
 
         if (result.Code !== 200) {
@@ -172,10 +172,7 @@ export const usePressingOperationDetailsStore =
       });
 
       try {
-        const result = await ClosePressingOperation(params.id, {
-          endDate: params.endDate,
-          oilQuantity: params.oliveQuantity,
-        });
+        const result = await ClosePressingOperation({id:params.id,oilQuantity:params.oilQuantity,proceedOilAnalysis:params.proceedOilAnalysis});
 
         if (result.Code !== 200) {
           set({

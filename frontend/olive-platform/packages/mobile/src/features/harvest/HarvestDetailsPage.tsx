@@ -6,12 +6,12 @@ import { Screen } from "../../components/Screen";
 import { HarvestCostsSection } from "./widgets/HarvestCostsSection";
 import { CloseHarvestSheet } from "./components/details/CloseHarvestSheet";
 import { spacing } from "../../consts/spacing";
-import { HarvestDetailsLoading } from "./components/details/HarvestDetailsLoading";
-import { HarvestActionCard } from "./components/details/HarvestActionCard";
-import { HarvestDetailsHeader } from "./components/details/HarvestDetailsHeader";
 import { HarvestSummaryCard } from "./components/details/HarvestSummaryCard";
 import { HarvestGeneralSection } from "./components/details/HarvestGeneralSection";
 import { HarvestMobileTab, HarvestTabs } from "./components/details/HarvestTabs";
+import { Loading } from "../../components/Loading";
+import { DetailsHeader } from "../../components/DetailsHeader";
+import { ActionCard } from "../../components/ActionCard";
 
 type Props = { harvestId: number };
 
@@ -63,7 +63,7 @@ export function HarvestDetailsPage({ harvestId }: Props) {
   );
 
   if (!harvest) {
-    return <HarvestDetailsLoading />;
+    return <Loading />;
   }
 
   return (
@@ -72,12 +72,12 @@ export function HarvestDetailsPage({ harvestId }: Props) {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.content}
       >
-        <HarvestDetailsHeader/>
+        <DetailsHeader title="Détails Récole"/>
 
         <HarvestSummaryCard harvest={harvest} />
 
         {isPlanned && (
-          <HarvestActionCard
+          <ActionCard
             icon="▶"
             title="Lancer la récolte"
             subtitle="Commencer les opérations"
@@ -87,7 +87,7 @@ export function HarvestDetailsPage({ harvestId }: Props) {
         )}
 
         {isInProgress && (
-          <HarvestActionCard
+          <ActionCard
             icon="✓"
             title="Clôturer la récolte"
             subtitle="Enregistrer les résultats"

@@ -1,14 +1,15 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { IconChevronLeft } from "@tabler/icons-react-native";
-import { typography } from "../../../../consts/Typography";
-import { radius, shadow, spacing } from "../../../../consts/spacing";
-import { colors, semanticColors } from "../../../../consts/Colors";
+import { typography } from "../consts/Typography";
+import { radius, shadow, spacing } from "../consts/spacing";
+import { colors, semanticColors } from "../consts/Colors";
 
 type Props = {
+  title: string;
   onBack?: () => void;
 };
 
-export function HarvestDetailsHeader({ onBack }: Props) {
+export function DetailsHeader({ title, onBack }: Props) {
   return (
     <View style={styles.container}>
       <Pressable
@@ -21,7 +22,7 @@ export function HarvestDetailsHeader({ onBack }: Props) {
         <IconChevronLeft size={22} color={semanticColors.textPrimary} />
       </Pressable>
 
-      <Text style={[typography.h2, styles.title]}>Détails récolte</Text>
+      <Text style={[typography.h2, styles.title]}>{title}</Text>
     </View>
   );
 }

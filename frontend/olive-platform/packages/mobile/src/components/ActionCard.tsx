@@ -1,7 +1,7 @@
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
-import { radius, shadow, spacing } from "../../../../consts/spacing";
-import { colors, semanticColors } from "../../../../consts/Colors";
-import { typography } from "../../../../consts/Typography";
+import { radius, shadow, spacing } from "../consts/spacing";
+import { colors, semanticColors } from "../consts/Colors";
+import { typography } from "../consts/Typography";
 
 type Props = {
   icon: string;
@@ -11,7 +11,7 @@ type Props = {
   onPress: () => void;
 };
 
-export function HarvestActionCard({
+export function ActionCard({
   icon,
   title,
   subtitle,
