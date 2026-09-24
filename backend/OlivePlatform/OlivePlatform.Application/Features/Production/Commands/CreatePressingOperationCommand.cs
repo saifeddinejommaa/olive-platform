@@ -12,15 +12,11 @@ public class CreatePressingOperationCommand : IRequest<Unit>
 {
     public required List<NewPressingOperationInputRequest> Inputs { get; set; }
 
-    public DateTime CreatedAt { get; set; }
-
-    public DateTime? StartTime { get; set; }
-
-    public DateTime? EndTime { get; set; }
-
     public int Status { get; set; } = 0;
 
     public decimal? OliveQuantityKg { get; set; }
+
+    public DateOnly PressingDate { get; set; }
 
     public decimal? OilQuantityLiters { get; set; }
 
@@ -50,7 +46,8 @@ public class CreateProductionBatchCommandHandler
         CreatePressingOperationCommand request,
         CancellationToken cancellationToken)
     {
-        var year = request.CreatedAt.Year;
+
+        var year = request.PressingDate.Year;
         var operationNumber =
            await _documentNumberService.GenerateAsync(
                DocumentTypes.Pressing,
@@ -62,14 +59,14 @@ public class CreateProductionBatchCommandHandler
             request.Inputs,
             cancellationToken);
 
+        var utcNow = DateTime.UtcNow;
+
         var pressingOperation = new PressingOperation
         {
             OperationNumber = operationNumber,
-            StartTime = request.StartTime,
-            EndTime = request.EndTime,
             Status = (ProductionStatus)request.Status,
             OilQuantityLiters = request.OilQuantityLiters,
-            CreatedAt = request.CreatedAt,
+            CreatedAt = utcNow,
             Notes = request.Notes,
             ExpectedOilLiters = expectedOilLiters
         };
@@ -87,7 +84,7 @@ public class CreateProductionBatchCommandHandler
                HarvestId = input.HarvestId,
                PurchaseItemId = input.PurchaseItemId,
                QuantityKg = input.QuantityKg,
-               CreatedAt = request.CreatedAt,
+               CreatedAt = utcNow,
            })
            .ToList();
 

@@ -1,13 +1,20 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import {
+  createJSONStorage,
+  persist,
+} from "zustand/middleware";
 
 import type { AppConstants } from "./domain/models/AppConstants";
 import { getAppConstants } from "./domain/useCases/GetAppConstants";
+import type { ConstantsStorage } from "./ConstantsStorage";
 
 type AppConstantsState = {
   Appconstants: AppConstants;
+
   loading: boolean;
+
   loaded: boolean;
+
   hydrated: boolean;
 
   fetchConstants: () => Promise<void>;
@@ -22,48 +29,60 @@ const initialConstants: AppConstants = {
   paymentMethods: [],
   purchaseStatus: [],
   costLineTypes: [],
-  harvestTypes: []
+  harvestTypes: [],
 };
 
-export const useConstantsStore = create<AppConstantsState>()(
-  persist(
-    (set, get) => ({
-      Appconstants: initialConstants,
-      loading: false,
-      loaded: false,
-      hydrated: false,
-      fetchConstants: async () => {
-        if (get().loaded || get().loading) {
-          return;
-        }
+export function createConstantsStore(
+  storage: ConstantsStorage,
+) {
+  return create<AppConstantsState>()(
+    persist(
+      (set, get) => ({
+        Appconstants: initialConstants,
 
-        set({
-          loading: true,
-        });
+        loading: false,
 
-        try {
-          const data = await getAppConstants();
+        loaded: false,
+
+        hydrated: false,
+
+        fetchConstants: async () => {
+          const state = get();
+          if (state.loaded || state.loading) {
+            return;
+          }
+
           set({
-            Appconstants: data,
-            loaded: true,
+            loading: true,
           });
-        } finally {
-          set({
-            loading: false,
-          });
-        }
-      },
-    }),
-    {
-      name: "olive-platform-constants",
 
-      onRehydrateStorage: () => {
-        return () => {
-          useConstantsStore.setState({
-            hydrated: true,
-          });
-        };
+          try {
+            const data = await getAppConstants();
+
+            set({
+              Appconstants: data,
+
+              loaded: true,
+            });
+          } finally {
+            set({
+              loading: false,
+            });
+          }
+        },
+      }),
+      {
+        name: "olive-platform-constants",
+
+        storage: createJSONStorage(
+          () => storage,
+        ),
+
+        onRehydrateStorage: () => {
+          return () => {
+          };
+        },
       },
-    },
-  ),
-);
+    ),
+  );
+}

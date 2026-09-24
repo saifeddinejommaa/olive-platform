@@ -3,15 +3,9 @@ import type { CreatePressingOperationInputParams } from "./CreatePressingOperati
 export type UpdatePressingOperationParams = {
   id: number;
 
-  startTime: string | null;
+  planificationDate?: string;
 
-  endTime: string | null;
+  notes?: string | null;
 
-  oliveQuantityKg: number | null;
-
-  oilQuantityLiters: number | null;
-
-  notes: string | null;
-
-  inputs: CreatePressingOperationInputParams[];
+  inputs?: CreatePressingOperationInputParams[];
 };

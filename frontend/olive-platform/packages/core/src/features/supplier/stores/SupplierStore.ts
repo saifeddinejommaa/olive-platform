@@ -22,7 +22,6 @@ export const useSupplierStore = create<SupplierState>((set) => ({
 
     try {
       const suppliers = await GetSuppliers();
-console.log(suppliers)
       set({
         suppliers,
         loading: false,

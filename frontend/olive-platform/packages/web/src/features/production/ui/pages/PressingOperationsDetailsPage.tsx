@@ -463,8 +463,7 @@ export default function PressingOperationDetailsPage() {
         const params: UpdatePressingOperationParams =
           {
             id: operation.id,
-            startTime: operation.startTime,
-            endTime: operation.endTime,
+            planificationDate: operation.startTime,
             oliveQuantityKg:
               operation.oliveQuantityKg,
             oilQuantityLiters:

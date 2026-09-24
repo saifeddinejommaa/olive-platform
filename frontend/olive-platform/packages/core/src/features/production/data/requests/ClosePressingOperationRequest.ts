@@ -1,4 +1,5 @@
 export type ClosePressingOperationRequest = {
-  endDate: string;
+  id: number;
   oilQuantity: number;
+  proceedOilAnalysis: boolean
 };

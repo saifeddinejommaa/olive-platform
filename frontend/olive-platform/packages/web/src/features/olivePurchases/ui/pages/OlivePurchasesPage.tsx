@@ -10,7 +10,7 @@ import OlivePurchasesFilterComponent from "../components/OlivePurchasesFilterCom
 import { usePageTitle } from "../../../../common/hooks/usePageTitle";
 
 import { useOlivePurchasesStore } from "@olive-platform/core/features/olivePurchases/stores/OlivePurchaseStore";
-import { useConstantsStore } from "@olive-platform/core/features/appConstants/ConstantsStore";
+import { useConstantsStore } from "../../../../stores/ConstantsStore";
 import type { OlivePurchaseForList } from "@olive-platform/core/features/olivePurchases/domain/entities/OlivePurchaseForList";
 import Button from "../../../../common/widgets/button/Button";
 import { IconPlus } from "@tabler/icons-react";

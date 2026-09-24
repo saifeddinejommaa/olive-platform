@@ -1,10 +1,12 @@
 import { useHarvestsStore } from '@olive-platform/core/features/harvests/stores/HarvestsStore';
 import { useEffect } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { ListScreen } from '../../../components/ListScreen';
-import { HarvestListItem } from '../widgets/HarvestListItem';
+import { ListScreen } from '../../components/ListScreen';
+import { HarvestListItem } from './widgets/HarvestListItem';
+import { useRouter } from 'expo-router';
 
 export const HarvestPage = () => {
+  const router = useRouter();
   const {
     harvests,
     loading,
@@ -26,7 +28,15 @@ export const HarvestPage = () => {
         console.log('Créer une récolte');
       }}
       renderItem={({ item }) => (
-        <HarvestListItem harvest={item} />
+        <HarvestListItem
+          harvest={item}
+          onPress={(harvest) =>
+            router.push({
+              pathname: '/harvest/[id]',
+              params: { id: harvest.id.toString() },
+            })
+          }
+        />
       )}
       emptyTitle={
         loading

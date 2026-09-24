@@ -8,8 +8,6 @@ namespace OlivePlatform.Application.Features.Production.Commands
     {
         public int Id { get; set; }
 
-        public DateTime? EndDate { get; set; }
-
         public int OilQuantity { get; set; }
     }
 
@@ -36,6 +34,8 @@ namespace OlivePlatform.Application.Features.Production.Commands
                 request.Id,
                 cancellationToken);
 
+            var now = DateTime.UtcNow;
+
             if (pressingOperation is null)
             {
                 throw new KeyNotFoundException(
@@ -55,7 +55,7 @@ namespace OlivePlatform.Application.Features.Production.Commands
                     cancellationToken);
             }
 
-            pressingOperation.EndTime = request.EndDate;
+            pressingOperation.EndTime = TimeOnly.FromDateTime(now);
             pressingOperation.OilQuantityLiters = request.OilQuantity;
             pressingOperation.Status = ProductionStatus.Completed;
             pressingOperation.OilYieldDeviationLiters = pressingOperation.ExpectedOilLiters is not null

@@ -8,8 +8,6 @@ namespace OlivePlatform.Application.Features.Production.Commands
     public class StartPressingOperationCommand : IRequest<PressingOperation>
     {
         public int Id { get; set; }
-
-        public DateTime StartDate { get; set; }
     }
 
     public class StartPressingOperationCommandHandler
@@ -44,6 +42,8 @@ namespace OlivePlatform.Application.Features.Production.Commands
                 request.Id,
                 cancellationToken);
 
+            var now = DateTime.UtcNow;
+
             foreach (var input in inputs)
             {
                 if (input.Status == PressingOperationInputStatus.Reserved)
@@ -56,7 +56,8 @@ namespace OlivePlatform.Application.Features.Production.Commands
                 }
             }
 
-            pressingOperation.StartTime = request.StartDate;
+            pressingOperation.StartTime = TimeOnly.FromDateTime(now);
+            pressingOperation.PressingDate = DateOnly.FromDateTime(now);
             pressingOperation.Status = ProductionStatus.InProgress;
 
             await _repository.UpdateAsync(

@@ -19,20 +19,38 @@ public class PressingOperationQueryRepository : IPressiongOperationQueryReposito
     }
 
     public async Task<PagedResult<PressingOperationForListResponse>> GetPressingOperations(
-     PressingOperationsRequestFilter filter)
+    PressingOperationsRequestFilter filter)
     {
         var sql = new StringBuilder(
             $"""
-        SELECT DISTINCT
-            COUNT(*) OVER() {nameof(PressingOperationDetailsResponse.Total)},
+        SELECT
+            COUNT(*) OVER() AS {nameof(PressingOperationForListResponse.Total)},
 
-            p.id {nameof(PressingOperationDetailsResponse.Id)},
-            p.operation_number {nameof(PressingOperationDetailsResponse.OperationNumber)},
-            p.start_time  {nameof(PressingOperationDetailsResponse.StartTime)},
-            p.created_at  {nameof(PressingOperationDetailsResponse.CreatedAt)},
-            p.end_time {nameof(PressingOperationDetailsResponse.EndTime)},
-            p.status_id {nameof(PressingOperationDetailsResponse.Status)},
-            p.oil_quantity_liters {nameof(PressingOperationDetailsResponse.OilQuantityLiters)}
+            p.id AS {nameof(PressingOperationForListResponse.Id)},
+            p.operation_number AS {nameof(PressingOperationForListResponse.OperationNumber)},
+            p.status_id AS {nameof(PressingOperationForListResponse.Status)},
+
+            p.pressing_date AS {nameof(PressingOperationForListResponse.PressingDate)},
+
+            COALESCE(
+                SUM(poi.quantity_kg),
+                0
+            ) AS {nameof(PressingOperationForListResponse.OliveQuantityKg)},
+
+            p.oil_quantity_liters AS {nameof(PressingOperationForListResponse.OilQuantityLiters)},
+
+            CASE
+                WHEN COALESCE(SUM(poi.quantity_kg), 0) > 0
+                     AND p.oil_quantity_liters IS NOT NULL
+                THEN
+                    (p.oil_quantity_liters / SUM(poi.quantity_kg)) * 100
+                ELSE NULL
+            END AS {nameof(PressingOperationForListResponse.YieldPercentage)},
+
+            p.start_time AS {nameof(PressingOperationForListResponse.StartTime)},
+            p.end_time AS {nameof(PressingOperationForListResponse.EndTime)},
+
+            MAX(poi.status) AS {nameof(PressingOperationForListResponse.OliveAnalysis)}
 
         FROM pressing_operations p
 
@@ -103,6 +121,23 @@ public class PressingOperationQueryRepository : IPressiongOperationQueryReposito
                 "PurchaseNumber",
                 $"%{filter.PurchaseNumber}%");
         }
+
+        // ========================================================
+        // GROUP BY
+        // ========================================================
+
+        sql.Append(
+            """
+        
+        GROUP BY
+            p.id,
+            p.operation_number,
+            p.status_id,
+            p.pressing_date,
+            p.oil_quantity_liters,
+            p.start_time,
+            p.end_time
+        """);
 
         // ========================================================
         // PAGINATION

@@ -6,7 +6,7 @@ import Button from "../../../../common/widgets/button/Button";
 import TextInput from "../../../../common/widgets/textInput/TextInput";
 import TextEditor from "../../../../common/widgets/textEditor/TextEditor";
 
-import { useConstantsStore } from "@olive-platform/core/features/appConstants/ConstantsStore";
+import { useConstantsStore } from "../../../../stores/ConstantsStore";
 import type { SourceOption } from "../widgets/SourceReference";
 import type {
   InputSourceType,
