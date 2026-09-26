@@ -21,7 +21,7 @@ public class HarvestRepository : IHarvestRepository
     {
         return await _context.Harvests
             .Where(x => x.PlotId == plotId)
-            .OrderByDescending(x => x.HarvestDate)
+            .OrderByDescending(x => x.PlannedDate)
             .ToListAsync(cancellationToken);
     }
 

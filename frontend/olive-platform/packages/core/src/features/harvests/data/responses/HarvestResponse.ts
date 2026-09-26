@@ -6,7 +6,7 @@ export type HarvestResponse = {
 
   plotName: string;
 
-  harvestDate: string;
+  plannedDate: string;
 
   startTime: string | null;
 

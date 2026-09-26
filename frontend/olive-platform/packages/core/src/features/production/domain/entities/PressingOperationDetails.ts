@@ -4,7 +4,7 @@ import type { ProductionStatus } from "./ProductionStatus";
 export type PressingOperationDetails = {
   id: number;
   operationNumber: string;
-  pressingDate: string;
+  plannedDate: string;
   status: ProductionStatus;
   oliveQuantityKg: number;
   oilQuantityLiters: number | null;

@@ -6,10 +6,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
-  Platform,
 } from "react-native";
-import DateTimePicker from "@react-native-community/datetimepicker";
-import { IconCalendarEvent } from "@tabler/icons-react-native";
 
 import { usePressingOperationDetailsStore } from "@olive-platform/core/features/production/stores/PressingOperationDetailsStore";
 import { ProductionStatus } from "@olive-platform/core/features/production/domain/entities/ProductionStatus";
@@ -18,6 +15,7 @@ import { colors, semanticColors } from "../../../consts/Colors";
 import { typography } from "../../../consts/Typography";
 import { radius, shadow, spacing } from "../../../consts/spacing";
 import { formatDate } from "@olive-platform/core/features/shared/utils/DatesUtils";
+import { DatePickerField, safeParseDate } from "../../../widgets/DatePickerField";
 
 type PressingParameters = {
   id: number;
@@ -35,18 +33,12 @@ type PressingParameters = {
   notes: string | null;
 };
 
-type ExistingInput = {
-  harvestId: number | null;
-  purchaseItemId: number | null;
-  quantityKg: number;
-};
-
 type Props = {
   operation: {
     id: number;
     operationNumber: string;
     status: ProductionStatus;
-    pressingDate: string;
+    plannedDate: string;
     oliveQuantityKg: number;
     oilQuantityLiters: number | null;
     expectedOilLiters: number | null;
@@ -55,9 +47,6 @@ type Props = {
   };
 };
 
-
-
-
 function numToStr(value: number | null) {
   return value != null ? String(value) : "";
 }
@@ -65,10 +54,9 @@ function numToStr(value: number | null) {
 export function PressingGeneralInfoCard({ operation }: Props) {
   const [isEditing, setIsEditing] = useState(false);
 
-  const [planificationDate, setPlanificationDate] = useState(
-    new Date(operation.pressingDate),
+  const [plannedDate, setPlannedDate] = useState(
+    safeParseDate(operation.plannedDate),
   );
-  const [showDatePicker, setShowDatePicker] = useState(false);
 
   const [notes, setNotes] = useState(operation.notes ?? "");
 
@@ -81,7 +69,7 @@ export function PressingGeneralInfoCard({ operation }: Props) {
   const canEdit = isPlanned || isInProgress;
 
   const resetFromOperation = () => {
-    setPlanificationDate(new Date(operation.pressingDate));
+    setPlannedDate(safeParseDate(operation.plannedDate));
     setNotes(operation.notes ?? "");
   };
 
@@ -93,31 +81,21 @@ export function PressingGeneralInfoCard({ operation }: Props) {
   const handleCancel = () => {
     resetFromOperation();
     setIsEditing(false);
-    setShowDatePicker(false);
   };
 
- const handleSave = async () => {
+  const handleSave = async () => {
     try {
       await updateOperation({
         id: operation.id,
-        planificationDate: canEditDate
-          ? planificationDate.toISOString()
-          : operation.pressingDate,
-        notes
+        plannedDate: canEditDate
+          ? plannedDate.toISOString()
+          : operation.plannedDate,
+        notes,
       });
 
       setIsEditing(false);
-      setShowDatePicker(false);
     } catch {
       Alert.alert("Erreur", "Impossible de mettre à jour les informations.");
-    }
-  };
-
-  const handleDateChange = (_event: any, selectedDate?: Date) => {
-    setShowDatePicker(Platform.OS === "ios");
-
-    if (selectedDate) {
-      setPlanificationDate(selectedDate);
     }
   };
 
@@ -137,32 +115,12 @@ export function PressingGeneralInfoCard({ operation }: Props) {
           Date de pressurage
         </Text>
 
-        {isEditing && canEditDate ? (
-          <TouchableOpacity
-            style={styles.dateButton}
-            onPress={() => setShowDatePicker(true)}
-          >
-            <IconCalendarEvent size={18} color={semanticColors.primary} />
-
-            <Text style={[typography.bodyStrong, styles.dateValue]}>
-              {formatDate(planificationDate.toISOString())}
-            </Text>
-          </TouchableOpacity>
-        ) : (
-          <Text style={[typography.bodyStrong, styles.value]}>
-            {formatDate(operation.pressingDate)}
-          </Text>
-        )}
-      </View>
-
-      {isEditing && canEditDate && showDatePicker && (
-        <DateTimePicker
-          value={planificationDate}
-          mode="date"
-          display={Platform.OS === "ios" ? "spinner" : "default"}
-          onChange={handleDateChange}
+        <DatePickerField
+          value={plannedDate}
+          editable={isEditing && canEditDate}
+          onChange={setPlannedDate}
         />
-      )}
+      </View>
 
       {/* Quantité d'olives — dérivée des intrants, lecture seule */}
       <View style={styles.row}>
@@ -224,53 +182,22 @@ export function PressingGeneralInfoCard({ operation }: Props) {
             Paramètres de pressurage
           </Text>
 
-          <ParamReadOnlyRow
-            label="Température malaxage (°C)"
-            value={numToStr(operation.parameters.malaxingTemperatureC)}
-          />
-          <ParamReadOnlyRow
-            label="Durée malaxage (min)"
-            value={numToStr(operation.parameters.malaxingDurationMinutes)}
-          />
-          <ParamReadOnlyRow
-            label="Vitesse malaxage (rpm)"
-            value={numToStr(operation.parameters.malaxingSpeedRpm)}
-          />
-          <ParamReadOnlyRow
-            label="Débit d'alimentation (kg/h)"
-            value={numToStr(operation.parameters.feedRateKgH)}
-          />
-          <ParamReadOnlyRow
-            label="Vitesse décanteur (rpm)"
-            value={numToStr(operation.parameters.decanterSpeedRpm)}
-          />
-          <ParamReadOnlyRow
-            label="Différentiel décanteur (rpm)"
-            value={numToStr(operation.parameters.decanterDifferentialRpm)}
-          />
-          <ParamReadOnlyRow
-            label="Vitesse centrifugeuse (rpm)"
-            value={numToStr(operation.parameters.centrifugeSpeedRpm)}
-          />
-          <ParamReadOnlyRow
-            label="Eau ajoutée (L)"
-            value={numToStr(operation.parameters.addedWaterLiters)}
-          />
-          <ParamReadOnlyRow
-            label="Température de l'eau (°C)"
-            value={numToStr(operation.parameters.waterTemperatureC)}
-          />
+          <ParamReadOnlyRow label="Température malaxage (°C)" value={numToStr(operation.parameters.malaxingTemperatureC)} />
+          <ParamReadOnlyRow label="Durée malaxage (min)" value={numToStr(operation.parameters.malaxingDurationMinutes)} />
+          <ParamReadOnlyRow label="Vitesse malaxage (rpm)" value={numToStr(operation.parameters.malaxingSpeedRpm)} />
+          <ParamReadOnlyRow label="Débit d'alimentation (kg/h)" value={numToStr(operation.parameters.feedRateKgH)} />
+          <ParamReadOnlyRow label="Vitesse décanteur (rpm)" value={numToStr(operation.parameters.decanterSpeedRpm)} />
+          <ParamReadOnlyRow label="Différentiel décanteur (rpm)" value={numToStr(operation.parameters.decanterDifferentialRpm)} />
+          <ParamReadOnlyRow label="Vitesse centrifugeuse (rpm)" value={numToStr(operation.parameters.centrifugeSpeedRpm)} />
+          <ParamReadOnlyRow label="Eau ajoutée (L)" value={numToStr(operation.parameters.addedWaterLiters)} />
+          <ParamReadOnlyRow label="Température de l'eau (°C)" value={numToStr(operation.parameters.waterTemperatureC)} />
           <ParamReadOnlyRow
             label="Attente avant extraction (min)"
-            value={numToStr(
-              operation.parameters.waitingTimeBeforeExtractionMinutes,
-            )}
+            value={numToStr(operation.parameters.waitingTimeBeforeExtractionMinutes)}
           />
 
           <View style={styles.column}>
-            <Text style={[typography.caption, styles.field]}>
-              Notes paramètres
-            </Text>
+            <Text style={[typography.caption, styles.field]}>Notes paramètres</Text>
             <Text style={[typography.body, styles.notesValue]}>
               {operation.parameters.notes || "—"}
             </Text>
@@ -282,14 +209,8 @@ export function PressingGeneralInfoCard({ operation }: Props) {
       {canEdit && (
         <View style={styles.actions}>
           {isEditing && (
-            <TouchableOpacity
-              style={styles.cancelButton}
-              onPress={handleCancel}
-              disabled={saving}
-            >
-              <Text style={[typography.bodyStrong, styles.cancelLabel]}>
-                Annuler
-              </Text>
+            <TouchableOpacity style={styles.cancelButton} onPress={handleCancel} disabled={saving}>
+              <Text style={[typography.bodyStrong, styles.cancelLabel]}>Annuler</Text>
             </TouchableOpacity>
           )}
 
@@ -312,9 +233,7 @@ function ParamReadOnlyRow({ label, value }: { label: string; value: string }) {
   return (
     <View style={styles.row}>
       <Text style={[typography.caption, styles.field]}>{label}</Text>
-      <Text style={[typography.bodyStrong, styles.value]}>
-        {value || "—"}
-      </Text>
+      <Text style={[typography.bodyStrong, styles.value]}>{value || "—"}</Text>
     </View>
   );
 }
@@ -329,50 +248,26 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     ...shadow.card,
   },
-
   row: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     gap: spacing.md,
   },
-
-  column: {
-    gap: spacing.sm,
-  },
-
+  column: { gap: spacing.sm },
   sectionTitle: {
     color: semanticColors.textPrimary,
     marginTop: spacing.xs,
   },
-
   field: {
     color: semanticColors.textSecondary,
     flexShrink: 1,
   },
-
   value: {
     color: semanticColors.textPrimary,
     textAlign: "right",
     flexShrink: 1,
   },
-
-  dateButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: spacing.xs,
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.md,
-    borderRadius: radius.sm,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.background,
-  },
-
-  dateValue: {
-    color: semanticColors.primary,
-  },
-
   input: {
     minWidth: 110,
     borderWidth: 1,
@@ -384,17 +279,12 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     textAlign: "right",
   },
-
   multiline: {
     minHeight: 80,
     textAlign: "left",
     textAlignVertical: "top",
   },
-
-  notesValue: {
-    color: semanticColors.textPrimary,
-  },
-
+  notesValue: { color: semanticColors.textPrimary },
   actions: {
     flexDirection: "row",
     justifyContent: "flex-end",
@@ -402,24 +292,16 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     marginTop: spacing.xs,
   },
-
   cancelButton: {
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.md,
   },
-
-  cancelLabel: {
-    color: semanticColors.textSecondary,
-  },
-
+  cancelLabel: { color: semanticColors.textSecondary },
   editButton: {
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.lg,
     borderRadius: radius.sm,
     backgroundColor: semanticColors.primary,
   },
-
-  editLabel: {
-    color: semanticColors.onPrimary,
-  },
+  editLabel: { color: semanticColors.onPrimary },
 });

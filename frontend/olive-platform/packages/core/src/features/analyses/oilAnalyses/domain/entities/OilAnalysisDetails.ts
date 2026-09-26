@@ -11,7 +11,9 @@ export interface OilAnalysisDetails {
   k232?: number;
   k270?: number;
   organolepticGrade?: number;
-  analysisDate?: string;
+  plannedDate?: string;
+  startTime?: string;
+  endTime?: string;
   createdAt: string;
   updatedAt?: string;
   status: ProductionStatus;

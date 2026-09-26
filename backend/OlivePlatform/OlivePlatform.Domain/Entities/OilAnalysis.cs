@@ -33,8 +33,14 @@ namespace OlivePlatform.Domain.Entities
         [Column("organoleptic_grade")]
         public int? OrganolepticGrade { get; set; }
 
-        [Column("analysis_date")]
-        public DateTime? AnalysisDate { get; set; }
+        [Column("planned_date", TypeName = "timestamp with time zone")]
+        public DateTime? PlannedDate { get; set; }
+
+        [Column("start_time", TypeName = "timestamp with time zone")]
+        public DateTime? StartTime { get; set; }
+
+        [Column("end_time", TypeName = "timestamp with time zone")]
+        public DateTime? EndTime { get; set; }
 
         [Column("created_at")]
         public DateTime CreatedAt { get; set; }

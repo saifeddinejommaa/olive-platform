@@ -22,11 +22,11 @@ export function OliveAnalysisMapper(
 
     acidityPercentage: undefined,
 
-    analysisDate: response.analysisDate,
+    plannedDate: response.plannedDate,
 
-    createdAt: response.createdAt,
+    startTime: response.startTime,
 
-    updatedAt: response.updatedAt,
+    endTime: response.endTime,
 
     status: response.status as ProductionStatus,
   };

@@ -18,8 +18,8 @@ public class Harvest
     [Column("plot_id")]
     public int PlotId { get; set; }
 
-    [Column("harvest_date")]
-    public DateOnly HarvestDate { get; set; }
+    [Column("planned_date", TypeName = "timestamp with time zone")]
+    public DateTime PlannedDate { get; set; }
 
     [Column("quantity_kg")]
     public decimal QuantityKg { get; set; }
@@ -30,11 +30,11 @@ public class Harvest
     [Column("variety_id")]
     public int VarietyId { get; set; }
 
-    [Column("start_time")]
-    public TimeOnly? StartTime { get; set; }
+    [Column("start_time", TypeName = "timestamp with time zone")]
+    public DateTime? StartTime { get; set; }
 
-    [Column("end_time")]
-    public TimeOnly? EndTime { get; set; }
+    [Column("end_time", TypeName = "timestamp with time zone")]
+    public DateTime? EndTime { get; set; }
 
     [Column("harvested_trees")]
     public int? HarvestedTrees { get; set; }

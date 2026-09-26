@@ -43,7 +43,7 @@ public class StartHarvestCommandHandler
         var now = DateTime.UtcNow;
 
         entity.Status = ProductionStatus.InProgress;
-        entity.StartTime = TimeOnly.FromDateTime(now);
+        entity.StartTime = now;
         entity.UpdatedAt = now;
 
         await _repository.UpdateAsync(

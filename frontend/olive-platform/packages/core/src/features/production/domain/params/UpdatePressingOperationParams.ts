@@ -3,7 +3,7 @@ import type { CreatePressingOperationInputParams } from "./CreatePressingOperati
 export type UpdatePressingOperationParams = {
   id: number;
 
-  planificationDate?: string;
+  plannedDate?: string;
 
   notes?: string | null;
 

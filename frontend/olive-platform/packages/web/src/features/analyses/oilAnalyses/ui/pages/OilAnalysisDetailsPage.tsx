@@ -19,7 +19,7 @@ type OilAnalysisForm = {
   k232?: number;
   k270?: number;
   organolepticGrade?: number;
-  analysisDate?: string;
+  plannedDate?: string;
 };
 
 const initialForm: OilAnalysisForm = {};
@@ -34,7 +34,7 @@ const toOptionalNumber = (value: string): number | undefined => {
   return Number.isNaN(number) ? undefined : number;
 };
 
-const formatAnalysisDate = (date?: string | null) => {
+const formatPlannedDate = (date?: string | null) => {
   if (!date) {
     return "-";
   }
@@ -119,8 +119,8 @@ export default function OilAnalysisDetailsPage() {
 
       organolepticGrade: analysis.organolepticGrade ?? undefined,
 
-      analysisDate: analysis.analysisDate
-        ? analysis.analysisDate.split("T")[0]
+      plannedDate: analysis.plannedDate
+        ? analysis.plannedDate.split("T")[0]
         : "",
     });
 
@@ -133,8 +133,8 @@ export default function OilAnalysisDetailsPage() {
     const isPercentageInvalid = (value?: number) =>
       value !== undefined && (value < 0 || value > 100);
 
-    if (!form.analysisDate) {
-      validationErrors.analysisDate = "La date d'analyse est obligatoire.";
+    if (!form.plannedDate) {
+      validationErrors.plannedDate = "La date d'analyse est obligatoire.";
     }
 
     if (isPercentageInvalid(form.acidityPercentage)) {
@@ -183,8 +183,8 @@ export default function OilAnalysisDetailsPage() {
 
       organolepticGrade: form.organolepticGrade,
 
-      analysisDate: form.analysisDate
-        ? new Date(`${form.analysisDate}T00:00:00`).toISOString()
+      plannedDate: form.plannedDate
+        ? new Date(`${form.plannedDate}T00:00:00`).toISOString()
         : undefined,
     }),
     [form],
@@ -506,7 +506,7 @@ export default function OilAnalysisDetailsPage() {
 
           <InfoFieldWidget
             label="Date d'analyse"
-            value={formatAnalysisDate(form.analysisDate)}
+            value={formatPlannedDate(form.plannedDate)}
           />
 
           <InfoFieldWidget
@@ -628,15 +628,15 @@ export default function OilAnalysisDetailsPage() {
             <TextInput
               label="Date d'analyse"
               type="date"
-              value={form.analysisDate ?? ""}
+              value={form.plannedDate ?? ""}
               onChange={(event) =>
-                updateForm("analysisDate", event.target.value)
+                updateForm("plannedDate", event.target.value)
               }
               disabled={fieldsDisabled}
             />
 
-            {errors.analysisDate && (
-              <span className="field-error">{errors.analysisDate}</span>
+            {errors.plannedDate && (
+              <span className="field-error">{errors.plannedDate}</span>
             )}
           </div>
         </div>
@@ -678,7 +678,7 @@ export default function OilAnalysisDetailsPage() {
         sourceLabel={`${getSourceTypeLabel(analysis.sourceTypeId)} — ${
           analysis.sourceReference ?? "-"
         }`}
-        analysisDateLabel={formatAnalysisDate(form.analysisDate)}
+        plannedDateLabel={formatPlannedDate(form.plannedDate)}
         acidityPercentage={form.acidityPercentage}
         peroxideIndex={form.peroxideIndex}
         k232={form.k232}

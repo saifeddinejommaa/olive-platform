@@ -8,6 +8,7 @@ export function PressingOperationMapper(
     id: response.id,
     operationNumber: response.operationNumber,
     startTime: response.startTime ? new Date(response.startTime) : null,
+    plannedDate: new Date(response.plannedDate),
     createdAt: new Date(response.createdAt),
     endTime: response.endTime ? new Date(response.endTime) : null,
     oilQuantityLiters: response.oilQuantityLiters,

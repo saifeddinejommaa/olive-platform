@@ -1,5 +1,5 @@
 export type UpdatePressingOperationRequest = {
-  planificationDate?: string | null;
+  plannedDate?: string | null;
   notes?: string | null;
   inputs?:
     | {

@@ -30,7 +30,7 @@ public class PressingOperationQueryRepository : IPressiongOperationQueryReposito
             p.operation_number AS {nameof(PressingOperationForListResponse.OperationNumber)},
             p.status_id AS {nameof(PressingOperationForListResponse.Status)},
 
-            p.pressing_date AS {nameof(PressingOperationForListResponse.PressingDate)},
+            p.planned_date AS {nameof(PressingOperationForListResponse.PlannedDate)},
 
             COALESCE(
                 SUM(poi.quantity_kg),
@@ -133,7 +133,7 @@ public class PressingOperationQueryRepository : IPressiongOperationQueryReposito
             p.id,
             p.operation_number,
             p.status_id,
-            p.pressing_date,
+            p.planned_date,
             p.oil_quantity_liters,
             p.start_time,
             p.end_time
@@ -195,6 +195,7 @@ public class PressingOperationQueryRepository : IPressiongOperationQueryReposito
             po.status_id {nameof(PressingOperationDetailsResponse.Status)},
             po.created_at {nameof(PressingOperationDetailsResponse.CreatedAt)},
             po.oil_quantity_liters {nameof(PressingOperationDetailsResponse.OilQuantityLiters)},
+            po.planned_date {nameof(PressingOperationDetailsResponse.PlannedDate)},
             po.start_time {nameof(PressingOperationDetailsResponse.StartTime)},
             po.end_time {nameof(PressingOperationDetailsResponse.EndTime)},
             po.expected_oil_liters {nameof(PressingOperationDetailsResponse.ExpectedOilLiters)},
@@ -244,6 +245,7 @@ public class PressingOperationQueryRepository : IPressiongOperationQueryReposito
             po.status_id,
             po.created_at,
             po.oil_quantity_liters,
+            po.planned_date,
             po.start_time,
             po.end_time;
         """;
@@ -322,8 +324,8 @@ public class PressingOperationQueryRepository : IPressiongOperationQueryReposito
                     '{nameof(OliveAnalysisInfoResponse.AcidityPercentage)}',
                         oa.acidity_percentage,
 
-                    '{nameof(OliveAnalysisInfoResponse.AnalysisDate)}',
-                        oa.analysis_date,
+                    '{nameof(OliveAnalysisInfoResponse.PlannedDate)}',
+                        oa.planned_date,
 
                     '{nameof(OliveAnalysisInfoResponse.CreatedAt)}',
                         oa.created_at,

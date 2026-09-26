@@ -4,6 +4,7 @@ import { semanticColors } from "../../../../consts/Colors";
 import { HarvestSectionHeader } from "../../../harvest/components/details/HarvestSectionHeader";
 import { PressingInputsCard } from "./PressingInputsCard";
 import { ProductionStatus } from "@olive-platform/core/features/production/domain/entities/ProductionStatus";
+import { usePressingOperationInputsStore } from "@olive-platform/core/features/production/stores/PressingOperationInputsStore";
 
 type Props = {
   operationId: number;
@@ -11,6 +12,8 @@ type Props = {
 };
 
 export function PressingInputsSection({ operationId, status }: Props) {
+
+  const { fetchInputs, loading, inputs} = usePressingOperationInputsStore()
   return (
     <View>
       <HarvestSectionHeader

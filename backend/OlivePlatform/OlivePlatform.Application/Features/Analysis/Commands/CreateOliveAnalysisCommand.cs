@@ -12,6 +12,7 @@ namespace OlivePlatform.Application.Features.Analysis.Commands
     {
         public int SourceTypeId { get; set; }
         public int SourceId { get; set; }
+        public DateTime? PlannedDate { get; set; }
     }
 
     public class CreateOliveAnalysisCommandHandler
@@ -57,6 +58,7 @@ namespace OlivePlatform.Application.Features.Analysis.Commands
                 SourceType = (InputSourceType)request.SourceTypeId,
                 SourceId = request.SourceId,
                 Reference = operationNumber,
+                PlannedDate = request.PlannedDate.ToUtc(),
                 CreatedAt = now,
             };
 

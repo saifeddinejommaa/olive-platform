@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using OlivePlatform.Application.Common;
 using OlivePlatform.Domain.Repositories;
 
 namespace OlivePlatform.Application.Features.OilAnalyses.Commands
@@ -17,7 +18,7 @@ namespace OlivePlatform.Application.Features.OilAnalyses.Commands
 
         public int? OrganolepticGrade { get; set; }
 
-        public DateTime? AnalysisDate { get; set; }
+        public DateTime? PlannedDate { get; set; }
     }
 
     public class UpdateOilAnalysisCommandHandler
@@ -42,13 +43,6 @@ namespace OlivePlatform.Application.Features.OilAnalyses.Commands
                     $"Oil analysis {request.Id} not found.");
             }
 
-            if (oilAnalysis.AnalysisDate.HasValue)
-            {
-                oilAnalysis.AnalysisDate = DateTime.SpecifyKind(
-                    oilAnalysis.AnalysisDate.Value,
-                    DateTimeKind.Utc);
-            }
-
             oilAnalysis.CreatedAt = DateTime.SpecifyKind(
                 oilAnalysis.CreatedAt,
                 DateTimeKind.Utc);
@@ -58,7 +52,11 @@ namespace OlivePlatform.Application.Features.OilAnalyses.Commands
             oilAnalysis.K232 = request.K232;
             oilAnalysis.K270 = request.K270;
             oilAnalysis.OrganolepticGrade = request.OrganolepticGrade;
-            oilAnalysis.AnalysisDate = request.AnalysisDate;
+            if (request.PlannedDate.HasValue)
+            {
+                oilAnalysis.PlannedDate = request.PlannedDate.Value.ToUtc();
+            }
+
             oilAnalysis.UpdatedAt = DateTime.UtcNow;
 
             await _repository.UpdateAsync(oilAnalysis, cancellationToken);

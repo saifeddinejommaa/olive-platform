@@ -45,7 +45,7 @@ export function PressingSummaryCard({ operation }: Props) {
             <IconCalendarEvent size={15} color={semanticColors.textMuted} />
 
             <Text style={[typography.caption, styles.metaText]}>
-              {formatDate(operation.pressingDate)}
+              {formatDate(operation.plannedDate)}
             </Text>
 
             <IconClock size={15} color={semanticColors.textMuted} />

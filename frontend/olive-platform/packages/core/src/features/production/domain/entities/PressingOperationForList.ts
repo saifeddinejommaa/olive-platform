@@ -5,7 +5,7 @@ export interface PressingOperationForList {
   id: number;
   operationNumber: string;
   status: ProductionStatus;
-  pressingDate: string;
+  plannedDate: string;
   oliveQuantityKg: number | null;
   oilQuantityLiters: number | null;
   yieldPercentage: number | null;

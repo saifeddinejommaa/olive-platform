@@ -6,7 +6,7 @@ namespace OlivePlatform.Application.Features.Production.Requests
     {
         public string? OperationNumber { get; set; }
 
-        public DateOnly? PressingDate { get; set; }
+        public DateOnly? PlannedDate { get; set; }
 
         public string? HarvestNumber { get; set; }
 

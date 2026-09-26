@@ -58,10 +58,10 @@ export default function OilAnalysesFilter() {
                         <TextInput
                             label="Date d'analyse"
                             type="date"
-                            value={filters.analysisDate}
+                            value={filters.plannedDate}
                             onChange={(event) =>
                                 setFilters({
-                                    analysisDate: event.target.value,
+                                    plannedDate: event.target.value,
                                 })
                             }
                         />

@@ -90,15 +90,16 @@ public class PlotRepository : IPlotRepository
                 $"La variété {varietyId} n'est pas associée à la parcelle {plotId}.");
         }
 
-        var startDate = new DateOnly(harvestDate.Year, 1, 1);
+        var startDate = new DateTime(harvestDate.Year, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+        var endDateExclusive = harvestDate.AddDays(1).ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc);
 
         var harvestedTrees = await _context.Harvests
             .AsNoTracking()
             .Where(x =>
                 x.PlotId == plotId &&
                 x.VarietyId == varietyId &&
-                x.HarvestDate >= startDate &&
-                x.HarvestDate <= harvestDate)
+                x.PlannedDate >= startDate &&
+                x.PlannedDate < endDateExclusive)
             .SumAsync(
                 x => (int?)x.HarvestedTrees,
                 cancellationToken) ?? 0;
@@ -108,8 +109,8 @@ public class PlotRepository : IPlotRepository
             .Where(x =>
                 x.PlotId == plotId &&
                 x.VarietyId == varietyId &&
-                x.HarvestDate >= startDate &&
-                x.HarvestDate <= harvestDate)
+                x.PlannedDate >= startDate &&
+                x.PlannedDate < endDateExclusive)
             .SumAsync(
                 x => x.PlannedTrees,
                 cancellationToken) ?? 0;

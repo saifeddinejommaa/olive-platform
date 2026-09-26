@@ -2,9 +2,9 @@ import { Tabs } from 'expo-router';
 import {
   IconHome,
   IconLeaf,
-  IconSettings,
-  IconShoppingCart,
-  IconChartBar,
+  IconDroplet,
+  IconTree,
+  IconFlask2
 } from '@tabler/icons-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -52,17 +52,17 @@ export default function TabsLayout() {
         options={{
           title: 'Production',
           tabBarIcon: ({ color, size }) => (
-            <IconSettings size={size} color={color} />
+            <IconDroplet size={size} color={color} />
           ),
         }}
       />
 
       <Tabs.Screen
-        name="achat"
+        name="plots"
         options={{
-          title: 'Achat',
+          title: 'Plots',
           tabBarIcon: ({ color, size }) => (
-            <IconShoppingCart size={size} color={color} />
+            <IconTree size={size} color={color} />
           ),
         }}
       />
@@ -72,7 +72,7 @@ export default function TabsLayout() {
         options={{
           title: 'Analyses',
           tabBarIcon: ({ color, size }) => (
-            <IconChartBar size={size} color={color} />
+            <IconFlask2 size={size} color={color} />
           ),
         }}
       />

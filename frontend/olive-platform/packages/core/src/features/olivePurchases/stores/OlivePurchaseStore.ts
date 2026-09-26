@@ -110,7 +110,7 @@ export const useOlivePurchasesStore = create<OlivePurchasesStore>(
         }
 
         const request: CreatePressingOperationParams = {
-          createdAt: new Date().toISOString(),
+          plannedDate: new Date().toISOString(),
           status: ProductionStatus.Planned,
           notes: null,
           startTime: null,

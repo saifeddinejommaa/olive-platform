@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using OlivePlatform.Application.Common;
 using OlivePlatform.Domain.Enums;
 using OlivePlatform.Domain.Interfaces.Repositories;
 
@@ -12,7 +13,7 @@ public class UpdateHarvestCommand : IRequest<Unit>
 
     public int? PlannedTrees { get; set; }
 
-    public DateOnly? HarvestDate { get; set; }
+    public DateTime? PlannedDate { get; set; }
 
     public string? Notes { get; set; }
 
@@ -66,9 +67,9 @@ public class UpdateHarvestCommandHandler
             entity.PlannedTrees = request.PlannedTrees.Value;
         }
 
-        if (request.HarvestDate.HasValue)
+        if (request.PlannedDate.HasValue)
         {
-            entity.HarvestDate = request.HarvestDate.Value;
+            entity.PlannedDate = request.PlannedDate.Value.ToUtc();
         }
 
         if (request.HarvestType.HasValue)

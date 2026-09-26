@@ -13,7 +13,7 @@ type Props = {
   sourceReferenceLabel: string;
   sourceReferenceValue: string;
   varietyLabel: string;
-  analysisDateLabel: string;
+  plannedDateLabel: string;
   humidityPercentage?: number;
   waterPercentage?: number;
   oilPercentage?: number;
@@ -33,7 +33,7 @@ export default function CompleteOliveAnalysisDrawer({
   sourceReferenceLabel,
   sourceReferenceValue,
   varietyLabel,
-  analysisDateLabel,
+  plannedDateLabel,
   humidityPercentage,
   waterPercentage,
   oilPercentage,
@@ -75,7 +75,7 @@ export default function CompleteOliveAnalysisDrawer({
         <DrawerInfoCard label="Variété">{varietyLabel}</DrawerInfoCard>
 
         <DrawerInfoCard label="Date d'analyse">
-          {analysisDateLabel}
+          {plannedDateLabel}
         </DrawerInfoCard>
 
         <DrawerSummarySection

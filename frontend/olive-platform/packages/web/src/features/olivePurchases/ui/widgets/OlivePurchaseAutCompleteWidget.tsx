@@ -2,9 +2,9 @@ import { useEffect, useState } from "react";
 import { Autocomplete } from "../../../../common/widgets/autoComplete/AutoComplete";
 import { UseOlivePurchaseAutoComplete } from "@olive-platform/core/features/olivePurchases/hooks/UseOlivePurchaseAutoComplete";
 import { GetOlivePurchaseItems } from "@olive-platform/core/features/olivePurchases/domain/usecases/GetOlivePurchaseItems";
-import { getOliveVarietyLabel } from "@olive-platform/core/features/appConstants/helper/AppConstantsHelper";
 import type { SourceOption } from "../../../production/ui/widgets/SourceReference";
 import type { OlivePurchaseItemDetails } from "@olive-platform/core/features/olivePurchases/domain/entities/OlivePurchaseItemDetails";
+import { getOliveVarietyLabel } from "@olive-platform/core/features/appConstants/helper/AppConstantsHelper";
 
 type PurchaseOption = {
   id: number;

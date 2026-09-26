@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using OlivePlatform.Application.Common;
 using OlivePlatform.Application.Features.Production.Requests;
 using OlivePlatform.Domain.Entities;
 using OlivePlatform.Domain.Interfaces.Repositories;
@@ -6,11 +7,11 @@ using OlivePlatform.Domain.Repositories;
 
 namespace OlivePlatform.Application.Features.ProductionBatches.Commands;
 
-public class UpdatePressingOperationCommand : IRequest<bool>
+public class UpdatePressingOperationCommand : IRequest<Unit>
 {
     public int Id { get; set; }
 
-    public DateOnly? PlanificationDate { get; set; }
+    public DateTime? PlannedDate { get; set; }
 
     public List<NewPressingOperationInputRequest>? Inputs { get; set; }
 
@@ -20,7 +21,7 @@ public class UpdatePressingOperationCommand : IRequest<bool>
 }
 
 public class UpdatePressingOperationCommandHandler
-    : IRequestHandler<UpdatePressingOperationCommand, bool>
+    : IRequestHandler<UpdatePressingOperationCommand, Unit>
 {
     private readonly IPressingOperationsRepository _repository;
     private readonly IPressingOperationInputsRepository _inputRepository;
@@ -36,7 +37,7 @@ public class UpdatePressingOperationCommandHandler
         _parametersRepository = parametersRepository;
     }
 
-    public async Task<bool> Handle(
+    public async Task<Unit> Handle(
         UpdatePressingOperationCommand request,
         CancellationToken cancellationToken)
     {
@@ -45,12 +46,13 @@ public class UpdatePressingOperationCommandHandler
             cancellationToken);
 
         if (pressingOperation is null)
-            return false;
+            throw new KeyNotFoundException(
+                    $"Pressing operation {request.Id} not found.");
 
-        if (request.PlanificationDate.HasValue)
+        if (request.PlannedDate.HasValue)
         {
-            pressingOperation.PressingDate =
-                request.PlanificationDate.Value;
+            pressingOperation.PlannedDate =
+                request.PlannedDate.Value.ToUtc();
         }
 
         if (request.Notes is not null)
@@ -143,6 +145,6 @@ public class UpdatePressingOperationCommandHandler
             }
         }
 
-        return true;
+        return Unit.Value;
     }
 }

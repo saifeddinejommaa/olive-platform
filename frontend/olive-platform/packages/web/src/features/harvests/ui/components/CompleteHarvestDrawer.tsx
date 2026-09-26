@@ -8,7 +8,7 @@ import TextInput from "../../../../common/widgets/textInput/TextInput";
 
 import type { HarvestDetails } from "@olive-platform/core/features/harvests/domain/entities/HarvestDetails";
 
-import { formatDate } from "@olive-platform/core/features/shared/utils/DatesUtils";
+import { formatDate, formatStringToDateTime } from "@olive-platform/core/features/shared/utils/DatesUtils";
 import type { HarvestStockParams } from "@olive-platform/core/features/harvests/domain/params/HarvestStockParams";
 import CheckboxField from "../../../../common/widgets/checkBoxField/CheckboxField";
 
@@ -161,8 +161,8 @@ export default function CloseHarvestDrawer({
                 </DrawerInfoCard>
 
                 <DrawerInfoCard label="Date de récolte">
-                    {harvest.harvestDate
-                        ? formatDate(harvest.harvestDate)
+                    {harvest.plannedDate
+                        ? formatDate(harvest.plannedDate)
                         : "-"}
                 </DrawerInfoCard>
 
@@ -183,11 +183,11 @@ export default function CloseHarvestDrawer({
                 </DrawerInfoCard>
 
                 <DrawerInfoCard label="Heure de début">
-                    {harvest.startTime || "-"}
+                    {formatStringToDateTime(harvest.startTime)}
                 </DrawerInfoCard>
 
                 <DrawerInfoCard label="Heure de fin">
-                    {harvest.endTime || "-"}
+                    {formatStringToDateTime(harvest.endTime)}
                 </DrawerInfoCard>
 
                 {/* Distribution dans les stocks */}

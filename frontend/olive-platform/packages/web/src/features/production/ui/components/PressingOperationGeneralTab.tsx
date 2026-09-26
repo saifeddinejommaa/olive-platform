@@ -3,7 +3,7 @@ import InfoFieldWidget from "../../../../common/widgets/InfoFieldWidget";
 import TextInput from "../../../../common/widgets/textInput/TextInput";
 import type { PressingOperationDetails } from "@olive-platform/core/features/production/domain/entities/PressingOperationDetails";
 import type { PressingParametersDetails } from "@olive-platform/core/features/production/domain/entities/PressingParametersDetails";
-import { formatDate } from "@olive-platform/core/features/shared/utils/DatesUtils";
+import { formatDate, formatStringToDateTime } from "@olive-platform/core/features/shared/utils/DatesUtils";
 import Card from "../../../../common/widgets/card/Card";
 import {
   formatDeviation,
@@ -74,7 +74,7 @@ export default function PressingOperationGeneralTab({
           <div className="info-grid">
             <InfoFieldWidget
               label="Date de planification"
-              value={formatDate(operation.pressingDate)}
+              value={formatDate(operation.plannedDate)}
             />
 
             <InfoFieldWidget
@@ -104,12 +104,12 @@ export default function PressingOperationGeneralTab({
 
             <InfoFieldWidget
               label="Date de lancement"
-              value={formatDate(operation.startTime)}
+              value={formatStringToDateTime(operation.startTime)}
             />
 
             <InfoFieldWidget
               label="Date de fin"
-              value={formatDate(operation.endTime)}
+              value={formatStringToDateTime(operation.endTime)}
             />
 
             <div className="filter-item" style={{ gridColumn: "1 / -1" }}>

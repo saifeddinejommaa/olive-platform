@@ -24,6 +24,8 @@ namespace OlivePlatform.Application.Features.Production.Responses
 
         public decimal? OilYieldDeviationLiters { get; set; }
 
+        public DateTime PlannedDate { get; set; }
+
         public DateTime? StartTime { get; set; }
 
         public DateTime? EndTime { get; set; }

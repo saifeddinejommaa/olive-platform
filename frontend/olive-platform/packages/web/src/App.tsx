@@ -50,11 +50,16 @@ import OilAnalysisDetailsPage from "./features/analyses/oilAnalyses/ui/pages/Oil
 import NewOilAnalysisPage from "./features/analyses/oilAnalyses/ui/pages/NewOilAnalysisPage";
 import PlotsPage from "./features/plots/ui/pages/PlotsPage";
 import PlotDetailPage from "./features/plots/ui/pages/PlotDetailsPage";
+import { setAppConstants } from "@olive-platform/core/features/appConstants/helper/AppConstantsHelper";
 
 
 function App() {
   
   const { fetchConstants } = useConstantsStore();
+
+  setAppConstants(
+  useConstantsStore.getState().Appconstants
+  );
 
   useEffect(() => {
     fetchConstants();

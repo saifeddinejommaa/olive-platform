@@ -4,13 +4,13 @@ using OlivePlatform.Domain.Interfaces.Repositories;
 
 namespace OlivePlatform.Application.Features.Production.Commands
 {
-    public class CancelPressingOperationCommand : IRequest<bool>
+    public class CancelPressingOperationCommand : IRequest<Unit>
     {
         public int Id { get; set; }
     }
 
     public class CancelPressingOperationCommandHandler
-    : IRequestHandler<CancelPressingOperationCommand, bool>
+    : IRequestHandler<CancelPressingOperationCommand, Unit>
     {
         private readonly IPressingOperationsRepository _repository;
         private readonly IPressingOperationInputsRepository _inputsRepository;
@@ -23,7 +23,7 @@ namespace OlivePlatform.Application.Features.Production.Commands
             _inputsRepository = inputsRepository;
         }
 
-        public async Task<bool> Handle(
+        public async Task<Unit> Handle(
            CancelPressingOperationCommand request,
            CancellationToken cancellationToken)
         {
@@ -32,7 +32,8 @@ namespace OlivePlatform.Application.Features.Production.Commands
                 cancellationToken);
 
             if (pressingOperation is null)
-                return false;
+                throw new KeyNotFoundException(
+                    $"Pressing operation {request.Id} not found.");
 
             var inputs = await _inputsRepository
                 .GetByPressingOperationIdAsync(
@@ -54,7 +55,7 @@ namespace OlivePlatform.Application.Features.Production.Commands
                 pressingOperation,
                 cancellationToken);
 
-            return true;
+            return Unit.Value;
         }
     }
 }

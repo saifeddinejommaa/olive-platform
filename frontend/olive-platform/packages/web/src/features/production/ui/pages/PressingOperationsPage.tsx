@@ -1,5 +1,3 @@
-// src/features/production/pressingOperations/presentation/pages/PressingOperationsPage.tsx
-
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 
@@ -9,12 +7,12 @@ import PressingOperationsFilterComponent from "../components/PressingOperationsF
 import { usePageTitle } from "../../../../common/hooks/usePageTitle";
 
 import { usePressingOperationsStore } from "@olive-platform/core/features/production/stores/pressingOperationStore";
-import type { PressingOperation } from "@olive-platform/core/features/production/domain/entities/PressingOperation";
-import { formatDateTime } from "@olive-platform/core/features/shared/utils/DatesUtils";
+import { formatStringToDateTime } from "@olive-platform/core/features/shared/utils/DatesUtils";
 import { productionStatusConfig } from "../../../../common/status/ProductionStatusConfig";
 import { renderStatus } from "../../../../common/status/StatusUtils";
 import Button from "../../../../common/widgets/button/Button";
 import { IconPlus } from "@tabler/icons-react";
+import type { PressingOperationForList } from "@olive-platform/core/features/production/domain/entities/PressingOperationForList";
 
 export default function PressingOperationsPage() {
   const navigate = useNavigate();
@@ -42,32 +40,32 @@ export default function PressingOperationsPage() {
 
   const columns = [
     {
-      key: "operationNumber" as keyof PressingOperation,
+      key: "operationNumber" as keyof PressingOperationForList,
       label: "N° Pression",
     },
     {
-      key: "createdAt" as keyof PressingOperation,
+      key: "createdAt" as keyof PressingOperationForList,
       label: "Date",
-      render: (item: PressingOperation) => formatDateTime(item.createdAt),
+      render: (item: PressingOperationForList) => formatStringToDateTime(item.plannedDate),
     },
     {
-      key: "status" as keyof PressingOperation,
+      key: "status" as keyof PressingOperationForList,
       label: "Statut",
-      render: (item: PressingOperation) =>
+      render: (item: PressingOperationForList) =>
         renderStatus(item.status, productionStatusConfig),
     },
     {
-      key: "oilQuantityLiters" as keyof PressingOperation,
+      key: "oilQuantityLiters" as keyof PressingOperationForList,
       label: "Huile produite",
-      render: (item: PressingOperation) =>
+      render: (item: PressingOperationForList) =>
         item.oilQuantityLiters !== null
           ? `${item.oilQuantityLiters.toLocaleString()} L`
           : "—",
     },
     {
-      key: "id" as keyof PressingOperation,
+      key: "id" as keyof PressingOperationForList,
       label: "Actions",
-      render: (item: PressingOperation) => (
+      render: (item: PressingOperationForList) => (
         <ActionCard
           type="edit"
           title="Détails"

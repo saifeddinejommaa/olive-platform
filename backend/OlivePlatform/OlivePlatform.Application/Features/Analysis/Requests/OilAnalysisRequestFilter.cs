@@ -7,7 +7,7 @@ namespace OlivePlatform.Application.Features.Analysis.Requests
     {
         public string? Reference { get; set; }
 
-        public DateOnly? AnalysisDate { get; set; }
+        public DateOnly? PlannedDate { get; set; }
 
         public ProductionStatus? Status { get; set; }
     }

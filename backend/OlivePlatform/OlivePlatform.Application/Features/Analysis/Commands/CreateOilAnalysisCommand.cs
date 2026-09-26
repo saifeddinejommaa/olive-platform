@@ -14,7 +14,7 @@ namespace OlivePlatform.Application.Features.OilAnalyses.Commands
 
         public int SourceId { get; set; }
 
-        public DateTime? AnalysisDate { get; set; }
+        public DateTime? PlannedDate { get; set; }
     }
 
     public class CreateOilAnalysisCommandHandler
@@ -51,9 +51,7 @@ namespace OlivePlatform.Application.Features.OilAnalyses.Commands
                 Reference = reference,
                 SourceTypeId = (OilAnalysisSourceType)request.SourceTypeId,
                 SourceId = request.SourceId,
-                AnalysisDate = request.AnalysisDate.HasValue
-                                ? DateTime.SpecifyKind(request.AnalysisDate.Value, DateTimeKind.Utc)
-                                : null,
+                PlannedDate = request.PlannedDate.ToUtc(),
                 CreatedAt = now,
                 Status = ProductionStatus.Planned,
             };

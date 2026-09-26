@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using OlivePlatform.Application.Common;
 using OlivePlatform.Domain.Entities;
 using OlivePlatform.Domain.Enums;
 using OlivePlatform.Domain.Interfaces.Repositories;
@@ -11,7 +12,7 @@ public class CreateHarvestCommand : IRequest<int>
 {
     public int PlotId { get; set; }
     public int VarietyId { get; set; }
-    public DateOnly HarvestDate { get; set; }
+    public DateTime PlannedDate { get; set; }
     public HarvestType HarvestType { get; set; }
     public int PlannedTrees { get; set; }
     public string? Notes { get; set; }
@@ -44,7 +45,7 @@ public class CreateHarvestCommandHandler : IRequestHandler<CreateHarvestCommand,
         {
             Reference = operationNumber,
             PlotId = request.PlotId,
-            HarvestDate = request.HarvestDate,
+            PlannedDate = request.PlannedDate.ToUtc(),
             Status = ProductionStatus.Planned,
             Notes = request.Notes,
             VarietyId = request.VarietyId,

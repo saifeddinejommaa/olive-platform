@@ -52,12 +52,12 @@ public class DashboardQueryRepository : IDashboardQueryRepository
 
         -- 4) Rendement récolte par jour
         SELECT
-            harvest_date AS {nameof(HarvestYieldPointResponse.Date)},
+            planned_date::date AS {nameof(HarvestYieldPointResponse.Date)},
             SUM(quantity_kg) AS {nameof(HarvestYieldPointResponse.QuantityKg)}
         FROM public.harvests
-        WHERE harvest_date >= @HarvestYieldFromDate
-        GROUP BY harvest_date
-        ORDER BY harvest_date;
+        WHERE planned_date::date >= @HarvestYieldFromDate
+        GROUP BY planned_date::date
+        ORDER BY planned_date::date;
 
         -- 5) Pression : réel vs attendu (dernières opérations terminées)
         SELECT

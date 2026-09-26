@@ -4,7 +4,7 @@ using OlivePlatform.Domain.Interfaces.Repositories;
 
 namespace OlivePlatform.Application.Features.Production.Commands
 {
-    public class ClosePressingOperationCommand : IRequest<int>
+    public class ClosePressingOperationCommand : IRequest<Unit>
     {
         public int Id { get; set; }
 
@@ -12,7 +12,7 @@ namespace OlivePlatform.Application.Features.Production.Commands
     }
 
     public class ClosePressingOperationCommandHandler
-    : IRequestHandler<ClosePressingOperationCommand, int>
+    : IRequestHandler<ClosePressingOperationCommand, Unit>
     {
 
         private readonly IPressingOperationsRepository _repository;
@@ -26,7 +26,7 @@ namespace OlivePlatform.Application.Features.Production.Commands
             _inputsRepository = inputsRepository;
         }
 
-        public async Task<int> Handle(
+        public async Task<Unit> Handle(
     ClosePressingOperationCommand request,
     CancellationToken cancellationToken)
         {
@@ -55,7 +55,7 @@ namespace OlivePlatform.Application.Features.Production.Commands
                     cancellationToken);
             }
 
-            pressingOperation.EndTime = TimeOnly.FromDateTime(now);
+            pressingOperation.EndTime = now;
             pressingOperation.OilQuantityLiters = request.OilQuantity;
             pressingOperation.Status = ProductionStatus.Completed;
             pressingOperation.OilYieldDeviationLiters = pressingOperation.ExpectedOilLiters is not null
@@ -66,7 +66,7 @@ namespace OlivePlatform.Application.Features.Production.Commands
                 pressingOperation,
                 cancellationToken);
 
-            return pressingOperation.Id;
+            return Unit.Value;
         }
 
     }

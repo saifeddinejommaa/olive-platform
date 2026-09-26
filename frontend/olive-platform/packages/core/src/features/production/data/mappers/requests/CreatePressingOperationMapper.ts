@@ -5,7 +5,7 @@ export function CreatePressingOperationMapper(
   data: CreatePressingOperationParams,
 ): CreatePressingOperationRequest {
   return {
-    createdAt: data.createdAt,
+    plannedDate: data.plannedDate,
     startTime: data.startTime,
 
     endTime: data.endTime,

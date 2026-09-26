@@ -9,7 +9,7 @@ export const formatDateTime = (value: Date) => {
   );
 };
 
-export const formatStringToDateTime = (value?: string) => {
+export const formatStringToDateTime = (value?: string | null) => {
   if (!value) return "-";
   return new Date(value).toLocaleString("fr-FR");
 };
@@ -21,7 +21,12 @@ export const formatDate = (value: string | null) => {
 
 export const formatTime = (value: string | null) => {
   if (!value) return "-";
-  return value?.slice(0, 5) ?? "-";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "-";
+  return date.toLocaleTimeString("fr-FR", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 };
 
 export const getTodayDate = () => {

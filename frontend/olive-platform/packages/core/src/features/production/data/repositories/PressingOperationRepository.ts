@@ -53,7 +53,7 @@ export const PressingOperationRepository = {
   },
 
   updatePressingOperation: async (params: UpdatePressingOperationParams) => {
-    return await http<ApiResponse<PressingOperationDetails>>(
+    return await http<ApiResponse<void>>(
       `pressingoperations/update?id=${params.id}`,
       {
         method: "PUT",
@@ -65,7 +65,7 @@ export const PressingOperationRepository = {
   startPressingOperation: async (
     params: StartPressingOperationRequest,
   ) => {
-    return await http<ApiResponse<PressingOperationDetails>>(
+    return await http<ApiResponse<ApiResponse<void>>>(
       `pressingoperations/start?id=${params.operationId}`,
       {
         method: "PUT",
@@ -77,7 +77,7 @@ export const PressingOperationRepository = {
   closePressingOperation: async (
     params: ClosePressingOperationRequest,
   ) => {
-    return await http<ApiResponse<number>>(
+    return await http<ApiResponse<void>>(
       `pressingoperations/close?id=${params.id}`,
       {
         method: "PUT",

@@ -26,7 +26,7 @@ export const usePressingOperationsStore = create<PressingOperations>(
     filters: {
       harvestNumber: "",
       purchaseNumber: "",
-      pressingDate: "",
+      plannedDate: "",
       operationNumber: "",
       pageNumber: 1,
       pageSize: 10,
@@ -45,7 +45,7 @@ export const usePressingOperationsStore = create<PressingOperations>(
         filters: {
           harvestNumber: "",
           purchaseNumber: "",
-          pressingDate: "",
+          plannedDate: "",
           operationNumber: "",
           pageNumber: 1,
           pageSize: 10,

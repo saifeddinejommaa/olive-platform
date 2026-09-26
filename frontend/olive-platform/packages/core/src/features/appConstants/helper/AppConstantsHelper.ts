@@ -1,34 +1,35 @@
-import { useConstantsStore } from "../ConstantsStore";
+export type AppConstants = {
+  oliveVarieties: { id: number; label: string }[];
+  costLineTypes: { id: number; label: string }[];
+  harvestTypes: { id: number; label: string }[];
+  paymentMethods: { id: number; label: string }[];
+};
 
-export function getOliveVarietyLabel(varietyId: number): string {
-  const { Appconstants } = useConstantsStore.getState();
+let constants: AppConstants | null = null;
 
-  return (
-    Appconstants.oliveVarieties.find((variety) => variety.id === varietyId)
-      ?.label ?? "Inconnue"
-  );
+export function setAppConstants(value: AppConstants) {
+  constants = value;
 }
 
-export function getCostTypeLabel(costLineId: number): string {
-  const { Appconstants } = useConstantsStore.getState();
-  return (
-    Appconstants.costLineTypes.find((line) => line.id === costLineId)
-      ?.label ?? "Inconnue"
-  );
+function getLabel(
+  values: { id: number; label: string }[],
+  id: number,
+): string {
+  return values.find((x) => x.id === id)?.label ?? "Inconnue";
 }
 
-export function getHarvestTypeLabel(costLineId: number): string {
-  const { Appconstants } = useConstantsStore.getState();
-  return (
-    Appconstants.costLineTypes.find((line) => line.id === costLineId)
-      ?.label ?? "Inconnue"
-  );
+export function getOliveVarietyLabel(id: number): string {
+  return getLabel(constants?.oliveVarieties ?? [], id);
 }
 
-export function getPaymentMethodLabel(paymentMethod: number): string {
-  const { Appconstants } = useConstantsStore.getState();
-  return (
-    Appconstants.paymentMethods.find((line) => line.id === paymentMethod)
-      ?.label ?? "Inconnue"
-  );
+export function getCostTypeLabel(id: number): string {
+  return getLabel(constants?.costLineTypes ?? [], id);
+}
+
+export function getHarvestTypeLabel(id: number): string {
+  return getLabel(constants?.harvestTypes ?? [], id);
+}
+
+export function getPaymentMethodLabel(id: number): string {
+  return getLabel(constants?.paymentMethods ?? [], id);
 }

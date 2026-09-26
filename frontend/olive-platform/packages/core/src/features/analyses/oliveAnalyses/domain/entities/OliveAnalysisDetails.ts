@@ -17,11 +17,11 @@ export type OliveAnalysisDetails = {
 
   acidityPercentage?: number;
 
-  analysisDate?: string;
+  plannedDate?: string;
 
-  createdAt: string;
+  startTime?: string;
 
-  updatedAt: string;
+  endTime?: string;
 
   varietyId: number;
 

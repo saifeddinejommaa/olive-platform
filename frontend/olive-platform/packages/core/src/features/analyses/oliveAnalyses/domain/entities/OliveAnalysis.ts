@@ -11,9 +11,10 @@ export type OliveAnalysis = {
   oilPercentage?: number;
   acidityPercentage?: number;
 
-  analysisDate?: string;
+  plannedDate?: string;
 
-  createdAt: string;
-  updatedAt?: string;
+  startTime?: string;
+
+  endTime?: string;
   status: ProductionStatus;
 };

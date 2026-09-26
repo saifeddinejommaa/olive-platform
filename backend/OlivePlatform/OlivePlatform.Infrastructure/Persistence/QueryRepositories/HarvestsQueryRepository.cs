@@ -36,7 +36,7 @@ public class HarvestQueryRepository : IHarvestQueryRepository
                 h.id AS {nameof(HarvestForListResponse.Id)},
                 h.reference AS {nameof(HarvestForListResponse.Reference)},
                 p.name AS {nameof(HarvestForListResponse.PlotName)},
-                h.harvest_date AS {nameof(HarvestForListResponse.HarvestDate)},
+                h.planned_date AS {nameof(HarvestForListResponse.PlannedDate)},
                 h.quantity_kg AS {nameof(HarvestForListResponse.QuantityKg)},
                 h.planned_trees AS {nameof(HarvestForListResponse.PlannedTrees)},
                 h.harvested_trees AS {nameof(HarvestForListResponse.HarvestedTrees)},
@@ -139,7 +139,7 @@ public class HarvestQueryRepository : IHarvestQueryRepository
             sql.Append(
                 """
 
-                AND h.harvest_date >= @HarvestDateFrom
+                AND h.planned_date::date >= @HarvestDateFrom
                 """);
 
             parameters.Add(
@@ -156,7 +156,7 @@ public class HarvestQueryRepository : IHarvestQueryRepository
             sql.Append(
                 """
 
-                AND h.harvest_date <= @HarvestDateTo
+                AND h.planned_date::date <= @HarvestDateTo
                 """);
 
             parameters.Add(
@@ -200,7 +200,7 @@ public class HarvestQueryRepository : IHarvestQueryRepository
             """
 
             ORDER BY
-                h.harvest_date DESC,
+                h.planned_date DESC,
                 h.reference
 
             LIMIT @PageSize
@@ -237,7 +237,7 @@ public class HarvestQueryRepository : IHarvestQueryRepository
             h.id AS "{nameof(HarvestDetailsResponse.Id)}",
             h.reference AS "{nameof(HarvestDetailsResponse.Reference)}",
             p.reference AS "{nameof(HarvestDetailsResponse.PlotReference)}",
-            h.harvest_date AS "{nameof(HarvestDetailsResponse.HarvestDate)}",
+            h.planned_date AS "{nameof(HarvestDetailsResponse.PlannedDate)}",
             h.quantity_kg AS "{nameof(HarvestDetailsResponse.QuantityKg)}",
             h.notes AS "{nameof(HarvestDetailsResponse.Notes)}",
             h.status AS "{nameof(HarvestDetailsResponse.Status)}",
@@ -320,7 +320,7 @@ public class HarvestQueryRepository : IHarvestQueryRepository
             h.id,
             h.reference,
             p.reference,
-            h.harvest_date,
+            h.planned_date,
             h.quantity_kg,
             h.notes,
             h.status,
@@ -366,7 +366,7 @@ public class HarvestQueryRepository : IHarvestQueryRepository
 
                 h.plot_id AS PlotId,
 
-                h.harvest_date AS HarvestDate,
+                h.planned_date AS PlannedDate,
                 h.quantity_kg AS QuantityKg,
                 h.quality_grade AS QualityGrade,
                 h.notes AS Notes
@@ -376,7 +376,7 @@ public class HarvestQueryRepository : IHarvestQueryRepository
             WHERE h.plot_id = @PlotId
 
             ORDER BY
-                h.harvest_date DESC,
+                h.planned_date DESC,
                 h.harvest_number
             """;
 
@@ -437,9 +437,9 @@ public class HarvestQueryRepository : IHarvestQueryRepository
                 oa.water_percentage AS {nameof(OliveAnalysisDetailsResponse.WaterPercentage)},
                 oa.oil_percentage AS {nameof(OliveAnalysisDetailsResponse.OilPercentage)},
                 oa.acidity_percentage AS {nameof(OliveAnalysisDetailsResponse.AcidityPercentage)},
-                oa.analysis_date AS {nameof(OliveAnalysisDetailsResponse.AnalysisDate)},
-                oa.created_at AS {nameof(OliveAnalysisDetailsResponse.CreatedAt)},
-                oa.updated_at AS {nameof(OliveAnalysisDetailsResponse.UpdatedAt)},
+                oa.planned_date AS {nameof(OliveAnalysisDetailsResponse.PlannedDate)},
+                oa.start_time AS {nameof(OliveAnalysisDetailsResponse.StartTime)},
+                oa.end_time AS {nameof(OliveAnalysisDetailsResponse.EndTime)},
                 oa.status AS {nameof(OliveAnalysisDetailsResponse.Status)}
             FROM olive_analyses oa
             WHERE oa.source_type = 1

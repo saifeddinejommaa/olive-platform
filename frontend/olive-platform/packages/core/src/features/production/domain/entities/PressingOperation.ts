@@ -4,6 +4,7 @@ export type PressingOperation = {
   id: number;
 
   operationNumber: string;
+  plannedDate: Date;
   createdAt: Date;
   startTime: Date | null;
   endTime: Date | null;

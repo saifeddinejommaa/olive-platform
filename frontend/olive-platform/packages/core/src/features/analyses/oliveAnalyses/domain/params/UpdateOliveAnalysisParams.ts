@@ -5,5 +5,4 @@ export type UpdateOliveAnalysisParams = {
   waterPercentage?: number;
   oilPercentage?: number;
   acidityPercentage?: number;
-  analysisDate?: string;
 };

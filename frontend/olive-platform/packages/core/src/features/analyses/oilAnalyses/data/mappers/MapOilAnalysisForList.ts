@@ -8,7 +8,9 @@ export function mapOilAnalysisForList(
     id: response.id,
     reference: response.reference,
     sourceReference: response.sourceReference,
-    analysisDate: response.analysisDate,
+    plannedDate: response.plannedDate,
+    startTime: response.startTime,
+    endTime: response.endTime,
     createdAt: response.createdAt,
     status: response.status,
   };

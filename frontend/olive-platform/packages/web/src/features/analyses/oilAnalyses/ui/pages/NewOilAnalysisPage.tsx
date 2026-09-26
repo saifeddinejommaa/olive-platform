@@ -32,7 +32,7 @@ export default function NewOilAnalysisPage() {
 
   const [sourceId, setSourceId] = useState<number | null>(null);
   const [sourceLabel, setSourceLabel] = useState("");
-  const [analysisDate, setAnalysisDate] = useState("");
+  const [plannedDate, setPlannedDate] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
@@ -64,7 +64,7 @@ export default function NewOilAnalysisPage() {
       const id = await CreateOilAnalysis({
         sourceTypeId: sourceType,
         sourceId,
-        analysisDate: analysisDate || undefined,
+        plannedDate: plannedDate || undefined,
       });
 
       toast.success("Analyse d'huile créée avec succès.");
@@ -81,7 +81,7 @@ export default function NewOilAnalysisPage() {
     } finally {
       setSaving(false);
     }
-  }, [sourceType, sourceId, analysisDate, navigate]);
+  }, [sourceType, sourceId, plannedDate, navigate]);
 
   // ============================================================
   // CANCEL
@@ -206,8 +206,8 @@ export default function NewOilAnalysisPage() {
             <TextInput
               label="Date d'analyse"
               type="date"
-              value={analysisDate}
-              onChange={(event) => setAnalysisDate(event.target.value)}
+              value={plannedDate}
+              onChange={(event) => setPlannedDate(event.target.value)}
             />
           </div>
         </div>

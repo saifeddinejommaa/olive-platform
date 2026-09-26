@@ -13,7 +13,7 @@ namespace OlivePlatform.Application.Features.Laboratory.Requests
 
         public string? HarvestReference { get; set; }
 
-        public DateOnly? AnalysisDate { get; set; }
+        public DateOnly? PlannedDate { get; set; }
 
         public ProductionStatus Status { get; set; }
     }

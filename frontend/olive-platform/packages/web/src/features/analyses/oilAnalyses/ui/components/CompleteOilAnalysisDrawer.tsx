@@ -10,7 +10,7 @@ type Props = {
   saving: boolean;
   reference: string;
   sourceLabel: string;
-  analysisDateLabel: string;
+  plannedDateLabel: string;
   acidityPercentage?: number;
   peroxideIndex?: number;
   k232?: number;
@@ -28,7 +28,7 @@ export default function CompleteOilAnalysisDrawer({
   saving,
   reference,
   sourceLabel,
-  analysisDateLabel,
+  plannedDateLabel,
   acidityPercentage,
   peroxideIndex,
   k232,
@@ -63,7 +63,7 @@ export default function CompleteOilAnalysisDrawer({
         <DrawerInfoCard label="Source">{sourceLabel || "-"}</DrawerInfoCard>
 
         <DrawerInfoCard label="Date d'analyse">
-          {analysisDateLabel}
+          {plannedDateLabel}
         </DrawerInfoCard>
 
         <DrawerSummarySection

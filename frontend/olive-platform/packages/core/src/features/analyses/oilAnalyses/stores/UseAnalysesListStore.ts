@@ -5,7 +5,7 @@ import { GetOilAnalyses } from "../domain/usecases/GetOilAnalysis";
 
 type Filters = {
   reference: string;
-  analysisDate: string; // "" = pas de filtre
+  plannedDate: string; // "" = pas de filtre
   status: ProductionStatus | null;
 };
 
@@ -28,7 +28,7 @@ type OilAnalysesListState = {
 
 const initialFilters: Filters = {
   reference: "",
-  analysisDate: "",
+  plannedDate: "",
   status: null,
 };
 
@@ -52,7 +52,7 @@ export const useOilAnalysesListStore = create<OilAnalysesListState>(
 
         const result = await GetOilAnalyses({
           reference: filters.reference || undefined,
-          analysisDate: filters.analysisDate || undefined,
+          plannedDate: filters.plannedDate || undefined,
           status: filters.status ?? undefined,
           pageNumber,
           pageSize,

@@ -12,15 +12,15 @@ namespace OlivePlatform.Application.Features.Harvests.Responses
         public string PlotReference { get; set; } = string.Empty;
 
         public HarvestType HarvestType { get; set; }
-        public DateOnly HarvestDate { get; set; }
+        public DateTime PlannedDate { get; set; }
         public decimal QuantityKg { get; set; }
         public int PlannedTrees { get; set; }
         public required int VarietyId { get; set; }
         public int HarvestedTrees { get; set; }
         public string? Notes { get; set; }
         public ProductionStatus Status { get; set; }
-        public TimeOnly? StartTime { get; set; }
-        public TimeOnly? EndTime { get; set; }
+        public DateTime? StartTime { get; set; }
+        public DateTime? EndTime { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
         public List<HarvestCostSummaryResponse> Costs { get; set; } = new();

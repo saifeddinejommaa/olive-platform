@@ -27,7 +27,7 @@ type ListScreenProps<T> = {
 
   onCreate: () => void;
   createLabel?: string;
-
+  canCreate?: boolean
   filterContent?: ReactNode;
   onApplyFilters?: () => void;
   onResetFilters?: () => void;
@@ -45,6 +45,7 @@ export function ListScreen<T>({
   keyExtractor,
   onCreate,
   createLabel = 'Nouveau',
+  canCreate = true,
   filterContent,
   onApplyFilters,
   onResetFilters,
@@ -93,7 +94,7 @@ export function ListScreen<T>({
               </View>
             )}
           </TouchableOpacity>
-
+          {canCreate &&
           <TouchableOpacity
             style={styles.createButton}
             onPress={onCreate}
@@ -102,6 +103,7 @@ export function ListScreen<T>({
             <IconPlus size={18} color={colors.white} />
             <Text style={styles.createButtonText}>{createLabel}</Text>
           </TouchableOpacity>
+          }
         </View>
       </View>
 

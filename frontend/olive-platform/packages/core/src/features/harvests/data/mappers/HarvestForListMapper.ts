@@ -13,7 +13,7 @@ export function HarvestForListMapper(
 
     plotId: response.plotId,
 
-    harvestDate: response.harvestDate,
+    plannedDate: response.plannedDate,
 
     quantityKg: response.quantityKg,
 

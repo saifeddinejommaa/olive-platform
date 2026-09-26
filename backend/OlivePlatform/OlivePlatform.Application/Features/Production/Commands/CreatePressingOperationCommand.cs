@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using OlivePlatform.Application.Common;
 using OlivePlatform.Application.Features.Production.Requests;
 using OlivePlatform.Domain.Entities;
 using OlivePlatform.Domain.Enums;
@@ -16,7 +17,7 @@ public class CreatePressingOperationCommand : IRequest<Unit>
 
     public decimal? OliveQuantityKg { get; set; }
 
-    public DateOnly PressingDate { get; set; }
+    public DateTime PlannedDate { get; set; }
 
     public decimal? OilQuantityLiters { get; set; }
 
@@ -47,7 +48,7 @@ public class CreateProductionBatchCommandHandler
         CancellationToken cancellationToken)
     {
 
-        var year = request.PressingDate.Year;
+        var year = request.PlannedDate.Year;
         var operationNumber =
            await _documentNumberService.GenerateAsync(
                DocumentTypes.Pressing,
@@ -68,6 +69,7 @@ public class CreateProductionBatchCommandHandler
             OilQuantityLiters = request.OilQuantityLiters,
             CreatedAt = utcNow,
             Notes = request.Notes,
+            PlannedDate = request.PlannedDate.ToUtc(),
             ExpectedOilLiters = expectedOilLiters
         };
 
