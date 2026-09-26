@@ -1,6 +1,8 @@
 ﻿using MediatR;
 using OlivePlatform.Application.Common;
 using OlivePlatform.Application.Features.Production.Requests;
+using OlivePlatform.Application.Features.Seasons;
+using OlivePlatform.Application.Services;
 using OlivePlatform.Domain.Entities;
 using OlivePlatform.Domain.Enums;
 using OlivePlatform.Domain.Interfaces.Repositories;
@@ -22,6 +24,9 @@ public class CreatePressingOperationCommand : IRequest<Unit>
     public decimal? OilQuantityLiters { get; set; }
 
     public string? Notes { get; set; }
+
+    // Campagne sélectionnée ; si absente, déduite de PlannedDate.
+    public int? SeasonId { get; set; }
 }
 
 public class CreateProductionBatchCommandHandler
@@ -30,23 +35,35 @@ public class CreateProductionBatchCommandHandler
     private readonly IPressingOperationsRepository _repository;
     private readonly IOliveAnalysisRepository _oliveAnalysisRepository;
     private readonly IDocumentNumberService _documentNumberService;
+    private readonly ISeasonService _seasonService;
 
     private const decimal OliveOilDensityKgPerLiter = 0.916m;
 
     public CreateProductionBatchCommandHandler(
         IPressingOperationsRepository repository,
         IDocumentNumberService documentNumberService,
-        IOliveAnalysisRepository oliveAnalysisRepository)
+        IOliveAnalysisRepository oliveAnalysisRepository,
+        ISeasonService seasonService)
     {
         _repository = repository;
         _documentNumberService = documentNumberService;
         _oliveAnalysisRepository = oliveAnalysisRepository;
+        _seasonService = seasonService;
     }
 
     public async Task<Unit> Handle(
         CreatePressingOperationCommand request,
         CancellationToken cancellationToken)
     {
+        var seasonId = await _seasonService.ResolveForDateAsync(
+            request.SeasonId,
+            SeasonCalendar.ToBusinessDate(request.PlannedDate),
+            cancellationToken);
+
+        await _seasonService.EnsureSourcesInSeasonAsync(
+            seasonId,
+            request.Inputs.Select(input => input.ToSource()),
+            cancellationToken);
 
         var year = request.PlannedDate.Year;
         var operationNumber =
@@ -65,6 +82,7 @@ public class CreateProductionBatchCommandHandler
         var pressingOperation = new PressingOperation
         {
             OperationNumber = operationNumber,
+            SeasonId = seasonId,
             Status = (ProductionStatus)request.Status,
             OilQuantityLiters = request.OilQuantityLiters,
             CreatedAt = utcNow,

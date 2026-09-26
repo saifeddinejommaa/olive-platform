@@ -6,6 +6,7 @@ using Npgsql;
 using OlivePlatform.Api.Middleware;
 using OlivePlatform.Application;
 using OlivePlatform.Application.Common;
+using OlivePlatform.Application.Services;
 using OlivePlatform.Infrastructure;
 using OlivePlatform.Infrastructure.Services;
 using System.Data;
@@ -119,6 +120,17 @@ builder.Services.AddCors(options =>
 // ============================================================
 
 var app = builder.Build();
+
+// ============================================================
+// Seasons - campagne en cours et suivante créées automatiquement
+// ============================================================
+
+using (var scope = app.Services.CreateScope())
+{
+    var seasonService = scope.ServiceProvider.GetRequiredService<ISeasonService>();
+
+    await seasonService.EnsureCurrentSeasonsAsync();
+}
 
 // ============================================================
 // HTTP Pipeline

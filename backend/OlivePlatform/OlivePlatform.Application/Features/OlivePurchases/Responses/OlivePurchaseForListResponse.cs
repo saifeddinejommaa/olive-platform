@@ -8,6 +8,8 @@ public class OlivePurchaseForListResponse
 
     public int Id { get; set; }
 
+    public int SeasonId { get; set; }
+
     public string Reference { get; set; } = null!;
 
     public string SupplierName { get; set; } = null!;

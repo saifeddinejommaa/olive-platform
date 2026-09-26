@@ -1,6 +1,8 @@
 ﻿using MediatR;
 using OlivePlatform.Application.Common;
 using OlivePlatform.Application.Features.Production.Requests;
+using OlivePlatform.Application.Features.Seasons;
+using OlivePlatform.Application.Services;
 using OlivePlatform.Domain.Entities;
 using OlivePlatform.Domain.Interfaces.Repositories;
 using OlivePlatform.Domain.Repositories;
@@ -26,15 +28,18 @@ public class UpdatePressingOperationCommandHandler
     private readonly IPressingOperationsRepository _repository;
     private readonly IPressingOperationInputsRepository _inputRepository;
     private readonly IPressingParametersRepository _parametersRepository;
+    private readonly ISeasonService _seasonService;
 
     public UpdatePressingOperationCommandHandler(
         IPressingOperationsRepository repository,
         IPressingOperationInputsRepository inputRepository,
-        IPressingParametersRepository parametersRepository)
+        IPressingParametersRepository parametersRepository,
+        ISeasonService seasonService)
     {
         _repository = repository;
         _inputRepository = inputRepository;
         _parametersRepository = parametersRepository;
+        _seasonService = seasonService;
     }
 
     public async Task<Unit> Handle(
@@ -48,6 +53,28 @@ public class UpdatePressingOperationCommandHandler
         if (pressingOperation is null)
             throw new KeyNotFoundException(
                     $"Pressing operation {request.Id} not found.");
+
+        if (request.PlannedDate.HasValue)
+        {
+            await _seasonService.EnsureDateInSeasonAsync(
+                pressingOperation.SeasonId,
+                SeasonCalendar.ToBusinessDate(request.PlannedDate.Value),
+                cancellationToken);
+        }
+        else
+        {
+            await _seasonService.EnsureSeasonOpenAsync(
+                pressingOperation.SeasonId,
+                cancellationToken);
+        }
+
+        if (request.Inputs is not null)
+        {
+            await _seasonService.EnsureSourcesInSeasonAsync(
+                pressingOperation.SeasonId,
+                request.Inputs.Select(input => input.ToSource()),
+                cancellationToken);
+        }
 
         if (request.PlannedDate.HasValue)
         {

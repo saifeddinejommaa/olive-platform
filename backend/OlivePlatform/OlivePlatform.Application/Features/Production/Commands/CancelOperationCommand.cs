@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using OlivePlatform.Application.Services;
 using OlivePlatform.Domain.Enums;
 using OlivePlatform.Domain.Interfaces.Repositories;
 
@@ -14,13 +15,16 @@ namespace OlivePlatform.Application.Features.Production.Commands
     {
         private readonly IPressingOperationsRepository _repository;
         private readonly IPressingOperationInputsRepository _inputsRepository;
+        private readonly ISeasonService _seasonService;
 
         public CancelPressingOperationCommandHandler(
             IPressingOperationsRepository repository,
-            IPressingOperationInputsRepository inputsRepository)
+            IPressingOperationInputsRepository inputsRepository,
+            ISeasonService seasonService)
         {
             _repository = repository;
             _inputsRepository = inputsRepository;
+            _seasonService = seasonService;
         }
 
         public async Task<Unit> Handle(
@@ -34,6 +38,10 @@ namespace OlivePlatform.Application.Features.Production.Commands
             if (pressingOperation is null)
                 throw new KeyNotFoundException(
                     $"Pressing operation {request.Id} not found.");
+
+            await _seasonService.EnsureSeasonOpenAsync(
+                pressingOperation.SeasonId,
+                cancellationToken);
 
             var inputs = await _inputsRepository
                 .GetByPressingOperationIdAsync(

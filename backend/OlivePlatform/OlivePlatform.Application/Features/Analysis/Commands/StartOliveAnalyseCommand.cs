@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using OlivePlatform.Application.Common;
+using OlivePlatform.Application.Services;
 using OlivePlatform.Domain.Enums;
 using OlivePlatform.Domain.Interfaces.Repositories;
 
@@ -16,13 +17,16 @@ namespace OlivePlatform.Application.Features.Analysis.Commands
         private readonly IOliveAnalysisRepository _repository;
 
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ISeasonService _seasonService;
 
         public StartOliveAnalyseCommandHandler(
             IOliveAnalysisRepository repository,
-            IUnitOfWork unitOfWork)
+            IUnitOfWork unitOfWork,
+            ISeasonService seasonService)
         {
             _repository = repository;
             _unitOfWork = unitOfWork;
+            _seasonService = seasonService;
         }
 
         public async Task<Unit> Handle(StartOliveAnalyseCommand request, CancellationToken cancellationToken)
@@ -36,6 +40,11 @@ namespace OlivePlatform.Application.Features.Analysis.Commands
                 throw new InvalidOperationException(
                     "Pas d'opération d'analyse à lancer");
             }
+
+            await _seasonService.EnsureSeasonOpenAsync(
+                existing.SeasonId,
+                cancellationToken);
+
             var now = DateTime.UtcNow;
 
             existing.Status = ProductionStatus.InProgress;

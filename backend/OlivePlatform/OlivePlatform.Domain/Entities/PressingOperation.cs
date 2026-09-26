@@ -9,6 +9,9 @@ public class PressingOperation
     [Column("id")]
     public int Id { get; set; }
 
+    [Column("season_id")]
+    public int SeasonId { get; set; }
+
     [Column("operation_number")]
     public string OperationNumber { get; set; } = null!;
 

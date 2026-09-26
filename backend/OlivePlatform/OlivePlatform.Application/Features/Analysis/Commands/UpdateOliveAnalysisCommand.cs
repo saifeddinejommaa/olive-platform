@@ -1,5 +1,7 @@
 ﻿using MediatR;
 using OlivePlatform.Application.Common;
+using OlivePlatform.Application.Features.Seasons;
+using OlivePlatform.Application.Services;
 using OlivePlatform.Domain.Interfaces.Repositories;
 
 namespace OlivePlatform.Application.Features.Analysis.Commands
@@ -24,13 +26,16 @@ namespace OlivePlatform.Application.Features.Analysis.Commands
     {
         private readonly IOliveAnalysisRepository _repository;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ISeasonService _seasonService;
 
         public UpdateOliveAnalyseCommandHandler(
             IOliveAnalysisRepository repository,
-            IUnitOfWork unitOfWork)
+            IUnitOfWork unitOfWork,
+            ISeasonService seasonService)
         {
             _repository = repository;
             _unitOfWork = unitOfWork;
+            _seasonService = seasonService;
         }
 
         public async Task<Unit> Handle(
@@ -45,6 +50,20 @@ namespace OlivePlatform.Application.Features.Analysis.Commands
             {
                 throw new InvalidOperationException(
                     "L'analyse d'olive n'existe pas.");
+            }
+
+            if (request.PlannedDate.HasValue)
+            {
+                await _seasonService.EnsureDateInSeasonAsync(
+                    existing.SeasonId,
+                    SeasonCalendar.ToBusinessDate(request.PlannedDate.Value),
+                    cancellationToken);
+            }
+            else
+            {
+                await _seasonService.EnsureSeasonOpenAsync(
+                    existing.SeasonId,
+                    cancellationToken);
             }
 
             if (request.HumidityPercentage.HasValue)

@@ -8,6 +8,8 @@ public class PressingOperationForListResponse
 
     public int Id { get; set; }
 
+    public int SeasonId { get; set; }
+
     public string OperationNumber { get; set; } = null!;
 
     public ProductionStatus Status { get; set; }

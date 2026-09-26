@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using OlivePlatform.Application.Common;
 using OlivePlatform.Application.Features.Harvests.Requests;
+using OlivePlatform.Application.Services;
 using OlivePlatform.Domain.Entities;
 using OlivePlatform.Domain.Enums;
 using OlivePlatform.Domain.Interfaces.Repositories;
@@ -28,19 +29,22 @@ public class CloseHarvestCommandHandler : IRequestHandler<CloseHarvestCommand, U
     private readonly IDocumentNumberService _documentNumberService;
     private readonly IOliveAnalysisRepository _oliveAnalyseRepository;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly ISeasonService _seasonService;
 
     public CloseHarvestCommandHandler(
         IHarvestRepository repository,
         IHarvestStockRepository harvestStockRepository,
         IDocumentNumberService documentNumberService,
         IOliveAnalysisRepository oliveAnalyseRepository,
-        IUnitOfWork unitOfWork)
+        IUnitOfWork unitOfWork,
+        ISeasonService seasonService)
     {
         _repository = repository;
         _harvestStockRepository = harvestStockRepository;
         _documentNumberService = documentNumberService;
         _oliveAnalyseRepository = oliveAnalyseRepository;
         _unitOfWork = unitOfWork;
+        _seasonService = seasonService;
     }
 
     public async Task<Unit> Handle(CloseHarvestCommand request, CancellationToken cancellationToken)
@@ -54,6 +58,8 @@ public class CloseHarvestCommandHandler : IRequestHandler<CloseHarvestCommand, U
 
             if (harvest.Status != ProductionStatus.InProgress)
                 throw new InvalidOperationException("Seule une récolte en cours peut être clôturée.");
+
+            await _seasonService.EnsureSeasonOpenAsync(harvest.SeasonId, ct);
 
             if (request.QuantityKg <= 0)
                 throw new InvalidOperationException("La quantité récoltée doit être supérieure à 0.");
@@ -115,6 +121,7 @@ public class CloseHarvestCommandHandler : IRequestHandler<CloseHarvestCommand, U
                 var newAnalyse = new OliveAnalysis
                 {
                     Reference = operationNumber,
+                    SeasonId = harvest.SeasonId,
                     SourceId = harvest.Id,
                     SourceType = InputSourceType.Harvest,
                     Status = ProductionStatus.Planned,

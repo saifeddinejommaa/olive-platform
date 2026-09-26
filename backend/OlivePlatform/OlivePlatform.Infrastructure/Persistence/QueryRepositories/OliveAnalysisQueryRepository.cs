@@ -29,6 +29,8 @@ public class OliveAnalysisQueryRepository : IOliveAnalysisQueryRepository
              SELECT
                  oa.id AS {nameof(OliveAnalysisDetailsResponse.Id)},
 
+                 oa.season_id AS {nameof(OliveAnalysisDetailsResponse.SeasonId)},
+
                  oa.source_type AS {nameof(OliveAnalysisDetailsResponse.SourceTypeId)},
 
                  oa.reference AS {nameof(OliveAnalysisDetailsResponse.Reference)},
@@ -109,6 +111,8 @@ public class OliveAnalysisQueryRepository : IOliveAnalysisQueryRepository
              COUNT(*) OVER() AS {nameof(OliveAnalysisForListResponse.Total)},
 
              oa.id AS {nameof(OliveAnalysisForListResponse.Id)},
+
+             oa.season_id AS {nameof(OliveAnalysisForListResponse.SeasonId)},
 
              CASE
                  WHEN oa.source_type = 1 THEN h.reference
@@ -266,6 +270,22 @@ public class OliveAnalysisQueryRepository : IOliveAnalysisQueryRepository
         }
 
 
+        // ----------------------------------------------------
+        // Season
+        // ----------------------------------------------------
+
+        if (filter.SeasonId.HasValue)
+        {
+            sql.Append(
+                """
+
+                AND oa.season_id = @SeasonId
+                """);
+
+            parameters.Add(
+                "SeasonId",
+                filter.SeasonId.Value);
+        }
         // ========================================================
         // STATUS
         // ========================================================

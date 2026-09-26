@@ -9,6 +9,9 @@ public class Harvest
     [Column("id")]
     public int Id { get; set; }
 
+    [Column("season_id")]
+    public int SeasonId { get; set; }
+
     [Column("reference")]
     public string Reference { get; set; } = null!;
 

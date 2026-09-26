@@ -28,6 +28,7 @@ public class OlivePurchaseQueryRepository : IOlivePurchaseQueryRepository
         COUNT(*) OVER() AS Total,
 
         op.id AS {nameof(OlivePurchaseForListResponse.Id)},
+        op.season_id AS {nameof(OlivePurchaseForListResponse.SeasonId)},
         op.reference AS {nameof(OlivePurchaseForListResponse.Reference)},
         s.name AS {nameof(OlivePurchaseForListResponse.SupplierName)},
         op.purchase_date AS {nameof(OlivePurchaseForListResponse.PurchaseDate)},
@@ -169,6 +170,22 @@ public class OlivePurchaseQueryRepository : IOlivePurchaseQueryRepository
                 $"%{filter.SupplierName}%");
         }
 
+        // ----------------------------------------------------
+        // Season
+        // ----------------------------------------------------
+
+        if (filter.SeasonId.HasValue)
+        {
+            sql.Append(
+                """
+
+                AND op.season_id = @SeasonId
+                """);
+
+            parameters.Add(
+                "SeasonId",
+                filter.SeasonId.Value);
+        }
         // ========================================================
         // Status
         // ========================================================
@@ -263,6 +280,7 @@ public class OlivePurchaseQueryRepository : IOlivePurchaseQueryRepository
 
         GROUP BY
             op.id,
+            op.season_id,
             op.reference,
             s.name,
             op.purchase_date,
@@ -316,6 +334,7 @@ public class OlivePurchaseQueryRepository : IOlivePurchaseQueryRepository
         const string purchaseSql = $@"
     SELECT
         op.id AS {nameof(OlivePurchaseDetailsResponse.Id)},
+        op.season_id AS {nameof(OlivePurchaseDetailsResponse.SeasonId)},
 
         op.reference AS {nameof(OlivePurchaseDetailsResponse.Reference)},
 

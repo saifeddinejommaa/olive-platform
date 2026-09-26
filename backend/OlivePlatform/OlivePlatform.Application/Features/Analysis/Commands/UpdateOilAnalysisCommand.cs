@@ -1,5 +1,7 @@
 ﻿using MediatR;
 using OlivePlatform.Application.Common;
+using OlivePlatform.Application.Features.Seasons;
+using OlivePlatform.Application.Services;
 using OlivePlatform.Domain.Repositories;
 
 namespace OlivePlatform.Application.Features.OilAnalyses.Commands
@@ -25,10 +27,14 @@ namespace OlivePlatform.Application.Features.OilAnalyses.Commands
         : IRequestHandler<UpdateOilAnalysisCommand,Unit>
     {
         private readonly IOilAnalysisRepository _repository;
+        private readonly ISeasonService _seasonService;
 
-        public UpdateOilAnalysisCommandHandler(IOilAnalysisRepository repository)
+        public UpdateOilAnalysisCommandHandler(
+            IOilAnalysisRepository repository,
+            ISeasonService seasonService)
         {
             _repository = repository;
+            _seasonService = seasonService;
         }
 
         public async Task<Unit> Handle(
@@ -41,6 +47,20 @@ namespace OlivePlatform.Application.Features.OilAnalyses.Commands
             {
                 throw new KeyNotFoundException(
                     $"Oil analysis {request.Id} not found.");
+            }
+
+            if (request.PlannedDate.HasValue)
+            {
+                await _seasonService.EnsureDateInSeasonAsync(
+                    oilAnalysis.SeasonId,
+                    SeasonCalendar.ToBusinessDate(request.PlannedDate.Value),
+                    cancellationToken);
+            }
+            else
+            {
+                await _seasonService.EnsureSeasonOpenAsync(
+                    oilAnalysis.SeasonId,
+                    cancellationToken);
             }
 
             oilAnalysis.CreatedAt = DateTime.SpecifyKind(

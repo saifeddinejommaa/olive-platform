@@ -1,4 +1,5 @@
 import { usePageTitleStore } from "../../stores/usePageTittleStore";
+import SeasonSelector from "../season/SeasonSelector";
 
 export default function Topbar() {
   const dynamicTitle = usePageTitleStore((state) => state.title);
@@ -14,6 +15,8 @@ export default function Topbar() {
       </div>
 
       <div className="topbar-actions">
+        <SeasonSelector />
+
         <button type="button" className="topbar-button" title="Notifications">
           🔔
         </button>
