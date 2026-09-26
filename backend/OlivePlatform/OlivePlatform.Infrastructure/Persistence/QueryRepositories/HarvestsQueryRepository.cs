@@ -34,6 +34,7 @@ public class HarvestQueryRepository : IHarvestQueryRepository
                 COUNT(*) OVER() {nameof(HarvestForListResponse.Total)},
 
                 h.id AS {nameof(HarvestForListResponse.Id)},
+                h.season_id AS {nameof(HarvestForListResponse.SeasonId)},
                 h.reference AS {nameof(HarvestForListResponse.Reference)},
                 p.name AS {nameof(HarvestForListResponse.PlotName)},
                 h.planned_date AS {nameof(HarvestForListResponse.PlannedDate)},
@@ -113,6 +114,22 @@ public class HarvestQueryRepository : IHarvestQueryRepository
                 $"%{filter.HarvestNumber}%");
         }
 
+        // ----------------------------------------------------
+        // Season
+        // ----------------------------------------------------
+
+        if (filter.SeasonId.HasValue)
+        {
+            sql.Append(
+                """
+
+                AND h.season_id = @SeasonId
+                """);
+
+            parameters.Add(
+                "SeasonId",
+                filter.SeasonId.Value);
+        }
         // ----------------------------------------------------
         // Plot
         // ----------------------------------------------------
@@ -235,6 +252,7 @@ public class HarvestQueryRepository : IHarvestQueryRepository
         const string sql = $"""
         SELECT
             h.id AS "{nameof(HarvestDetailsResponse.Id)}",
+            h.season_id AS "{nameof(HarvestDetailsResponse.SeasonId)}",
             h.reference AS "{nameof(HarvestDetailsResponse.Reference)}",
             p.reference AS "{nameof(HarvestDetailsResponse.PlotReference)}",
             h.planned_date AS "{nameof(HarvestDetailsResponse.PlannedDate)}",
@@ -318,6 +336,7 @@ public class HarvestQueryRepository : IHarvestQueryRepository
 
         GROUP BY
             h.id,
+            h.season_id,
             h.reference,
             p.reference,
             h.planned_date,
@@ -431,6 +450,7 @@ public class HarvestQueryRepository : IHarvestQueryRepository
         const string sql = $"""
             SELECT
                 oa.id AS {nameof(OliveAnalysisDetailsResponse.Id)},
+                oa.season_id AS {nameof(OliveAnalysisDetailsResponse.SeasonId)},
                 oa.reference AS {nameof(OliveAnalysisDetailsResponse.Reference)},
                 oa.source_type AS {nameof(OliveAnalysisDetailsResponse.SourceTypeId)},
                 oa.humidity_percentage AS {nameof(OliveAnalysisDetailsResponse.HumidityPercentage)},

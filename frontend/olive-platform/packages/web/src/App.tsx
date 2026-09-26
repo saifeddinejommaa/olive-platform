@@ -37,6 +37,7 @@ import InvoicesPage from "./features/invoices/pages/InvoicesPage";
 import SettingsPage from "./features/settings/pages/SettingsPage";
 import { useEffect } from "react";
 import { useConstantsStore } from "./stores/ConstantsStore";
+import SeasonGate from "./common/widgets/season/SeasonGate";
 import NewPressingOperationPage from "./features/production/ui/pages/NewPressingOperationPage";
 import { ToastContainer } from "react-toastify";
 import PressingOperationDetailsPage from "./features/production/ui/pages/PressingOperationsDetailsPage";
@@ -67,6 +68,7 @@ function App() {
   return (
     <>
       <BrowserRouter>
+        <SeasonGate>
         <Routes>
           <Route element={<Layout />}>
             {/* ================================================== */}
@@ -187,6 +189,7 @@ function App() {
             <Route path="/settings" element={<SettingsPage />} />
           </Route>
         </Routes>
+        </SeasonGate>
       </BrowserRouter>
       <ToastContainer position="top-right" autoClose={3000} newestOnTop />
     </>

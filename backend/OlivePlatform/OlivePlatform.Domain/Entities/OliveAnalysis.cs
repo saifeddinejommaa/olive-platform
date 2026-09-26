@@ -12,6 +12,9 @@ public class OliveAnalysis
     [Column("id")]
     public int Id { get; set; }
 
+    [Column("season_id")]
+    public int SeasonId { get; set; }
+
     [Column("reference")]
     public required string Reference { get; set; }
 

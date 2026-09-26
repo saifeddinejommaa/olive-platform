@@ -5,6 +5,8 @@ namespace OlivePlatform.Application.Features.Laboratory.Requests
 {
     public class OliveAnalysesRequestFilter : PaginationRequest
     {
+        public int? SeasonId { get; set; }
+
         public string? Reference { get; set; }
 
         public string? PlotReference { get; set; }

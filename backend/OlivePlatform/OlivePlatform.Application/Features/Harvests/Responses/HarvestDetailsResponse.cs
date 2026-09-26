@@ -8,6 +8,8 @@ namespace OlivePlatform.Application.Features.Harvests.Responses
     public class HarvestDetailsResponse
     {
         public int Id { get; set; }
+
+        public int SeasonId { get; set; }
         public string Reference { get; set; } = string.Empty;
         public string PlotReference { get; set; } = string.Empty;
 

@@ -27,6 +27,7 @@ public class PressingOperationQueryRepository : IPressiongOperationQueryReposito
             COUNT(*) OVER() AS {nameof(PressingOperationForListResponse.Total)},
 
             p.id AS {nameof(PressingOperationForListResponse.Id)},
+            p.season_id AS {nameof(PressingOperationForListResponse.SeasonId)},
             p.operation_number AS {nameof(PressingOperationForListResponse.OperationNumber)},
             p.status_id AS {nameof(PressingOperationForListResponse.Status)},
 
@@ -122,6 +123,22 @@ public class PressingOperationQueryRepository : IPressiongOperationQueryReposito
                 $"%{filter.PurchaseNumber}%");
         }
 
+        // ----------------------------------------------------
+        // Season
+        // ----------------------------------------------------
+
+        if (filter.SeasonId.HasValue)
+        {
+            sql.Append(
+                """
+
+                AND p.season_id = @SeasonId
+                """);
+
+            parameters.Add(
+                "SeasonId",
+                filter.SeasonId.Value);
+        }
         // ========================================================
         // GROUP BY
         // ========================================================
@@ -131,6 +148,7 @@ public class PressingOperationQueryRepository : IPressiongOperationQueryReposito
         
         GROUP BY
             p.id,
+            p.season_id,
             p.operation_number,
             p.status_id,
             p.planned_date,
@@ -191,6 +209,7 @@ public class PressingOperationQueryRepository : IPressiongOperationQueryReposito
         const string sql = $"""
         SELECT
             po.id {nameof(PressingOperationDetailsResponse.Id)},
+            po.season_id {nameof(PressingOperationDetailsResponse.SeasonId)},
             po.operation_number {nameof(PressingOperationDetailsResponse.OperationNumber)},
             po.status_id {nameof(PressingOperationDetailsResponse.Status)},
             po.created_at {nameof(PressingOperationDetailsResponse.CreatedAt)},
@@ -241,6 +260,7 @@ public class PressingOperationQueryRepository : IPressiongOperationQueryReposito
 
         GROUP BY
             po.id,
+            po.season_id,
             po.operation_number,
             po.status_id,
             po.created_at,

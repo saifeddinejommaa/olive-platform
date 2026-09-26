@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using OlivePlatform.Application.Services;
 using OlivePlatform.Domain.Enums;
 using OlivePlatform.Domain.Interfaces.Repositories;
 
@@ -18,11 +19,14 @@ public class UpdateOlivePurchaseCommandHandler
     : IRequestHandler<UpdateOlivePurchaseCommand, bool>
 {
     private readonly IOlivePurchaseRepository _repository;
+    private readonly ISeasonService _seasonService;
 
     public UpdateOlivePurchaseCommandHandler(
-        IOlivePurchaseRepository repository)
+        IOlivePurchaseRepository repository,
+        ISeasonService seasonService)
     {
         _repository = repository;
+        _seasonService = seasonService;
     }
 
     public async Task<bool> Handle(
@@ -37,6 +41,11 @@ public class UpdateOlivePurchaseCommandHandler
         if (entity == null)
             throw new KeyNotFoundException(
                 $"Purchase with id '{request.Id}' was not found.");
+
+        await _seasonService.EnsureDateInSeasonAsync(
+            entity.SeasonId,
+            request.PurchaseDate,
+            cancellationToken);
 
         entity.Reference = request.PurchaseNumber;
         entity.PurchaseDate = request.PurchaseDate;

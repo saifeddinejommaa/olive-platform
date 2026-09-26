@@ -1,5 +1,7 @@
 ﻿using MediatR;
 using OlivePlatform.Application.Common;
+using OlivePlatform.Application.Features.Seasons;
+using OlivePlatform.Application.Services;
 using OlivePlatform.Domain.Enums;
 using OlivePlatform.Domain.Interfaces.Repositories;
 
@@ -24,11 +26,14 @@ public class UpdateHarvestCommandHandler
     : IRequestHandler<UpdateHarvestCommand, Unit>
 {
     private readonly IHarvestRepository _repository;
+    private readonly ISeasonService _seasonService;
 
     public UpdateHarvestCommandHandler(
-        IHarvestRepository repository)
+        IHarvestRepository repository,
+        ISeasonService seasonService)
     {
         _repository = repository;
+        _seasonService = seasonService;
     }
 
     public async Task<Unit> Handle(
@@ -43,6 +48,20 @@ public class UpdateHarvestCommandHandler
         {
             throw new KeyNotFoundException(
                 $"Harvest with id '{request.Id}' was not found.");
+        }
+
+        if (request.PlannedDate.HasValue)
+        {
+            await _seasonService.EnsureDateInSeasonAsync(
+                entity.SeasonId,
+                SeasonCalendar.ToBusinessDate(request.PlannedDate.Value),
+                cancellationToken);
+        }
+        else
+        {
+            await _seasonService.EnsureSeasonOpenAsync(
+                entity.SeasonId,
+                cancellationToken);
         }
 
         if (request.PlotId.HasValue)

@@ -1,4 +1,5 @@
 import { getCoreConfig } from "../config/CoreConfiguration";
+import { getSelectedSeasonId } from "./SeasonContext";
 
 type HttpMethod = "GET" | "POST" | "PUT" | "DELETE";
 
@@ -6,6 +7,8 @@ type RequestOptions = {
   method?: HttpMethod;
   body?: any;
   headers?: Record<string, string>;
+  // Ajoute la campagne sélectionnée à l'appel (true par défaut).
+  withSeason?: boolean;
 };
 
 export type ApiResponse<T> = {
@@ -14,15 +17,47 @@ export type ApiResponse<T> = {
   ResponseMessage: string;
 };
 
+const isPlainObject = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" &&
+  value !== null &&
+  Object.getPrototypeOf(value) === Object.prototype;
+
+// seasonId en query string (filtres des listes) et dans le corps (création).
+function applySeason(path: string, body: any, seasonId: number) {
+  const [pathname, query = ""] = path.split("?");
+  const params = new URLSearchParams(query);
+
+  if (!params.has("seasonId")) {
+    params.set("seasonId", String(seasonId));
+  }
+
+  const nextBody =
+    isPlainObject(body) && body.seasonId == null
+      ? { ...body, seasonId }
+      : body;
+
+  return {
+    path: `${pathname}?${params.toString()}`,
+    body: nextBody,
+  };
+}
+
 export async function http<T>(
   path: string,
   options: RequestOptions = {},
 ): Promise<T> {
   const { apiBaseUrl } = getCoreConfig();
-  
 
-  const { method = "GET", body, headers = {} } = options;
-  const url = `${apiBaseUrl.replace(/\/$/, "")}/${path.replace(/^\//, "")}`; 
+  const { method = "GET", headers = {}, withSeason = true } = options;
+  let { body } = options;
+
+  const seasonId = withSeason ? getSelectedSeasonId() : null;
+
+  if (seasonId != null) {
+    ({ path, body } = applySeason(path, body, seasonId));
+  }
+
+  const url = `${apiBaseUrl.replace(/\/$/, "")}/${path.replace(/^\//, "")}`;
   const isGet = method.toUpperCase() === "GET";
   const response = await fetch(url, {
     method,

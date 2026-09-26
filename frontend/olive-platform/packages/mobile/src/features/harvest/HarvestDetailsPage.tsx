@@ -12,6 +12,7 @@ import { HarvestMobileTab, HarvestTabs } from "./components/details/HarvestTabs"
 import { Loading } from "../../components/Loading";
 import { DetailsHeader } from "../../components/DetailsHeader";
 import { ActionCard } from "../../components/ActionCard";
+import { router } from 'expo-router';
 
 type Props = { harvestId: number };
 
@@ -72,7 +73,7 @@ export function HarvestDetailsPage({ harvestId }: Props) {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.content}
       >
-        <DetailsHeader title="Détails Récole"/>
+        <DetailsHeader title="Détails Récole" onBack={()=> { router.back()}}/>
 
         <HarvestSummaryCard harvest={harvest} />
 

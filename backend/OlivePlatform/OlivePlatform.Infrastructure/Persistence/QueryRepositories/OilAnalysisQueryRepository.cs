@@ -24,6 +24,8 @@ namespace OlivePlatform.Infrastructure.Persistence.QueryRepositories
         SELECT
             oa.id AS {nameof(OilAnalysisDetailsResponse.Id)},
 
+            oa.season_id AS {nameof(OilAnalysisDetailsResponse.SeasonId)},
+
             oa.reference AS {nameof(OilAnalysisDetailsResponse.Reference)},
 
             oa.source_type_id AS {nameof(OilAnalysisDetailsResponse.SourceTypeId)},
@@ -130,6 +132,23 @@ namespace OlivePlatform.Infrastructure.Persistence.QueryRepositories
                     filter.PlannedDate.Value);
             }
 
+            // ----------------------------------------------------
+            // Season
+            // ----------------------------------------------------
+    
+            if (filter.SeasonId.HasValue)
+            {
+                where.Append(
+                    """
+    
+                    AND oa.season_id = @SeasonId
+                    """);
+    
+                parameters.Add(
+                    "SeasonId",
+                    filter.SeasonId.Value);
+            }
+    
             // Filtre par statut
             if (filter.Status.HasValue)
             {
@@ -167,6 +186,8 @@ namespace OlivePlatform.Infrastructure.Persistence.QueryRepositories
             var sql = $"""
                 SELECT
                     oa.id AS {nameof(OilAnalysisForListResponse.Id)},
+
+                    oa.season_id AS {nameof(OilAnalysisForListResponse.SeasonId)},
                 
                     oa.reference AS {nameof(OilAnalysisForListResponse.Reference)},
                 

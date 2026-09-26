@@ -8,6 +8,8 @@ namespace OlivePlatform.Application.Features.OlivePurchases.Responses
 
         public int Id { get; set; }
 
+        public int SeasonId { get; set; }
+
         public string Reference { get; set; } = string.Empty;
 
         public DateOnly PurchaseDate { get; set; }

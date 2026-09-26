@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using OlivePlatform.Application.Common;
 using OlivePlatform.Application.Features.OlivePurchases.Requests;
+using OlivePlatform.Application.Services;
 using OlivePlatform.Domain.Entities;
 using OlivePlatform.Domain.Enums;
 using OlivePlatform.Domain.Interfaces.Repositories;
@@ -18,6 +19,9 @@ public class CreateOlivePurchaseCommand : IRequest<int>
     public PurchaseStatus Status { get; set; }
     public string? Notes { get; set; }
     public required List<NewOlivePurchaseItemRequest> Items { get; set; }
+
+    // Campagne sélectionnée ; si absente, déduite de PurchaseDate.
+    public int? SeasonId { get; set; }
 }
 
 public class CreateOlivePurchaseCommandHandler
@@ -28,19 +32,22 @@ public class CreateOlivePurchaseCommandHandler
     private readonly ISupplierRepository _supplierRepository;
     private readonly IDocumentNumberService _documentNumberService;
     private readonly IOliveAnalysisRepository _oliveAnalysisRepository;
+    private readonly ISeasonService _seasonService;
 
     public CreateOlivePurchaseCommandHandler(
         IUnitOfWork unitOfWork,
         IOlivePurchaseRepository repository,
         ISupplierRepository supplierRepository,
         IDocumentNumberService documentNumberService,
-        IOliveAnalysisRepository oliveAnalysisRepository)
+        IOliveAnalysisRepository oliveAnalysisRepository,
+        ISeasonService seasonService)
     {
         _unitOfWork = unitOfWork;
         _repository = repository;
         _supplierRepository = supplierRepository;
         _documentNumberService = documentNumberService;
         _oliveAnalysisRepository = oliveAnalysisRepository;
+        _seasonService = seasonService;
     }
 
     public async Task<int> Handle(
@@ -69,6 +76,11 @@ public class CreateOlivePurchaseCommandHandler
                     throw new InvalidOperationException(
                         "Le prix par kg doit être supérieur à 0.");
             }
+
+            var seasonId = await _seasonService.ResolveForDateAsync(
+                request.SeasonId,
+                request.PurchaseDate,
+                ct);
 
             var now = DateTime.UtcNow;
 
@@ -110,6 +122,7 @@ public class CreateOlivePurchaseCommandHandler
             var purchase = new OlivePurchase
             {
                 Reference = purchaseNumber,
+                SeasonId = seasonId,
                 SupplierId = supplierId,
                 PurchaseDate = request.PurchaseDate,
                 Status = request.Status,
@@ -174,6 +187,7 @@ public class CreateOlivePurchaseCommandHandler
                 var analysisEntity = new OliveAnalysis
                 {
                     Reference = analysisReference,
+                    SeasonId = seasonId,
                     SourceType = InputSourceType.Purchase,
                     SourceId = itemEntity.Id,
                     CreatedAt = now,

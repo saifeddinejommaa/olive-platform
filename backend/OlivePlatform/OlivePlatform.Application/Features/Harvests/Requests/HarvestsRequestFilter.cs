@@ -4,6 +4,8 @@ namespace OlivePlatform.Application.Features.Harvests.Requests
 {
     public class HarvestsRequestFilter : PaginationRequest
     {
+        public int? SeasonId { get; set; }
+
         public string? HarvestNumber { get; set; }
 
         public int? PlotId { get; set; }

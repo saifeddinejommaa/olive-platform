@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using OlivePlatform.Application.Services;
 using OlivePlatform.Domain.Enums;
 using OlivePlatform.Domain.Interfaces.Repositories;
 
@@ -13,11 +14,14 @@ public class StartHarvestCommandHandler
     : IRequestHandler<StartHarvestCommand, Unit>
 {
     private readonly IHarvestRepository _repository;
+    private readonly ISeasonService _seasonService;
 
     public StartHarvestCommandHandler(
-        IHarvestRepository repository)
+        IHarvestRepository repository,
+        ISeasonService seasonService)
     {
         _repository = repository;
+        _seasonService = seasonService;
     }
 
     public async Task<Unit> Handle(
@@ -39,6 +43,10 @@ public class StartHarvestCommandHandler
             throw new InvalidOperationException(
                 "Seule une récolte planifiée peut être lancée.");
         }
+
+        await _seasonService.EnsureSeasonOpenAsync(
+            entity.SeasonId,
+            cancellationToken);
 
         var now = DateTime.UtcNow;
 

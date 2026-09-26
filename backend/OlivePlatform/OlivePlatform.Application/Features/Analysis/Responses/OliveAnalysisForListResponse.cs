@@ -8,6 +8,8 @@ namespace OlivePlatform.Application.Features.Analysis.Responses
     {
         public int Id { get; set; }
 
+        public int SeasonId { get; set; }
+
         public int Total { get; set; }
 
         public required string Reference { get; set; }

@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using OlivePlatform.Application.Services;
 using OlivePlatform.Domain.Enums;
 using OlivePlatform.Domain.Repositories;
 
@@ -17,10 +18,14 @@ namespace OlivePlatform.Application.Features.OilAnalyses.Commands
         : IRequestHandler<StartOilAnalysisCommand, Unit>
     {
         private readonly IOilAnalysisRepository _repository;
+        private readonly ISeasonService _seasonService;
 
-        public StartOilAnalysisCommandHandler(IOilAnalysisRepository repository)
+        public StartOilAnalysisCommandHandler(
+            IOilAnalysisRepository repository,
+            ISeasonService seasonService)
         {
             _repository = repository;
+            _seasonService = seasonService;
         }
 
         public async Task<Unit> Handle(
@@ -34,6 +39,10 @@ namespace OlivePlatform.Application.Features.OilAnalyses.Commands
                 throw new KeyNotFoundException(
                     $"Oil analysis {request.Id} not found.");
             }
+
+            await _seasonService.EnsureSeasonOpenAsync(
+                oilAnalysis.SeasonId,
+                cancellationToken);
 
             oilAnalysis.CreatedAt = DateTime.SpecifyKind(
                 oilAnalysis.CreatedAt,
@@ -74,10 +83,14 @@ namespace OlivePlatform.Application.Features.OilAnalyses.Commands
         : IRequestHandler<CompleteOilAnalysisCommand, Unit>
     {
         private readonly IOilAnalysisRepository _repository;
+        private readonly ISeasonService _seasonService;
 
-        public CompleteOilAnalysisCommandHandler(IOilAnalysisRepository repository)
+        public CompleteOilAnalysisCommandHandler(
+            IOilAnalysisRepository repository,
+            ISeasonService seasonService)
         {
             _repository = repository;
+            _seasonService = seasonService;
         }
 
         public async Task<Unit> Handle(
@@ -91,6 +104,10 @@ namespace OlivePlatform.Application.Features.OilAnalyses.Commands
                 throw new KeyNotFoundException(
                     $"Oil analysis {request.Id} not found.");
             }
+
+            await _seasonService.EnsureSeasonOpenAsync(
+                oilAnalysis.SeasonId,
+                cancellationToken);
 
             oilAnalysis.CreatedAt = DateTime.SpecifyKind(
                 oilAnalysis.CreatedAt,

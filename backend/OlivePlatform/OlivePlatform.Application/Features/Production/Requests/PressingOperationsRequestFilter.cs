@@ -4,6 +4,8 @@ namespace OlivePlatform.Application.Features.Production.Requests
 {
     public class PressingOperationsRequestFilter : PaginationRequest
     {
+        public int? SeasonId { get; set; }
+
         public string? OperationNumber { get; set; }
 
         public DateOnly? PlannedDate { get; set; }

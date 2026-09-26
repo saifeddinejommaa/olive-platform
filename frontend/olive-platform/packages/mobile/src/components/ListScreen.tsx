@@ -12,6 +12,7 @@ import {
 } from '@tabler/icons-react-native';
 
 import { FilterModal } from './FilterModal';
+import { SeasonSelector } from './SeasonSelector';
 import { colors } from '../consts/Colors';
 import { typography } from '../consts/Typography';
 import { radius, shadow, spacing } from '../consts/spacing';
@@ -64,6 +65,8 @@ export function ListScreen<T>({
         {description && (
           <Text style={styles.bannerDescription}>{description}</Text>
         )}
+
+        <SeasonSelector />
       </View>
 
       {/* Carte flottante — chevauche le bas du bandeau */}

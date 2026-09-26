@@ -7,6 +7,8 @@ public class HarvestForListResponse
     public int Total { get; set; }
     public int Id { get; set; }
 
+    public int SeasonId { get; set; }
+
     public string Reference { get; set; } = null!;
 
     public int PlotId { get; set; }

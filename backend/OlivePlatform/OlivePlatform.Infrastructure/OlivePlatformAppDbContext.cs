@@ -47,6 +47,8 @@ public class OlivePlatformAppDbContext : DbContext
     public DbSet<Supplier> Suppliers => Set<Supplier>();
     public DbSet<DocumentCounter> DocumentCounters { get; set; }
 
+    public DbSet<Season> Seasons => Set<Season>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
