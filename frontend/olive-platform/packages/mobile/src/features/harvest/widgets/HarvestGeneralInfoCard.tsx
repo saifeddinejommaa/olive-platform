@@ -27,7 +27,7 @@ type Props = {
     id: number;
     reference: string;
     status: ProductionStatus;
-    harvestDate?: string | null;
+    plannedDate?: string | null;
     plannedTrees: number;
     notes?: string | null;
     harvestType: number;
@@ -51,9 +51,9 @@ export function HarvestGeneralInfoCard({
 }: Props) {
   const [isEditing, setIsEditing] = useState(false);
 
-  const [harvestDate, setHarvestDate] = useState(
-    harvest.harvestDate
-      ? new Date(harvest.harvestDate)
+  const [plannedDate, setPlannedDate] = useState(
+    harvest.plannedDate
+      ? new Date(harvest.plannedDate)
       : new Date(),
   );
 
@@ -90,9 +90,9 @@ export function HarvestGeneralInfoCard({
   const canEdit = isPlanned || isInProgress;
 
   const handleEdit = () => {
-    setHarvestDate(
-      harvest.harvestDate
-        ? new Date(harvest.harvestDate)
+    setPlannedDate(
+      harvest.plannedDate
+        ? new Date(harvest.plannedDate)
         : new Date(),
     );
 
@@ -108,9 +108,9 @@ export function HarvestGeneralInfoCard({
   };
 
   const handleCancel = () => {
-    setHarvestDate(
-      harvest.harvestDate
-        ? new Date(harvest.harvestDate)
+    setPlannedDate(
+      harvest.plannedDate
+        ? new Date(harvest.plannedDate)
         : new Date(),
     );
 
@@ -131,7 +131,7 @@ export function HarvestGeneralInfoCard({
 
       if (isPlanned) {
         await update(harvest.id, {
-          harvestDate: harvestDate.toISOString(),
+          plannedDate: plannedDate.toISOString(),
           plannedTrees: Number(plannedTrees) || 0,
           harvestType,
           notes,
@@ -161,7 +161,7 @@ export function HarvestGeneralInfoCard({
     setShowDatePicker(Platform.OS === "ios");
 
     if (selectedDate) {
-      setHarvestDate(selectedDate);
+      setPlannedDate(selectedDate);
     }
   };
 
@@ -216,7 +216,7 @@ export function HarvestGeneralInfoCard({
               ]}
             >
               {formatDate(
-                harvestDate.toISOString(),
+                plannedDate.toISOString(),
               )}
             </Text>
           </TouchableOpacity>
@@ -227,7 +227,7 @@ export function HarvestGeneralInfoCard({
               styles.value,
             ]}
           >
-            {formatDate(harvest.harvestDate)}
+            {formatDate(harvest.plannedDate)}
           </Text>
         )}
       </View>
@@ -237,7 +237,7 @@ export function HarvestGeneralInfoCard({
         isPlanned &&
         showDatePicker && (
           <DateTimePicker
-            value={harvestDate}
+            value={plannedDate}
             mode="date"
             display={
               Platform.OS === "ios"

@@ -39,7 +39,7 @@ export default function OliveAnalysisInfoWidget({ analysis }: Props) {
         />
         <InfoFieldWidget
           label="Date d'analyse"
-          value={formatStringToDateTime(analysis.analysisDate)}
+          value={formatStringToDateTime(analysis.plannedDate)}
         />
       </div>
     </div>

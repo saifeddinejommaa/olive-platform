@@ -9,11 +9,11 @@ export type OliveAnalysisForListResponse = {
 
   plotReference: number;
 
-  analysisDate?: string;
+  plannedDate?: string;
 
-  createdAt: string;
+  startTime?: string;
 
-  updatedAt: string;
+  endTime?: string;
 
   status: number;
 };

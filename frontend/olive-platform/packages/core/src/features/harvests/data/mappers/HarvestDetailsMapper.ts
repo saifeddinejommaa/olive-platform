@@ -15,7 +15,7 @@ export function HarvestDetailsMapper(
     
     plotReference: response.plotReference,
 
-    harvestDate: response.harvestDate,
+    plannedDate: response.plannedDate,
 
     quantityKg: response.quantityKg,
 

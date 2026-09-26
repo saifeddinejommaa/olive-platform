@@ -33,11 +33,17 @@ public class OliveAnalysis
     [Column("acidity_percentage", TypeName = "numeric(10,3)")]
     public decimal? AcidityPercentage { get; set; }
 
-    [Column("analysis_date",TypeName = "timestamp with time zone")]
-    public DateTime? AnalysisDate { get; set; }
+    [Column("planned_date", TypeName = "timestamp with time zone")]
+    public DateTime? PlannedDate { get; set; }
 
     [Column("created_at", TypeName = "timestamp with time zone")]
     public DateTime CreatedAt { get; set; }
+
+    [Column("start_time", TypeName = "timestamp with time zone")]
+    public DateTime? StartTime { get; set; }
+
+    [Column("end_time", TypeName = "timestamp with time zone")]
+    public DateTime? EndTime { get; set; }
 
     [Column("updated_at", TypeName = "timestamp with time zone")]
     public DateTime UpdatedAt { get; set; }

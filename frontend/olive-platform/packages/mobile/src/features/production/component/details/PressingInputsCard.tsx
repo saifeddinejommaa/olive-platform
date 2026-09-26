@@ -1,274 +1,113 @@
-import { useState } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  Alert,
-} from "react-native";
-import { IconPlus, IconTrash } from "@tabler/icons-react-native";
-
-import { usePressingOperationDetailsStore } from "@olive-platform/core/features/production/stores/PressingOperationDetailsStore";
-import { usePressingOperationInputsStore } from "@olive-platform/core/features/production/stores/PressingOperationInputsStore";
+import { useEffect } from "react";
+import { StyleSheet, View, Text, ActivityIndicator } from "react-native";
+import { spacing } from "../../../../consts/spacing";
+import { semanticColors } from "../../../../consts/Colors";
 import { ProductionStatus } from "@olive-platform/core/features/production/domain/entities/ProductionStatus";
-
-import { colors, semanticColors } from "../../../../consts/Colors";
-import { typography } from "../../../../consts/Typography";
-import { radius, shadow, spacing } from "../../../../consts/spacing";
-
-type ExistingInput = {
-  harvestId: number | null;
-  purchaseItemId: number | null;
-  quantityKg: number;
-};
+import { usePressingOperationInputsStore } from "@olive-platform/core/features/production/stores/PressingOperationInputsStore";
 
 type Props = {
   operationId: number;
   status: ProductionStatus;
 };
 
-function inputLabel(input: ExistingInput) {
-  // TODO: idéalement résoudre le vrai nom (référence récolte / achat)
-  // via un lookup — pour l'instant on affiche juste la source.
-  if (input.harvestId != null) return `Récolte #${input.harvestId}`;
-  if (input.purchaseItemId != null) return `Achat #${input.purchaseItemId}`;
-  return "Source inconnue";
-}
+export function PressingInputsCard({ operationId, status }: Props) {
+  const { fetchInputs, loading, inputs } = usePressingOperationInputsStore();
 
-export function PressingInputsCard({
-  operationId,
-  status,
-}: Props) {
-  const [isAdding, setIsAdding] = useState(false);
-  const [newQuantityKg, setNewQuantityKg] = useState("");
-  // TODO: à remplacer par un vrai sélecteur (récolte OU achat) plutôt
-  // qu'un id brut, une fois qu'on sait comment les lister au clavier.
-  const [newHarvestId, setNewHarvestId] = useState("");
+  useEffect(() => {
+    fetchInputs(operationId);
+  }, [operationId, fetchInputs]);
 
-  const { updateOperation, saving } = usePressingOperationDetailsStore();
-  const { inputs,fetchInputs } = usePressingOperationInputsStore(); // ← à ajuster selon la vraie signature
+  if (loading) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator color={semanticColors.primary} />
+      </View>
+    );
+  }
 
-  const isPlanned = status === ProductionStatus.Planned;
-  const isInProgress = status === ProductionStatus.InProgress;
-  const canEdit = isPlanned || isInProgress;
+  if (!inputs || inputs.length === 0) {
+    return (
+      <View style={styles.centered}>
+        <Text style={styles.emptyText}>Aucun intrant enregistré</Text>
+      </View>
+    );
+  }
 
-  const persistInputs = async (nextInputs: ExistingInput[]) => {
-    try {
-      await updateOperation({
-        id: operationId,
-        inputs: nextInputs.map((input) => ({
-          harvestId: input.harvestId,
-          purchaseItemId: input.purchaseItemId,
-          quantityKg: input.quantityKg,
-        })),
-      });
-    } catch {
-      Alert.alert("Erreur", "Impossible de mettre à jour les intrants.");
-    }
-  };
-
-  const handleAdd = async () => {
-    const quantityKg = Number(newQuantityKg.replace(",", "."));
-    const harvestId = Number(newHarvestId);
-
-    if (!quantityKg || quantityKg <= 0 || !harvestId) return;
-
-    const nextInputs = [
-      ...inputs,
-      { harvestId, purchaseItemId: null, quantityKg },
-    ];
-
-    await persistInputs(nextInputs);
-
-    setNewQuantityKg("");
-    setNewHarvestId("");
-    setIsAdding(false);
-  };
-
-  const handleRemove = async (index: number) => {
-    const nextInputs = inputs.filter((_, i) => i !== index);
-    await persistInputs(nextInputs);
-  };
+  const totalKg = inputs.reduce((sum, i) => sum + i.quantityKg, 0);
 
   return (
-    <View style={styles.card}>
-      <Text style={styles.sectionTitle}>Intrants</Text>
-
-      {inputs.length === 0 && (
-        <Text style={styles.emptyText}>Aucun intrant enregistré.</Text>
-      )}
-
-      {inputs.map((input, index) => (
-        <View
-          key={`${input.harvestId ?? input.purchaseItemId}-${index}`}
-          style={styles.row}
-        >
-          <View style={styles.rowMain}>
-            <Text style={[typography.bodyStrong, styles.value]}>
-              {inputLabel(input)}
+    <View>
+      {inputs.map((input) => (
+        <View key={input.id} style={styles.row}>
+          <View style={styles.rowHeader}>
+            <Text style={styles.sourceLabel}>
+              {input.sourceType === "harvest" ? "Récolte" : "Achat"}
+              {" · "}
+              {input.sourceReference}
             </Text>
-            <Text style={[typography.caption, styles.field]}>
-              {input.quantityKg.toLocaleString()} kg
-            </Text>
+            <Text style={styles.quantity}>{input.quantityKg.toFixed(1)} kg</Text>
           </View>
 
-          {canEdit && (
-            <TouchableOpacity
-              onPress={() => handleRemove(index)}
-              disabled={saving}
-              style={styles.removeButton}
-            >
-              <IconTrash size={18} color={semanticColors.danger ?? "#C0392B"} />
-            </TouchableOpacity>
+          {input.analysis && (
+            <Text style={styles.analysisText}>
+              Analyse : {input.analysis.oilPercentage != null
+                ? `Rendement ${input.analysis.oilPercentage}%`
+                : "disponible"}
+            </Text>
           )}
         </View>
       ))}
 
-      {canEdit && (
-        <>
-          {isAdding ? (
-            <View style={styles.addForm}>
-              <TextInput
-                style={styles.input}
-                placeholder="ID récolte"
-                keyboardType="numeric"
-                value={newHarvestId}
-                onChangeText={setNewHarvestId}
-              />
-              <TextInput
-                style={styles.input}
-                placeholder="Quantité (kg)"
-                keyboardType="numeric"
-                value={newQuantityKg}
-                onChangeText={setNewQuantityKg}
-              />
-
-              <View style={styles.actions}>
-                <TouchableOpacity
-                  style={styles.cancelButton}
-                  onPress={() => setIsAdding(false)}
-                  disabled={saving}
-                >
-                  <Text style={[typography.bodyStrong, styles.cancelLabel]}>
-                    Annuler
-                  </Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={styles.editButton}
-                  onPress={handleAdd}
-                  disabled={saving}
-                >
-                  <Text style={[typography.bodyStrong, styles.editLabel]}>
-                    {saving ? "Ajout..." : "Ajouter"}
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          ) : (
-            <TouchableOpacity
-              style={styles.addButton}
-              onPress={() => setIsAdding(true)}
-            >
-              <IconPlus size={18} color={semanticColors.primary} />
-              <Text style={[typography.bodyStrong, styles.addLabel]}>
-                Ajouter un intrant
-              </Text>
-            </TouchableOpacity>
-          )}
-        </>
-      )}
+      <View style={styles.totalRow}>
+        <Text style={styles.totalLabel}>Total</Text>
+        <Text style={styles.totalValue}>{totalKg.toFixed(1)} kg</Text>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  card: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.md,
-    padding: spacing.lg,
-    gap: spacing.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    ...shadow.card,
-  },
-  sectionTitle: {
-    ...typography.bodyStrong,
-    color: semanticColors.textPrimary,
+  centered: {
+    paddingVertical: spacing.lg,
+    alignItems: "center",
   },
   emptyText: {
-    ...typography.body,
-    color: semanticColors.textMuted,
+    color: semanticColors.textSecondary,
   },
   row: {
+    paddingVertical: spacing.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: semanticColors.border,
+  },
+  rowHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingVertical: spacing.sm,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
   },
-  rowMain: {
-    flex: 1,
-    gap: 2,
+  sourceLabel: {
+    color: semanticColors.textPrimary,
+    fontWeight: "600",
   },
-  field: {
-    color: semanticColors.textSecondary,
-  },
-  value: {
+  quantity: {
     color: semanticColors.textPrimary,
   },
-  removeButton: {
-    padding: spacing.xs,
-  },
-  addForm: {
-    gap: spacing.sm,
-    marginTop: spacing.sm,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radius.sm,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    color: semanticColors.textPrimary,
-    backgroundColor: colors.surface,
-  },
-  addButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: spacing.xs,
-    paddingVertical: spacing.md,
-    borderRadius: radius.sm,
-    borderWidth: 1,
-    borderColor: semanticColors.primary,
-    marginTop: spacing.sm,
-  },
-  addLabel: {
-    color: semanticColors.primary,
-  },
-  actions: {
-    flexDirection: "row",
-    justifyContent: "flex-end",
-    alignItems: "center",
-    gap: spacing.sm,
-  },
-  cancelButton: {
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.md,
-  },
-  cancelLabel: {
+  analysisText: {
+    marginTop: spacing.xs,
+    fontSize: 12,
     color: semanticColors.textSecondary,
   },
-  editButton: {
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.lg,
-    borderRadius: radius.sm,
-    backgroundColor: semanticColors.primary,
+  totalRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: spacing.md,
+    paddingTop: spacing.sm,
+    borderTopWidth: 1,
+    borderTopColor: semanticColors.border,
   },
-  editLabel: {
-    color: semanticColors.onPrimary,
+  totalLabel: {
+    fontWeight: "600",
+  },
+  totalValue: {
+    fontWeight: "700",
   },
 });

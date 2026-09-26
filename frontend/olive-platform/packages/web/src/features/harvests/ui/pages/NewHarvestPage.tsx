@@ -20,7 +20,7 @@ type NewHarvestForm = {
   plotId: number;
   varietyId: number;
   plannedTrees: number;
-  harvestDate: string;
+  plannedDate: string;
   harvestType: number;
   notes: string;
 };
@@ -30,7 +30,7 @@ const initialForm: NewHarvestForm = {
   varietyId: 0,
   plannedTrees: 0,
   harvestType: 0,
-  harvestDate: new Date().toISOString().split("T")[0],
+  plannedDate: new Date().toISOString().split("T")[0],
   notes: "",
 };
 
@@ -52,8 +52,8 @@ export default function NewHarvestPage() {
     if (!form.plotId) validationErrors.plotId = "La parcelle est obligatoire.";
     if (!form.varietyId)
       validationErrors.varietyId = "La variété est obligatoire.";
-    if (!form.harvestDate)
-      validationErrors.harvestDate = "La date de récolte est obligatoire.";
+    if (!form.plannedDate)
+      validationErrors.plannedDate = "La date de récolte est obligatoire.";
     if (form.plannedTrees <= 0)
       validationErrors.harvestedTrees =
         "Le nombre d'arbres doit être supérieur à 0.";
@@ -96,7 +96,7 @@ export default function NewHarvestPage() {
         plotId: form.plotId,
         varietyId: form.varietyId,
         plannedTrees: form.plannedTrees,
-        harvestDate: form.harvestDate,
+        plannedDate: form.plannedDate,
         notes: form.notes || null,
         harvestType: form.harvestType
       };
@@ -167,13 +167,13 @@ export default function NewHarvestPage() {
             <TextInput
               label="Date de récolte"
               type="date"
-              value={form.harvestDate}
+              value={form.plannedDate}
               onChange={(event) =>
-                updateForm("harvestDate", event.target.value)
+                updateForm("plannedDate", event.target.value)
               }
             />
-            {errors.harvestDate && (
-              <span className="field-error">{errors.harvestDate}</span>
+            {errors.plannedDate && (
+              <span className="field-error">{errors.plannedDate}</span>
             )}
           </div>
 
@@ -186,8 +186,8 @@ export default function NewHarvestPage() {
               }
               }
             />
-            {errors.harvestDate && (
-              <span className="field-error">{errors.harvestDate}</span>
+            {errors.plannedDate && (
+              <span className="field-error">{errors.plannedDate}</span>
             )}
           </div>
 

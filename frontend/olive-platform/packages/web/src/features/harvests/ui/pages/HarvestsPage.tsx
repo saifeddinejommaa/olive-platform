@@ -61,11 +61,11 @@ export default function HarvestsPage() {
       render: (item: HarvestForList) => item.reference || "-",
     },
     {
-      key: "harvestDate" as keyof HarvestForList,
+      key: "plannedDate" as keyof HarvestForList,
       label: "Date",
       render: (item: HarvestForList) =>
-        item.harvestDate
-          ? new Date(item.harvestDate).toLocaleDateString("fr-FR")
+        item.plannedDate
+          ? new Date(item.plannedDate).toLocaleDateString("fr-FR")
           : "-",
     },
     {

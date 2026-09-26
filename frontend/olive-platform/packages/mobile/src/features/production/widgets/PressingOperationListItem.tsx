@@ -25,7 +25,7 @@ export function PressingOperationListItem({
     <ListItemCard onPress={() => onPress?.(operation)}>
       <ListItemHeader
         title={operation.operationNumber}
-        subtitle={formatDateOnly(operation.pressingDate, true) ?? undefined}
+        subtitle={formatDateOnly(operation.plannedDate, true) ?? undefined}
         status={operation.status}
       />
 

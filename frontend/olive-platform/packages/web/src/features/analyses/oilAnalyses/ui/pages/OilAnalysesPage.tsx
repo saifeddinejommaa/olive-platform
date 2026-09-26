@@ -66,11 +66,11 @@ export default function OilAnalysesPage() {
     },
 
     {
-      key: "analysisDate" as keyof OilAnalysisForList,
+      key: "plannedDate" as keyof OilAnalysisForList,
       label: "Date d'analyse",
       render: (item: OilAnalysisForList) =>
-        item.analysisDate
-          ? new Date(item.analysisDate).toLocaleDateString("fr-FR")
+        item.plannedDate
+          ? new Date(item.plannedDate).toLocaleDateString("fr-FR")
           : "-",
     },
 

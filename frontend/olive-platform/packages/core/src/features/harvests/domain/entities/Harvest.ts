@@ -8,7 +8,7 @@ export interface Harvest {
   variety: OliveVarieties;
   harvestedTrees: number;
   plannedTrees: number;
-  harvestDate: string;
+  plannedDate: string;
   quantityKg: number | null;
   notes: string | null;
   createdAt: string;

@@ -5,13 +5,13 @@ using OlivePlatform.Domain.Interfaces.Repositories;
 
 namespace OlivePlatform.Application.Features.Production.Commands
 {
-    public class StartPressingOperationCommand : IRequest<PressingOperation>
+    public class StartPressingOperationCommand : IRequest<Unit>
     {
         public int Id { get; set; }
     }
 
     public class StartPressingOperationCommandHandler
-        : IRequestHandler<StartPressingOperationCommand, PressingOperation>
+        : IRequestHandler<StartPressingOperationCommand, Unit>
     {
         private readonly IPressingOperationsRepository _repository;
         private readonly IPressingOperationInputsRepository _inputsRepository;
@@ -24,7 +24,7 @@ namespace OlivePlatform.Application.Features.Production.Commands
             _inputsRepository = inputsRepository;
         }
 
-        public async Task<PressingOperation> Handle(
+        public async Task<Unit> Handle(
             StartPressingOperationCommand request,
             CancellationToken cancellationToken)
         {
@@ -56,15 +56,14 @@ namespace OlivePlatform.Application.Features.Production.Commands
                 }
             }
 
-            pressingOperation.StartTime = TimeOnly.FromDateTime(now);
-            pressingOperation.PressingDate = DateOnly.FromDateTime(now);
+            pressingOperation.StartTime = now;
             pressingOperation.Status = ProductionStatus.InProgress;
 
             await _repository.UpdateAsync(
                 pressingOperation,
                 cancellationToken);
 
-            return pressingOperation;
+            return Unit.Value;
         }
     }
 }

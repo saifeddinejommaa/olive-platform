@@ -1,5 +1,5 @@
 export type CreatePressingOperationRequest = {
-  createdAt: string;
+  plannedDate: string;
   startTime: string | null;
   endTime: string | null;
   status: number;

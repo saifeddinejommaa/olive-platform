@@ -10,15 +10,14 @@ import Card from "../../../../common/widgets/card/Card";
 import {
   formatDate,
   formatStringToDateTime,
-  formatTime,
 } from "@olive-platform/core/features/shared/utils/DatesUtils";
 
-import { getHarvestTypeLabel, getOliveVarietyLabel } from "@olive-platform/core/features/appConstants/helper/AppConstantsHelper";
 import { ProductionStatus } from "@olive-platform/core/features/production/domain/entities/ProductionStatus";
 
 import { useHarvestDetailsStore } from "@olive-platform/core/features/harvests/stores/HarvestDetailsStore";
 import HarvestCostsWidget from "../widgets/HarvestCostsWidget";
 import HarvestTypeSelector from "../../../../common/widgets/HarvestTypeSelector";
+import { getHarvestTypeLabel, getOliveVarietyLabel } from "@olive-platform/core/features/appConstants/helper/AppConstantsHelper";
 
 type Props = {
   harvestId: number;
@@ -109,8 +108,6 @@ export default function HarvestGeneralTab({
 
     try {
       await update(harvest.id, {
-        quantityKg: parsedQuantityKg,
-        harvestedTrees: parsedHarvestedTrees,
         harvestType: harvestType,
       });
 
@@ -232,7 +229,7 @@ export default function HarvestGeneralTab({
 
             <InfoFieldWidget
               label="Date de récolte"
-              value={formatDate(harvest.harvestDate)}
+              value={formatDate(harvest.plannedDate)}
             />
 
             <InfoFieldWidget
@@ -244,12 +241,12 @@ export default function HarvestGeneralTab({
 
             <InfoFieldWidget
               label="Heure de début"
-              value={formatTime(harvest.startTime)}
+              value={formatStringToDateTime(harvest.startTime)}
             />
 
             <InfoFieldWidget
               label="Heure de fin"
-              value={formatTime(harvest.endTime)}
+              value={formatStringToDateTime(harvest.endTime)}
             />
 
             {isInProgress ? (

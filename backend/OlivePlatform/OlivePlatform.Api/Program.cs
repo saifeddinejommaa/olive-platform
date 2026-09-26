@@ -13,6 +13,8 @@ using YourProject.Application.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.WebHost.UseUrls("http://0.0.0.0:7009");
+
 // ============================================================
 // Dependency Injection - Autofac
 // ============================================================
@@ -100,13 +102,16 @@ builder.Logging.AddConsole();
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowFrontend", policy =>
-    {
-        policy
-            .AllowAnyOrigin()
-            .AllowAnyHeader()
-            .AllowAnyMethod();
-    });
+    options.AddPolicy(
+        "AllowFrontend",
+        policy =>
+        {
+            policy
+                .WithOrigins(
+                    "http://localhost:5173")
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        });
 });
 
 // ============================================================
@@ -133,7 +138,7 @@ app.UseMiddleware<ExceptionHandlerMiddlware>();
 // API Response Middleware
 app.UseMiddleware<ApiResponseMiddleware>();
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 
 app.UseAuthorization();
 

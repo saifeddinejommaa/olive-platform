@@ -12,6 +12,8 @@ import { ActionCard } from "../../components/ActionCard";
 import { PressingInputsSection } from "./component/details/PressingInputsSection";
 import { DetailsHeader } from "../../components/DetailsHeader";
 import { Loading } from "../../components/Loading";
+import { router } from 'expo-router';
+
 type Props = { operationId: number };
 
 export function PressingOperationDetailsPage({ operationId }: Props) {
@@ -68,7 +70,7 @@ export function PressingOperationDetailsPage({ operationId }: Props) {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.content}
       >
-        <DetailsHeader title ="Détails" onBack={()=>{}} />
+        <DetailsHeader title ="Détails" onBack={()=>{ router.back()}} />
 
         <PressingSummaryCard operation={operation} />
 

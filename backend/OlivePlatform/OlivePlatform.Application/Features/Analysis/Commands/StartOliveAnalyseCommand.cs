@@ -36,10 +36,11 @@ namespace OlivePlatform.Application.Features.Analysis.Commands
                 throw new InvalidOperationException(
                     "Pas d'opération d'analyse à lancer");
             }
+            var now = DateTime.UtcNow;
 
             existing.Status = ProductionStatus.InProgress;
-            existing.UpdatedAt = DateTime.UtcNow;
-            existing.AnalysisDate = DateTime.UtcNow;
+            existing.UpdatedAt = now;
+            existing.StartTime = now;
 
             await _unitOfWork.ExecuteInTransactionAsync(async ct =>
             {

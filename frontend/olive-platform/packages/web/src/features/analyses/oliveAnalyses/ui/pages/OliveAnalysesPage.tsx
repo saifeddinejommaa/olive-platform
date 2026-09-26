@@ -53,11 +53,11 @@ export default function OliveAnalysesPage() {
       label: "Référence",
     },
     {
-      key: "analysisDate" as keyof OliveAnalysis,
+      key: "plannedDate" as keyof OliveAnalysis,
       label: "Date d'analyse",
       render: (item: OliveAnalysis) =>
-        item.analysisDate
-          ? new Date(item.analysisDate).toLocaleDateString("fr-FR")
+        item.plannedDate
+          ? new Date(item.plannedDate).toLocaleDateString("fr-FR")
           : "-",
     },
     {

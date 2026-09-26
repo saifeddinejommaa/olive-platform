@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import type { PressingOperation } from "@olive-platform/core/features/production/domain/entities/PressingOperation";
+import type { PressingOperationForList } from "@olive-platform/core/features/production/domain/entities/PressingOperationForList";
 import { GetPressingOperations } from "@olive-platform/core/features/production/domain/useCases/GetPressingOperations";
 
 export function usePressingOperationsAutocomplete(reference: string) {
-  const [results, setResults] = useState<PressingOperation[]>([]);
+  const [results, setResults] = useState<PressingOperationForList[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {

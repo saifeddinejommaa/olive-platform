@@ -15,7 +15,7 @@ public class HarvestForListResponse
 
     public string PlotName { get; set; } = null!;
 
-    public DateOnly HarvestDate { get; set; }
+    public DateTime PlannedDate { get; set; }
 
     public decimal QuantityKg { get; set; }
 
@@ -31,9 +31,9 @@ public class HarvestForListResponse
 
     public DateTime CreatedAt { get; set; }
 
-    public TimeOnly? StartTime { get; set; }
+    public DateTime? StartTime { get; set; }
 
-    public TimeOnly? EndTime { get; set; }
+    public DateTime? EndTime { get; set; }
 
     public DateTime? UpdatedAt { get; set; }
 

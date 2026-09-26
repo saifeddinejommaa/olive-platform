@@ -8,16 +8,6 @@ namespace OlivePlatform.Application.Features.Analysis.Commands
     public class CompleteOliveAnalyseCommand : IRequest<Unit>
     {
         public int Id { get; set; }
-
-        public decimal? HumidityPercentage { get; set; }
-
-        public decimal? WaterPercentage { get; set; }
-
-        public decimal? OilPercentage { get; set; }
-
-        public decimal? AcidityPercentage { get; set; }
-
-        public DateTime? AnalysisDate { get; set; }
     }
 
     public class CompleteOliveAnalyseCommandHandler
@@ -48,32 +38,10 @@ namespace OlivePlatform.Application.Features.Analysis.Commands
                     "L'analyse d'olive n'existe pas.");
             }
 
-            if (request.HumidityPercentage.HasValue)
-            {
-                existing.HumidityPercentage = request.HumidityPercentage.Value;
-            }
+            var now = DateTime.UtcNow;
 
-            if (request.WaterPercentage.HasValue)
-            {
-                existing.WaterPercentage = request.WaterPercentage.Value;
-            }
-
-            if (request.OilPercentage.HasValue)
-            {
-                existing.OilPercentage = request.OilPercentage.Value;
-            }
-
-            if (request.AcidityPercentage.HasValue)
-            {
-                existing.AcidityPercentage = request.AcidityPercentage.Value;
-            }
-
-            if (request.AnalysisDate.HasValue)
-            {
-                existing.AnalysisDate = request.AnalysisDate.Value;
-            }
-
-            existing.UpdatedAt = DateTime.UtcNow;
+            existing.UpdatedAt = now;
+            existing.EndTime = now;
             existing.Status = ProductionStatus.Completed;
 
             await _unitOfWork.ExecuteInTransactionAsync(async ct =>

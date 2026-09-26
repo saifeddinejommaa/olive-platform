@@ -4,5 +4,5 @@ export type UpdateOilAnalysisParams = {
   k232?: number;
   k270?: number;
   organolepticGrade?: number;
-  analysisDate?: string;
+  plannedDate?: string;
 };

@@ -1,5 +1,4 @@
-﻿using OlivePlatform.Domain.Entities;
-using OlivePlatform.Domain.Enums;
+﻿using OlivePlatform.Domain.Enums;
 
 namespace OlivePlatform.Application.Features.Analysis.Responses
 {
@@ -23,11 +22,11 @@ namespace OlivePlatform.Application.Features.Analysis.Responses
 
         public decimal? AcidityPercentage { get; set; }
 
-        public DateTime? AnalysisDate { get; set; }
+        public DateTime? PlannedDate { get; set; }
 
-        public DateTime CreatedAt { get; set; }
+        public DateTime? StartTime { get; set; }
 
-        public DateTime UpdatedAt { get; set; }
+        public DateTime? EndTime { get; set; }
 
         public ProductionStatus Status { get; set; }
     }

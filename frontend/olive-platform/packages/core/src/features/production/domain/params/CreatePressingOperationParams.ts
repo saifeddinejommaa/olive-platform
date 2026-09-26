@@ -1,7 +1,7 @@
 import type { CreatePressingOperationInputParams } from "./CreatePressingOperationInputParams";
 
 export type CreatePressingOperationParams = {
-  createdAt: string;
+  plannedDate: string;
 
   startTime: string | null;
 

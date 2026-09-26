@@ -50,7 +50,7 @@ export function HarvestSummaryCard({ harvest }: Props) {
             />
 
             <Text style={[typography.caption, styles.metaText]}>
-              {formatDate(harvest.harvestDate)}
+              {formatDate(harvest.plannedDate)}
             </Text>
 
             <IconClock

@@ -13,7 +13,9 @@ namespace OlivePlatform.Application.Features.Analysis.Responses
         public decimal? K232 { get; set; }
         public decimal? K270 { get; set; }
         public int? OrganolepticGrade { get; set; }
-        public DateTime? AnalysisDate { get; set; }
+        public DateTime? PlannedDate { get; set; }
+        public DateTime? StartTime { get; set; }
+        public DateTime? EndTime { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
         public ProductionStatus Status { get; set; }

@@ -2,7 +2,7 @@ import type { PaginationFilter } from "../../../../core/PaginationFilter";
 
 export type PressingOperationFilters = PaginationFilter & {
   operationNumber?: string;
-  pressingDate?: string;
+  plannedDate?: string;
   harvestNumber?: string;
   purchaseNumber?: string;
 };

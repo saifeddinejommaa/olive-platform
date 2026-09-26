@@ -18,14 +18,14 @@ import type { CreatePressingOperationParams } from "@olive-platform/core/feature
 import ProductionStatusSelector from "../../../../common/widgets/ProductionStatusSelector";
 
 type NewPressingOperationForm = {
-  pressingDate: string;
+  plannedDate: string;
   statusId: number;
   notes: string;
   inputs: PressingOperationInput[];
 };
 
 const initialForm: NewPressingOperationForm = {
-  pressingDate: new Date().toISOString().split("T")[0],
+  plannedDate: new Date().toISOString().split("T")[0],
   statusId: 0,
   notes: "",
   inputs: [],
@@ -43,8 +43,8 @@ export default function NewPressingOperationPage() {
   const getValidationErrors = useCallback((): Record<string, string> => {
     const validationErrors: Record<string, string> = {};
 
-    if (!form.pressingDate) {
-      validationErrors.pressingDate = "La date de pression est obligatoire.";
+    if (!form.plannedDate) {
+      validationErrors.plannedDate = "La date de pression est obligatoire.";
     }
 
     if (!form.statusId) {
@@ -227,7 +227,7 @@ export default function NewPressingOperationPage() {
       setSaving(true);
 
       const request: CreatePressingOperationParams = {
-        createdAt: new Date(`${form.pressingDate}T00:00:00`).toISOString(),
+        plannedDate: new Date(`${form.plannedDate}T00:00:00`).toISOString(),
         status: form.statusId,
         notes: form.notes || null,
         startTime: null,
@@ -299,13 +299,13 @@ export default function NewPressingOperationPage() {
             <TextInput
               label="Date de pression"
               type="date"
-              value={form.pressingDate}
+              value={form.plannedDate}
               onChange={(event) =>
-                updateForm("pressingDate", event.target.value)
+                updateForm("plannedDate", event.target.value)
               }
             />
-            {errors.pressingDate && (
-              <span className="field-error">{errors.pressingDate}</span>
+            {errors.plannedDate && (
+              <span className="field-error">{errors.plannedDate}</span>
             )}
           </div>
 

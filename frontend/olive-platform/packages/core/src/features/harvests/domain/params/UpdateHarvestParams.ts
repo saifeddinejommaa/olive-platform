@@ -1,7 +1,7 @@
 export interface UpdateHarvestParams {
   plotId?: number;
   plannedTrees?: number;
-  harvestDate?: string;
+  plannedDate?: string;
   notes?: string;
   harvestType?: number;
 }

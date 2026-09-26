@@ -9,15 +9,13 @@ import { ProductionStatus } from "@olive-platform/core/features/production/domai
 
 import Button from "../../../../../common/widgets/button/Button";
 import TextInput from "../../../../../common/widgets/textInput/TextInput";
-
-import { getOliveVarietyLabel } from "@olive-platform/core/features/appConstants/helper/AppConstantsHelper";
-
 import CompleteOliveAnalysisDrawer from "../widgets/CompleteOliveAnalysisDrawer";
 import { usePageTitle } from "../../../../../common/hooks/usePageTitle";
 import InfoFieldWidget from "../../../../../common/widgets/InfoFieldWidget";
 import Card from "../../../../../common/widgets/card/Card";
 import { renderStatus } from "../../../../../common/status/StatusUtils";
 import { productionStatusConfig } from "../../../../../common/status/ProductionStatusConfig";
+import { getOliveVarietyLabel } from "@olive-platform/core/features/appConstants/helper/AppConstantsHelper";
 
 type OliveAnalysisForm = {
   reference: string;
@@ -27,7 +25,7 @@ type OliveAnalysisForm = {
   waterPercentage?: number;
   oilPercentage?: number;
   acidityPercentage?: number;
-  analysisDate?: string;
+  plannedDate?: string;
   varietyId: number;
 };
 
@@ -39,7 +37,7 @@ const initialForm: OliveAnalysisForm = {
   waterPercentage: undefined,
   oilPercentage: undefined,
   acidityPercentage: undefined,
-  analysisDate: "",
+  plannedDate: "",
   varietyId: 0,
 };
 
@@ -49,7 +47,7 @@ const toOptionalNumber = (value: string): number | undefined => {
   return Number.isNaN(number) ? undefined : number;
 };
 
-const formatAnalysisDate = (date?: string) => {
+const formatPlannedDate = (date?: string) => {
   if (!date) return "-";
   return new Date(`${date}T00:00:00`).toLocaleDateString("fr-FR");
 };
@@ -117,8 +115,8 @@ export default function OliveAnalysisDetailsPage() {
       oilPercentage: analysis.oilPercentage ?? undefined,
       acidityPercentage: analysis.acidityPercentage ?? undefined,
       varietyId: analysis.varietyId ?? 0,
-      analysisDate: analysis.analysisDate
-        ? new Date(analysis.analysisDate).toISOString().split("T")[0]
+      plannedDate: analysis.plannedDate
+        ? new Date(analysis.plannedDate).toISOString().split("T")[0]
         : "",
     });
 
@@ -137,8 +135,8 @@ export default function OliveAnalysisDetailsPage() {
     if (!form.sourceReference?.trim())
       validationErrors.sourceReference = "La source est obligatoire.";
 
-    if (!form.analysisDate)
-      validationErrors.analysisDate = "La date d'analyse est obligatoire.";
+    if (!form.plannedDate)
+      validationErrors.plannedDate = "La date d'analyse est obligatoire.";
 
     if (isPercentageInvalid(form.humidityPercentage))
       validationErrors.humidityPercentage =
@@ -183,9 +181,6 @@ export default function OliveAnalysisDetailsPage() {
       waterPercentage: form.waterPercentage,
       oilPercentage: form.oilPercentage,
       acidityPercentage: form.acidityPercentage,
-      analysisDate: form.analysisDate
-        ? new Date(form.analysisDate).toISOString()
-        : undefined,
     }),
     [form],
   );
@@ -430,7 +425,7 @@ export default function OliveAnalysisDetailsPage() {
             <InfoFieldWidget label="Type de source" value={sourceTypeLabel} />
             <InfoFieldWidget label={sourceReferenceLabel} value={form.sourceReference || "-"} />
             <InfoFieldWidget label="Variété" value={getOliveVarietyLabel(form.varietyId)} />
-            <InfoFieldWidget label="Date d'analyse" value={formatAnalysisDate(form.analysisDate)} />
+            <InfoFieldWidget label="Date d'analyse" value={formatPlannedDate(form.plannedDate)} />
           </div>
         </div>
       </Card>
@@ -541,7 +536,7 @@ export default function OliveAnalysisDetailsPage() {
         sourceReferenceLabel={sourceReferenceLabel}
         sourceReferenceValue={form.sourceReference}
         varietyLabel={getOliveVarietyLabel(form.varietyId)}
-        analysisDateLabel={formatAnalysisDate(form.analysisDate)}
+        plannedDateLabel={formatPlannedDate(form.plannedDate)}
         humidityPercentage={form.humidityPercentage}
         waterPercentage={form.waterPercentage}
         oilPercentage={form.oilPercentage}

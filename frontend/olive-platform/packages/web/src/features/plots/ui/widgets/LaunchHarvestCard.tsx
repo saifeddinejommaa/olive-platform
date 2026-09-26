@@ -24,7 +24,7 @@ export default function LaunchHarvestCard({
   onClose,
   onSuccess,
 }: Props) {
-  const [harvestDate, setHarvestDate] = useState(
+  const [plannedDate, setPlannedDate] = useState(
     new Date().toISOString().slice(0, 10)
   );
   const [harvestType, setHarvestType] = useState(
@@ -48,7 +48,7 @@ export default function LaunchHarvestCard({
       await createHarvestUseCase({
         plotId,
         varietyId,
-        harvestDate,
+        plannedDate,
         plannedTrees: parsedPlannedTrees,
         harvestType
       });
@@ -76,8 +76,8 @@ export default function LaunchHarvestCard({
           <TextInput
             label="Date de récolte"
             type="date"
-            value={harvestDate}
-            onChange={(event) => setHarvestDate(event.target.value)}
+            value={plannedDate}
+            onChange={(event) => setPlannedDate(event.target.value)}
           />
         </div>
 

@@ -45,7 +45,11 @@ namespace OlivePlatform.Infrastructure.Persistence.QueryRepositories
 
             oa.organoleptic_grade AS {nameof(OilAnalysisDetailsResponse.OrganolepticGrade)},
 
-            oa.analysis_date AS {nameof(OilAnalysisDetailsResponse.AnalysisDate)},
+            oa.planned_date AS {nameof(OilAnalysisDetailsResponse.PlannedDate)},
+
+            oa.start_time AS {nameof(OilAnalysisDetailsResponse.StartTime)},
+
+            oa.end_time AS {nameof(OilAnalysisDetailsResponse.EndTime)},
 
             oa.created_at AS {nameof(OilAnalysisDetailsResponse.CreatedAt)},
 
@@ -114,16 +118,16 @@ namespace OlivePlatform.Infrastructure.Persistence.QueryRepositories
             }
 
             // Filtre par date d'analyse
-            if (filter.AnalysisDate.HasValue)
+            if (filter.PlannedDate.HasValue)
             {
                 where.Append("""
 
-                     AND oa.analysis_date::date = @AnalysisDate
+                     AND oa.planned_date::date = @PlannedDate
                      """);
 
                 parameters.Add(
-                    "AnalysisDate",
-                    filter.AnalysisDate.Value);
+                    "PlannedDate",
+                    filter.PlannedDate.Value);
             }
 
             // Filtre par statut
@@ -173,7 +177,11 @@ namespace OlivePlatform.Infrastructure.Persistence.QueryRepositories
                             THEN t.reference
                     END AS {nameof(OilAnalysisForListResponse.SourceReference)},
                 
-                    oa.analysis_date AS {nameof(OilAnalysisForListResponse.AnalysisDate)},
+                    oa.planned_date AS {nameof(OilAnalysisForListResponse.PlannedDate)},
+                
+                    oa.start_time AS {nameof(OilAnalysisForListResponse.StartTime)},
+                
+                    oa.end_time AS {nameof(OilAnalysisForListResponse.EndTime)},
                 
                     oa.created_at AS {nameof(OilAnalysisForListResponse.CreatedAt)},
                 

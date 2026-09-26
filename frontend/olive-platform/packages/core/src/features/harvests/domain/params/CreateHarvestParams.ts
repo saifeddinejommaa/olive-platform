@@ -1,7 +1,7 @@
 export interface CreateHarvestParams {
   plotId: number;
   varietyId: number;
-  harvestDate: string;
+  plannedDate: string;
   notes?: string | null;
   plannedTrees: number;
   harvestType: number

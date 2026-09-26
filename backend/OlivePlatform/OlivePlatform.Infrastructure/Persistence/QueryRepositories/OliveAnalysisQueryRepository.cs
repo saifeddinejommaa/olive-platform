@@ -46,11 +46,11 @@ public class OliveAnalysisQueryRepository : IOliveAnalysisQueryRepository
 
                  oa.acidity_percentage AS {nameof(OliveAnalysisDetailsResponse.AcidityPercentage)},
 
-                 oa.analysis_date AS {nameof(OliveAnalysisDetailsResponse.AnalysisDate)},
+                 oa.planned_date AS {nameof(OliveAnalysisDetailsResponse.PlannedDate)},
 
-                 oa.created_at AS {nameof(OliveAnalysisDetailsResponse.CreatedAt)},
+                 oa.start_time AS {nameof(OliveAnalysisDetailsResponse.StartTime)},
 
-                 oa.updated_at AS {nameof(OliveAnalysisDetailsResponse.UpdatedAt)},
+                 oa.end_time AS {nameof(OliveAnalysisDetailsResponse.EndTime)},
 
                  CASE
                      WHEN oa.source_type = 1 THEN h.variety_id
@@ -119,11 +119,11 @@ public class OliveAnalysisQueryRepository : IOliveAnalysisQueryRepository
 
              pl.reference AS {nameof(OliveAnalysisForListResponse.PlotReference)},
 
-             oa.analysis_date AS {nameof(OliveAnalysisForListResponse.AnalysisDate)},
+             oa.planned_date AS {nameof(OliveAnalysisForListResponse.PlannedDate)},
 
-             oa.created_at AS {nameof(OliveAnalysisForListResponse.CreatedAt)},
+             oa.start_time AS {nameof(OliveAnalysisForListResponse.StartTime)},
 
-             oa.updated_at AS {nameof(OliveAnalysisForListResponse.UpdatedAt)},
+             oa.end_time AS {nameof(OliveAnalysisForListResponse.EndTime)},
 
              oa.status AS {nameof(OliveAnalysisForListResponse.Status)}
 
@@ -252,17 +252,17 @@ public class OliveAnalysisQueryRepository : IOliveAnalysisQueryRepository
         // ANALYSIS DATE
         // ========================================================
 
-        if (filter.AnalysisDate.HasValue)
+        if (filter.PlannedDate.HasValue)
         {
             sql.Append(
                 """
 
-                AND oa.analysis_date::date = @AnalysisDate
+                AND oa.planned_date::date = @PlannedDate
                 """);
 
             parameters.Add(
-                "AnalysisDate",
-                filter.AnalysisDate.Value);
+                "PlannedDate",
+                filter.PlannedDate.Value);
         }
 
 
@@ -292,7 +292,7 @@ public class OliveAnalysisQueryRepository : IOliveAnalysisQueryRepository
             """
 
             ORDER BY
-                oa.analysis_date DESC,
+                oa.planned_date DESC,
                 oa.id DESC
 
             LIMIT @PageSize

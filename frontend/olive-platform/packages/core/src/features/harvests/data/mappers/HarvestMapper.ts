@@ -11,7 +11,7 @@ export function HarvestMapper(response: HarvestResponse): Harvest {
 
     plotId: response.plotId,
 
-    harvestDate: response.harvestDate,
+    plannedDate: response.plannedDate,
 
     quantityKg: response.quantityKg,
 

@@ -3,6 +3,6 @@ import type { ProductionStatus } from "../../../../production/domain/entities/Pr
 
 export type OilAnalysesFilter = PaginationFilter & {
   reference?: string;
-  analysisDate?: string;
+  plannedDate?: string;
   status?: ProductionStatus;
 };

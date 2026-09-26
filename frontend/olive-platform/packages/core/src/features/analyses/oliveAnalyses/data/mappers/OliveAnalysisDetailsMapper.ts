@@ -21,11 +21,11 @@ export function mapOliveAnalysisDetails(
 
     acidityPercentage: response.acidityPercentage,
 
-    analysisDate: response.analysisDate,
+    plannedDate: response.plannedDate,
 
-    createdAt: response.createdAt,
+    startTime: response.startTime,
 
-    updatedAt: response.updatedAt,
+    endTime: response.endTime,
 
     varietyId: response.varietyId,
 

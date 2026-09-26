@@ -40,7 +40,7 @@ export function HarvestListItem({ harvest, onPress }: HarvestListItemProps) {
     <ListItemCard onPress={() => onPress?.(harvest)}>
       <ListItemHeader
         title={harvest.reference}
-        subtitle={formatDateOnly(harvest.harvestDate) ?? undefined}
+        subtitle={formatDateOnly(harvest.plannedDate) ?? undefined}
         status={harvest.status}
       />
 

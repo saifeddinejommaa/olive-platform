@@ -500,7 +500,7 @@ WHERE op.purchase_number = @PurchaseNumber
                     '{nameof(OliveAnalysisInfoResponse.WaterPercentage)}', oa.water_percentage,
                     '{nameof(OliveAnalysisInfoResponse.OilPercentage)}', oa.oil_percentage,
                     '{nameof(OliveAnalysisInfoResponse.AcidityPercentage)}', oa.acidity_percentage,
-                    '{nameof(OliveAnalysisInfoResponse.AnalysisDate)}', oa.analysis_date,
+                    '{nameof(OliveAnalysisInfoResponse.PlannedDate)}', oa.planned_date,
                     '{nameof(OliveAnalysisInfoResponse.CreatedAt)}', oa.created_at,
                     '{nameof(OliveAnalysisInfoResponse.UpdatedAt)}', oa.updated_at,
                     '{nameof(OliveAnalysisInfoResponse.Status)}', oa.status

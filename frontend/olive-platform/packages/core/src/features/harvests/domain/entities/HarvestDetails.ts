@@ -19,7 +19,7 @@ export interface HarvestDetails {
 
   plannedTrees: number;
 
-  harvestDate: string;
+  plannedDate: string;
 
   quantityKg: number | null;
 

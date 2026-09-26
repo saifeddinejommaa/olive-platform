@@ -16,7 +16,7 @@ namespace OlivePlatform.Application.Features.Analysis.Commands
 
         public decimal? AcidityPercentage { get; set; }
 
-        public DateTime? AnalysisDate { get; set; }
+        public DateTime? PlannedDate { get; set; }
     }
 
     public class UpdateOliveAnalyseCommandHandler
@@ -67,9 +67,9 @@ namespace OlivePlatform.Application.Features.Analysis.Commands
                 existing.AcidityPercentage = request.AcidityPercentage.Value;
             }
 
-            if (request.AnalysisDate.HasValue)
+            if (request.PlannedDate.HasValue)
             {
-                existing.AnalysisDate = request.AnalysisDate.Value;
+                existing.PlannedDate = request.PlannedDate.Value.ToUtc();
             }
 
             existing.UpdatedAt = DateTime.UtcNow;

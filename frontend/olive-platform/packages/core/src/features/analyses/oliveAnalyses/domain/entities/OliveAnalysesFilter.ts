@@ -10,7 +10,7 @@ export type OliveAnalysesFilters = PaginationFilter & {
 
   harvestReference?: string;
 
-  analysisDate?: string;
+  plannedDate?: string;
 
   status?: ProductionStatus;
 };

@@ -23,7 +23,7 @@ export default function PressingOperationsFilterComponent() {
 
   const handleReset = async () => {
     setFilter("pressingNumber", "");
-    setFilter("pressingDate", "");
+    setFilter("plannedDate", "");
     setFilter("harvestNumber", "");
     setFilter("purchaseNumber", "");
     await fetchPressingOperations();
@@ -57,9 +57,9 @@ export default function PressingOperationsFilterComponent() {
             <TextInput
               label="Date de pression"
               type="date"
-              value={filters.pressingDate}
+              value={filters.plannedDate}
               onChange={(event) =>
-                updateFilter("pressingDate", event.target.value)
+                updateFilter("plannedDate", event.target.value)
               }
             />
           </div>

@@ -22,7 +22,11 @@ export type OilAnalysisDetailsResponse = {
 
   organolepticGrade: number | null;
 
-  analysisDate: string | undefined;
+  plannedDate: string | undefined;
+
+  startTime: string | null;
+
+  endTime: string | null;
 
   createdAt: string;
 

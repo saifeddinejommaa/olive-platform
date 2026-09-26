@@ -4,20 +4,28 @@ export function formatDateOnly(
 ): string | null {
   if (!date) return null;
 
-  // DateOnly arrive depuis l'API sous la forme "2026-09-21"
-  const parts = date.split('-');
-  if (parts.length !== 3) return null;
+  // Les dates arrivent depuis l'API au format ISO (ex. "2026-09-21T08:30:00Z")
+  const parsed = new Date(date);
+  if (Number.isNaN(parsed.getTime())) return null;
 
-  const [year, month, day] = parts;
-
-  return withYear ? `${day}/${month}/${year}` : `${day}/${month}`;
+  return parsed.toLocaleDateString('fr-FR', {
+    day: '2-digit',
+    month: '2-digit',
+    ...(withYear ? { year: 'numeric' } : {}),
+  });
 }
 
 export function formatTimeOnly(time?: string | null): string | null {
   if (!time) return null;
 
-  // TimeOnly arrive depuis l'API sous la forme "08:30:00"
-  return time.slice(0, 5);
+  // Les heures arrivent depuis l'API au format ISO (ex. "2026-09-21T08:30:00Z")
+  const parsed = new Date(time);
+  if (Number.isNaN(parsed.getTime())) return null;
+
+  return parsed.toLocaleTimeString('fr-FR', {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
 }
 
 export function formatNumberFR(value?: number | null): string {

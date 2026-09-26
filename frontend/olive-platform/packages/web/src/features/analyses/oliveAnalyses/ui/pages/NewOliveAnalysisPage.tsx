@@ -14,7 +14,7 @@ type NewOliveAnalysisForm = {
   waterPercentage: number;
   oilPercentage: number;
   acidityPercentage: number;
-  analysisDate: string;
+  plannedDate: string;
 };
 
 const initialForm: NewOliveAnalysisForm = {
@@ -24,7 +24,7 @@ const initialForm: NewOliveAnalysisForm = {
   waterPercentage: 0,
   oilPercentage: 0,
   acidityPercentage: 0,
-  analysisDate: new Date().toISOString().split("T")[0],
+  plannedDate: new Date().toISOString().split("T")[0],
 };
 
 export default function NewOliveAnalysisPage() {
@@ -76,8 +76,8 @@ export default function NewOliveAnalysisPage() {
       validationErrors.sourceId = "La source est obligatoire.";
     }
 
-    if (!form.analysisDate) {
-      validationErrors.analysisDate = "La date d’analyse est obligatoire.";
+    if (!form.plannedDate) {
+      validationErrors.plannedDate = "La date d’analyse est obligatoire.";
     }
 
     if (form.humidityPercentage < 0 || form.humidityPercentage > 100) {
@@ -158,6 +158,9 @@ export default function NewOliveAnalysisPage() {
       const request: CreateOliveAnalysisParams = {
         sourceTypeId: form.sourceTypeId,
         sourceId: form.sourceId,
+        plannedDate: form.plannedDate
+          ? new Date(`${form.plannedDate}T00:00:00`).toISOString()
+          : undefined,
       };
 
       const success = await createOliveAnalysisAction(request);
@@ -276,14 +279,14 @@ export default function NewOliveAnalysisPage() {
             <TextInput
               label="Date d'analyse"
               type="date"
-              value={form.analysisDate}
+              value={form.plannedDate}
               onChange={(event) =>
-                updateForm("analysisDate", event.target.value)
+                updateForm("plannedDate", event.target.value)
               }
             />
 
-            {errors.analysisDate && (
-              <span className="field-error">{errors.analysisDate}</span>
+            {errors.plannedDate && (
+              <span className="field-error">{errors.plannedDate}</span>
             )}
           </div>
         </div>

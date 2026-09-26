@@ -138,7 +138,7 @@ export default function FinishPressingOperationDrawer({
         </DrawerInfoCard>
 
         <DrawerInfoCard label="Date de pression">
-          {formatDate(operation.pressingDate)}
+          {formatDate(operation.plannedDate)}
         </DrawerInfoCard>
 
         <DrawerInfoCard label="Statut actuel">

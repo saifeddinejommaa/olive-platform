@@ -16,7 +16,7 @@ namespace OlivePlatform.Application.Features.Analysis.Responses
 
         public decimal? AcidityPercentage { get; set; }
 
-        public DateTime? AnalysisDate { get; set; }
+        public DateTime? PlannedDate { get; set; }
 
         public DateTime CreatedAt { get; set; }
 

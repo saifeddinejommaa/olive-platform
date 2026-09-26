@@ -1,7 +1,7 @@
 export type PressingOperationResponse = {
   id: number;
   operationNumber: string;
-  pressingDate: string;
+  plannedDate: string;
   createdAt: string;
   startTime: string | null;
   endTime: string | null;

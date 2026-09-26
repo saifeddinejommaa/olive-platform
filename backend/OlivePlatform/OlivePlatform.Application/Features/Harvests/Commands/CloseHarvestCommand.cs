@@ -77,7 +77,7 @@ public class CloseHarvestCommandHandler : IRequestHandler<CloseHarvestCommand, U
 
             harvest.Status = ProductionStatus.Completed;
             harvest.QuantityKg = request.QuantityKg;
-            harvest.EndTime = TimeOnly.FromDateTime(now);
+            harvest.EndTime = now;
             harvest.UpdatedAt = now;
             harvest.HarvestedTrees = request.harvestedTrees;
 

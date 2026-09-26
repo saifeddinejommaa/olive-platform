@@ -236,9 +236,9 @@ export default function PressingOperationDetailsPage() {
       setOperation((previous) =>
         previous
           ? {
-              ...previous,
-              [field]: value,
-            }
+            ...previous,
+            [field]: value,
+          }
           : null,
       );
 
@@ -313,19 +313,19 @@ export default function PressingOperationDetailsPage() {
 
         return previous.sourceType === "harvest"
           ? {
-              ...previous,
-              harvestId: source.id,
-              purchaseItemId: null,
-              reference: source.reference,
-              quantityKg: quantity,
-            }
+            ...previous,
+            harvestId: source.id,
+            purchaseItemId: null,
+            reference: source.reference,
+            quantityKg: quantity,
+          }
           : {
-              ...previous,
-              harvestId: null,
-              purchaseItemId: source.id,
-              reference: source.reference,
-              quantityKg: quantity,
-            };
+            ...previous,
+            harvestId: null,
+            purchaseItemId: source.id,
+            reference: source.reference,
+            quantityKg: quantity,
+          };
       });
 
       setNewInputErrors((previous) => {
@@ -387,32 +387,32 @@ export default function PressingOperationDetailsPage() {
     }
 
     const convertedInput: PressingOperationInputDetails =
-      {
-        id:
-          Date.now() +
-          Math.floor(Math.random() * 10000),
+    {
+      id:
+        Date.now() +
+        Math.floor(Math.random() * 10000),
 
-        sourceType:
-          newInput.sourceType,
+      sourceType:
+        newInput.sourceType,
 
-        sourceReference:
-          newInput.reference,
+      sourceReference:
+        newInput.reference,
 
-        quantityKg:
-          Number(newInput.quantityKg),
+      quantityKg:
+        Number(newInput.quantityKg),
 
-        harvestId:
-          newInput.sourceType === "harvest"
-            ? newInput.harvestId
-            : null,
+      harvestId:
+        newInput.sourceType === "harvest"
+          ? newInput.harvestId
+          : null,
 
-        purchaseItemId:
-          newInput.sourceType === "purchase"
-            ? newInput.purchaseItemId
-            : null,
+      purchaseItemId:
+        newInput.sourceType === "purchase"
+          ? newInput.purchaseItemId
+          : null,
 
-        analysis: null,
-      };
+      analysis: null,
+    };
 
     addInputToStore(convertedInput);
 
@@ -461,22 +461,18 @@ export default function PressingOperationDetailsPage() {
         setError(null);
 
         const params: UpdatePressingOperationParams =
-          {
-            id: operation.id,
-            planificationDate: operation.startTime,
-            oliveQuantityKg:
-              operation.oliveQuantityKg,
-            oilQuantityLiters:
-              operation.oilQuantityLiters,
-            notes: operation.notes,
+        {
+          id: operation.id,
+          plannedDate: operation.plannedDate,
+          notes: operation.notes,
 
-            inputs: inputs.map((input) => ({
-              harvestId: input.harvestId,
-              purchaseItemId:
-                input.purchaseItemId,
-              quantityKg: input.quantityKg,
-            })),
-          };
+          inputs: inputs.map((input) => ({
+            harvestId: input.harvestId,
+            purchaseItemId:
+              input.purchaseItemId,
+            quantityKg: input.quantityKg,
+          })),
+        };
 
         await updateOperationStore(params);
 
@@ -622,12 +618,9 @@ export default function PressingOperationDetailsPage() {
 
           await completeOperationStore({
             id: operation.id,
-            oliveQuantity:
-              oilQuantityLiters,
-            endDate:
-              new Date().toISOString(),
             proceedOilAnalysis:
               proceedOilAnalysis,
+            oilQuantity: oilQuantityLiters
           });
 
           setFinishDrawerOpen(false);
@@ -689,10 +682,10 @@ export default function PressingOperationDetailsPage() {
       <div className="page-header">
         <div className="page-header-content">
           {operation &&
-                      renderStatus(
-                        operation.status,
-                        productionStatusConfig,
-                      )}
+            renderStatus(
+              operation.status,
+              productionStatusConfig,
+            )}
         </div>
 
         <div className="pressing-page-actions">
@@ -771,7 +764,7 @@ export default function PressingOperationDetailsPage() {
           canEditOperation={
             canEditOperation
           }
-          onParametersChange={()=>{}}
+          onParametersChange={() => { }}
         />
       )}
 
