@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using OlivePlatform.Application.Features.Harvests.Commands.AddHarvestCostLine;
 using OlivePlatform.Application.Features.Harvests.Commands.CloseHarvest;
 using OlivePlatform.Application.Features.Harvests.Commands.CreateHarvest;
 using OlivePlatform.Application.Features.Harvests.Commands.StartHarvest;
@@ -141,5 +142,26 @@ public class HarvestsController : ControllerBase
         return NoContent();
     }
 
+    [HttpPost("{id:int}/cost-lines")]
+    public async Task<IActionResult> AddCostLine(
+        int id,
+        [FromBody] AddHarvestCostLineCommand command,
+        CancellationToken cancellationToken)
+    {
+        command.HarvestId = id;
 
+        return Ok(await _mediator.Send(command, cancellationToken));
+    }
+
+    [HttpGet("cost-lines/workers")]
+    public async Task<IActionResult> SearchWorkers(
+        [FromQuery] string? search,
+        [FromQuery] int limit = 10,
+        CancellationToken cancellationToken = default)
+    {
+        return Ok(await _harvestQueryRepository.SearchWorkers(
+            search,
+            Math.Clamp(limit, 1, 50),
+            cancellationToken));
+    }
 }

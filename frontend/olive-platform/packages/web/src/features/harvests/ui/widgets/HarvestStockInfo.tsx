@@ -1,4 +1,6 @@
 import InfoFieldWidget from "../../../../common/widgets/InfoFieldWidget";
+import { renderStatus } from "../../../../common/status/StatusUtils";
+import { harvestStockStatusConfig } from "../../../../common/status/HarvestStockStatusConfig";
 
 import type { HarvestStockDetails } from "@olive-platform/core/features/harvests/domain/entities/HarvestStockDetails";
 
@@ -9,9 +11,13 @@ type Props = {
 const formatKg = (value: number) =>
   `${value.toLocaleString("fr-FR")} kg`;
 
+const formatDateTime = (value: string) =>
+  new Date(value).toLocaleString("fr-FR");
+
+// Même grille que les formulaires (Informations générales).
 export default function HarvestStockInfo({ stock }: Props) {
   return (
-    <div className="filters-content">
+    <div className="info-grid harvest-stock-grid">
       <InfoFieldWidget
         label="Référence"
         value={stock.reference}
@@ -22,19 +28,19 @@ export default function HarvestStockInfo({ stock }: Props) {
         value={formatKg(stock.quantityKg)}
       />
 
-      <InfoFieldWidget
-        label="Statut"
-        value={stock.status.toString()}
-      />
+      <div className="filter-item">
+        <span className="filter-item-label">Statut</span>
+        {renderStatus(stock.status, harvestStockStatusConfig)}
+      </div>
 
       <InfoFieldWidget
         label="Créé le"
-        value={new Date(stock.createdAt).toLocaleString("fr-FR")}
+        value={formatDateTime(stock.createdAt)}
       />
 
       <InfoFieldWidget
         label="Modifié le"
-        value={new Date(stock.updatedAt).toLocaleString("fr-FR")}
+        value={formatDateTime(stock.updatedAt)}
       />
     </div>
   );

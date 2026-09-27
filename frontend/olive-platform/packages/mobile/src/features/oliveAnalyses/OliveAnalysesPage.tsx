@@ -1,5 +1,5 @@
-import { useEffect } from "react";
-import { useRouter } from "expo-router";
+import { useCallback } from "react";
+import { useFocusEffect, useRouter } from "expo-router";
 
 import { useOliveAnalysesStore } from "@olive-platform/core/features/analyses/oliveAnalyses/store/OliveAnalysesStore";
 import { ListScreen } from "../../components/ListScreen";
@@ -11,9 +11,12 @@ export const OliveAnalysesPage = () => {
 
   const { analyses, loading, error, fetchAnalyses } = useOliveAnalysesStore();
 
-  useEffect(() => {
-    fetchAnalyses();
-  }, [fetchAnalyses]);
+  // Rechargé à chaque retour sur l'écran (ex. après une analyse terminée).
+  useFocusEffect(
+    useCallback(() => {
+      fetchAnalyses();
+    }, [fetchAnalyses]),
+  );
 
   return (
     <ListScreen

@@ -257,6 +257,9 @@ public class HarvestQueryRepository : IHarvestQueryRepository
             p.reference AS "{nameof(HarvestDetailsResponse.PlotReference)}",
             h.planned_date AS "{nameof(HarvestDetailsResponse.PlannedDate)}",
             h.quantity_kg AS "{nameof(HarvestDetailsResponse.QuantityKg)}",
+            h.variety_id AS "{nameof(HarvestDetailsResponse.VarietyId)}",
+            h.planned_trees AS "{nameof(HarvestDetailsResponse.PlannedTrees)}",
+            COALESCE(h.harvested_trees, 0) AS "{nameof(HarvestDetailsResponse.HarvestedTrees)}",
             h.notes AS "{nameof(HarvestDetailsResponse.Notes)}",
             h.status AS "{nameof(HarvestDetailsResponse.Status)}",
             h.start_time AS "{nameof(HarvestDetailsResponse.StartTime)}",
@@ -337,6 +340,9 @@ public class HarvestQueryRepository : IHarvestQueryRepository
         GROUP BY
             h.id,
             h.season_id,
+            h.variety_id,
+            h.planned_trees,
+            h.harvested_trees,
             h.reference,
             p.reference,
             h.planned_date,
@@ -480,5 +486,69 @@ public class HarvestQueryRepository : IHarvestQueryRepository
 
         return await connection.QueryFirstOrDefaultAsync<OliveAnalysisDetailsResponse>(
             command);
+    }
+
+    // ============================================================
+    // SEARCH WORKERS (from cost lines)
+    // ============================================================
+
+    public async Task<IReadOnlyList<WorkerSuggestionResponse>> SearchWorkers(
+        string? search,
+        int limit,
+        CancellationToken cancellationToken = default)
+    {
+        var sql = new StringBuilder(
+            $"""
+            SELECT
+                btrim(hcl.worker_name) AS {nameof(WorkerSuggestionResponse.WorkerName)},
+                NULLIF(btrim(hcl.worker_identifier), '') AS {nameof(WorkerSuggestionResponse.WorkerIdentifier)}
+
+            FROM harvest_cost_line hcl
+
+            WHERE hcl.worker_name IS NOT NULL
+              AND btrim(hcl.worker_name) <> ''
+            """);
+
+        var parameters = new DynamicParameters();
+
+        parameters.Add("Limit", limit);
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            sql.Append(
+                """
+
+                AND (
+                    hcl.worker_name ILIKE @Search
+                    OR hcl.worker_identifier ILIKE @Search
+                )
+                """);
+
+            parameters.Add("Search", $"%{search.Trim()}%");
+        }
+
+        sql.Append(
+            """
+
+            GROUP BY
+                btrim(hcl.worker_name),
+                NULLIF(btrim(hcl.worker_identifier), '')
+
+            ORDER BY
+                MAX(hcl.date) DESC,
+                1
+
+            LIMIT @Limit
+            """);
+
+        using var connection = _dbConnection;
+
+        var result = await connection.QueryAsync<WorkerSuggestionResponse>(
+            new CommandDefinition(
+                sql.ToString(),
+                parameters,
+                cancellationToken: cancellationToken));
+
+        return result.ToList();
     }
 }

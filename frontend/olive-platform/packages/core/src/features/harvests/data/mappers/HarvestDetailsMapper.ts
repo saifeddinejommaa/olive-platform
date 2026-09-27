@@ -23,7 +23,9 @@ export function HarvestDetailsMapper(
 
     plannedTrees: response.plannedTrees,
 
-    variety: response.variety as OliveVarieties,
+    variety: response.varietyId as OliveVarieties,
+
+    seasonId: response.seasonId,
 
     notes: response.notes,
 

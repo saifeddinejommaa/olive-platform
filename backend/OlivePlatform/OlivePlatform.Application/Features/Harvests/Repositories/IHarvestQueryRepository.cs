@@ -24,4 +24,10 @@ public interface IHarvestQueryRepository
     Task<IReadOnlyList<Harvest>> GetByPlotIdAsync(
         int plotId,
         CancellationToken cancellationToken = default);
+
+    // Ouvriers déjà saisis sur les lignes de coût, filtrés par nom ou identifiant.
+    Task<IReadOnlyList<WorkerSuggestionResponse>> SearchWorkers(
+        string? search,
+        int limit,
+        CancellationToken cancellationToken = default);
 }

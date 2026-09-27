@@ -4,7 +4,10 @@ import { useHarvestDetailsStore } from "@olive-platform/core/features/harvests/s
 import { ProductionStatus } from "@olive-platform/core/features/production/domain/entities/ProductionStatus";
 import { Screen } from "../../components/Screen";
 import { HarvestCostsSection } from "./widgets/HarvestCostsSection";
-import { CloseHarvestSheet } from "./components/details/CloseHarvestSheet";
+import {
+  CloseHarvestSheet,
+  type CloseHarvestSheetResult,
+} from "./components/details/CloseHarvestSheet";
 import { spacing } from "../../consts/spacing";
 import { HarvestSummaryCard } from "./components/details/HarvestSummaryCard";
 import { HarvestGeneralSection } from "./components/details/HarvestGeneralSection";
@@ -19,8 +22,15 @@ type Props = { harvestId: number };
 export function HarvestDetailsPage({ harvestId }: Props) {
   const [activeTab, setActiveTab] = useState<HarvestMobileTab>("general");
   const [closeSheetOpen, setCloseSheetOpen] = useState(false);
+  // Nouvelle clé à chaque ouverture : le récapitulatif repart des valeurs à jour.
+  const [closeSheetKey, setCloseSheetKey] = useState(0);
 
-  const { harvest, saving, fetchHarvest, start, complete, clear } =
+  const openCloseSheet = () => {
+    setCloseSheetKey((key) => key + 1);
+    setCloseSheetOpen(true);
+  };
+
+  const { harvest, saving, fetchHarvest, start, complete, addCostLine, clear } =
     useHarvestDetailsStore();
 
   useEffect(() => {
@@ -42,23 +52,25 @@ export function HarvestDetailsPage({ harvestId }: Props) {
   }, [harvest, start]);
 
   const handleClose = useCallback(
-    async (quantityKg: number, harvestedTrees: number) => {
+    async ({
+      quantityKg,
+      harvestedTrees,
+      stocks,
+      proceedAnalyse,
+    }: CloseHarvestSheetResult) => {
       if (!harvest) return;
 
-      try {
-        await complete(
-          harvest.id,
-          quantityKg,
-          harvestedTrees,
-          new Date().toISOString(),
-          [],
-          false,
-        );
+      // Une erreur est remontée à la feuille, qui affiche le message.
+      await complete(
+        harvest.id,
+        quantityKg,
+        harvestedTrees,
+        new Date().toISOString(),
+        stocks,
+        proceedAnalyse,
+      );
 
-        setCloseSheetOpen(false);
-      } catch {
-        Alert.alert("Erreur", "Impossible de clôturer la récolte.");
-      }
+      setCloseSheetOpen(false);
     },
     [harvest, complete],
   );
@@ -69,9 +81,13 @@ export function HarvestDetailsPage({ harvestId }: Props) {
 
   return (
     <Screen>
+      {/* keyboardShouldPersistTaps : les feuilles (coût, clôture) sont des
+          enfants React de ce ScrollView. Sans ce réglage, il intercepte le
+          premier tap pour fermer le clavier (suggestion, bouton non déclenchés). */}
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.content}
+        keyboardShouldPersistTaps="handled"
       >
         <DetailsHeader title="Détails Récole" onBack={()=> { router.back()}}/>
 
@@ -93,7 +109,7 @@ export function HarvestDetailsPage({ harvestId }: Props) {
             title="Clôturer la récolte"
             subtitle="Enregistrer les résultats"
             loading={saving}
-            onPress={() => setCloseSheetOpen(true)}
+            onPress={openCloseSheet}
           />
         )}
 
@@ -115,9 +131,14 @@ export function HarvestDetailsPage({ harvestId }: Props) {
           <HarvestCostsSection
             harvestId={harvest.id}
             costs={harvest.costs}
-            onAddCost={async (params) => {
-              console.log("TODO addCost", params);
-            }}
+            savingCost={saving}
+            canAddCost={isInProgress || harvest.status === ProductionStatus.Completed}
+            addCostDisabledMessage={
+              isPlanned
+                ? "Les coûts pourront être ajoutés une fois la récolte lancée."
+                : undefined
+            }
+            onAddCost={(params) => addCostLine(harvest.id, params)}
           />
         )}
 
@@ -125,9 +146,10 @@ export function HarvestDetailsPage({ harvestId }: Props) {
       </ScrollView>
 
       <CloseHarvestSheet
+        key={closeSheetKey}
         visible={closeSheetOpen}
         saving={saving}
-        defaultHarvestedTrees={harvest.harvestedTrees}
+        harvest={harvest}
         onClose={() => setCloseSheetOpen(false)}
         onConfirm={handleClose}
       />

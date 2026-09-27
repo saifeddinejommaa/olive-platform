@@ -69,6 +69,7 @@ export function PressingOperationDetailsPage({ operationId }: Props) {
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.content}
+        keyboardShouldPersistTaps="handled"
       >
         <DetailsHeader title ="Détails" onBack={()=>{ router.back()}} />
 

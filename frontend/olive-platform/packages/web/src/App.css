@@ -1246,15 +1246,83 @@ textarea {
   gap: var(--space-3);
 }
 
+/* Nouvelle récolte : variétés de la parcelle sélectionnée. */
+.variety-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--space-3);
+}
+
+.variety-option {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 12px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-raised);
+  color: var(--color-olive-900);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.variety-option span {
+  font-size: var(--fs-xs);
+  color: var(--color-muted);
+}
+
+.variety-option:hover:not(:disabled) {
+  border-color: var(--color-olive-500);
+}
+
+.variety-option--selected {
+  border-color: var(--color-olive-500);
+  background: var(--color-olive-100);
+}
+
+.variety-option:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.variety-options-hint {
+  font-size: var(--fs-xs);
+  color: var(--color-muted);
+}
+
+/* Stocks d'une récolte : cartes espacées, détails en grille. */
+.harvest-stock-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.harvest-stock-grid {
+  padding-top: var(--space-3);
+  row-gap: var(--space-5);
+}
+
+/* Barre d'actions fixée en bas de l'écran, à droite de la sidebar. */
 .harvest-general-actions {
-  position: sticky;
+  position: fixed;
+  left: var(--sidebar-width);
+  right: 0;
   bottom: 0;
   display: flex;
   justify-content: flex-end;
-  padding: 16px 0;
-  margin-top: 24px;
-  background: var(--background-color);
-  z-index: 10;
+  padding: 14px 32px;
+  background: var(--color-surface-raised);
+  border-top: 1px solid var(--color-border);
+  box-shadow: 0 -4px 16px rgba(31, 42, 24, 0.06);
+  z-index: 40;
+}
+
+/* Réserve la place de la barre pour que la fin du contenu reste visible. */
+.harvest-general-actions-spacer {
+  height: 80px;
 }
 
 /* ============================================================
@@ -1273,6 +1341,11 @@ textarea {
 
   .page-content {
     padding: 24px;
+  }
+
+  .harvest-general-actions {
+    left: 210px;
+    padding: 14px 24px;
   }
 
   .topbar {
@@ -1296,6 +1369,10 @@ textarea {
   .main-layout {
     width: calc(100% - 64px);
     margin-left: 64px;
+  }
+
+  .harvest-general-actions {
+    left: 64px;
   }
 
   .sidebar-brand {

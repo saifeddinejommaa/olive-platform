@@ -7,14 +7,20 @@ import TextInput from "../../../../common/widgets/textInput/TextInput";
 import TextEditor from "../../../../common/widgets/textEditor/TextEditor";
 import { Autocomplete } from "../../../../common/widgets/autoComplete/AutoComplete";
 
-import { useCreateHarvest } from "@olive-platform/core/features/harvests/hooks/UseCreateHarvest";
 import type { CreateHarvestParams } from "@olive-platform/core/features/harvests/domain/params/CreateHarvestParams";
+import { createHarvestUseCase } from "@olive-platform/core/features/harvests/domain/usecases/createHarvest";
+import type { PlotForList } from "@olive-platform/core/features/plots/domain/entities/PlotForList";
+import type { PlotVarietyDetail } from "@olive-platform/core/features/plots/domain/entities/PlotVarietyDetail";
+import { GetPlotDetails } from "@olive-platform/core/features/plots/domain/usecases/GetPlotsDetails";
+import { getTodayDate } from "@olive-platform/core/features/shared/utils/DatesUtils";
 import { usePlotsAutocomplete } from "../../../plots/ui/hooks/UsePlotsAutocomplete";
-import { useAvailableTrees } from "../../../plots/ui/hooks/UseAvailableTrees";
-import OliveVarietySelector from "../../../../common/widgets/OliveVarietySelector";
 import { usePageTitle } from "../../../../common/hooks/usePageTitle";
 import Card from "../../../../common/widgets/card/Card";
 import HarvestTypeSelector from "../../../../common/widgets/HarvestTypeSelector";
+import { useSeasonStore } from "../../../../stores/SeasonStore";
+
+// Valeur par défaut acceptée par l'API (1 = Manuelle).
+const DEFAULT_HARVEST_TYPE = 1;
 
 type NewHarvestForm = {
   plotId: number;
@@ -25,27 +31,44 @@ type NewHarvestForm = {
   notes: string;
 };
 
-const initialForm: NewHarvestForm = {
-  plotId: 0,
-  varietyId: 0,
-  plannedTrees: 0,
-  harvestType: 0,
-  plannedDate: new Date().toISOString().split("T")[0],
-  notes: "",
-};
+// Aujourd'hui s'il est dans la campagne sélectionnée, sinon son premier jour.
+function defaultDateInSeason(season?: { startDate: string; endDate: string }) {
+  const today = getTodayDate();
+
+  if (!season || (today >= season.startDate && today <= season.endDate)) {
+    return today;
+  }
+
+  return season.startDate;
+}
 
 export default function NewHarvestPage() {
   const navigate = useNavigate();
-  const { createHarvestAction, error } = useCreateHarvest();
-  const [form, setForm] = useState<NewHarvestForm>(initialForm);
+
+  const selectedSeason = useSeasonStore((state) =>
+    state.seasons.find((season) => season.id === state.selectedSeasonId),
+  );
+
+  const [form, setForm] = useState<NewHarvestForm>(() => ({
+    plotId: 0,
+    varietyId: 0,
+    plannedTrees: 0,
+    harvestType: DEFAULT_HARVEST_TYPE,
+    plannedDate: defaultDateInSeason(selectedSeason),
+    notes: "",
+  }));
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
 
-  const {
-    availableTrees,
-    loading: availableTreesLoading,
-    error: availableTreesError,
-  } = useAvailableTrees(form.plotId, form.varietyId);
+  // Variétés de la parcelle choisie, avec les arbres restant à récolter.
+  const [varieties, setVarieties] = useState<PlotVarietyDetail[]>([]);
+  const [varietiesLoading, setVarietiesLoading] = useState(false);
+  const [varietiesError, setVarietiesError] = useState<string | null>(null);
+
+  const selectedVariety = varieties.find(
+    (variety) => variety.varietyId === form.varietyId,
+  );
+  const availableTrees = selectedVariety?.remainingTreesToHarvest ?? null;
 
   const getValidationErrors = useCallback((): Record<string, string> => {
     const validationErrors: Record<string, string> = {};
@@ -54,15 +77,17 @@ export default function NewHarvestPage() {
       validationErrors.varietyId = "La variété est obligatoire.";
     if (!form.plannedDate)
       validationErrors.plannedDate = "La date de récolte est obligatoire.";
+    if (!form.harvestType)
+      validationErrors.harvestType = "Le type de récolte est obligatoire.";
     if (form.plannedTrees <= 0)
-      validationErrors.harvestedTrees =
+      validationErrors.plannedTrees =
         "Le nombre d'arbres doit être supérieur à 0.";
     if (availableTrees !== null && form.plannedTrees > availableTrees) {
-      validationErrors.harvestedTrees = `Le nombre d'arbres ne peut pas dépasser ${availableTrees}.`;
+      validationErrors.plannedTrees = `Le nombre d'arbres ne peut pas dépasser ${availableTrees}.`;
     }
     return validationErrors;
   }, [form, availableTrees]);
-  
+
   usePageTitle("Nouvelle récolte","Créer une nouvelle récolte et renseigner les informations associées.");
   const isFormValid = useMemo(
     () => Object.keys(getValidationErrors()).length === 0,
@@ -82,6 +107,62 @@ export default function NewHarvestPage() {
     [],
   );
 
+  const selectVariety = useCallback((variety: PlotVarietyDetail) => {
+    setForm((previous) => ({
+      ...previous,
+      varietyId: variety.varietyId,
+      // Proposé par défaut : tous les arbres restant à récolter.
+      plannedTrees: variety.remainingTreesToHarvest,
+    }));
+    setErrors((previous) => {
+      const next = { ...previous };
+      delete next.varietyId;
+      delete next.plannedTrees;
+      return next;
+    });
+  }, []);
+
+  // Le choix de la parcelle charge ses variétés.
+  const handlePlotSelect = useCallback(
+    async (plot: PlotForList) => {
+      setForm((previous) => ({
+        ...previous,
+        plotId: plot.id,
+        varietyId: 0,
+        plannedTrees: 0,
+      }));
+      setErrors((previous) => {
+        const next = { ...previous };
+        delete next.plotId;
+        return next;
+      });
+      setVarieties([]);
+      setVarietiesError(null);
+      setVarietiesLoading(true);
+
+      try {
+        const details = await GetPlotDetails(plot.id);
+        const plotVarieties = details.varieties ?? [];
+
+        setVarieties(plotVarieties);
+
+        // Une seule variété récoltable : on la présélectionne.
+        const harvestable = plotVarieties.filter(
+          (variety) => variety.remainingTreesToHarvest > 0,
+        );
+
+        if (harvestable.length === 1) {
+          selectVariety(harvestable[0]);
+        }
+      } catch {
+        setVarietiesError("Impossible de charger les variétés de la parcelle.");
+      } finally {
+        setVarietiesLoading(false);
+      }
+    },
+    [selectVariety],
+  );
+
   const handleSubmit = useCallback(async () => {
     const validationErrors = getValidationErrors();
     if (Object.keys(validationErrors).length > 0) {
@@ -98,28 +179,24 @@ export default function NewHarvestPage() {
         plannedTrees: form.plannedTrees,
         plannedDate: form.plannedDate,
         notes: form.notes || null,
-        harvestType: form.harvestType
+        harvestType: form.harvestType,
       };
 
-      const success = await createHarvestAction(request);
+      await createHarvestUseCase(request);
 
-      if (success) {
-        toast.success("Récolte créée avec succès.");
-        navigate("/harvests");
-        return;
-      }
-
-      toast.error(error ?? "Impossible de créer la récolte.");
-    } catch {
-      toast.error("Une erreur est survenue lors de la création de la récolte.");
-      setErrors({ general: "Impossible de créer la récolte." });
+      toast.success("Récolte créée avec succès.");
+      navigate("/harvests");
+    } catch (e: any) {
+      const message = e?.message ?? "Impossible de créer la récolte.";
+      toast.error(message);
+      setErrors({ general: message });
     } finally {
       setSaving(false);
     }
-  }, [form, getValidationErrors, createHarvestAction, error, navigate]);
+  }, [form, getValidationErrors, navigate]);
 
   const handleCancel = useCallback(() => {
-    if (!saving) navigate("/production");
+    if (!saving) navigate("/harvests");
   }, [saving, navigate]);
 
   return (
@@ -131,7 +208,7 @@ export default function NewHarvestPage() {
             <span>Informations relatives à la récolte</span>
           </div>
         </div>
-        
+
         <Card>
         <div className="info-grid">
           <div className="filter-item">
@@ -140,7 +217,7 @@ export default function NewHarvestPage() {
               <Autocomplete
                 useSearch={usePlotsAutocomplete}
                 getLabel={(plot) => `${plot.reference} - ${plot.name}`}
-                onSelect={(plot) => updateForm("plotId", plot.id)}
+                onSelect={handlePlotSelect}
                 placeholder="Rechercher une parcelle..."
                 width="100%"
               />
@@ -151,23 +228,12 @@ export default function NewHarvestPage() {
           </div>
 
           <div className="filter-item">
-            <label>Variété</label>
-            <OliveVarietySelector
-              value={form.varietyId}
-              onChange={(event) =>
-                updateForm("varietyId", Number(event))
-              }
-            />
-            {errors.varietyId && (
-              <span className="field-error">{errors.varietyId}</span>
-            )}
-          </div>
-
-          <div className="filter-item">
             <TextInput
               label="Date de récolte"
               type="date"
               value={form.plannedDate}
+              min={selectedSeason?.startDate}
+              max={selectedSeason?.endDate}
               onChange={(event) =>
                 updateForm("plannedDate", event.target.value)
               }
@@ -181,41 +247,79 @@ export default function NewHarvestPage() {
              <label>Type de Récolte</label>
             <HarvestTypeSelector
               value={form.harvestType}
-              onChange={(event) =>{
-                updateForm("harvestType", event??0)
-              }
+              onChange={(value) =>
+                updateForm("harvestType", value ?? 0)
               }
             />
-            {errors.plannedDate && (
-              <span className="field-error">{errors.plannedDate}</span>
+            {errors.harvestType && (
+              <span className="field-error">{errors.harvestType}</span>
             )}
           </div>
 
-          {form.plotId > 0 && form.varietyId > 0 && (
-            <div
-              style={{
-                gridColumn: "1 / -1",
-                marginTop: "10px",
-                paddingTop: "20px",
-                borderTop: "1px solid #eee",
-              }}
-            >
-              <div className="available-trees-info">
-                {availableTreesLoading && (
-                  <span>Calcul du nombre d'arbres disponibles...</span>
-                )}
-                {!availableTreesLoading && availableTrees !== null && (
-                  <strong>
-                    {availableTrees.toLocaleString("fr-FR")} arbres disponibles
-                    pour la récolte
-                  </strong>
-                )}
-                {availableTreesError && (
-                  <span className="field-error">{availableTreesError}</span>
-                )}
+          {/* Variétés de la parcelle sélectionnée */}
+          <div className="filter-item" style={{ gridColumn: "1 / -1" }}>
+            <label>Variété</label>
+
+            {!form.plotId && (
+              <span className="variety-options-hint">
+                Sélectionnez d'abord une parcelle pour choisir la variété.
+              </span>
+            )}
+
+            {form.plotId > 0 && varietiesLoading && (
+              <span className="variety-options-hint">
+                Chargement des variétés de la parcelle...
+              </span>
+            )}
+
+            {form.plotId > 0 && varietiesError && (
+              <span className="field-error">{varietiesError}</span>
+            )}
+
+            {form.plotId > 0 &&
+              !varietiesLoading &&
+              !varietiesError &&
+              varieties.length === 0 && (
+                <span className="variety-options-hint">
+                  Aucune variété enregistrée pour cette parcelle.
+                </span>
+              )}
+
+            {varieties.length > 0 && (
+              <div className="variety-options">
+                {varieties.map((variety) => {
+                  const selected = variety.varietyId === form.varietyId;
+                  const exhausted = variety.remainingTreesToHarvest <= 0;
+
+                  return (
+                    <button
+                      key={variety.varietyId}
+                      type="button"
+                      disabled={exhausted}
+                      onClick={() => selectVariety(variety)}
+                      className={[
+                        "variety-option",
+                        selected ? "variety-option--selected" : "",
+                      ]
+                        .filter(Boolean)
+                        .join(" ")}
+                    >
+                      <strong>{variety.varietyLabel}</strong>
+                      <span>
+                        {exhausted
+                          ? "Tous les arbres sont récoltés"
+                          : `${variety.remainingTreesToHarvest.toLocaleString("fr-FR")} / ${variety.numberOfTrees.toLocaleString("fr-FR")} arbres disponibles`}
+                      </span>
+                    </button>
+                  );
+                })}
               </div>
-            </div>
-          )}
+            )}
+
+            {errors.varietyId && (
+              <span className="field-error">{errors.varietyId}</span>
+            )}
+          </div>
 
           <div className="filter-item">
             <TextInput
@@ -228,8 +332,14 @@ export default function NewHarvestPage() {
                 updateForm("plannedTrees", Number(event.target.value))
               }
             />
-            {errors.harvestedTrees && (
-              <span className="field-error">{errors.harvestedTrees}</span>
+            {availableTrees !== null && !errors.plannedTrees && (
+              <span className="variety-options-hint">
+                {availableTrees.toLocaleString("fr-FR")} arbres disponibles
+                pour la récolte
+              </span>
+            )}
+            {errors.plannedTrees && (
+              <span className="field-error">{errors.plannedTrees}</span>
             )}
           </div>
 

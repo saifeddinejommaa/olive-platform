@@ -29,13 +29,15 @@ export const formatTime = (value: string | null) => {
   });
 };
 
-export const getTodayDate = () => {
-  const today = new Date();
-  const year = today.getFullYear();
-  const month = String(today.getMonth() + 1).padStart(2, "0");
-  const day = String(today.getDate()).padStart(2, "0");
+// Date locale au format "YYYY-MM-DD" (DateOnly côté API).
+export const toDateOnlyString = (date: Date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
 };
+
+export const getTodayDate = () => toDateOnlyString(new Date());
 
 export const toDateTime = (date: string): string | null => {
   if (!date) return null;

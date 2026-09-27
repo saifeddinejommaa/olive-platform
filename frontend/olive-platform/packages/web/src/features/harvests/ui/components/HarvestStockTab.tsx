@@ -96,16 +96,18 @@ export default function HarvestStocksTab({ harvestId }: Props) {
                         </div>
                     )}
 
-                    {!stocksLoading &&
-                        !stocksError &&
-                        stocks.map((stock) => (
-                            <CollapsibleCard
-                                key={stock.id}
-                                title={stock.reference}
-                            >
-                                <HarvestStockInfo stock={stock} />
-                            </CollapsibleCard>
-                        ))}
+                    {!stocksLoading && !stocksError && hasStocks && (
+                        <div className="harvest-stock-list">
+                            {stocks.map((stock) => (
+                                <CollapsibleCard
+                                    key={stock.id}
+                                    title={stock.reference}
+                                >
+                                    <HarvestStockInfo stock={stock} />
+                                </CollapsibleCard>
+                            ))}
+                        </div>
+                    )}
 
                     {!stocksLoading &&
                         !stocksError &&

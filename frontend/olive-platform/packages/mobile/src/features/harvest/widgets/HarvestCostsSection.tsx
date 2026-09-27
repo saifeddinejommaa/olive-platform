@@ -1,65 +1,79 @@
 import { useState } from "react";
-import { View, Text, FlatList, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 
-// TODO: remplace par le vrai type une fois confirmé.
 import type { HarvestCostSummary } from "@olive-platform/core/features/harvests/domain/entities/HarvestCostSummary";
+import type { AddHarvestCostLineParams } from "@olive-platform/core/features/harvests/domain/params/AddHarvestCostLineParams";
+import { useConstantsStore } from "../../../stores/ConstantsStore";
 import { AddHarvestCostSheet } from "../components/AddHarvestCostSheet";
-
-
 
 type Props = {
   harvestId: number;
   costs: HarvestCostSummary[];
-  // TODO: brancher sur la vraie action d'ajout (ex: useHarvestDetailsStore().addCost)
-  onAddCost: (params: { label: string; amount: number; date: string }) => Promise<void> | void;
+  onAddCost: (params: AddHarvestCostLineParams) => Promise<void> | void;
   savingCost?: boolean;
+  canAddCost?: boolean;
+  // Affiché à la place du bouton quand l'ajout n'est pas possible.
+  addCostDisabledMessage?: string;
 };
+
+const formatAmount = (value: number) =>
+  value.toLocaleString("fr-FR", { maximumFractionDigits: 3 });
 
 export function HarvestCostsSection({
   costs,
   onAddCost,
   savingCost,
+  canAddCost = true,
+  addCostDisabledMessage,
 }: Props) {
   const [addOpen, setAddOpen] = useState(false);
+  // Nouvelle clé à chaque ouverture : la feuille repart d'un formulaire vide.
+  const [sheetKey, setSheetKey] = useState(0);
 
-  // TODO: "amount" à ajuster selon le nom réel du champ dans HarvestCostSummary
-  const total = costs?.reduce((sum, c: any) => sum + c.amount, 0) ?? 0;
+  const openSheet = () => {
+    setSheetKey((key) => key + 1);
+    setAddOpen(true);
+  };
+  const { Appconstants } = useConstantsStore();
+
+  const total = costs?.reduce((sum, cost) => sum + cost.totalAmount, 0) ?? 0;
+
+  const typeLabel = (typeId: number) =>
+    Appconstants.costLineTypes.find((type) => type.id === typeId)?.label ??
+    "Autre";
 
   return (
     <View style={styles.container}>
       <View style={styles.summary}>
         <Text style={styles.totalLabel}>Total des coûts</Text>
-        <Text style={styles.totalValue}>{total.toLocaleString("fr-FR")} DT</Text>
+        <Text style={styles.totalValue}>{formatAmount(total)} DT</Text>
       </View>
 
-      <FlatList
-        data={costs}
-        keyExtractor={(item: any) => String(item.id)}
-        scrollEnabled={false}
-        ListEmptyComponent={
-          <Text style={styles.empty}>Aucun coût enregistré pour l'instant.</Text>
-        }
-        renderItem={({ item }: any) => (
-          <View style={styles.costRow}>
-            <View>
-              {/* TODO: ajuster les noms de champs à HarvestCostSummary réel */}
-              <Text style={styles.costLabel}>{item.label}</Text>
-              <Text style={styles.costDate}>
-                {new Date(item.date).toLocaleDateString("fr-FR")}
-              </Text>
-            </View>
+      {!costs?.length ? (
+        <Text style={styles.empty}>{"Aucun coût enregistré pour l'instant."}</Text>
+      ) : (
+        costs.map((cost) => (
+          <View key={cost.costLineTypeId} style={styles.costRow}>
+            <Text style={styles.costLabel}>{typeLabel(cost.costLineTypeId)}</Text>
             <Text style={styles.costAmount}>
-              {item.amount && item.amount.toLocaleString("fr-FR")} DT
+              {formatAmount(cost.totalAmount)} DT
             </Text>
           </View>
-        )}
-      />
+        ))
+      )}
 
-      <TouchableOpacity style={styles.addButton} onPress={() => setAddOpen(true)}>
-        <Text style={styles.addLabel}>+ Ajouter un coût</Text>
-      </TouchableOpacity>
+      {canAddCost ? (
+        <TouchableOpacity style={styles.addButton} onPress={openSheet}>
+          <Text style={styles.addLabel}>+ Ajouter un coût</Text>
+        </TouchableOpacity>
+      ) : (
+        addCostDisabledMessage && (
+          <Text style={styles.disabledHint}>{addCostDisabledMessage}</Text>
+        )
+      )}
 
       <AddHarvestCostSheet
+        key={sheetKey}
         visible={addOpen}
         saving={savingCost}
         onClose={() => setAddOpen(false)}
@@ -92,7 +106,6 @@ const styles = StyleSheet.create({
     borderBottomColor: "#EEE",
   },
   costLabel: { fontWeight: "500" },
-  costDate: { color: "#999", fontSize: 12, marginTop: 2 },
   costAmount: { fontWeight: "600" },
   empty: { color: "#999", textAlign: "center", paddingVertical: 20 },
   addButton: {
@@ -103,4 +116,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   addLabel: { color: "#2E7D32", fontWeight: "600" },
+  disabledHint: {
+    color: "#777",
+    textAlign: "center",
+    paddingVertical: 10,
+    borderWidth: 1,
+    borderStyle: "dashed",
+    borderColor: "#DDD",
+    borderRadius: 8,
+  },
 });

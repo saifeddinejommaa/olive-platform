@@ -1,6 +1,5 @@
 import type { OliveAnalysisDetailsResponse } from "../../../analyses/oliveAnalyses/data/responses/OliveAnalysesDetailsResponse";
 import type { ProductionStatus } from "../../../production/domain/entities/ProductionStatus";
-import type { OliveVarieties } from "../../../shared/entities/OliveVarieties";
 import type { HarvestCostSummary } from "../../domain/entities/HarvestCostSummary";
 
 export interface HarvestDetailsResponse {
@@ -8,7 +7,8 @@ export interface HarvestDetailsResponse {
   reference: string;
   plotId: number;
   plotReference: string;
-  variety: OliveVarieties;
+  varietyId: number;
+  seasonId: number;
   harvestedTrees: number;
   plannedTrees: number;
   plannedDate: string;

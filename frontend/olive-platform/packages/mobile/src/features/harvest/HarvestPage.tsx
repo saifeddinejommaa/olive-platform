@@ -1,9 +1,9 @@
 import { useHarvestsStore } from '@olive-platform/core/features/harvests/stores/HarvestsStore';
-import { useEffect } from 'react';
+import { useCallback } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { ListScreen } from '../../components/ListScreen';
 import { HarvestListItem } from './widgets/HarvestListItem';
-import { useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 
 export const HarvestPage = () => {
   const router = useRouter();
@@ -14,9 +14,12 @@ export const HarvestPage = () => {
     fetchHarvests,
   } = useHarvestsStore();
 
-  useEffect(() => {
-    fetchHarvests();
-  }, [fetchHarvests]);
+  // Rechargé à chaque retour sur l'écran (ex. après la clôture d'une récolte).
+  useFocusEffect(
+    useCallback(() => {
+      fetchHarvests();
+    }, [fetchHarvests]),
+  );
 
   return (
     <ListScreen
@@ -24,9 +27,7 @@ export const HarvestPage = () => {
       description="Gérez vos récoltes"
       data={harvests.items}
       keyExtractor={(item) => item.id.toString()}
-      onCreate={() => {
-        console.log('Créer une récolte');
-      }}
+      onCreate={() => router.push('/harvest/new')}
       renderItem={({ item }) => (
         <HarvestListItem
           harvest={item}

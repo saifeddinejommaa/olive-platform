@@ -1,5 +1,5 @@
-import { useEffect } from "react";
-import { useRouter } from "expo-router";
+import { useCallback } from "react";
+import { useFocusEffect, useRouter } from "expo-router";
 
 import { usePressingOperationsStore } from "@olive-platform/core/features/production/stores/pressingOperationStore";
 import { ListScreen } from "../../components/ListScreen";
@@ -17,9 +17,13 @@ export const ProductionPage = () => {
     fetchPressingOperations
   } = usePressingOperationsStore();
 
-  useEffect(() => {
-    fetchPressingOperations();
-  }, [PressingOperations]);
+  // Rechargé à chaque retour sur l'écran. Ne pas dépendre des données
+  // chargées : chaque chargement les remplace et relancerait l'effet en boucle.
+  useFocusEffect(
+    useCallback(() => {
+      fetchPressingOperations();
+    }, [fetchPressingOperations]),
+  );
 
   return (
     <ListScreen
