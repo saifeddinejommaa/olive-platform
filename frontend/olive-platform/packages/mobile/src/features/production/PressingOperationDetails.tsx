@@ -20,7 +20,7 @@ export function PressingOperationDetailsPage({ operationId }: Props) {
   const [activeTab, setActiveTab] = useState<PressingMobileTab>("general");
   const [closeSheetOpen, setCloseSheetOpen] = useState(false);
 
-  const { operation, saving, fetchOperation, startOperation, completeOperation, clear } =
+  const { operation, saving, completing, fetchOperation, startOperation, completeOperation, clear } =
     usePressingOperationDetailsStore();
 
   useEffect(() => {
@@ -36,29 +36,50 @@ export function PressingOperationDetailsPage({ operationId }: Props) {
 
     try {
       await startOperation(operation.id);
-    } catch {
-      Alert.alert("Erreur", "Impossible de lancer le pressurage.");
+    } catch (e: any) {
+      // Ex. un lot en attente d'analyse : le message de l'API l'explique.
+      Alert.alert("Erreur", e?.message ?? "Impossible de lancer le pressurage.");
     }
   }, [operation, startOperation]);
 
+  // Une erreur remonte au récapitulatif, qui l'affiche.
   const handleClose = useCallback(
-    async (operationNumber: string, oilQuantityLiters: number) => {
+    async (oilQuantityLiters: number) => {
       if (!operation) return;
 
-      try {
-        await completeOperation({
-          id: operation.id,
-          oilQuantity: oilQuantityLiters,
-          proceedOilAnalysis: true
+      await completeOperation({
+        id: operation.id,
+        oilQuantity: oilQuantityLiters,
+        // Non pris en charge par l'API pour l'instant (aucune analyse créée).
+        proceedOilAnalysis: false,
       });
 
-        setCloseSheetOpen(false);
-      } catch {
-        Alert.alert("Erreur", "Impossible de clôturer le pressurage.");
-      }
+      setCloseSheetOpen(false);
     },
     [operation, completeOperation],
   );
+
+  // La configuration de pression est obligatoire avant la clôture.
+  const handleOpenCloseSheet = useCallback(() => {
+    const parameters = operation?.parameters;
+    const hasConfiguration =
+      !!parameters &&
+      Object.entries(parameters).some(
+        ([key, value]) =>
+          key !== "id" && key !== "notes" && value !== null && value !== undefined,
+      );
+
+    if (!hasConfiguration) {
+      setActiveTab("general");
+      Alert.alert(
+        "Configuration requise",
+        "Renseignez la configuration de pression (onglet Général, « Modifier ») avant de clôturer.",
+      );
+      return;
+    }
+
+    setCloseSheetOpen(true);
+  }, [operation]);
 
   if (!operation) {
     return <Loading />;
@@ -91,7 +112,7 @@ export function PressingOperationDetailsPage({ operationId }: Props) {
             title="Clôturer le pressurage"
             subtitle="Enregistrer les résultats"
             loading={saving}
-            onPress={() => setCloseSheetOpen(true)}
+            onPress={handleOpenCloseSheet}
           />
         )}
 
@@ -110,13 +131,15 @@ export function PressingOperationDetailsPage({ operationId }: Props) {
         <View style={styles.bottomSpace} />
       </ScrollView>
 
-      <ClosePressingSheet
-        visible={closeSheetOpen}
-        saving={saving}
-        defaultOperationNumber={operation.operationNumber}
-        onClose={() => setCloseSheetOpen(false)}
-        onConfirm={handleClose}
-      />
+      {closeSheetOpen && (
+        <ClosePressingSheet
+          visible
+          saving={completing}
+          operation={operation}
+          onClose={() => setCloseSheetOpen(false)}
+          onConfirm={handleClose}
+        />
+      )}
     </Screen>
   );
 }

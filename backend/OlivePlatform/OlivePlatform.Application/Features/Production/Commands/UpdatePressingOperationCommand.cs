@@ -3,6 +3,7 @@ using OlivePlatform.Application.Common;
 using OlivePlatform.Application.Features.Production.Requests;
 using OlivePlatform.Application.Features.Seasons;
 using OlivePlatform.Application.Services;
+using OlivePlatform.Domain;
 using OlivePlatform.Domain.Entities;
 using OlivePlatform.Domain.Enums;
 using OlivePlatform.Domain.Interfaces.Repositories;
@@ -60,6 +61,14 @@ public class UpdatePressingOperationCommandHandler
         if (pressingOperation is null)
             throw new KeyNotFoundException(
                     $"Pressing operation {request.Id} not found.");
+
+        // La configuration se saisit pendant la pression (après son lancement).
+        if (request.Parameters is not null
+            && pressingOperation.Status != ProductionStatus.InProgress)
+        {
+            throw new BusinessException(
+                "La configuration de pression se saisit une fois la pression lancée.");
+        }
 
         if (request.PlannedDate.HasValue)
         {

@@ -9,7 +9,7 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import { ProductionStatus } from '@olive-platform/core/features/production/domain/entities/ProductionStatus';
 
-import { colors } from '../consts/Colors';
+import { statusColors } from '../consts/Colors';
 import { radius, spacing } from '../consts/spacing';
 import { typography } from '../consts/Typography';
 
@@ -20,33 +20,34 @@ type StatusConfig = {
   backgroundColor: string;
 };
 
+// Mêmes tons que le web et les pastilles du tableau de bord.
 const STATUS_CONFIG: Record<ProductionStatus, StatusConfig> = {
   [ProductionStatus.Planned]: {
     label: 'Planifiée',
     icon: IconClock,
-    color: colors.gold[700],
-    backgroundColor: colors.gold[100],
+    color: statusColors.planned.color,
+    backgroundColor: statusColors.planned.background,
   },
 
   [ProductionStatus.InProgress]: {
     label: 'En cours',
     icon: IconPlayerPlay,
-    color: colors.teal[700],
-    backgroundColor: colors.teal[100],
+    color: statusColors.inProgress.color,
+    backgroundColor: statusColors.inProgress.background,
   },
 
   [ProductionStatus.Completed]: {
     label: 'Clôturée',
     icon: IconCircleCheck,
-    color: colors.olive[700],
-    backgroundColor: colors.olive[100],
+    color: statusColors.completed.color,
+    backgroundColor: statusColors.completed.background,
   },
 
   [ProductionStatus.Cancelled]: {
     label: 'Annulée',
     icon: IconX,
-    color: colors.textSecondary,
-    backgroundColor: colors.background,
+    color: statusColors.cancelled.color,
+    backgroundColor: statusColors.cancelled.background,
   },
 };
 

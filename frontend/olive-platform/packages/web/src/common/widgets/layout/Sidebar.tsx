@@ -16,8 +16,6 @@ const menuItems: MenuItem[] = [
   { label: "Mouvements d'huile", icon: "ti-arrows-exchange", path: "/oil-movements" },
   { label: "Citernes", icon: "ti-building-warehouse", path: "/tanks" },
   { label: "Paiements", icon: "ti-cash", path: "/payments" },
-  { label: "Factures", icon: "ti-file-invoice", path: "/invoices" },
-  { label: "Ouvriers", icon: "ti-users", path: "/workers" },
 ];
 
 export default function Sidebar() {

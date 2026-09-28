@@ -35,7 +35,12 @@ export function OliveAnalysisListItem({
       <View style={styles.metaRow}>
         <View style={styles.metaItem}>
           <IconFlask2 size={14} color={colors.textMuted} />
-          <Text style={styles.metaText}>Source #{analysis.sourceId}</Text>
+          <Text style={styles.metaText}>
+            {analysis.sourceTypeId === 2 ? "Achat" : "Récolte"}
+            {" · "}
+            {analysis.sourceReference ?? "—"}
+            {analysis.plotReference ? ` · ${analysis.plotReference}` : ""}
+          </Text>
         </View>
 
         {analysis.plannedDate && (

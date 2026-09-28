@@ -52,6 +52,14 @@ const formatPlannedDate = (date?: string) => {
   return new Date(`${date}T00:00:00`).toLocaleDateString("fr-FR");
 };
 
+// Quantité des lots analysés, ex. « 530 kg (5 lots) ».
+const formatOliveQuantity = (quantityKg?: number, lotsCount?: number) =>
+  quantityKg
+    ? `${quantityKg.toLocaleString("fr-FR")} kg${
+        lotsCount ? ` (${lotsCount} lot${lotsCount > 1 ? "s" : ""})` : ""
+      }`
+    : "-";
+
 const getSourceTypeLabel = (sourceTypeId: number) =>
   sourceTypeId === 1 ? "Récolte" : sourceTypeId === 2 ? "Achat d'olives" : "-";
 
@@ -129,15 +137,8 @@ export default function OliveAnalysisDetailsPage() {
     const isPercentageInvalid = (value?: number) =>
       value !== undefined && (value < 0 || value > 100);
 
-    if (!form.sourceTypeId)
-      validationErrors.sourceTypeId = "Le type de source est obligatoire.";
-
-    if (!form.sourceReference?.trim())
-      validationErrors.sourceReference = "La source est obligatoire.";
-
-    if (!form.plannedDate)
-      validationErrors.plannedDate = "La date d'analyse est obligatoire.";
-
+    // Source et date ne sont qu'affichées ici : seuls les taux sont validés
+    // (les analyses créées à la clôture d'une récolte n'ont pas de date).
     if (isPercentageInvalid(form.humidityPercentage))
       validationErrors.humidityPercentage =
         "L'humidité doit être comprise entre 0 et 100 %.";
@@ -273,7 +274,10 @@ export default function OliveAnalysisDetailsPage() {
     }
 
     try {
-      await complete(analysis.id, buildUpdateRequest(analysis.id));
+      // La clôture ne fait que changer le statut : les taux saisis sont
+      // enregistrés d'abord, sinon ils seraient perdus.
+      await update(analysis.id, buildUpdateRequest(analysis.id));
+      await complete(analysis.id, { id: analysis.id });
       await fetchAnalysis(analysis.id);
       setCompleteDrawerOpen(false);
       setErrors({});
@@ -293,6 +297,7 @@ export default function OliveAnalysisDetailsPage() {
     saving,
     validateForm,
     buildUpdateRequest,
+    update,
     complete,
     fetchAnalysis,
   ]);
@@ -425,6 +430,10 @@ export default function OliveAnalysisDetailsPage() {
             <InfoFieldWidget label="Type de source" value={sourceTypeLabel} />
             <InfoFieldWidget label={sourceReferenceLabel} value={form.sourceReference || "-"} />
             <InfoFieldWidget label="Variété" value={getOliveVarietyLabel(form.varietyId)} />
+            <InfoFieldWidget
+              label="Quantité d'olives"
+              value={formatOliveQuantity(analysis?.quantityKg, analysis?.lotsCount)}
+            />
             <InfoFieldWidget label="Date d'analyse" value={formatPlannedDate(form.plannedDate)} />
           </div>
         </div>

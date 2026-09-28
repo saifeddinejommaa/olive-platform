@@ -28,6 +28,11 @@ public interface IOliveLotService
         IReadOnlyDictionary<long, decimal> quantitiesByLot,
         CancellationToken cancellationToken = default);
 
+    // Vérifie que chaque lot est analysé (analyse terminée) ou dispensé d'analyse.
+    Task EnsureLotsAnalysedAsync(
+        IEnumerable<long> lotIds,
+        CancellationToken cancellationToken = default);
+
     // Le lot sera pressé sans analyse.
     Task SkipAnalysisAsync(
         long lotId,

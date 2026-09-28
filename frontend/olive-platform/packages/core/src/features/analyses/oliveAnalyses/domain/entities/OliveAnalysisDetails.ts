@@ -24,6 +24,9 @@ export type OliveAnalysisDetails = {
   endTime?: string;
 
   varietyId: number;
+  // Lots analysés : quantité totale (kg) et nombre.
+  quantityKg?: number;
+  lotsCount?: number;
 
   status: ProductionStatus;
 };

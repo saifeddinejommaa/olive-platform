@@ -40,12 +40,8 @@ export function PressingInputsCard({ operationId, status }: Props) {
       {inputs.map((input) => (
         <View key={input.id} style={styles.row}>
           <View style={styles.rowHeader}>
-            <Text style={styles.sourceLabel}>
-              {input.sourceType === "harvest" ? "Récolte" : "Achat"}
-              {" · "}
-              {input.sourceReference}
-              {input.lotReference ? ` · ${input.lotReference}` : ""}
-            </Text>
+            {/* Seul le lot pressé est affiché. */}
+            <Text style={styles.sourceLabel}>{input.lotReference || "—"}</Text>
             <Text style={styles.quantity}>{input.quantityKg.toFixed(1)} kg</Text>
           </View>
 

@@ -104,6 +104,8 @@ public class CloseHarvestCommandHandler : IRequestHandler<CloseHarvestCommand, U
                 {
                     Reference = analysisReference,
                     SeasonId = harvest.SeasonId,
+                    // Date prévue par défaut : la clôture de la récolte.
+                    PlannedDate = now,
                     Status = ProductionStatus.Planned,
                     CreatedAt = now,
                     UpdatedAt = now

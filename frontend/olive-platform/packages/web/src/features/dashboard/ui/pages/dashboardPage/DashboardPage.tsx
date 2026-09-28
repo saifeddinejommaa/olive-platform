@@ -1,4 +1,6 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import Button from "../../../../../common/widgets/button/Button";
+import PlanPressingsDrawer from "../../components/PlanPressingsDrawer";
 import styles from "../../styles/dashboard.module.css";
 import ActivityStrip from "../../widgets/ActivityStrip";
 import OliveLotsChart from "../../widgets/OliveLotsChart";
@@ -17,6 +19,8 @@ export const DashboardPage: React.FC = () => {
     error,
     fetchSummary,
   } = useDashboardStore();
+
+  const [planOpen, setPlanOpen] = useState(false);
 
   // La page est remontée à chaque changement de campagne (Layout) :
   // le résumé est donc rechargé pour la campagne sélectionnée.
@@ -77,7 +81,18 @@ export const DashboardPage: React.FC = () => {
       <div className={styles.grid}>
         <div className={styles.column}>
           <div className="filters">
-            <OliveLotsChart data={summary.oliveLots} />
+            <OliveLotsChart
+              data={summary.oliveLots}
+              action={
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={() => setPlanOpen(true)}
+                >
+                  Planifier des pressions
+                </Button>
+              }
+            />
 
             <PressingComparisonChart
               data={summary.pressingComparison}
@@ -99,6 +114,12 @@ export const DashboardPage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      <PlanPressingsDrawer
+        open={planOpen}
+        onClose={() => setPlanOpen(false)}
+        onCompleted={fetchSummary}
+      />
     </div>
   );
 };

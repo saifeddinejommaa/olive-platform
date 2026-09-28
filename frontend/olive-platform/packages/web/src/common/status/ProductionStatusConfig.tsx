@@ -1,5 +1,6 @@
+import { statusColors } from "@olive-platform/core/theme/Colors";
 import {
-   IconCalendarTime,
+  IconCalendarTime,
   IconLoader2,
   IconCircleCheck,
   IconX,
@@ -10,28 +11,29 @@ import {
 } from "@olive-platform/core/features/production/domain/entities/ProductionStatus";
 import type { StatusConfig } from "./StatusUtils";
 
+// Mêmes couleurs que les pastilles du tableau de bord.
 export const productionStatusConfig: StatusConfig<ProductionStatusType> = {
   [ProductionStatus.Planned]: {
     label: "Planifiée",
     icon: IconCalendarTime,
-    color: "#f59e0b",
+    ...statusColors.planned,
   },
 
   [ProductionStatus.InProgress]: {
     label: "En cours",
     icon: IconLoader2,
-    color: "#2563eb",
+    ...statusColors.inProgress,
   },
 
   [ProductionStatus.Completed]: {
     label: "Terminée",
     icon: IconCircleCheck,
-    color: "#16a34a",
+    ...statusColors.completed,
   },
 
   [ProductionStatus.Cancelled]: {
     label: "Annulée",
     icon: IconX,
-    color: "#dc2626",
+    ...statusColors.cancelled,
   },
 };

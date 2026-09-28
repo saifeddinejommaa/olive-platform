@@ -1,6 +1,7 @@
 import React from 'react';
 import { Chart as ChartJS, ArcElement, Tooltip } from 'chart.js';
 import { Doughnut } from 'react-chartjs-2';
+import { colors } from '@olive-platform/core/theme/Colors';
 import styles from '../styles/dashboard.module.css';
 import type { ChargesCoverage } from '@olive-platform/core/features/dashboard/domain/dashboard.types';
 import Card from '../../../../common/widgets/card/Card';
@@ -17,7 +18,7 @@ export const ChargesCoverageDonut: React.FC<ChargesCoverageDonutProps> = ({ data
     datasets: [
       {
         data: [data.paidAmount, data.unpaidAmount],
-        backgroundColor: ['#3b6d11', '#a23b2e'],
+        backgroundColor: [colors.olive[700], colors.rust[600]],
         borderWidth: 0,
       },
     ],

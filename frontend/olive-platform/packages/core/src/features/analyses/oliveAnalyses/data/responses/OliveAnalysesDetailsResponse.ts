@@ -25,6 +25,11 @@ export type OliveAnalysisDetailsResponse = {
 
   varietyId: number;
 
+  // Lots analysés : quantité totale (kg) et nombre.
+  quantityKg?: number;
+
+  lotsCount?: number;
+
   oliveVarOliveVarietyId: number;
 
   status: ProductionStatus;

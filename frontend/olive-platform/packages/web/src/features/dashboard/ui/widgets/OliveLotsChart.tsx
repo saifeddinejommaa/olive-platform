@@ -1,6 +1,7 @@
 import React from "react";
 import { Chart as ChartJS, ArcElement, Tooltip } from "chart.js";
 import { Doughnut } from "react-chartjs-2";
+import { colors } from "@olive-platform/core/theme/Colors";
 import styles from "../styles/dashboard.module.css";
 import type { OliveLotsOverview } from "@olive-platform/core/features/dashboard/domain/dashboard.types";
 import Card from "../../../../common/widgets/card/Card";
@@ -9,6 +10,8 @@ ChartJS.register(ArcElement, Tooltip);
 
 export interface OliveLotsChartProps {
   data: OliveLotsOverview;
+  // Action affichée à droite du titre (ex. « Planifier des pressions »).
+  action?: React.ReactNode;
 }
 
 const formatKg = (value: number) =>
@@ -17,31 +20,31 @@ const formatKg = (value: number) =>
 const plural = (count: number) => `${count} lot${count > 1 ? "s" : ""}`;
 
 // Répartition des olives de la campagne selon l'état de leurs lots.
-export const OliveLotsChart: React.FC<OliveLotsChartProps> = ({ data }) => {
+export const OliveLotsChart: React.FC<OliveLotsChartProps> = ({ data, action }) => {
   const segments = [
     {
       label: "Prêt à presser",
       kg: data.readyKg,
       lots: data.readyLots,
-      color: "#66763F",
+      color: colors.olive[600],
     },
     {
       label: "En attente d'analyse",
       kg: data.pendingAnalysisKg,
       lots: data.pendingAnalysisLots,
-      color: "#C89B3C",
+      color: colors.gold[600],
     },
     {
       label: "En pression",
       kg: data.inPressingKg,
       lots: data.inPressingLots,
-      color: "#2E5C55",
+      color: colors.teal[700],
     },
     {
       label: "Pressé",
       kg: data.pressedKg,
       lots: data.pressedLots,
-      color: "#A69F85",
+      color: colors.textMuted,
     },
   ];
 
@@ -61,10 +64,13 @@ export const OliveLotsChart: React.FC<OliveLotsChartProps> = ({ data }) => {
   return (
     <Card
       headerAction={
-        <h3 className={styles.panelTitle}>
-          Lots d'olives{" "}
-          <span className={styles.panelMeta}>· {plural(data.totalLots)}</span>
-        </h3>
+        <div className={styles.lotsHeader}>
+          <h3 className={styles.panelTitle}>
+            Lots d'olives{" "}
+            <span className={styles.panelMeta}>· {plural(data.totalLots)}</span>
+          </h3>
+          {action}
+        </div>
       }
     >
       {!hasData ? (

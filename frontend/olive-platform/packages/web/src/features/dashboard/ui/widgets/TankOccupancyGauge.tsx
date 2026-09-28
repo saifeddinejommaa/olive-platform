@@ -3,6 +3,7 @@ import React from 'react';
 import styles from '../styles/dashboard.module.css';
 import type { TankOccupancy } from '@olive-platform/core/features/dashboard/domain/dashboard.types';
 import Card from '../../../../common/widgets/card/Card';
+import { colors } from '@olive-platform/core/theme/Colors';
 
 export interface TankOccupancyGaugeProps {
   data: TankOccupancy;
@@ -15,9 +16,9 @@ export const TankOccupancyGauge: React.FC<TankOccupancyGaugeProps> = ({ data }) 
     <Card headerAction={<h3 className={styles.panelTitle}>Occupation cuves (global)</h3>}>
       <div className={styles.gaugeWrap}>
         <svg width="88" height="88" viewBox="0 0 88 88">
-          <circle cx="44" cy="44" r="36" fill="none" stroke="#CFC7AA" strokeWidth="9" />
+          <circle cx="44" cy="44" r="36" fill="none" stroke={colors.border} strokeWidth="9" />
           <circle
-            cx="44" cy="44" r="36" fill="none" stroke="#96741F" strokeWidth="9"
+            cx="44" cy="44" r="36" fill="none" stroke={colors.gold[600]} strokeWidth="9"
             strokeDasharray={`${(pct / 100) * 226.2} 226.2`}
             strokeLinecap="round"
             transform="rotate(-90 44 44)"

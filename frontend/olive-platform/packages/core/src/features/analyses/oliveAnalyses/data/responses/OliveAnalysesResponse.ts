@@ -5,9 +5,19 @@ export type OliveAnalysisForListResponse = {
 
   reference: string;
 
-  sourceReference: number;
+  sourceTypeId: number | null;
 
-  plotReference: number;
+  sourceReference: string | null;
+
+  plotReference: string | null;
+
+  humidityPercentage: number | null;
+
+  waterPercentage: number | null;
+
+  oilPercentage: number | null;
+
+  acidityPercentage: number | null;
 
   plannedDate?: string;
 

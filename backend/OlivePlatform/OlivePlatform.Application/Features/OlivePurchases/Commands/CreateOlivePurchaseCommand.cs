@@ -166,6 +166,7 @@ public class CreateOlivePurchaseCommandHandler
                     {
                         Reference = analysisReference,
                         SeasonId = seasonId,
+                        // Date prévue renseignée à l'acceptation de l'achat.
                         CreatedAt = now,
                         UpdatedAt = now,
                         Status = ProductionStatus.Planned

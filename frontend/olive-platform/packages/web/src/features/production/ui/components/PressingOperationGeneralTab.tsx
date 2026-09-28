@@ -25,6 +25,22 @@ type Props = {
   onParametersChange: (parameters: PressingParametersDetails) => void;
 };
 
+const emptyParameters: PressingParametersDetails = {
+  id: 0,
+  processTypeId: null,
+  malaxingTemperatureC: null,
+  malaxingDurationMinutes: null,
+  malaxingSpeedRpm: null,
+  feedRateKgH: null,
+  decanterSpeedRpm: null,
+  decanterDifferentialRpm: null,
+  centrifugeSpeedRpm: null,
+  addedWaterLiters: null,
+  waterTemperatureC: null,
+  waitingTimeBeforeExtractionMinutes: null,
+  notes: null,
+};
+
 export default function PressingOperationGeneralTab({
   operation,
   yieldPercentage,
@@ -32,10 +48,15 @@ export default function PressingOperationGeneralTab({
   onNotesChange,
   onParametersChange,
 }: Props) {
-  const parameters = operation.parameters;
-
   const isEditingConfiguration =
     canEditOperation && operation.status === ProductionStatus.InProgress;
+
+  const isPlanned = operation.status === ProductionStatus.Planned;
+
+  // Pendant la pression, une configuration vide est proposée si aucune n'existe.
+  const parameters: PressingParametersDetails | null =
+    operation.parameters ??
+    (isEditingConfiguration ? emptyParameters : null);
 
   const updateParameter = <K extends keyof PressingParametersDetails>(
     field: K,
@@ -128,13 +149,22 @@ export default function PressingOperationGeneralTab({
         <div className="filters">
           <div className="filters-header">
             <h3>Configuration de pression</h3>
+            {isEditingConfiguration && (
+              <span>
+                Obligatoire avant de clôturer la pression — pensez à enregistrer.
+              </span>
+            )}
           </div>
 
           {!parameters ? (
             <div className="info-grid">
               <InfoFieldWidget
                 label="Configuration"
-                value="Aucune configuration de pression"
+                value={
+                  isPlanned
+                    ? "La configuration se saisit une fois la pression lancée."
+                    : "Aucune configuration de pression"
+                }
               />
             </div>
           ) : (

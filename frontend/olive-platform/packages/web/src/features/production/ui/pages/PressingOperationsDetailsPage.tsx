@@ -63,6 +63,16 @@ const emptyInput = (): PressingOperationInput => ({
   notes: "",
 });
 
+// Configuration renseignée : au moins un réglage saisi.
+const hasConfiguration = (
+  parameters: PressingOperationDetails["parameters"] | undefined,
+) =>
+  !!parameters &&
+  Object.entries(parameters).some(
+    ([key, value]) =>
+      key !== "id" && key !== "notes" && value !== null && value !== undefined,
+  );
+
 export default function PressingOperationDetailsPage() {
   const { id } = useParams<{ id: string }>();
 
@@ -455,11 +465,20 @@ export default function PressingOperationDetailsPage() {
           plannedDate: operation.plannedDate,
           notes: operation.notes,
 
-          // Chaque entrée garde son lot : il est libéré puis réservé à nouveau.
-          inputs: inputs.map((input) => ({
-            lotId: input.lotId,
-            quantityKg: input.quantityKg,
-          })),
+          // Entrées modifiables tant que la pression est planifiée : chaque
+          // entrée garde son lot (libéré puis réservé à nouveau).
+          inputs: isPlanned
+            ? inputs.map((input) => ({
+                lotId: input.lotId,
+                quantityKg: input.quantityKg,
+              }))
+            : undefined,
+
+          // Configuration saisie pendant la pression.
+          parameters:
+            isInProgress && operation.parameters
+              ? operation.parameters
+              : undefined,
         };
 
         await updateOperationStore(params);
@@ -469,15 +488,18 @@ export default function PressingOperationDetailsPage() {
         toast.success(
           "Opération enregistrée avec succès.",
         );
-      } catch {
+      } catch (e: any) {
         toast.error(
-          "Impossible d'enregistrer les modifications.",
+          e?.message ??
+            "Impossible d'enregistrer les modifications.",
         );
       }
     },
     [
       operation,
       inputs,
+      isPlanned,
+      isInProgress,
       updateOperationStore,
     ],
   );
@@ -526,9 +548,11 @@ export default function PressingOperationDetailsPage() {
         toast.success(
           "La pression a été lancée.",
         );
-      } catch {
+      } catch (e: any) {
+        // Ex. un lot en attente d'analyse : le message de l'API l'explique.
         toast.error(
-          "Impossible de lancer l'opération de pression.",
+          e?.message ??
+            "Impossible de lancer l'opération de pression.",
         );
       }
     },
@@ -581,8 +605,24 @@ export default function PressingOperationDetailsPage() {
         return;
       }
 
+      // La configuration est obligatoire (et doit être enregistrée) avant clôture.
+      if (!hasConfiguration(operation.parameters)) {
+        setActiveTab("general");
+        toast.error(
+          "Renseignez la configuration de pression avant de clôturer.",
+        );
+        return;
+      }
+
+      if (dirty) {
+        toast.error(
+          "Enregistrez vos modifications avant de clôturer la pression.",
+        );
+        return;
+      }
+
       setFinishDrawerOpen(true);
-    }, [operation]);
+    }, [operation, dirty]);
 
   const handleCloseFinishDrawer =
     useCallback(() => {
@@ -752,7 +792,12 @@ export default function PressingOperationDetailsPage() {
           canEditOperation={
             canEditOperation
           }
-          onParametersChange={() => { }}
+          onParametersChange={(parameters) =>
+            updateOperation(
+              "parameters",
+              parameters,
+            )
+          }
         />
       )}
 

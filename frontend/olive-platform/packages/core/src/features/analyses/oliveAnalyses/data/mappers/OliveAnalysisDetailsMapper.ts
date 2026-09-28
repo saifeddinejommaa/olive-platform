@@ -29,6 +29,10 @@ export function mapOliveAnalysisDetails(
 
     varietyId: response.varietyId,
 
+    quantityKg: response.quantityKg ?? 0,
+
+    lotsCount: response.lotsCount ?? 0,
+
     status: response.status,
   };
 }

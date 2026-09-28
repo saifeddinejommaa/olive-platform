@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using OlivePlatform.Domain;
 using OlivePlatform.Domain.Entities;
 using OlivePlatform.Application.Services;
 using OlivePlatform.Domain.Enums;
@@ -17,15 +18,18 @@ namespace OlivePlatform.Application.Features.Production.Commands
         private readonly IPressingOperationsRepository _repository;
         private readonly IPressingOperationInputsRepository _inputsRepository;
         private readonly ISeasonService _seasonService;
+        private readonly IOliveLotService _oliveLotService;
 
         public StartPressingOperationCommandHandler(
             IPressingOperationsRepository repository,
             IPressingOperationInputsRepository inputsRepository,
-            ISeasonService seasonService)
+            ISeasonService seasonService,
+            IOliveLotService oliveLotService)
         {
             _repository = repository;
             _inputsRepository = inputsRepository;
             _seasonService = seasonService;
+            _oliveLotService = oliveLotService;
         }
 
         public async Task<Unit> Handle(
@@ -42,12 +46,23 @@ namespace OlivePlatform.Application.Features.Production.Commands
                     $"Pressing operation {request.Id} not found.");
             }
 
+            if (pressingOperation.Status != ProductionStatus.Planned)
+            {
+                throw new BusinessException(
+                    "Seule une pression planifiée peut être lancée.");
+            }
+
             await _seasonService.EnsureSeasonOpenAsync(
                 pressingOperation.SeasonId,
                 cancellationToken);
 
             var inputs = await _inputsRepository.GetByPressingOperationIdAsync(
                 request.Id,
+                cancellationToken);
+
+            // Un lot dont l'analyse est requise mais non terminée bloque le lancement.
+            await _oliveLotService.EnsureLotsAnalysedAsync(
+                inputs.Select(input => input.LotId),
                 cancellationToken);
 
             var now = DateTime.UtcNow;

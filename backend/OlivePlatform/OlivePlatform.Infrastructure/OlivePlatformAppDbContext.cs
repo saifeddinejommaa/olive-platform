@@ -31,6 +31,7 @@ public class OlivePlatformAppDbContext : DbContext
 
     public DbSet<PressingOperation> PressingOperations => Set<PressingOperation>();
     public DbSet<PressingOperationInput> PressingOperationInputs => Set<PressingOperationInput>();
+    public DbSet<PressingParameters> PressingParameters => Set<PressingParameters>();
 
     public DbSet<Tank> Tanks => Set<Tank>();
     public DbSet<OilMovement> OilMovements => Set<OilMovement>();

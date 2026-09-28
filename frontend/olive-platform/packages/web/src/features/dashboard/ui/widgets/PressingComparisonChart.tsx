@@ -10,6 +10,7 @@ import {
   Legend,
 } from "chart.js";
 import { Line } from "react-chartjs-2";
+import { colors } from "@olive-platform/core/theme/Colors";
 import styles from "../styles/dashboard.module.css";
 import Card from "../../../../common/widgets/card/Card";
 import type { PressingComparisonPoint } from "@olive-platform/core/features/dashboard/domain/dashboard.types";
@@ -62,12 +63,12 @@ export const PressingComparisonChart: React.FC<
         label: "Réel",
         data: actualPercentage,
 
-        borderColor: "rgb(55, 69, 31)",
-        backgroundColor: "rgba(55, 69, 31, 0.5)",
+        borderColor: colors.olive[800],
+        backgroundColor: `${colors.olive[800]}80`,
 
         pointRadius: 5,
         pointHoverRadius: 7,
-        pointBackgroundColor: "rgb(55, 69, 31)",
+        pointBackgroundColor: colors.olive[800],
 
         borderWidth: 2,
         tension: 0.3,
@@ -76,12 +77,12 @@ export const PressingComparisonChart: React.FC<
         label: "Attendu",
         data: expectedPercentage,
 
-        borderColor: "rgb(166, 159, 133)",
-        backgroundColor: "rgba(166, 159, 133, 0.5)",
+        borderColor: colors.textMuted,
+        backgroundColor: `${colors.textMuted}80`,
 
         pointRadius: 5,
         pointHoverRadius: 7,
-        pointBackgroundColor: "rgb(166, 159, 133)",
+        pointBackgroundColor: colors.textMuted,
 
         borderWidth: 2,
         tension: 0.3,
@@ -150,7 +151,7 @@ export const PressingComparisonChart: React.FC<
         },
 
         ticks: {
-          color: "#6B6C58",
+          color: colors.textSecondary,
 
           font: {
             size: 11,
@@ -163,11 +164,11 @@ export const PressingComparisonChart: React.FC<
         max: 110,
 
         grid: {
-          color: "rgba(207, 199, 170, 0.4)",
+          color: colors.border,
         },
 
         ticks: {
-          color: "#6B6C58",
+          color: colors.textSecondary,
 
           callback: (value: string | number) =>
             `${Number(value).toLocaleString("fr-TN")} %`,
@@ -176,7 +177,7 @@ export const PressingComparisonChart: React.FC<
         title: {
           display: true,
           text: "Rendement par rapport à l'attendu",
-          color: "#6B6C58",
+          color: colors.textSecondary,
         },
       },
     },

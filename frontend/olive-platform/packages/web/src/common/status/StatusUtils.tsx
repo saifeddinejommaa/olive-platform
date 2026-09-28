@@ -1,6 +1,6 @@
+import { colors } from "@olive-platform/core/theme/Colors";
 import { IconX } from "@tabler/icons-react";
 import type { Icon as TablerIconType } from "@tabler/icons-react";
-import "./StatusBadge.css"
 
 export type StatusConfig<T extends string | number> = Record<
   T,
@@ -8,6 +8,8 @@ export type StatusConfig<T extends string | number> = Record<
     label: string;
     icon: TablerIconType;
     color?: string;
+    // Fond du badge ; à défaut, la couleur du texte en transparence.
+    background?: string;
   }
 >;
 
@@ -31,13 +33,13 @@ export function renderStatus<T extends string | number>(
   }
 
   const Icon = statusConfig.icon;
-  const color = statusConfig.color ?? "#dc2626";
+  const color = statusConfig.color ?? colors.rust[600];
 
   return (
     <div
       className="status-badge"
       style={{
-        background: withAlpha(color, "1A"),
+        background: statusConfig.background ?? withAlpha(color, "1A"),
         color,
       }}
     >

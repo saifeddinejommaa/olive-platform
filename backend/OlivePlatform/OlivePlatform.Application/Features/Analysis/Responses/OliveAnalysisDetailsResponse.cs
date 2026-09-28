@@ -10,9 +10,15 @@ namespace OlivePlatform.Application.Features.Analysis.Responses
 
         public required string Reference { get; set; }
 
-        public int SourceTypeId { get; set; }
+        // Null si l'analyse n'est rattachée à aucun lot.
+        public int? SourceTypeId { get; set; }
 
-        public int VarietyId { get; set; }
+        public int? VarietyId { get; set; }
+
+        // Lots analysés : quantité totale et nombre.
+        public decimal QuantityKg { get; set; }
+
+        public int LotsCount { get; set; }
 
         public required string SourceReference { get; set; }
 

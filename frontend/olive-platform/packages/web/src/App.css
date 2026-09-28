@@ -1,11 +1,15 @@
 /* ============================================================
    TOKENS & BASE
+   Les couleurs reprennent exactement la palette partagée
+   (core/src/theme/Colors.ts), commune au web et au mobile.
    ============================================================ */
 @import "@tabler/icons-webfont/dist/tabler-icons.css";
 
 :root {
-  /* --- Couleurs de marque --- */
+  /* --- Palette de marque --- */
   --color-ink: #2c2c2a;
+  --color-white: #ffffff;
+
   --color-olive-900: #1f2a18;
   --color-olive-800: #27500a;
   --color-olive-700: #3b6d11;
@@ -24,27 +28,38 @@
   --color-teal-700: #2e5c55;
   --color-teal-100: #dceae7;
 
-  /* --- Neutres / surfaces --- */
-  --color-bg: #fafaf7;
-  --color-surface: #fcfcf8;
+  /* --- Neutres (identiques au mobile) --- */
+  --color-bg: #f7f7f5;
+  --color-surface: var(--color-bg);
   --color-surface-raised: #ffffff;
-  --color-border: #eceae3;
+  --color-border: #eaeaea;
   --color-border-strong: #d3d1c7;
-  --color-muted: #888780;
 
-  /* --- Nuances décoratives --- */
-  --color-bg-nuance-green: #eaf3de;
-  --color-bg-nuance-warm: #f5f1e6;
+  --color-text: #171717;
+  --color-text-secondary: #77776f;
+  --color-text-muted: #9a9a91;
+  /* Libellés et textes secondaires. */
+  --color-muted: var(--color-text-secondary);
 
-  /* --- Statuts sémantiques --- */
-  --color-success: #3b6d11;
-  --color-success-bg: #eaf3de;
-  --color-warning: #b9832a;
-  --color-warning-bg: #f6ead2;
-  --color-danger: #a23b2e;
-  --color-danger-bg: #f3dad6;
-  --color-info: #2e5c55;
-  --color-info-bg: #dceae7;
+  /* --- Rôles sémantiques (identiques au mobile) --- */
+  --color-primary: var(--color-olive-700);
+  --color-primary-pressed: var(--color-olive-800);
+  --color-primary-soft: var(--color-olive-100);
+  --color-accent: var(--color-gold-600);
+  --color-accent-soft: var(--color-gold-100);
+
+  --color-success: var(--color-olive-600);
+  --color-success-bg: var(--color-olive-100);
+  --color-warning: var(--color-gold-700);
+  --color-warning-bg: var(--color-gold-100);
+  --color-danger: var(--color-rust-600);
+  --color-danger-bg: var(--color-rust-100);
+  --color-info: var(--color-teal-700);
+  --color-info-bg: var(--color-teal-100);
+
+  /* --- Nuances décoratives du fond --- */
+  --color-bg-nuance-green: var(--color-olive-100);
+  --color-bg-nuance-warm: var(--color-gold-100);
 
   /* --- Typographie --- */
   --font-display: "Fraunces", "Iowan Old Style", serif;
@@ -59,7 +74,7 @@
   --fs-xl: 1.75rem;
   --fs-2xl: 2.25rem;
 
-  /* --- Espacement / rayon --- */
+  /* --- Espacement / rayon / ombres --- */
   --radius-sm: 6px;
   --radius-md: 10px;
   --radius-lg: 16px;
@@ -92,7 +107,7 @@ body,
 body {
   margin: 0;
   background: var(--color-bg);
-  color: var(--color-ink);
+  color: var(--color-text);
   font-family: var(--font-body);
   font-size: var(--fs-base);
   line-height: 1.5;
@@ -101,32 +116,31 @@ body {
   overflow-x: hidden;
 }
 
-body::before {
+/* Cercles décoratifs du fond. */
+body::before,
+body::after {
   content: "";
   position: fixed;
-  top: -80px;
-  right: -80px;
-  width: 260px;
-  height: 260px;
   border-radius: 50%;
-  background: var(--color-bg-nuance-green);
   opacity: 0.5;
   pointer-events: none;
   z-index: 0;
 }
 
+body::before {
+  top: -80px;
+  right: -80px;
+  width: 260px;
+  height: 260px;
+  background: var(--color-bg-nuance-green);
+}
+
 body::after {
-  content: "";
-  position: fixed;
   bottom: -100px;
   left: 320px;
   width: 300px;
   height: 300px;
-  border-radius: 50%;
   background: var(--color-bg-nuance-warm);
-  opacity: 0.5;
-  pointer-events: none;
-  z-index: 0;
 }
 
 #root {
@@ -166,11 +180,6 @@ textarea {
   background: var(--color-gold-100);
 }
 
-.mono {
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-}
-
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -191,6 +200,23 @@ textarea {
   position: relative;
 }
 
+.main-layout {
+  min-width: 0;
+  width: calc(100% - var(--sidebar-width));
+  height: 100vh;
+  margin-left: var(--sidebar-width);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.page-content {
+  flex: 1;
+  min-height: 0;
+  padding: 32px;
+  overflow-y: auto;
+}
+
 /* ============================================================
    SIDEBAR
    ============================================================ */
@@ -204,14 +230,10 @@ textarea {
   display: flex;
   flex-direction: column;
   background: var(--color-olive-900);
-  color: white;
+  color: var(--color-white);
   border-right: 1px solid rgba(255, 255, 255, 0.08);
   z-index: 100;
 }
-
-/* ============================================================
-   BRAND
-   ============================================================ */
 
 .sidebar-brand {
   height: var(--topbar-height);
@@ -244,10 +266,6 @@ textarea {
   white-space: nowrap;
 }
 
-/* ============================================================
-   SIDEBAR NAVIGATION
-   ============================================================ */
-
 .sidebar-nav {
   flex: 1;
   padding: 20px 12px;
@@ -270,10 +288,6 @@ textarea {
   border-radius: 10px;
 }
 
-/* ============================================================
-   SECTION TITLE
-   ============================================================ */
-
 .nav-section-title {
   margin: 20px 10px 8px;
   font-family: var(--font-mono);
@@ -287,10 +301,6 @@ textarea {
 .nav-section-title:first-child {
   margin-top: 0;
 }
-
-/* ============================================================
-   SIMPLE NAV ITEM
-   ============================================================ */
 
 .nav-item {
   display: flex;
@@ -307,7 +317,7 @@ textarea {
 }
 
 .nav-item:hover {
-  color: white;
+  color: var(--color-white);
   background: rgba(255, 255, 255, 0.08);
 }
 
@@ -317,10 +327,6 @@ textarea {
   font-weight: 600;
   box-shadow: var(--shadow-sm);
 }
-
-/* ============================================================
-   NAV ICON
-   ============================================================ */
 
 .nav-icon {
   width: 24px;
@@ -332,299 +338,6 @@ textarea {
   line-height: 1;
 }
 
-/* ============================================================
-   MENU SECTION
-   ============================================================ */
-
-.menu-section {
-  margin: 0;
-  padding: 0;
-}
-
-/* ============================================================
-   MAIN MENU PARENT
-   ============================================================ */
-
-.menu-parent {
-  width: 100%;
-  min-height: 40px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 0 10px;
-  margin: 1px 0;
-  border: none;
-  border-radius: var(--radius-md);
-  background: transparent;
-  color: rgba(255, 255, 255, 0.72);
-  font-family: var(--font-body);
-  font-size: var(--fs-sm);
-  text-align: left;
-  cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease;
-}
-
-.menu-parent:hover {
-  color: white;
-  background: rgba(255, 255, 255, 0.07);
-}
-
-.menu-parent.active-parent {
-  color: white;
-  background: rgba(255, 255, 255, 0.06);
-}
-
-.menu-parent-label {
-  flex: 1;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* ============================================================
-   MAIN CHEVRON
-   ============================================================ */
-
-.menu-chevron {
-  width: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  font-size: 17px;
-  line-height: 1;
-  opacity: 0.45;
-  transform: rotate(0deg);
-  transition: transform 0.15s ease, opacity 0.15s ease;
-}
-
-.menu-chevron.open {
-  transform: rotate(90deg);
-  opacity: 0.8;
-}
-
-/* ============================================================
-   SUBSECTIONS CONTAINER
-   ============================================================ */
-
-.sections-container {
-  position: relative;
-  margin: 0 0 2px 18px;
-  padding-left: 7px;
-  border-left: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-/* ============================================================
-   SUBSECTION
-   ============================================================ */
-
-.menu-subsection {
-  margin: 0;
-  padding: 0;
-}
-
-/* ============================================================
-   SUBSECTION PARENT
-   ============================================================ */
-
-.menu-subsection-parent {
-  width: 100%;
-  min-height: 32px;
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  padding: 0 7px;
-  margin: 0;
-  border: none;
-  border-radius: var(--radius-sm);
-  background: transparent;
-  color: rgba(255, 255, 255, 0.58);
-  font-family: var(--font-body);
-  font-size: var(--fs-xs);
-  font-weight: 500;
-  text-align: left;
-  cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease;
-}
-
-.menu-subsection-parent:hover {
-  color: rgba(255, 255, 255, 0.9);
-  background: rgba(255, 255, 255, 0.05);
-}
-
-.menu-subsection-parent.active-parent {
-  color: var(--color-gold-500);
-  background: rgba(200, 155, 60, 0.07);
-}
-
-/* ============================================================
-   SUBSECTION ICON
-   ============================================================ */
-
-.menu-subsection-parent .nav-icon {
-  width: 18px;
-  min-width: 18px;
-  font-size: 13px;
-}
-
-/* ============================================================
-   SUBSECTION LABEL
-   ============================================================ */
-
-.menu-subsection-label {
-  flex: 1;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* ============================================================
-   SUBSECTION CHEVRON
-   ============================================================ */
-
-.menu-subsection-parent .menu-chevron {
-  width: 13px;
-  font-size: 14px;
-  opacity: 0.3;
-}
-
-.menu-subsection-parent:hover .menu-chevron {
-  opacity: 0.6;
-}
-
-.menu-subsection-parent.active-parent .menu-chevron {
-  opacity: 0.8;
-}
-
-/* ============================================================
-   NESTED SUBMENU
-   ============================================================ */
-
-.submenu.nested {
-  position: relative;
-  margin: 0 0 2px 25px;
-  padding-left: 7px;
-  border-left: 1px solid rgba(255, 255, 255, 0.07);
-}
-
-/* ============================================================
-   NESTED SUBMENU ITEMS
-   ============================================================ */
-
-.submenu.nested .submenu-item {
-  min-height: 29px;
-  padding: 0 7px;
-  margin: 0;
-  gap: 6px;
-  border-radius: var(--radius-sm);
-  color: rgba(255, 255, 255, 0.48);
-  font-size: 11px;
-  transition: background 0.15s ease, color 0.15s ease;
-}
-
-.submenu.nested .submenu-item:hover {
-  color: white;
-  background: rgba(255, 255, 255, 0.05);
-}
-
-.submenu.nested .submenu-item.active {
-  color: var(--color-gold-500);
-  background: rgba(200, 155, 60, 0.08);
-  font-weight: 600;
-}
-
-/* ============================================================
-   NESTED INDICATOR
-   ============================================================ */
-
-.submenu.nested .submenu-indicator {
-  width: 3px;
-  height: 3px;
-  flex-shrink: 0;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.25);
-}
-
-.submenu.nested .submenu-item:hover .submenu-indicator {
-  background: rgba(255, 255, 255, 0.65);
-}
-
-.submenu.nested .submenu-item.active .submenu-indicator {
-  width: 3px;
-  height: 13px;
-  border-radius: 2px;
-  background: var(--color-gold-500);
-}
-
-/* ============================================================
-   STANDARD SUBMENU
-   ============================================================ */
-
-.submenu {
-  position: relative;
-  margin: 0 0 3px 25px;
-  padding-left: 7px;
-  border-left: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-/* ============================================================
-   SUBMENU ITEM
-   ============================================================ */
-
-.submenu-item {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  min-height: 30px;
-  padding: 0 7px;
-  margin: 0;
-  border-radius: var(--radius-sm);
-  color: rgba(255, 255, 255, 0.52);
-  text-decoration: none;
-  font-size: var(--fs-xs);
-  transition: background 0.15s ease, color 0.15s ease;
-}
-
-.submenu-item:hover {
-  color: white;
-  background: rgba(255, 255, 255, 0.05);
-}
-
-.submenu-item.active {
-  color: var(--color-gold-500);
-  background: rgba(200, 155, 60, 0.08);
-  font-weight: 600;
-}
-
-/* ============================================================
-   SUBMENU INDICATOR
-   ============================================================ */
-
-.submenu-indicator {
-  width: 3px;
-  height: 3px;
-  flex-shrink: 0;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.28);
-  transition: width 0.15s ease, height 0.15s ease, background 0.15s ease;
-}
-
-.submenu-item:hover .submenu-indicator {
-  background: rgba(255, 255, 255, 0.7);
-}
-
-.submenu-item.active .submenu-indicator {
-  width: 3px;
-  height: 14px;
-  border-radius: 2px;
-  background: var(--color-gold-500);
-}
-
-/* ============================================================
-   SIDEBAR BOTTOM
-   ============================================================ */
-
 .sidebar-bottom {
   padding: 12px;
   flex-shrink: 0;
@@ -635,20 +348,6 @@ textarea {
   padding: 10px 12px 4px;
   color: rgba(255, 255, 255, 0.3);
   font-size: 10px;
-}
-
-/* ============================================================
-   MAIN LAYOUT
-   ============================================================ */
-
-.main-layout {
-  min-width: 0;
-  width: calc(100% - var(--sidebar-width));
-  height: 100vh;
-  margin-left: var(--sidebar-width);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
 }
 
 /* ============================================================
@@ -664,7 +363,7 @@ textarea {
   align-items: center;
   justify-content: space-between;
   padding: 0 32px;
-  background: rgba(252, 252, 248, 0.94);
+  background: rgba(247, 247, 245, 0.94);
   border-bottom: 1px solid var(--color-border);
   backdrop-filter: blur(12px);
   z-index: 50;
@@ -682,10 +381,6 @@ textarea {
   color: var(--color-muted);
   font-size: var(--fs-xs);
 }
-
-/* ============================================================
-   TOPBAR ACTIONS
-   ============================================================ */
 
 .topbar-actions {
   display: flex;
@@ -711,10 +406,6 @@ textarea {
   background: var(--color-surface);
   box-shadow: var(--shadow-sm);
 }
-
-/* ============================================================
-   USER PROFILE
-   ============================================================ */
 
 .user-profile {
   display: flex;
@@ -753,17 +444,6 @@ textarea {
 }
 
 /* ============================================================
-   PAGE CONTENT
-   ============================================================ */
-
-.page-content {
-  flex: 1;
-  min-height: 0;
-  padding: 32px;
-  overflow-y: auto;
-}
-
-/* ============================================================
    PAGE HEADER
    ============================================================ */
 
@@ -794,18 +474,7 @@ textarea {
 }
 
 /* ============================================================
-   CARDS
-   ============================================================ */
-
-.glass-card {
-  background: var(--color-surface-raised);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
-}
-
-/* ============================================================
-   TABLE
+   TABLE & PAGINATION
    ============================================================ */
 
 .table-wrapper {
@@ -835,7 +504,7 @@ textarea {
 .modern-table td {
   padding: 15px 18px;
   border-bottom: 1px solid var(--color-border);
-  color: var(--color-ink);
+  color: var(--color-text);
 }
 
 .modern-table tbody tr {
@@ -849,10 +518,6 @@ textarea {
 .modern-table tbody tr:last-child td {
   border-bottom: none;
 }
-
-/* ============================================================
-   PAGINATION
-   ============================================================ */
 
 .pagination {
   display: flex;
@@ -870,7 +535,7 @@ textarea {
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
   background: var(--color-surface-raised);
-  color: var(--color-ink);
+  color: var(--color-text);
   cursor: pointer;
   transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
 }
@@ -887,99 +552,7 @@ textarea {
 }
 
 /* ============================================================
-   BUTTONS
-   ============================================================ */
-
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  min-height: 40px;
-  padding: 0 16px;
-  border: none;
-  border-radius: var(--radius-md);
-  font-size: var(--fs-sm);
-  font-weight: 600;
-  text-decoration: none;
-  cursor: pointer;
-  transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
-}
-
-.btn-primary {
-  color: white;
-  background: var(--color-olive-700);
-}
-
-.btn-primary:hover {
-  background: var(--color-olive-800);
-  box-shadow: var(--shadow-sm);
-}
-
-.btn-secondary {
-  color: var(--color-olive-900);
-  background: var(--color-olive-100);
-  border: 1px solid var(--color-border);
-}
-
-.btn-secondary:hover {
-  background: var(--color-olive-100);
-  border-color: var(--color-border-strong);
-}
-
-.btn-danger {
-  color: white;
-  background: var(--color-danger);
-}
-
-.btn-danger:hover {
-  background: #8d3026;
-}
-
-/* ============================================================
-   FORM ELEMENTS
-   ============================================================ */
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.form-label {
-  font-size: var(--fs-sm);
-  font-weight: 600;
-  color: var(--color-olive-900);
-}
-
-.form-input,
-.form-select,
-.form-textarea {
-  width: 100%;
-  min-height: 40px;
-  padding: 8px 12px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  background: var(--color-surface-raised);
-  color: var(--color-ink);
-  outline: none;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.form-input:focus,
-.form-select:focus,
-.form-textarea:focus {
-  border-color: var(--color-olive-500);
-  box-shadow: 0 0 0 3px rgba(116, 144, 74, 0.12);
-}
-
-.form-textarea {
-  min-height: 100px;
-  resize: vertical;
-}
-
-/* ============================================================
-   FILTERS / FORM LAYOUT
+   FILTRES / MISE EN PAGE DES FORMULAIRES
    ============================================================ */
 
 .filters {
@@ -1030,14 +603,14 @@ textarea {
 
 .filter-item-value {
   font-size: var(--fs-sm);
-  color: var(--color-ink);
+  color: var(--color-text);
 }
 
 .filter-title {
   font-family: var(--font-display);
   font-weight: 600;
   font-size: var(--fs-md);
-  color: var(--color-ink);
+  color: var(--color-text);
   margin: 0;
 }
 
@@ -1064,7 +637,7 @@ textarea {
   font-family: var(--font-display);
   font-weight: 600;
   font-size: var(--fs-lg);
-  color: var(--color-ink);
+  color: var(--color-text);
   margin: 0 0 4px;
 }
 
@@ -1089,7 +662,7 @@ textarea {
 .progress-label {
   font-size: var(--fs-sm);
   font-weight: 600;
-  color: var(--color-ink);
+  color: var(--color-text);
 }
 
 .progress-value {
@@ -1103,58 +676,29 @@ textarea {
   gap: var(--space-4);
 }
 
-@media (max-width: 720px) {
-  .info-grid {
-    grid-template-columns: repeat(2, minmax(160px, 1fr));
-  }
+/* Ligne de formulaire à deux champs côte à côte (un seul sur petit écran). */
+.form-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
 }
 
-@media (max-width: 420px) {
-  .info-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-.info-item {
+/* Liste de cartes de formulaire (ex. lignes d'olives d'une pression). */
+.form-card-list {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 16px;
 }
 
-.info-label {
-  font-size: var(--fs-xs);
-  color: var(--color-muted);
-}
-
-.info-value {
-  font-size: var(--fs-sm);
-  color: var(--color-ink);
-}
-
-.variety-list {
+.analysis-block {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
 }
 
-.variety-card-footer {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 12px;
-}
-
-.variety-card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 10px;
-}
-
-.variety-card-title {
-  font-size: var(--fs-sm);
-  font-weight: 600;
-  color: var(--color-ink);
-}
+/* ============================================================
+   BADGE DE STATUT
+   ============================================================ */
 
 .status-badge {
   display: inline-flex;
@@ -1173,6 +717,10 @@ textarea {
   white-space: nowrap;
 }
 
+.status-badge__icon {
+  flex-shrink: 0;
+}
+
 .status-badge--success {
   background: var(--color-success-bg);
   color: var(--color-success);
@@ -1182,6 +730,15 @@ textarea {
   background: var(--color-warning-bg);
   color: var(--color-warning);
 }
+
+.status-badge--neutral {
+  background: var(--color-border);
+  color: var(--color-muted);
+}
+
+/* ============================================================
+   ÉTAPES (onglets numérotés)
+   ============================================================ */
 
 .steps-tabs {
   display: flex;
@@ -1213,9 +770,9 @@ textarea {
 }
 
 .steps-tabs__step--active .steps-tabs__circle {
-  background: var(--color-olive-700);
-  border-color: var(--color-olive-700);
-  color: white;
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-white);
 }
 
 .steps-tabs__label {
@@ -1226,7 +783,7 @@ textarea {
 
 .steps-tabs__step--active .steps-tabs__label {
   font-weight: 600;
-  color: var(--color-ink);
+  color: var(--color-text);
 }
 
 .steps-tabs__connector {
@@ -1240,10 +797,42 @@ textarea {
   background: var(--color-olive-500);
 }
 
-.analysis-block {
+/* ============================================================
+   VARIÉTÉS
+   ============================================================ */
+
+.variety-list {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
+}
+
+.variety-card {
+  border: 1px solid var(--color-olive-100);
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.variety-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.variety-card-title {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.variety-card-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
 }
 
 /* Nouvelle récolte : variétés de la parcelle sélectionnée. */
@@ -1293,6 +882,10 @@ textarea {
   color: var(--color-muted);
 }
 
+/* ============================================================
+   RÉCOLTES / PRESSIONS
+   ============================================================ */
+
 /* Stocks d'une récolte : cartes espacées, détails en grille. */
 .harvest-stock-list {
   display: flex;
@@ -1305,50 +898,8 @@ textarea {
   row-gap: var(--space-5);
 }
 
-/* Barre d'actions fixée en bas de l'écran, à droite de la sidebar. */
-.fixed-actions-bar {
-  position: fixed;
-  left: var(--sidebar-width);
-  right: 0;
-  bottom: 0;
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 12px;
-  padding: 14px 32px;
-  background: var(--color-surface-raised);
-  border-top: 1px solid var(--color-border);
-  box-shadow: 0 -4px 16px rgba(31, 42, 24, 0.06);
-  z-index: 40;
-}
-
-/* Réserve la place de la barre pour que la fin du contenu reste visible. */
-.fixed-actions-spacer {
-  height: 80px;
-}
-
-/* Liste de cartes de formulaire (ex. lignes d'olives d'une pression). */
-.form-card-list {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-/* Ligne de formulaire à deux champs côte à côte (un seul sur petit écran). */
-.form-grid-2 {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-4);
-}
-
-@media (max-width: 720px) {
-  .form-grid-2 {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* Liste des stocks / lignes d'achat d'une ligne d'olives (pleine largeur).
-   Masquée tant qu'aucune source n'est sélectionnée. */
+/* Liste des lots d'une ligne d'olives (pleine largeur),
+   masquée tant qu'aucune source n'est sélectionnée. */
 .source-items-list:empty {
   display: none;
 }
@@ -1401,8 +952,30 @@ textarea {
   outline-offset: 2px;
 }
 
+/* Barre d'actions fixée en bas de l'écran, à droite de la sidebar. */
+.fixed-actions-bar {
+  position: fixed;
+  left: var(--sidebar-width);
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 32px;
+  background: var(--color-surface-raised);
+  border-top: 1px solid var(--color-border);
+  box-shadow: 0 -4px 16px rgba(31, 42, 24, 0.06);
+  z-index: 40;
+}
+
+/* Réserve la place de la barre pour que la fin du contenu reste visible. */
+.fixed-actions-spacer {
+  height: 80px;
+}
+
 /* ============================================================
-   RESPONSIVE — TABLET
+   RESPONSIVE
    ============================================================ */
 
 @media (max-width: 900px) {
@@ -1433,9 +1006,15 @@ textarea {
   }
 }
 
-/* ============================================================
-   RESPONSIVE — MOBILE
-   ============================================================ */
+@media (max-width: 720px) {
+  .info-grid {
+    grid-template-columns: repeat(2, minmax(160px, 1fr));
+  }
+
+  .form-grid-2 {
+    grid-template-columns: 1fr;
+  }
+}
 
 @media (max-width: 700px) {
   .sidebar {
@@ -1460,10 +1039,7 @@ textarea {
   .brand-subtitle,
   .nav-section-title,
   .sidebar-version,
-  .nav-item > span:not(.nav-icon),
-  .menu-parent-label,
-  .menu-chevron,
-  .menu-subsection-label {
+  .nav-item > span:not(.nav-icon) {
     display: none;
   }
 
@@ -1480,48 +1056,8 @@ textarea {
     width: 100%;
   }
 
-  .menu-parent {
-    justify-content: center;
-    padding: 0;
-  }
-
-  .menu-parent .nav-icon {
-    width: 100%;
-  }
-
-  .sections-container {
-    display: none;
-  }
-
-  .menu-subsection-parent {
-    justify-content: center;
-    min-height: 40px;
-    padding: 0;
-  }
-
-  .menu-subsection-parent .nav-icon {
-    width: 100%;
-  }
-
-  .menu-subsection-parent .menu-chevron {
-    display: none;
-  }
-
-  .menu-subsection {
-    margin: 0;
-  }
-
-  .submenu,
-  .submenu.nested {
-    display: none;
-  }
-
   .sidebar-bottom {
     padding: 8px;
-  }
-
-  .sidebar-bottom .nav-item {
-    justify-content: center;
   }
 
   .page-content {
@@ -1547,10 +1083,6 @@ textarea {
   }
 }
 
-/* ============================================================
-   VERY SMALL SCREENS
-   ============================================================ */
-
 @media (max-width: 480px) {
   .sidebar {
     width: 56px;
@@ -1574,55 +1106,8 @@ textarea {
   }
 }
 
-/* ============================================================
-   MISC TABLES / VARIETIES
-   ============================================================ */
-
-.data-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.data-table th,
-.data-table td {
-  padding: 10px 14px;
-  text-align: left;
-  border-bottom: 1px solid #e5e7eb;
-  font-size: 14px;
-}
-
-.data-table th {
-  font-size: 12px;
-  font-weight: 600;
-  color: #6b7280;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-}
-
-.varieties-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 16px;
-  margin-top: 12px;
-}
-
-.variety-card {
-  border: 1px solid var(--color-olive-100, #e5e5e0);
-  border-radius: 8px;
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.variety-title {
-  margin: 0;
-  font-size: 1rem;
-  color: var(--color-olive-900);
-}
-
-.variety-stats {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+@media (max-width: 420px) {
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
 }

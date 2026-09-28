@@ -1,5 +1,4 @@
-// src/features/shared/status/PurchaseStatusConfig.tsx
-
+import { statusColors } from "@olive-platform/core/theme/Colors";
 import {
   IconEdit,
   IconClock,
@@ -14,34 +13,35 @@ import {
 } from "@olive-platform/core/features/olivePurchases/domain/entities/PurchaseStatus";
 import type { StatusConfig } from "./StatusUtils";
 
+// Mêmes tons que les statuts de production (tableau de bord).
 export const purchaseStatusConfig: StatusConfig<PurchaseStatusType> = {
   [PurchaseStatus.Draft]: {
     label: "Brouillon",
     icon: IconEdit,
-    color: "#f59e0b",
+    ...statusColors.neutral,
   },
 
   [PurchaseStatus.Pending]: {
     label: "En attente",
     icon: IconClock,
-    color: "#f59e0b",
+    ...statusColors.planned,
   },
 
   [PurchaseStatus.Approved]: {
     label: "Approuvé",
     icon: IconCircleCheck,
-    color: "#2563eb",
+    ...statusColors.inProgress,
   },
 
   [PurchaseStatus.Received]: {
     label: "Réceptionné",
     icon: IconBox,
-    color: "#16a34a",
+    ...statusColors.completed,
   },
 
   [PurchaseStatus.Cancelled]: {
     label: "Annulé",
     icon: IconX,
-    color: "#dc2626",
+    ...statusColors.cancelled,
   },
 };

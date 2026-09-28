@@ -2,6 +2,7 @@
 import React from 'react';
 import { Chart as ChartJS, ArcElement, Tooltip } from 'chart.js';
 import { Doughnut } from 'react-chartjs-2';
+import { colors } from '@olive-platform/core/theme/Colors';
 import styles from '../styles/dashboard.module.css';
 import type { TreesCoverage } from '@olive-platform/core/features/dashboard/domain/dashboard.types';
 import Card from '../../../../common/widgets/card/Card';
@@ -18,7 +19,7 @@ export const TreesCoverageDonut: React.FC<TreesCoverageDonutProps> = ({ data }) 
     datasets: [
       {
         data: [data.harvestedTrees, data.plannedTrees, data.notHarvestedTrees],
-        backgroundColor: ['#66763F', '#96741F', '#CFC7AA'],
+        backgroundColor: [colors.olive[600], colors.gold[600], colors.textMuted],
         borderWidth: 0,
       },
     ],

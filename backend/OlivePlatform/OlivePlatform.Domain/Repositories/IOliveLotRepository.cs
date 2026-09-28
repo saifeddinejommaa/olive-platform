@@ -21,5 +21,9 @@ public interface IOliveLotRepository
         int harvestId,
         CancellationToken cancellationToken = default);
 
+    Task<IReadOnlyList<OliveLot>> GetByPurchaseIdAsync(
+        int purchaseId,
+        CancellationToken cancellationToken = default);
+
     Task SaveChangesAsync(CancellationToken cancellationToken = default);
 }

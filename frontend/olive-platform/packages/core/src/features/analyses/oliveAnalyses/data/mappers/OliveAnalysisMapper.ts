@@ -2,25 +2,31 @@ import type { ProductionStatus } from "../../../../production/domain/entities/Pr
 import type { OliveAnalysis } from "../../domain/entities/OliveAnalysis";
 import type { OliveAnalysisForListResponse } from "../responses/OliveAnalysesResponse";
 
+// Taux renvoyés en décimal (ou null si non mesurés).
+const toPercentage = (value: number | null | undefined) =>
+  value != null ? Number(value) : undefined;
+
 export function OliveAnalysisMapper(
   response: OliveAnalysisForListResponse,
 ): OliveAnalysis {
   return {
     id: response.id,
 
-    sourceTypeId: 0,
+    sourceTypeId: response.sourceTypeId ?? null,
 
-    sourceId: response.sourceReference,
+    sourceReference: response.sourceReference ?? null,
+
+    plotReference: response.plotReference ?? null,
 
     reference: response.reference,
 
-    humidityPercentage: undefined,
+    humidityPercentage: toPercentage(response.humidityPercentage),
 
-    waterPercentage: undefined,
+    waterPercentage: toPercentage(response.waterPercentage),
 
-    oilPercentage: undefined,
+    oilPercentage: toPercentage(response.oilPercentage),
 
-    acidityPercentage: undefined,
+    acidityPercentage: toPercentage(response.acidityPercentage),
 
     plannedDate: response.plannedDate,
 

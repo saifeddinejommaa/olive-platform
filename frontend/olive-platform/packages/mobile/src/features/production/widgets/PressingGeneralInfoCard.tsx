@@ -51,6 +51,35 @@ function numToStr(value: number | null) {
   return value != null ? String(value) : "";
 }
 
+type ParamKey = Exclude<keyof PressingParameters, "id" | "processTypeId" | "notes">;
+
+// Réglages saisis dans la configuration de pression.
+const PARAM_FIELDS: { key: ParamKey; label: string }[] = [
+  { key: "malaxingTemperatureC", label: "Température malaxage (°C)" },
+  { key: "malaxingDurationMinutes", label: "Durée malaxage (min)" },
+  { key: "malaxingSpeedRpm", label: "Vitesse malaxage (rpm)" },
+  { key: "feedRateKgH", label: "Débit d'alimentation (kg/h)" },
+  { key: "decanterSpeedRpm", label: "Vitesse décanteur (rpm)" },
+  { key: "decanterDifferentialRpm", label: "Différentiel décanteur (rpm)" },
+  { key: "centrifugeSpeedRpm", label: "Vitesse centrifugeuse (rpm)" },
+  { key: "addedWaterLiters", label: "Eau ajoutée (L)" },
+  { key: "waterTemperatureC", label: "Température de l'eau (°C)" },
+  { key: "waitingTimeBeforeExtractionMinutes", label: "Attente avant extraction (min)" },
+];
+
+type ParamValues = Record<ParamKey, string>;
+
+const paramsToValues = (parameters: PressingParameters | null): ParamValues =>
+  Object.fromEntries(
+    PARAM_FIELDS.map((field) => [field.key, numToStr(parameters?.[field.key] ?? null)]),
+  ) as ParamValues;
+
+// "12,5" -> 12.5 ; vide -> null ; invalide -> NaN.
+const parseParam = (value: string) => {
+  const trimmed = value.trim().replace(",", ".");
+  return trimmed === "" ? null : Number(trimmed);
+};
+
 export function PressingGeneralInfoCard({ operation }: Props) {
   const [isEditing, setIsEditing] = useState(false);
 
@@ -60,6 +89,11 @@ export function PressingGeneralInfoCard({ operation }: Props) {
 
   const [notes, setNotes] = useState(operation.notes ?? "");
 
+  const [paramValues, setParamValues] = useState<ParamValues>(() =>
+    paramsToValues(operation.parameters),
+  );
+  const [paramNotes, setParamNotes] = useState(operation.parameters?.notes ?? "");
+
   const { updateOperation, saving } = usePressingOperationDetailsStore();
 
   const isPlanned = operation.status === ProductionStatus.Planned;
@@ -67,10 +101,14 @@ export function PressingGeneralInfoCard({ operation }: Props) {
 
   const canEditDate = isPlanned;
   const canEdit = isPlanned || isInProgress;
+  // La configuration se saisit pendant la pression.
+  const canEditParameters = isInProgress;
 
   const resetFromOperation = () => {
     setPlannedDate(safeParseDate(operation.plannedDate));
     setNotes(operation.notes ?? "");
+    setParamValues(paramsToValues(operation.parameters));
+    setParamNotes(operation.parameters?.notes ?? "");
   };
 
   const handleEdit = () => {
@@ -83,7 +121,33 @@ export function PressingGeneralInfoCard({ operation }: Props) {
     setIsEditing(false);
   };
 
+  // Réglages saisis, ou null si une valeur est invalide (négative ou non numérique).
+  const buildParameters = () => {
+    const values = Object.fromEntries(
+      PARAM_FIELDS.map((field) => [field.key, parseParam(paramValues[field.key])]),
+    ) as Record<ParamKey, number | null>;
+
+    const invalid = PARAM_FIELDS.find((field) => {
+      const value = values[field.key];
+      return value !== null && (Number.isNaN(value) || value < 0);
+    });
+
+    if (invalid) {
+      Alert.alert("Configuration", `Valeur invalide : ${invalid.label}.`);
+      return null;
+    }
+
+    return {
+      ...values,
+      processTypeId: operation.parameters?.processTypeId ?? null,
+      notes: paramNotes.trim() || null,
+    };
+  };
+
   const handleSave = async () => {
+    const parameters = canEditParameters ? buildParameters() : undefined;
+    if (parameters === null) return;
+
     try {
       await updateOperation({
         id: operation.id,
@@ -91,11 +155,15 @@ export function PressingGeneralInfoCard({ operation }: Props) {
           ? plannedDate.toISOString()
           : operation.plannedDate,
         notes,
+        parameters,
       });
 
       setIsEditing(false);
-    } catch {
-      Alert.alert("Erreur", "Impossible de mettre à jour les informations.");
+    } catch (e: any) {
+      Alert.alert(
+        "Erreur",
+        e?.message ?? "Impossible de mettre à jour les informations.",
+      );
     }
   };
 
@@ -103,7 +171,7 @@ export function PressingGeneralInfoCard({ operation }: Props) {
     <View style={styles.card}>
       {/* N° d'opération */}
       <View style={styles.row}>
-        <Text style={[typography.caption, styles.field]}>N° d'opération</Text>
+        <Text style={[typography.caption, styles.field]}>N° d&apos;opération</Text>
         <Text style={[typography.bodyStrong, styles.value]}>
           {operation.operationNumber}
         </Text>
@@ -125,7 +193,7 @@ export function PressingGeneralInfoCard({ operation }: Props) {
       {/* Quantité d'olives — dérivée des intrants, lecture seule */}
       <View style={styles.row}>
         <Text style={[typography.caption, styles.field]}>
-          Quantité d'olives (kg)
+          Quantité d&apos;olives (kg)
         </Text>
         <Text style={[typography.bodyStrong, styles.value]}>
           {operation.oliveQuantityKg}
@@ -175,34 +243,74 @@ export function PressingGeneralInfoCard({ operation }: Props) {
         )}
       </View>
 
-      {/* Paramètres de pressurage — lecture seule pour l'instant */}
-      {operation.parameters && (
-        <>
-          <Text style={[typography.bodyStrong, styles.sectionTitle]}>
-            Paramètres de pressurage
-          </Text>
+      {/* Configuration de pression : saisie pendant la pression, obligatoire à la clôture */}
+      <Text style={[typography.bodyStrong, styles.sectionTitle]}>
+        Configuration de pression
+      </Text>
 
-          <ParamReadOnlyRow label="Température malaxage (°C)" value={numToStr(operation.parameters.malaxingTemperatureC)} />
-          <ParamReadOnlyRow label="Durée malaxage (min)" value={numToStr(operation.parameters.malaxingDurationMinutes)} />
-          <ParamReadOnlyRow label="Vitesse malaxage (rpm)" value={numToStr(operation.parameters.malaxingSpeedRpm)} />
-          <ParamReadOnlyRow label="Débit d'alimentation (kg/h)" value={numToStr(operation.parameters.feedRateKgH)} />
-          <ParamReadOnlyRow label="Vitesse décanteur (rpm)" value={numToStr(operation.parameters.decanterSpeedRpm)} />
-          <ParamReadOnlyRow label="Différentiel décanteur (rpm)" value={numToStr(operation.parameters.decanterDifferentialRpm)} />
-          <ParamReadOnlyRow label="Vitesse centrifugeuse (rpm)" value={numToStr(operation.parameters.centrifugeSpeedRpm)} />
-          <ParamReadOnlyRow label="Eau ajoutée (L)" value={numToStr(operation.parameters.addedWaterLiters)} />
-          <ParamReadOnlyRow label="Température de l'eau (°C)" value={numToStr(operation.parameters.waterTemperatureC)} />
-          <ParamReadOnlyRow
-            label="Attente avant extraction (min)"
-            value={numToStr(operation.parameters.waitingTimeBeforeExtractionMinutes)}
-          />
+      {isPlanned && (
+        <Text style={[typography.caption, styles.hint]}>
+          La configuration se saisit une fois la pression lancée.
+        </Text>
+      )}
+
+      {!isPlanned && isEditing && canEditParameters && (
+        <>
+          {PARAM_FIELDS.map((field) => (
+            <View key={field.key} style={styles.row}>
+              <Text style={[typography.caption, styles.field]}>{field.label}</Text>
+              <TextInput
+                style={[typography.bodyStrong, styles.input]}
+                keyboardType="decimal-pad"
+                placeholder="—"
+                placeholderTextColor={semanticColors.textMuted}
+                value={paramValues[field.key]}
+                onChangeText={(value) =>
+                  setParamValues((current) => ({ ...current, [field.key]: value }))
+                }
+              />
+            </View>
+          ))}
 
           <View style={styles.column}>
-            <Text style={[typography.caption, styles.field]}>Notes paramètres</Text>
-            <Text style={[typography.body, styles.notesValue]}>
-              {operation.parameters.notes || "—"}
-            </Text>
+            <Text style={[typography.caption, styles.field]}>Notes configuration</Text>
+            <TextInput
+              style={[typography.body, styles.input, styles.multiline]}
+              multiline
+              value={paramNotes}
+              onChangeText={setParamNotes}
+              placeholder="Ajouter une note..."
+              placeholderTextColor={semanticColors.textMuted}
+            />
           </View>
         </>
+      )}
+
+      {!isPlanned && !(isEditing && canEditParameters) && (
+        operation.parameters ? (
+          <>
+            {PARAM_FIELDS.map((field) => (
+              <ParamReadOnlyRow
+                key={field.key}
+                label={field.label}
+                value={numToStr(operation.parameters?.[field.key] ?? null)}
+              />
+            ))}
+
+            <View style={styles.column}>
+              <Text style={[typography.caption, styles.field]}>Notes configuration</Text>
+              <Text style={[typography.body, styles.notesValue]}>
+                {operation.parameters.notes || "—"}
+              </Text>
+            </View>
+          </>
+        ) : (
+          <Text style={[typography.caption, styles.hint]}>
+            {isInProgress
+              ? "Aucune configuration : touchez « Modifier » pour la saisir (obligatoire avant la clôture)."
+              : "Aucune configuration de pression."}
+          </Text>
+        )
       )}
 
       {/* Actions */}
@@ -285,6 +393,7 @@ const styles = StyleSheet.create({
     textAlignVertical: "top",
   },
   notesValue: { color: semanticColors.textPrimary },
+  hint: { color: semanticColors.textSecondary },
   actions: {
     flexDirection: "row",
     justifyContent: "flex-end",

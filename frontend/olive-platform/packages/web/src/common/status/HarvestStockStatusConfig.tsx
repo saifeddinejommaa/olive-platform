@@ -1,3 +1,4 @@
+import { colors, statusColors } from "@olive-platform/core/theme/Colors";
 import {
   IconCircleCheck,
   IconChartPie,
@@ -11,34 +12,36 @@ import {
 } from "@olive-platform/core/features/harvests/domain/entities/HarvestStockStatus";
 import type { StatusConfig } from "./StatusUtils";
 
+// Mêmes tons que les statuts de production (tableau de bord).
 export const harvestStockStatusConfig: StatusConfig<HarvestStockStatusType> = {
   [HarvestStockStatus.Available]: {
     label: "Disponible",
     icon: IconCircleCheck,
-    color: "#16a34a",
+    ...statusColors.completed,
   },
 
   [HarvestStockStatus.PartiallyUsed]: {
     label: "Partiellement utilisé",
     icon: IconChartPie,
-    color: "#f59e0b",
+    color: colors.olive[600],
+    background: colors.olive[100],
   },
 
   [HarvestStockStatus.Processing]: {
     label: "En traitement",
     icon: IconLoader2,
-    color: "#2563eb",
+    ...statusColors.inProgress,
   },
 
   [HarvestStockStatus.Empty]: {
     label: "Vide",
     icon: IconCircleDashed,
-    color: "#6b7280",
+    ...statusColors.neutral,
   },
 
   [HarvestStockStatus.Closed]: {
     label: "Clôturé",
     icon: IconLock,
-    color: "#dc2626",
+    ...statusColors.cancelled,
   },
 };

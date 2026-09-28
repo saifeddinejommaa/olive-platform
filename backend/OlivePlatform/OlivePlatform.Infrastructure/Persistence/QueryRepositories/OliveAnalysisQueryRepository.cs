@@ -59,6 +59,18 @@ public class OliveAnalysisQueryRepository : IOliveAnalysisQueryRepository
                      WHEN opi.source_type_id = 2 THEN opi.variety_id
                  END AS {nameof(OliveAnalysisDetailsResponse.VarietyId)},
 
+                 (
+                     SELECT COALESCE(SUM(l.quantity_kg), 0)
+                     FROM public.olive_lots l
+                     WHERE l.olive_analysis_id = oa.id
+                 ) AS {nameof(OliveAnalysisDetailsResponse.QuantityKg)},
+
+                 (
+                     SELECT COUNT(*)
+                     FROM public.olive_lots l
+                     WHERE l.olive_analysis_id = oa.id
+                 )::int AS {nameof(OliveAnalysisDetailsResponse.LotsCount)},
+
                  oa.status AS {nameof(OliveAnalysisDetailsResponse.Status)}
 
              FROM public.olive_analyses oa
@@ -124,6 +136,16 @@ public class OliveAnalysisQueryRepository : IOliveAnalysisQueryRepository
              oa.reference AS {nameof(OliveAnalysisForListResponse.Reference)},
 
              pl.reference AS {nameof(OliveAnalysisForListResponse.PlotReference)},
+
+             opi.source_type_id AS {nameof(OliveAnalysisForListResponse.SourceTypeId)},
+
+             oa.humidity_percentage AS {nameof(OliveAnalysisForListResponse.HumidityPercentage)},
+
+             oa.water_percentage AS {nameof(OliveAnalysisForListResponse.WaterPercentage)},
+
+             oa.oil_percentage AS {nameof(OliveAnalysisForListResponse.OilPercentage)},
+
+             oa.acidity_percentage AS {nameof(OliveAnalysisForListResponse.AcidityPercentage)},
 
              oa.planned_date AS {nameof(OliveAnalysisForListResponse.PlannedDate)},
 

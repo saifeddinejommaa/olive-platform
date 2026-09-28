@@ -48,6 +48,15 @@ public class OliveLotRepository : IOliveLotRepository
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<IReadOnlyList<OliveLot>> GetByPurchaseIdAsync(
+        int purchaseId,
+        CancellationToken cancellationToken = default)
+    {
+        return await _context.OliveLots
+            .Where(x => x.PurchaseId == purchaseId)
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         await _context.SaveChangesAsync(cancellationToken);

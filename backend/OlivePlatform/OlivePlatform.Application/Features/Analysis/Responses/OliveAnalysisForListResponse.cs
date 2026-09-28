@@ -16,7 +16,18 @@ namespace OlivePlatform.Application.Features.Analysis.Responses
 
         public required string SourceReference { get; set; }
 
-        public required string PlotReference { get; set; }
+        public string? PlotReference { get; set; }
+
+        // 1 = récolte, 2 = achat (null si aucun lot rattaché).
+        public int? SourceTypeId { get; set; }
+
+        public decimal? HumidityPercentage { get; set; }
+
+        public decimal? WaterPercentage { get; set; }
+
+        public decimal? OilPercentage { get; set; }
+
+        public decimal? AcidityPercentage { get; set; }
 
         public DateTime? PlannedDate { get; set; }
 

@@ -61,10 +61,9 @@ export default function OliveAnalysesPage() {
           : "-",
     },
     {
-      key: "sourceId" as keyof OliveAnalysis,
+      key: "sourceReference" as keyof OliveAnalysis,
       label: "Source",
-      render: (item: OliveAnalysis) =>
-        item.sourceId ? item.sourceId.toString() : "-",
+      render: (item: OliveAnalysis) => item.sourceReference || "-",
     },
     {
       key: "status" as keyof OliveAnalysis,

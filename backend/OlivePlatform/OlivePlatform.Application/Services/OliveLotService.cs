@@ -183,6 +183,18 @@ public class OliveLotService : IOliveLotService
             : null;
     }
 
+    public async Task EnsureLotsAnalysedAsync(
+        IEnumerable<long> lotIds,
+        CancellationToken cancellationToken = default)
+    {
+        var lots = await _lotRepository.GetByIdsAsync(lotIds, cancellationToken);
+
+        foreach (var lot in lots)
+        {
+            await EnsureAnalysedAsync(lot, cancellationToken);
+        }
+    }
+
     public async Task SkipAnalysisAsync(
         long lotId,
         CancellationToken cancellationToken = default)
