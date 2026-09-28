@@ -3,13 +3,29 @@ import { useFocusEffect, useRouter } from "expo-router";
 
 import { useOliveAnalysesStore } from "@olive-platform/core/features/analyses/oliveAnalyses/store/OliveAnalysesStore";
 import { ListScreen } from "../../components/ListScreen";
+import {
+  countActiveFilters,
+  FilterDateField,
+  FilterTextField,
+} from "../../components/filters/FilterFields";
+import { ProductionStatusFilterField } from "../../components/filters/ProductionStatusFilterField";
 
 import { OliveAnalysisListItem } from "./widgets/OliveAnalysisListItem";
 
 export const OliveAnalysesPage = () => {
   const router = useRouter();
 
-  const { analyses, loading, error, fetchAnalyses } = useOliveAnalysesStore();
+  const { analyses, loading, error, filter, setParams, fetchAnalyses, clear } =
+    useOliveAnalysesStore();
+
+  const applyFilters = () => {
+    fetchAnalyses({ pageNumber: 1 });
+  };
+
+  const resetFilters = () => {
+    clear();
+    fetchAnalyses({ pageNumber: 1, pageSize: 10 });
+  };
 
   // Rechargé à chaque retour sur l'écran (ex. après une analyse terminée).
   useFocusEffect(
@@ -50,7 +66,52 @@ export const OliveAnalysesPage = () => {
       emptyDescription={
         error ?? "Aucune analyse ne correspond aux filtres actuels."
       }
-      filterContent={<></>}
+      onApplyFilters={applyFilters}
+      onResetFilters={resetFilters}
+      activeFilterCount={countActiveFilters([
+        filter.reference,
+        filter.harvestReference,
+        filter.purchaseReference,
+        filter.fromDate,
+        filter.toDate,
+        filter.status,
+      ])}
+      filterContent={
+        <>
+          <FilterTextField
+            label="Référence"
+            placeholder="OLIV_ANALYSE-2026-001"
+            value={filter.reference}
+            onChangeText={(value) => setParams({ reference: value })}
+          />
+          <FilterTextField
+            label="Réf. récolte"
+            placeholder="HARV-2026-001"
+            value={filter.harvestReference}
+            onChangeText={(value) => setParams({ harvestReference: value })}
+          />
+          <FilterTextField
+            label="Réf. achat"
+            placeholder="Réf. de l'achat"
+            value={filter.purchaseReference}
+            onChangeText={(value) => setParams({ purchaseReference: value })}
+          />
+          <FilterDateField
+            label="Début à partir du"
+            value={filter.fromDate}
+            onChange={(value) => setParams({ fromDate: value })}
+          />
+          <FilterDateField
+            label="Fin jusqu'au"
+            value={filter.toDate}
+            onChange={(value) => setParams({ toDate: value })}
+          />
+          <ProductionStatusFilterField
+            value={filter.status}
+            onChange={(value) => setParams({ status: value })}
+          />
+        </>
+      }
     />
   );
 };

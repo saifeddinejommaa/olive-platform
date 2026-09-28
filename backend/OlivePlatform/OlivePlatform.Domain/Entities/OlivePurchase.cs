@@ -46,7 +46,4 @@ public class OlivePurchase
     [Column("is_paid")]
     public bool IsPaid { get; set; }
 
-    public ICollection<OlivePurchaseItem> Items { get; set; }
-       = new List<OlivePurchaseItem>();
-
 }

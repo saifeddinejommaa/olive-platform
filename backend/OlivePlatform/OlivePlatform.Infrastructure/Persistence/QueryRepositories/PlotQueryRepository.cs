@@ -97,6 +97,11 @@ public class PlotQueryRepository : IPlotQueryRepository
 
     public async Task<PagedResult<PlotForListResponse>> GetPagedListAsync(PlotsRequestFilter request)
     {
+        // Avancement calculé sur la campagne sélectionnée uniquement.
+        var seasonJoin = request.SeasonId.HasValue
+            ? "AND h.season_id = @SeasonId"
+            : string.Empty;
+
         var sql = new StringBuilder(
         $"""
         SELECT
@@ -131,11 +136,16 @@ public class PlotQueryRepository : IPlotQueryRepository
                 AS {nameof(PlotForListResponse.CanLaunchHarvest)}
 
         FROM public.plots p
-        LEFT JOIN public.harvests h ON h.plot_id = p.id
+        LEFT JOIN public.harvests h ON h.plot_id = p.id {seasonJoin}
         WHERE 1 = 1
         """);
 
         var parameters = new DynamicParameters();
+
+        if (request.SeasonId.HasValue)
+        {
+            parameters.Add("SeasonId", request.SeasonId.Value);
+        }
 
         // ----------------------------------------------------
         // Pagination parameters
@@ -184,13 +194,39 @@ public class PlotQueryRepository : IPlotQueryRepository
         }
 
         // ----------------------------------------------------
-        // Order + Pagination
+        // Group + état de récolte (après agrégation)
         // ----------------------------------------------------
 
         sql.Append(
             """
 
             GROUP BY p.id, p.reference, p.name, p.number_of_trees
+            """);
+
+        var harvestedTrees = "COALESCE(SUM(h.harvested_trees), 0)";
+
+        switch (request.HarvestState)
+        {
+            case PlotHarvestState.NotHarvested:
+                sql.Append($"\nHAVING {harvestedTrees} = 0");
+                break;
+
+            case PlotHarvestState.PartiallyHarvested:
+                sql.Append($"\nHAVING {harvestedTrees} > 0 AND {harvestedTrees} < p.number_of_trees");
+                break;
+
+            case PlotHarvestState.Harvested:
+                sql.Append($"\nHAVING {harvestedTrees} >= p.number_of_trees AND p.number_of_trees > 0");
+                break;
+        }
+
+        // ----------------------------------------------------
+        // Order + Pagination
+        // ----------------------------------------------------
+
+        sql.Append(
+            """
+
             ORDER BY p.reference
             LIMIT @PageSize
             OFFSET @Offset

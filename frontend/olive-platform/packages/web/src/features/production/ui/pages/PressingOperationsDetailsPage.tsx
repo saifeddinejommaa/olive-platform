@@ -57,7 +57,7 @@ const emptyInput = (): PressingOperationInput => ({
   id: crypto.randomUUID(),
   sourceType: "harvest",
   harvestId: null,
-  purchaseItemId: null,
+  purchaseId: null,
   reference: "",
   quantityKg: "",
   notes: "",
@@ -288,7 +288,7 @@ export default function PressingOperationDetailsPage() {
             ...previous,
             sourceType,
             harvestId: null,
-            purchaseItemId: null,
+            purchaseId: null,
             reference: "",
             quantityKg: "",
           },
@@ -315,14 +315,16 @@ export default function PressingOperationDetailsPage() {
           ? {
             ...previous,
             harvestId: source.id,
-            purchaseItemId: null,
+            lots: source.lots ?? [],
+            purchaseId: null,
             reference: source.reference,
             quantityKg: quantity,
           }
           : {
             ...previous,
             harvestId: null,
-            purchaseItemId: source.id,
+            purchaseId: source.id,
+            lots: source.lots ?? [],
             reference: source.reference,
             quantityKg: quantity,
           };
@@ -350,20 +352,15 @@ export default function PressingOperationDetailsPage() {
       string
     > = {};
 
-    if (
-      newInput.sourceType === "harvest" &&
-      !newInput.harvestId
-    ) {
-      validationErrors.input =
-        "Sélectionnez une récolte valide.";
-    }
+    const isHarvest = newInput.sourceType === "harvest";
 
-    if (
-      newInput.sourceType === "purchase" &&
-      !newInput.purchaseItemId
-    ) {
+    if (isHarvest ? !newInput.harvestId : !newInput.purchaseId) {
+      validationErrors.input = isHarvest
+        ? "Sélectionnez une récolte valide."
+        : "Sélectionnez un achat valide.";
+    } else if (!newInput.lots?.length) {
       validationErrors.input =
-        "Sélectionnez un achat valide.";
+        "Sélectionnez au moins un lot disponible.";
     }
 
     if (
@@ -386,35 +383,27 @@ export default function PressingOperationDetailsPage() {
       return;
     }
 
-    const convertedInput: PressingOperationInputDetails =
-    {
-      id:
-        Date.now() +
-        Math.floor(Math.random() * 10000),
+    const newId = () =>
+      Date.now() + Math.floor(Math.random() * 10000);
 
-      sourceType:
-        newInput.sourceType,
+    // Une entrée par lot coché.
+    const convertedInputs: PressingOperationInputDetails[] =
+      (newInput.lots ?? []).map((lot) => ({
+        id: newId(),
+        lotId: lot.id,
+        lotReference: lot.reference ?? "",
+        sourceType: newInput.sourceType,
+        sourceReference: newInput.reference,
+        quantityKg: lot.quantityKg,
+        lotQuantityKg: lot.quantityKg,
+        lotRemainingKg: lot.quantityKg,
+        harvestId: newInput.harvestId,
+        purchaseId: newInput.purchaseId,
+        oliveVarietyId: null,
+        analysis: null,
+      }));
 
-      sourceReference:
-        newInput.reference,
-
-      quantityKg:
-        Number(newInput.quantityKg),
-
-      harvestId:
-        newInput.sourceType === "harvest"
-          ? newInput.harvestId
-          : null,
-
-      purchaseItemId:
-        newInput.sourceType === "purchase"
-          ? newInput.purchaseItemId
-          : null,
-
-      analysis: null,
-    };
-
-    addInputToStore(convertedInput);
+    convertedInputs.forEach((input) => addInputToStore(input));
 
     setDirty(true);
     setNewInput(null);
@@ -466,10 +455,9 @@ export default function PressingOperationDetailsPage() {
           plannedDate: operation.plannedDate,
           notes: operation.notes,
 
+          // Chaque entrée garde son lot : il est libéré puis réservé à nouveau.
           inputs: inputs.map((input) => ({
-            harvestId: input.harvestId,
-            purchaseItemId:
-              input.purchaseItemId,
+            lotId: input.lotId,
             quantityKg: input.quantityKg,
           })),
         };

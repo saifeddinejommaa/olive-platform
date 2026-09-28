@@ -6,16 +6,18 @@ import { renderStatus } from "../../../../common/status/StatusUtils";
 
 type Props = {
   analysis: OliveAnalysisDetails;
+  // Masque le titre « Analyse » (ex. affichée dans une carte déjà titrée).
+  hideTitle?: boolean;
 };
 
 const formatPercentage = (value?: number | null) => {
   return value != null ? `${value.toLocaleString("fr-FR")} %` : "-";
 };
 
-export default function OliveAnalysisInfoWidget({ analysis }: Props) {
+export default function OliveAnalysisInfoWidget({ analysis, hideTitle = false }: Props) {
   return (
     <div className="analysis-block">
-      <h4 className="analysis-title">Analyse</h4>
+      {!hideTitle && <h4 className="analysis-title">Analyse</h4>}
 
       {renderStatus(analysis.status, productionStatusConfig)}
 

@@ -38,6 +38,7 @@ export default function NewPressingOperationInputsWidget({
   inputs,
   errors,
   onAdd,
+  onRemove,
   onUpdate,
   onChangeSource,
   onSelectSource,
@@ -47,7 +48,7 @@ export default function NewPressingOperationInputsWidget({
     <div className="filters">
       <PressingOperationInputsHeader />
 
-      <div className="filters-content">
+      <div className="form-card-list">
         {inputs.length === 0 && <PressingOperationInputsEmptyState />}
 
         {inputs.map((input, index) => (
@@ -59,6 +60,7 @@ export default function NewPressingOperationInputsWidget({
             onUpdate={onUpdate}
             onChangeSource={onChangeSource}
             onSelectSource={onSelectSource}
+            onRemove={onRemove}
           />
         ))}
 

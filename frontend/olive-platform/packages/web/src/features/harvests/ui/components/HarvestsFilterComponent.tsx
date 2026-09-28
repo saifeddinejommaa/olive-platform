@@ -3,6 +3,8 @@ import Button from "../../../../common/widgets/button/Button";
 import Card from "../../../../common/widgets/card/Card";
 import { useHarvestsStore } from "@olive-platform/core/features/harvests/stores/HarvestsStore";
 import type { HarvestFilters } from "@olive-platform/core/features/harvests/domain/entities/HarvestsFilters";
+import type { ProductionStatus } from "@olive-platform/core/features/production/domain/entities/ProductionStatus";
+import ProductionStatusSelector from "../../../../common/widgets/ProductionStatusSelector";
 
 export default function HarvestsFilterComponent() {
   const { filters, loading, setFilter, clearFilters, fetchHarvests } =
@@ -39,8 +41,8 @@ export default function HarvestsFilterComponent() {
           <div className="filter-item">
             <TextInput
               label="N° Récolte"
-              placeholder="REC-2026-001"
-              value={filters.harvestNumber}
+              placeholder="HARV-2026-001"
+              value={filters.harvestNumber ?? ""}
               onChange={(event) =>
                 updateFilter("harvestNumber", event.target.value)
               }
@@ -49,34 +51,40 @@ export default function HarvestsFilterComponent() {
 
           <div className="filter-item">
             <TextInput
-              label="Parcelle"
-              placeholder="ID parcelle"
-              type="number"
-              value={filters.plotId !== null ? String(filters.plotId) : ""}
+              label="Référence parcelle"
+              placeholder="PLOT-001"
+              value={filters.plotReference ?? ""}
               onChange={(event) =>
-                updateFilter(
-                  "plotId",
-                  event.target.value ? Number(event.target.value) : null,
-                )
+                updateFilter("plotReference", event.target.value)
               }
             />
           </div>
 
           <div className="filter-item">
             <TextInput
-              label="Du"
+              label="Début à partir du"
               type="date"
-              value={filters.fromDate}
+              value={filters.fromDate ?? ""}
               onChange={(event) => updateFilter("fromDate", event.target.value)}
             />
           </div>
 
           <div className="filter-item">
             <TextInput
-              label="Au"
+              label="Fin jusqu'au"
               type="date"
-              value={filters.toDate}
+              value={filters.toDate ?? ""}
               onChange={(event) => updateFilter("toDate", event.target.value)}
+            />
+          </div>
+
+          <div className="filter-item">
+            <ProductionStatusSelector
+              label="Statut"
+              value={filters.status ?? null}
+              onChange={(value) =>
+                updateFilter("status", value as ProductionStatus | null)
+              }
             />
           </div>
         </div>

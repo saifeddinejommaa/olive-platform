@@ -4,6 +4,7 @@ using OlivePlatform.Domain;
 using OlivePlatform.Domain.Entities;
 using OlivePlatform.Domain.Enums;
 using OlivePlatform.Domain.Interfaces.Repositories;
+using OlivePlatform.Domain.Repositories;
 
 namespace OlivePlatform.Application.Services;
 
@@ -12,20 +13,20 @@ public class SeasonService : ISeasonService
     private readonly ISeasonRepository _repository;
     private readonly IHarvestRepository _harvestRepository;
     private readonly IOlivePurchaseRepository _purchaseRepository;
-    private readonly IOlivePurchaseItemRepository _purchaseItemRepository;
+    private readonly IOliveLotRepository _lotRepository;
     private readonly IUnitOfWork _unitOfWork;
 
     public SeasonService(
         ISeasonRepository repository,
         IHarvestRepository harvestRepository,
         IOlivePurchaseRepository purchaseRepository,
-        IOlivePurchaseItemRepository purchaseItemRepository,
+        IOliveLotRepository lotRepository,
         IUnitOfWork unitOfWork)
     {
         _repository = repository;
         _harvestRepository = harvestRepository;
         _purchaseRepository = purchaseRepository;
-        _purchaseItemRepository = purchaseItemRepository;
+        _lotRepository = lotRepository;
         _unitOfWork = unitOfWork;
     }
 
@@ -116,35 +117,12 @@ public class SeasonService : ISeasonService
             return harvest.SeasonId;
         }
 
-        var item = await _purchaseItemRepository.GetByIdAsync(sourceId, cancellationToken)
+        // Achat : la source est le lot d'olives acheté.
+        var lot = await _lotRepository.GetByIdAsync(sourceId, cancellationToken)
             ?? throw new KeyNotFoundException(
-                $"Purchase item with id '{sourceId}' was not found.");
+                $"Olive lot with id '{sourceId}' was not found.");
 
-        var purchase = await _purchaseRepository.GetByIdAsync(item.PurchaseId, cancellationToken)
-            ?? throw new KeyNotFoundException(
-                $"Purchase with id '{item.PurchaseId}' was not found.");
-
-        return purchase.SeasonId;
-    }
-
-    public async Task EnsureSourcesInSeasonAsync(
-        int seasonId,
-        IEnumerable<(InputSourceType SourceType, int SourceId)> sources,
-        CancellationToken cancellationToken = default)
-    {
-        foreach (var (sourceType, sourceId) in sources.Distinct())
-        {
-            var sourceSeasonId = await GetSeasonIdOfSourceAsync(
-                sourceType,
-                sourceId,
-                cancellationToken);
-
-            if (sourceSeasonId != seasonId)
-            {
-                throw new BusinessException(
-                    "Toutes les entrées doivent appartenir à la même campagne que l'opération de pression.");
-            }
-        }
+        return lot.SeasonId;
     }
 
     public async Task EnsureDateInSeasonAsync(

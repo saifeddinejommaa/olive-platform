@@ -3,7 +3,6 @@
 import { useEffect } from "react";
 import DataTable from "../../../../common/widgets/tables/OrdersTable";
 import { useNavigate } from "react-router-dom";
-import type { PlotsRequestFilter } from "@olive-platform/core/features/plots/domain/entities/PlotsRequestFilter";
 import { usePlotsStore } from "@olive-platform/core/features/plots/stores/UsePlotsStore";
 import type { PlotForList } from "@olive-platform/core/features/plots/domain/entities/PlotForList";
 import ProgressBar from "../../../../common/widgets/progressBar/ProgressBar";
@@ -15,26 +14,11 @@ export default function PlotsPage() {
   const navigate = useNavigate();
 
   usePageTitle("Parcelles", "Liste des parcelles");
-  const { fetchPlots, setFilter, Plots, filters, loading } = usePlotsStore();
+  const { fetchPlots, setFilter, Plots } = usePlotsStore();
 
   useEffect(() => {
     fetchPlots();
-  }, []);
-
-  const updateFilter = (field: keyof PlotsRequestFilter, value: string) => {
-    setFilter(field, value);
-  };
-
-  const handleSearch = async () => {
-    await fetchPlots();
-  };
-
-  const handleReset = async () => {
-    setFilter("reference", "");
-    setFilter("name", "");
-    setFilter("pageNumber", 1);
-    await fetchPlots();
-  };
+  }, [fetchPlots]);
 
   const handlePageChange = async (pageNumber: number) => {
     setFilter("pageNumber", pageNumber);
@@ -86,13 +70,7 @@ export default function PlotsPage() {
 
   return (
     <div className="feature-page">
-      <PlotsFilterComponent
-        filters={filters}
-        loading={loading}
-        onFilterChange={updateFilter}
-        onSearch={handleSearch}
-        onReset={handleReset}
-      />
+      <PlotsFilterComponent />
 
       <DataTable
         data={Plots?.items ?? []}

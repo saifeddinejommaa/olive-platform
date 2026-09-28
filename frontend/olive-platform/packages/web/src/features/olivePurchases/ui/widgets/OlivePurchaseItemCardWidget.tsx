@@ -6,12 +6,18 @@ import { getOliveVarietyLabel } from "@olive-platform/core/features/appConstants
 
 type Props = {
   item: OlivePurchaseItemDetails;
+  onSkipAnalysis?: (itemId: number) => void;
+  skipping?: boolean;
 };
 
-export default function OlivePurchaseItemCardWidget({ item }: Props) {
+export default function OlivePurchaseItemCardWidget({ item, onSkipAnalysis, skipping }: Props) {
   return (
     <CollapsibleCard title={`${item.reference} — ${getOliveVarietyLabel(item.variety)}`}>
-      <OlivePurchaseItemInfo item={item} />
+      <OlivePurchaseItemInfo
+        item={item}
+        onSkipAnalysis={onSkipAnalysis}
+        skipping={skipping}
+      />
 
       {item.analysis && <OliveAnalysisInfoWidget analysis={item.analysis} />}
     </CollapsibleCard>

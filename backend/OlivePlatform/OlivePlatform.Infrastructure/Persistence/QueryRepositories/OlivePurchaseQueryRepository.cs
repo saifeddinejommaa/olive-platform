@@ -14,6 +14,20 @@ public class OlivePurchaseQueryRepository : IOlivePurchaseQueryRepository
 {
     private readonly IDbConnection _dbConnection;
 
+    private const string PressableLotSql = $"""
+                SELECT 1
+                FROM olive_lots pl
+                WHERE pl.purchase_id = op.id
+                  AND {OliveLotSql.PressableCondition}
+        """;
+
+    private const string SelectableLotSql = $"""
+                SELECT 1
+                FROM olive_lots pl
+                WHERE pl.purchase_id = op.id
+                  AND {OliveLotSql.SelectableCondition}
+        """;
+
     public OlivePurchaseQueryRepository(IDbConnection dbConnection)
     {
         _dbConnection = dbConnection;
@@ -36,7 +50,7 @@ public class OlivePurchaseQueryRepository : IOlivePurchaseQueryRepository
         ps.id AS {nameof(OlivePurchaseForListResponse.Status)},
 
         COALESCE(
-            SUM(opi.agreed_quantity_kg),
+            SUM(opi.quantity_kg),
             0
         ) AS {nameof(OlivePurchaseForListResponse.TotalQuantityKg)},
 
@@ -50,11 +64,10 @@ public class OlivePurchaseQueryRepository : IOlivePurchaseQueryRepository
                         WHEN BOOL_OR(oa.status = 4) THEN 4 -- Cancelled
                         ELSE 0
                     END
-                FROM olive_purchase_items item
+                FROM olive_lots lot
                 INNER JOIN olive_analyses oa
-                    ON oa.source_id = item.id
-                    AND oa.source_type = 2
-                WHERE item.purchase_id = op.id
+                    ON oa.id = lot.olive_analysis_id
+                WHERE lot.purchase_id = op.id
             ),
             0
         ) AS {nameof(OlivePurchaseForListResponse.AnalyseStatus)},
@@ -72,46 +85,16 @@ public class OlivePurchaseQueryRepository : IOlivePurchaseQueryRepository
                 FROM pressing_operation_inputs poi
                 INNER JOIN pressing_operations po
                     ON po.id = poi.pressing_operation_id
-                INNER JOIN olive_purchase_items item
-                    ON item.id = poi.purchase_item_id
-                WHERE item.purchase_id = op.id
+                INNER JOIN olive_lots lot
+                    ON lot.id = poi.lot_id
+                WHERE lot.purchase_id = op.id
             ),
             0
         ) AS {nameof(OlivePurchaseForListResponse.Pressed)},
 
         (
             op.status_id = 3 -- Approved
-
-            AND EXISTS (
-                SELECT 1
-                FROM olive_purchase_items item
-                WHERE item.purchase_id = op.id
-            )
-
-            AND NOT EXISTS (
-                SELECT 1
-                FROM olive_purchase_items item
-                WHERE item.purchase_id = op.id
-                AND NOT EXISTS (
-                    SELECT 1
-                    FROM olive_analyses oa
-                    WHERE oa.source_id = item.id
-                      AND oa.source_type = 2
-                      AND oa.status = 3 -- Completed
-                )
-            )
-
-            AND NOT EXISTS (
-                SELECT 1
-                FROM pressing_operation_inputs poi
-                INNER JOIN pressing_operations po
-                    ON po.id = poi.pressing_operation_id
-                INNER JOIN olive_purchase_items item
-                    ON item.id = poi.purchase_item_id
-                WHERE item.purchase_id = op.id
-                  AND po.status_id IN (1, 3) -- Planned, Completed
-            )
-
+            AND EXISTS ({PressableLotSql})
         ) AS {nameof(OlivePurchaseForListResponse.CanLaunchPression)}
 
     FROM olive_purchases op
@@ -122,7 +105,7 @@ public class OlivePurchaseQueryRepository : IOlivePurchaseQueryRepository
     LEFT JOIN supplier s
         ON s.id = op.supplier_id
 
-    LEFT JOIN olive_purchase_items opi
+    LEFT JOIN olive_lots opi
         ON opi.purchase_id = op.id
 
     WHERE 1 = 1
@@ -242,33 +225,7 @@ public class OlivePurchaseQueryRepository : IOlivePurchaseQueryRepository
         {
             sql.Append(@"
 
-            AND EXISTS (
-                SELECT 1
-                FROM olive_purchase_items item
-
-                WHERE item.purchase_id = op.id
-
-                AND (
-                    item.agreed_quantity_kg
-                    -
-                    COALESCE(
-                        (
-                            SELECT SUM(poi.quantity_kg)
-                            FROM pressing_operation_inputs poi
-
-                            INNER JOIN pressing_operations po
-                                ON po.id = poi.pressing_operation_id
-
-                            INNER JOIN production_status pstatus
-                                ON pstatus.id = po.status_id
-
-                            WHERE poi.purchase_item_id = item.id
-                              AND poi.status = 0
-                        ),
-                        0
-                    )
-                ) > 0
-            )
+            AND EXISTS (" + SelectableLotSql + @")
         ");
         }
 
@@ -348,8 +305,8 @@ public class OlivePurchaseQueryRepository : IOlivePurchaseQueryRepository
 
         COALESCE(
             (
-                SELECT SUM(opi.agreed_quantity_kg)
-                FROM olive_purchase_items opi
+                SELECT SUM(opi.quantity_kg)
+                FROM olive_lots opi
                 WHERE opi.purchase_id = op.id
             ),
             0
@@ -358,9 +315,9 @@ public class OlivePurchaseQueryRepository : IOlivePurchaseQueryRepository
         COALESCE(
             (
                 SELECT SUM(
-                    opi.agreed_quantity_kg * opi.price_per_kg
+                    opi.quantity_kg * COALESCE(opi.price_per_kg, 0)
                 )
-                FROM olive_purchase_items opi
+                FROM olive_lots opi
                 WHERE opi.purchase_id = op.id
             ),
             0
@@ -382,33 +339,7 @@ public class OlivePurchaseQueryRepository : IOlivePurchaseQueryRepository
 
         (
             op.status_id = 3 -- Approved
-            AND EXISTS (
-                SELECT 1
-                FROM olive_purchase_items item
-                WHERE item.purchase_id = op.id
-            )
-            AND NOT EXISTS (
-                SELECT 1
-                FROM olive_purchase_items item
-                WHERE item.purchase_id = op.id
-                AND NOT EXISTS (
-                    SELECT 1
-                    FROM olive_analyses oa
-                    WHERE oa.source_id = item.id
-                      AND oa.source_type = 2
-                      AND oa.status = 3 -- Completed
-                )
-            )
-            AND NOT EXISTS (
-                SELECT 1
-                FROM pressing_operation_inputs poi
-                INNER JOIN pressing_operations po
-                    ON po.id = poi.pressing_operation_id
-                INNER JOIN olive_purchase_items item
-                    ON item.id = poi.purchase_item_id
-                WHERE item.purchase_id = op.id
-                  AND po.status_id IN (1, 3) -- Planned, Completed
-            )
+            AND EXISTS ({PressableLotSql})
         ) AS {nameof(OlivePurchaseDetailsResponse.CanLaunchPression)}
 
     FROM olive_purchases op
@@ -489,26 +420,20 @@ WHERE op.purchase_number = @PurchaseNumber
             opi.id AS {nameof(OlivePurchaseItemDetailsResponse.Id)},
             opi.reference AS {nameof(OlivePurchaseItemDetailsResponse.Reference)},
             opi.variety_id AS {nameof(OlivePurchaseItemDetailsResponse.VarietyId)},
-            opi.agreed_quantity_kg AS {nameof(OlivePurchaseItemDetailsResponse.AgreedQuantityKg)},
-
+            opi.quantity_kg AS {nameof(OlivePurchaseItemDetailsResponse.AgreedQuantityKg)},
+            opi.remaining_kg AS {nameof(OlivePurchaseItemDetailsResponse.RemainingQuantityKg)},
+            opi.status_id AS {nameof(OlivePurchaseItemDetailsResponse.Status)},
+            opi.need_analysis AS {nameof(OlivePurchaseItemDetailsResponse.NeedAnalysis)},
+            COALESCE(ioa.status = 3, FALSE) AS {nameof(OlivePurchaseItemDetailsResponse.IsAnalyzed)},
+            (opi.need_analysis AND COALESCE(ioa.status <> 3, TRUE)) AS {nameof(OlivePurchaseItemDetailsResponse.ToAnalysis)},
             (
-                opi.agreed_quantity_kg -
-                COALESCE(
-                    (
-                        SELECT SUM(poi.quantity_kg)
-                        FROM pressing_operation_inputs poi
-                        INNER JOIN pressing_operations po
-                            ON po.id = poi.pressing_operation_id
-                        INNER JOIN production_status ps
-                            ON ps.id = po.status_id
-                        WHERE poi.purchase_item_id = opi.id
-                    ),
-                    0
-                )
-            ) AS {nameof(OlivePurchaseItemDetailsResponse.RemainingQuantityKg)},
+                SELECT {OliveLotSql.PressableCondition}
+                FROM olive_lots pl
+                WHERE pl.id = opi.id
+            ) AS {nameof(OlivePurchaseItemDetailsResponse.IsPressable)},
 
-            opi.price_per_kg AS {nameof(OlivePurchaseItemDetailsResponse.PricePerKg)},
-            opi.agreed_quantity_kg * opi.price_per_kg
+            COALESCE(opi.price_per_kg, 0) AS {nameof(OlivePurchaseItemDetailsResponse.PricePerKg)},
+            opi.quantity_kg * COALESCE(opi.price_per_kg, 0)
                 AS {nameof(OlivePurchaseItemDetailsResponse.TotalAmount)},
 
             (
@@ -525,13 +450,12 @@ WHERE op.purchase_number = @PurchaseNumber
                     '{nameof(OliveAnalysisInfoResponse.Status)}', oa.status
                 )
                 FROM olive_analyses oa
-                WHERE oa.source_id = opi.id
-                  AND oa.source_type = 2
-                ORDER BY oa.id DESC
-                LIMIT 1
+                WHERE oa.id = opi.olive_analysis_id
             ) AS {nameof(OlivePurchaseItemDetailsResponse.Analysis)}
 
-        FROM olive_purchase_items opi
+        FROM olive_lots opi
+        LEFT JOIN olive_analyses ioa
+            ON ioa.id = opi.olive_analysis_id
         WHERE opi.purchase_id = @PurchaseId
         ORDER BY opi.id DESC;
 ";

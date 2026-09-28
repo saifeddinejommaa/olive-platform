@@ -19,15 +19,18 @@ namespace OlivePlatform.Application.Features.Production.Commands
         private readonly IPressingOperationsRepository _repository;
         private readonly IPressingOperationInputsRepository _inputsRepository;
         private readonly ISeasonService _seasonService;
+        private readonly IOliveLotService _oliveLotService;
 
         public ClosePressingOperationCommandHandler(
             IPressingOperationsRepository repository,
             IPressingOperationInputsRepository inputsRepository,
-            ISeasonService seasonService)
+            ISeasonService seasonService,
+            IOliveLotService oliveLotService)
         {
             _repository = repository;
             _inputsRepository = inputsRepository;
             _seasonService = seasonService;
+            _oliveLotService = oliveLotService;
         }
 
         public async Task<Unit> Handle(
@@ -53,6 +56,9 @@ namespace OlivePlatform.Application.Features.Production.Commands
             var inputs = await _inputsRepository.GetByPressingOperationIdAsync(
                 request.Id,
                 cancellationToken);
+
+            // Les lots entièrement pressés sont vidés.
+            await _oliveLotService.CompleteAsync(inputs, cancellationToken);
 
             foreach (var input in inputs)
             {

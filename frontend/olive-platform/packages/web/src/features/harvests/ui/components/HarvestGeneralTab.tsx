@@ -400,11 +400,11 @@ export default function HarvestGeneralTab({
       />
 
       {(isPlanned || isInProgress) && (
-        <div className="harvest-general-actions-spacer" />
+        <div className="fixed-actions-spacer" />
       )}
 
       {(isPlanned || isInProgress) && (
-        <div className="harvest-general-actions">
+        <div className="fixed-actions-bar">
           <Button
             variant="primary"
             onClick={handleSave}

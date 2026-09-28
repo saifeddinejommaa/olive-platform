@@ -16,15 +16,18 @@ namespace OlivePlatform.Application.Features.Production.Commands
         private readonly IPressingOperationsRepository _repository;
         private readonly IPressingOperationInputsRepository _inputsRepository;
         private readonly ISeasonService _seasonService;
+        private readonly IOliveLotService _oliveLotService;
 
         public CancelPressingOperationCommandHandler(
             IPressingOperationsRepository repository,
             IPressingOperationInputsRepository inputsRepository,
-            ISeasonService seasonService)
+            ISeasonService seasonService,
+            IOliveLotService oliveLotService)
         {
             _repository = repository;
             _inputsRepository = inputsRepository;
             _seasonService = seasonService;
+            _oliveLotService = oliveLotService;
         }
 
         public async Task<Unit> Handle(
@@ -47,6 +50,9 @@ namespace OlivePlatform.Application.Features.Production.Commands
                 .GetByPressingOperationIdAsync(
                     request.Id,
                     cancellationToken);
+
+            // Les lots récupèrent les quantités réservées.
+            await _oliveLotService.ReleaseAsync(inputs, cancellationToken);
 
             foreach (var input in inputs)
             {

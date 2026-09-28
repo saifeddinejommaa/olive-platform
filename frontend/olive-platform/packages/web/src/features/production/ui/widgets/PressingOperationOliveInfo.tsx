@@ -19,7 +19,11 @@ export default function PressingOperationOliveInfo({ input }: Props) {
 
       <InfoFieldWidget label="Référence" value={input.sourceReference || "-"} />
 
-      <InfoFieldWidget label="Quantité" value={formatKg(input.quantityKg)} />
+      <InfoFieldWidget label="Lot" value={input.lotReference || "-"} />
+
+      <InfoFieldWidget label="Quantité pressée" value={formatKg(input.quantityKg)} />
+
+      <InfoFieldWidget label="Quantité du lot" value={formatKg(input.lotQuantityKg)} />
     </div>
   );
 }

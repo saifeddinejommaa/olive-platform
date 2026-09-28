@@ -1,8 +1,11 @@
+import ListSlot from "../../../../common/widgets/ListSlot";
 import { useState } from "react";
 import { Autocomplete } from "../../../../common/widgets/autoComplete/AutoComplete";
 import { useHarvestsAutocomplete } from "@olive-platform/core/features/harvests/hooks/UseHarvestsAutoComplete";
 import type { SourceOption } from "../../../production/ui/widgets/SourceReference";
 import { useHarvestStocks } from "@olive-platform/core/features/harvests/hooks/UseHarvestStock";
+import { HarvestStockStatus } from "@olive-platform/core/features/harvests/domain/entities/HarvestStockStatus";
+import { SkipOliveLotAnalysis } from "@olive-platform/core/features/oliveLots/domain/usecases/SkipOliveLotAnalysis";
 
 type HarvestOption = {
   id: number;
@@ -11,18 +14,29 @@ type HarvestOption = {
 
 type Props = {
   onSelect: (source: SourceOption) => void;
+  // Emplacement de la liste (ex. pleine largeur de la carte). Absent : sous la recherche.
+  listContainer?: HTMLElement | null;
 };
 
-export default function HarvestAutoCompleteWidget({ onSelect }: Props) {
+export default function HarvestAutoCompleteWidget({ onSelect, listContainer }: Props) {
   const [selectedHarvestId, setSelectedHarvestId] = useState<number | null>(
     null,
   );
   const [selectedHarvestReference, setSelectedHarvestReference] = useState("");
   const [selectedStockIds, setSelectedStockIds] = useState<number[]>([]);
+  const [skippingId, setSkippingId] = useState<number | null>(null);
 
-  const { HarvestStock, loading: loadingStocks } =
+  const { HarvestStock, loading: loadingStocks, reload } =
     useHarvestStocks(selectedHarvestId);
-  const stocks = HarvestStock ?? [];
+  // Lots avec du restant, non réservés en totalité ni vidés. Ceux dont
+  // l'analyse n'est pas terminée sont affichés grisés (non sélectionnables).
+  const stocks = (HarvestStock ?? []).filter(
+    (stock) =>
+      stock.remainingKg > 0 &&
+      (stock.status === HarvestStockStatus.Available ||
+        stock.status === HarvestStockStatus.PartiallyUsed),
+  );
+  const pressableStocks = stocks.filter((stock) => stock.isPressable);
 
   const handleSelectHarvest = (option: HarvestOption) => {
     setSelectedHarvestId(option.id);
@@ -32,16 +46,15 @@ export default function HarvestAutoCompleteWidget({ onSelect }: Props) {
     onSelect({
       id: option.id,
       reference: option.reference,
-      harvestStockIds: [],
     });
   };
 
   const emitSelection = (stockIds: number[]) => {
-    const selectedStocks = stocks.filter((stock) =>
+    const selectedStocks = pressableStocks.filter((stock) =>
       stockIds.includes(stock.id),
     );
     const quantityKg = selectedStocks.reduce(
-      (total, stock) => total + Number(stock.quantityKg ?? 0),
+      (total, stock) => total + Number(stock.remainingKg ?? 0),
       0,
     );
 
@@ -49,7 +62,11 @@ export default function HarvestAutoCompleteWidget({ onSelect }: Props) {
       onSelect({
         id: selectedHarvestId,
         reference: selectedHarvestReference,
-        harvestStockIds: stockIds,
+        lots: selectedStocks.map((stock) => ({
+          id: stock.id,
+          reference: stock.reference,
+          quantityKg: Number(stock.remainingKg ?? 0),
+        })),
         quantityKg,
       });
     }
@@ -68,12 +85,24 @@ export default function HarvestAutoCompleteWidget({ onSelect }: Props) {
 
   const handleSelectAll = () => {
     const next =
-      selectedStockIds.length === stocks.length
+      selectedStockIds.length === pressableStocks.length
         ? []
-        : stocks.map((stock) => stock.id);
+        : pressableStocks.map((stock) => stock.id);
 
     setSelectedStockIds(next);
     emitSelection(next);
+  };
+
+  // « Passer sans analyse » : le lot devient sélectionnable.
+  const handleSkipAnalysis = async (stockId: number) => {
+    setSkippingId(stockId);
+
+    try {
+      await SkipOliveLotAnalysis(stockId);
+      reload();
+    } finally {
+      setSkippingId(null);
+    }
   };
 
   return (
@@ -83,9 +112,10 @@ export default function HarvestAutoCompleteWidget({ onSelect }: Props) {
         getLabel={(harvest) => harvest.reference}
         onSelect={handleSelectHarvest}
         placeholder="Rechercher une récolte..."
-        width={400}
+        width="100%"
       />
 
+      <ListSlot container={listContainer}>
       {selectedHarvestId && (
         <div
           style={{
@@ -128,7 +158,7 @@ export default function HarvestAutoCompleteWidget({ onSelect }: Props) {
             <div
               style={{ padding: "20px", textAlign: "center", color: "#666" }}
             >
-              Aucun stock trouvé pour cette récolte.
+              Aucun stock disponible pour cette récolte.
             </div>
           )}
 
@@ -136,10 +166,12 @@ export default function HarvestAutoCompleteWidget({ onSelect }: Props) {
             <div>
               {stocks.map((stock) => {
                 const isSelected = selectedStockIds.includes(stock.id);
+                const isBlocked = !stock.isPressable;
 
                 return (
                   <label
                     key={stock.id}
+                    title={isBlocked ? "En attente d'analyse" : undefined}
                     style={{
                       display: "grid",
                       gridTemplateColumns: "50px 70px minmax(0, 1fr) 120px",
@@ -147,26 +179,80 @@ export default function HarvestAutoCompleteWidget({ onSelect }: Props) {
                       gap: "12px",
                       padding: "14px 16px",
                       borderBottom: "1px solid #eee",
-                      cursor: "pointer",
-                      background: isSelected ? "#f5f5f5" : "#fff",
+                      cursor: isBlocked ? "not-allowed" : "pointer",
+                      background: isBlocked
+                        ? "#fafafa"
+                        : isSelected
+                          ? "#f5f5f5"
+                          : "#fff",
+                      color: isBlocked ? "#999" : undefined,
                     }}
                   >
                     <div style={{ display: "flex", justifyContent: "center" }}>
                       <input
                         type="checkbox"
                         checked={isSelected}
+                        disabled={isBlocked}
                         onChange={() => handleToggleStock(stock.id)}
                         style={{
                           width: "18px",
                           height: "18px",
-                          cursor: "pointer",
+                          cursor: isBlocked ? "not-allowed" : "pointer",
                         }}
                       />
                     </div>
 
                     <div style={{ fontWeight: 600 }}>{stock.id}</div>
 
-                    <div style={{ fontWeight: 500 }}>{stock.reference}</div>
+                    <div
+                      style={{
+                        display: "flex",
+                        flexWrap: "wrap",
+                        alignItems: "center",
+                        gap: "8px",
+                        fontWeight: 500,
+                      }}
+                    >
+                      <span>{stock.reference}</span>
+
+                      {isBlocked && (
+                        <>
+                          <span
+                            style={{
+                              fontSize: "12px",
+                              padding: "2px 8px",
+                              borderRadius: "999px",
+                              background: "#fff4e5",
+                              color: "#b26a00",
+                            }}
+                          >
+                            En attente d'analyse
+                          </span>
+
+                          <button
+                            type="button"
+                            disabled={skippingId === stock.id}
+                            onClick={(event) => {
+                              event.preventDefault();
+                              handleSkipAnalysis(stock.id);
+                            }}
+                            style={{
+                              border: "1px solid #ccc",
+                              borderRadius: "6px",
+                              background: "#fff",
+                              padding: "2px 8px",
+                              fontSize: "12px",
+                              cursor: "pointer",
+                              color: "#333",
+                            }}
+                          >
+                            {skippingId === stock.id
+                              ? "..."
+                              : "Passer sans analyse"}
+                          </button>
+                        </>
+                      )}
+                    </div>
 
                     <div
                       style={{
@@ -175,7 +261,9 @@ export default function HarvestAutoCompleteWidget({ onSelect }: Props) {
                         textAlign: "right",
                       }}
                     >
-                      {stock.quantityKg} kg
+                      {stock.remainingKg < stock.quantityKg
+                        ? `${stock.remainingKg} / ${stock.quantityKg} kg`
+                        : `${stock.quantityKg} kg`}
                     </div>
                   </label>
                 );
@@ -209,7 +297,7 @@ export default function HarvestAutoCompleteWidget({ onSelect }: Props) {
                   fontWeight: 500,
                 }}
               >
-                {selectedStockIds.length === stocks.length
+                {selectedStockIds.length === pressableStocks.length
                   ? "Tout désélectionner"
                   : "Tout sélectionner"}
               </button>
@@ -222,6 +310,7 @@ export default function HarvestAutoCompleteWidget({ onSelect }: Props) {
           )}
         </div>
       )}
+      </ListSlot>
     </div>
   );
 }

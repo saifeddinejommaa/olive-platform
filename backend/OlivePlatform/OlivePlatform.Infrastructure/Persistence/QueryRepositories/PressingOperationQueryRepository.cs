@@ -58,15 +58,6 @@ public class PressingOperationQueryRepository : IPressiongOperationQueryReposito
         LEFT JOIN pressing_operation_inputs poi
             ON poi.pressing_operation_id = p.id
 
-        LEFT JOIN harvests h
-            ON h.id = poi.harvest_id
-
-        LEFT JOIN olive_purchase_items opi
-            ON opi.id = poi.purchase_item_id
-
-        LEFT JOIN olive_purchases op
-            ON op.id = opi.purchase_id
-
         WHERE 1 = 1
         """);
 
@@ -93,12 +84,21 @@ public class PressingOperationQueryRepository : IPressiongOperationQueryReposito
         // HARVEST NUMBER
         // ========================================================
 
+        // EXISTS : filtrer les entrées dans la jointure fausserait
+        // la quantité d'olives agrégée de l'opération.
         if (!string.IsNullOrWhiteSpace(filter.HarvestNumber))
         {
             sql.Append(
                 """
-            
-            AND h.reference ILIKE @HarvestNumber
+
+            AND EXISTS (
+                SELECT 1
+                FROM pressing_operation_inputs fpoi
+                INNER JOIN olive_lots fpl ON fpl.id = fpoi.lot_id
+                INNER JOIN harvests fh ON fh.id = fpl.harvest_id
+                WHERE fpoi.pressing_operation_id = p.id
+                  AND fh.reference ILIKE @HarvestNumber
+            )
             """);
 
             parameters.Add(
@@ -114,13 +114,54 @@ public class PressingOperationQueryRepository : IPressiongOperationQueryReposito
         {
             sql.Append(
                 """
-            
-            AND op.purchase_number ILIKE @PurchaseNumber
+
+            AND EXISTS (
+                SELECT 1
+                FROM pressing_operation_inputs fpoi
+                INNER JOIN olive_lots fpl ON fpl.id = fpoi.lot_id
+                INNER JOIN olive_purchases fop ON fop.id = fpl.purchase_id
+                WHERE fpoi.pressing_operation_id = p.id
+                  AND fop.reference ILIKE @PurchaseNumber
+            )
             """);
 
             parameters.Add(
                 "PurchaseNumber",
                 $"%{filter.PurchaseNumber}%");
+        }
+
+        // ========================================================
+        // DU : début de la pression (start_time)
+        // ========================================================
+
+        if (filter.FromDate.HasValue)
+        {
+            sql.Append(
+                """
+
+            AND p.start_time::date >= @FromDate
+            """);
+
+            parameters.Add(
+                "FromDate",
+                filter.FromDate.Value.ToDateTime(TimeOnly.MinValue));
+        }
+
+        // ========================================================
+        // AU : fin de la pression (end_time)
+        // ========================================================
+
+        if (filter.ToDate.HasValue)
+        {
+            sql.Append(
+                """
+
+            AND p.end_time::date <= @ToDate
+            """);
+
+            parameters.Add(
+                "ToDate",
+                filter.ToDate.Value.ToDateTime(TimeOnly.MinValue));
         }
 
         // ----------------------------------------------------
@@ -250,12 +291,6 @@ public class PressingOperationQueryRepository : IPressiongOperationQueryReposito
         LEFT JOIN pressing_operation_inputs poi
             ON poi.pressing_operation_id = po.id
 
-        LEFT JOIN harvests h
-            ON h.id = poi.harvest_id
-
-        LEFT JOIN olive_purchase_items opi
-            ON opi.id = poi.purchase_item_id
-
         WHERE po.id = @Id
 
         GROUP BY
@@ -286,41 +321,15 @@ public class PressingOperationQueryRepository : IPressiongOperationQueryReposito
         var sql = $"""
         SELECT
             poi.id AS {nameof(PressingOperationInputDetailsResponse.Id)},
-
-            CASE
-                WHEN poi.harvest_id IS NOT NULL THEN 1
-                WHEN poi.purchase_item_id IS NOT NULL THEN 2
-            END AS {nameof(PressingOperationInputDetailsResponse.SourceType)},
-
-            CASE
-                WHEN poi.harvest_id IS NOT NULL
-                    THEN poi.harvest_id
-                WHEN poi.purchase_item_id IS NOT NULL
-                    THEN poi.purchase_item_id
-            END AS {nameof(PressingOperationInputDetailsResponse.SourceId)},
-
-            CASE
-                WHEN poi.harvest_id IS NOT NULL
-                    THEN h.reference
-                WHEN poi.purchase_item_id IS NOT NULL
-                    THEN opi.reference
-            END AS {nameof(PressingOperationInputDetailsResponse.SourceReference)},
-
-            CASE
-                WHEN poi.harvest_id IS NOT NULL
-                    THEN h.quantity_kg
-                WHEN poi.purchase_item_id IS NOT NULL
-                    THEN opi.agreed_quantity_kg
-            END AS {nameof(PressingOperationInputDetailsResponse.QuantityKg)},
-
+            pl.id AS {nameof(PressingOperationInputDetailsResponse.LotId)},
+            pl.reference AS {nameof(PressingOperationInputDetailsResponse.LotReference)},
+            pl.source_type_id AS {nameof(PressingOperationInputDetailsResponse.SourceType)},
+            COALESCE(pl.harvest_id, pl.purchase_id) AS {nameof(PressingOperationInputDetailsResponse.SourceId)},
+            COALESCE(h.reference, op.reference) AS {nameof(PressingOperationInputDetailsResponse.SourceReference)},
+            pl.quantity_kg AS {nameof(PressingOperationInputDetailsResponse.QuantityKg)},
+            pl.remaining_kg AS {nameof(PressingOperationInputDetailsResponse.RemainingKg)},
             poi.quantity_kg AS {nameof(PressingOperationInputDetailsResponse.PressedQuantityKg)},
-
-            CASE
-                WHEN poi.harvest_id IS NOT NULL
-                    THEN h.variety_id
-                WHEN poi.purchase_item_id IS NOT NULL
-                    THEN opi.variety_id
-            END AS {nameof(PressingOperationInputDetailsResponse.OliveVarietyId)},
+            COALESCE(pl.variety_id, h.variety_id) AS {nameof(PressingOperationInputDetailsResponse.OliveVarietyId)},
 
             CASE
                 WHEN oa.id IS NULL THEN NULL
@@ -360,26 +369,17 @@ public class PressingOperationQueryRepository : IPressiongOperationQueryReposito
 
         FROM pressing_operation_inputs poi
 
-        LEFT JOIN harvests h
-            ON h.id = poi.harvest_id
+        INNER JOIN olive_lots pl
+            ON pl.id = poi.lot_id
 
-        LEFT JOIN olive_purchase_items opi
-            ON opi.id = poi.purchase_item_id
+        LEFT JOIN harvests h
+            ON h.id = pl.harvest_id
+
+        LEFT JOIN olive_purchases op
+            ON op.id = pl.purchase_id
 
         LEFT JOIN olive_analyses oa
-            ON oa.source_id = CASE
-                WHEN poi.harvest_id IS NOT NULL
-                    THEN poi.harvest_id
-                WHEN poi.purchase_item_id IS NOT NULL
-                    THEN poi.purchase_item_id
-            END
-
-            AND oa.source_type = CASE
-                WHEN poi.harvest_id IS NOT NULL
-                    THEN 1
-                WHEN poi.purchase_item_id IS NOT NULL
-                    THEN 2
-            END
+            ON oa.id = pl.olive_analysis_id
 
         WHERE poi.pressing_operation_id = @PressingOperationId
 

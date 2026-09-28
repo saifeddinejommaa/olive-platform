@@ -6,6 +6,8 @@ using OlivePlatform.Application.Features.Harvests.Commands.CreateHarvest;
 using OlivePlatform.Application.Features.Harvests.Commands.StartHarvest;
 using OlivePlatform.Application.Features.Harvests.Commands.UpdateHarvest;
 using OlivePlatform.Application.Features.Harvests.Requests;
+using OlivePlatform.Application.Features.OliveLots.Repositories;
+using OlivePlatform.Application.Features.OliveLots.Requests;
 using OlivePlatform.Domain.Entities;
 using OlivePlatform.Domain.QueryRepositories;
 
@@ -16,14 +18,17 @@ namespace OlivePlatform.Api.Controllers;
 public class HarvestsController : ControllerBase
 {
     private readonly IHarvestQueryRepository _harvestQueryRepository;
+    private readonly IOliveLotQueryRepository _oliveLotQueryRepository;
     private readonly IMediator _mediator;
 
     public HarvestsController(
         IHarvestQueryRepository harvestQueryRepository,
+        IOliveLotQueryRepository oliveLotQueryRepository,
         IMediator mediator)
     {
         _harvestQueryRepository =
             harvestQueryRepository;
+        _oliveLotQueryRepository = oliveLotQueryRepository;
         _mediator = mediator;
     }
 
@@ -57,16 +62,12 @@ public class HarvestsController : ControllerBase
         int id,
         CancellationToken cancellationToken)
     {
-        var stocks =
-            await _harvestQueryRepository.GetHarvestStocks(id,
-                cancellationToken);
+        // Stocks de la récolte = ses lots d'olives.
+        var lots = await _oliveLotQueryRepository.GetLots(
+            new OliveLotsRequestFilter { HarvestId = id },
+            cancellationToken);
 
-        if (stocks is null)
-        {
-            return NotFound();
-        }
-
-        return Ok(stocks);
+        return Ok(lots);
     }
 
 

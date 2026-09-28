@@ -12,6 +12,19 @@ export type OlivePurchaseItemDetailsResponse = {
 
   agreedQuantityKg: number;
 
+  // Lot d'olives : restant, statut et analyse.
+  remainingQuantityKg: number;
+
+  status: number;
+
+  needAnalysis: boolean;
+
+  isAnalyzed: boolean;
+
+  toAnalysis: boolean;
+
+  isPressable: boolean;
+
   pricePerKg: number;
 
   totalAmount: number | null;

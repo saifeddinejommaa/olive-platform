@@ -26,6 +26,7 @@ export default function FinishPressingInputSummaryRow({ input }: Props) {
       >
         <strong>
           {sourceTypeLabel} — {input.sourceReference}
+          {input.lotReference ? ` · ${input.lotReference}` : ""}
         </strong>
 
         <strong>{input.quantityKg} kg</strong>

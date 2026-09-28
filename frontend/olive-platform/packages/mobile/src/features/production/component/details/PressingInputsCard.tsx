@@ -44,6 +44,7 @@ export function PressingInputsCard({ operationId, status }: Props) {
               {input.sourceType === "harvest" ? "Récolte" : "Achat"}
               {" · "}
               {input.sourceReference}
+              {input.lotReference ? ` · ${input.lotReference}` : ""}
             </Text>
             <Text style={styles.quantity}>{input.quantityKg.toFixed(1)} kg</Text>
           </View>

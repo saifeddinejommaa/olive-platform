@@ -523,7 +523,7 @@ public class PaymentQueryRepository : IPaymentQueryRepository
             
                 COALESCE(
                     SUM(
-                        opi.agreed_quantity_kg * opi.price_per_kg
+                        opi.quantity_kg * COALESCE(opi.price_per_kg, 0)
                     ),
                     0
                 ) AS {nameof(PendingPaymentCostLineDetailResponse.TotalAmount)},
@@ -534,7 +534,7 @@ public class PaymentQueryRepository : IPaymentQueryRepository
             
             FROM public.olive_purchases op
             
-            LEFT JOIN public.olive_purchase_items opi
+            LEFT JOIN public.olive_lots opi
                 ON opi.purchase_id = op.id
             
             WHERE op.id = ANY(@SourceIds)

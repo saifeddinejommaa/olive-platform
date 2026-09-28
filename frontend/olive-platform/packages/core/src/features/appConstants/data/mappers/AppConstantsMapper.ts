@@ -15,6 +15,8 @@ export function mapConstantsResponseToModel(
     purchaseStatus: mapConstantItemResponseToModel(response.purchaseStatus),
     costLineTypes : mapConstantItemResponseToModel(response.costLineType),
     harvestTypes : mapConstantItemResponseToModel(response.harvestTypes),
+    plotHarvestStates: mapConstantItemResponseToModel(response.plotHarvestStates),
+    oliveLotStatuses: mapConstantItemResponseToModel(response.oliveLotStatuses),
   };
 }
 

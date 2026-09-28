@@ -87,7 +87,7 @@ export default function PressingOperationsPage() {
           onClick={handleCreate}
         >
           <IconPlus size={18} stroke={2} />
-          Nouvelle récolte
+          Nouvelle pression
         </Button>
       </div>
       <PressingOperationsFilterComponent />

@@ -25,7 +25,7 @@ public class CloseHarvestCommand : IRequest<Unit>
 public class CloseHarvestCommandHandler : IRequestHandler<CloseHarvestCommand, Unit>
 {
     private readonly IHarvestRepository _repository;
-    private readonly IHarvestStockRepository _harvestStockRepository;
+    private readonly IOliveLotRepository _oliveLotRepository;
     private readonly IDocumentNumberService _documentNumberService;
     private readonly IOliveAnalysisRepository _oliveAnalyseRepository;
     private readonly IUnitOfWork _unitOfWork;
@@ -33,14 +33,14 @@ public class CloseHarvestCommandHandler : IRequestHandler<CloseHarvestCommand, U
 
     public CloseHarvestCommandHandler(
         IHarvestRepository repository,
-        IHarvestStockRepository harvestStockRepository,
+        IOliveLotRepository oliveLotRepository,
         IDocumentNumberService documentNumberService,
         IOliveAnalysisRepository oliveAnalyseRepository,
         IUnitOfWork unitOfWork,
         ISeasonService seasonService)
     {
         _repository = repository;
-        _harvestStockRepository = harvestStockRepository;
+        _oliveLotRepository = oliveLotRepository;
         _documentNumberService = documentNumberService;
         _oliveAnalyseRepository = oliveAnalyseRepository;
         _unitOfWork = unitOfWork;
@@ -89,30 +89,12 @@ public class CloseHarvestCommandHandler : IRequestHandler<CloseHarvestCommand, U
 
             await _repository.UpdateAsync(harvest, ct);
 
-            foreach (var item in request.Stocks)
-            {
-                var operationNumber = await _documentNumberService.GenerateAsync(
-                    DocumentTypes.HarvestStock,
-                    DocumentPrefixes.HarvestStock,
-                    now.Year,
-                    ct);
-
-                var stock = new HarvestStock
-                {
-                    HarvestId = harvest.Id,
-                    Reference = operationNumber,
-                    QuantityKg = item.Quantitykg,
-                    Status = HarvestStockStatus.Available,
-                    CreatedAt = now,
-                    UpdatedAt = now
-                };
-
-                await _harvestStockRepository.AddAsync(stock, ct);
-            }
+            // Analyse unique partagée par tous les lots de la récolte.
+            int? analysisId = null;
 
             if (request.ProceedAnalyse)
             {
-                var operationNumber = await _documentNumberService.GenerateAsync(
+                var analysisReference = await _documentNumberService.GenerateAsync(
                     DocumentTypes.OliveAnalyse,
                     DocumentPrefixes.OliveAnalyse,
                     now.Year,
@@ -120,18 +102,46 @@ public class CloseHarvestCommandHandler : IRequestHandler<CloseHarvestCommand, U
 
                 var newAnalyse = new OliveAnalysis
                 {
-                    Reference = operationNumber,
+                    Reference = analysisReference,
                     SeasonId = harvest.SeasonId,
-                    SourceId = harvest.Id,
-                    SourceType = InputSourceType.Harvest,
                     Status = ProductionStatus.Planned,
                     CreatedAt = now,
-
-
+                    UpdatedAt = now
                 };
 
                 await _oliveAnalyseRepository.AddAsync(newAnalyse, ct);
+                // Enregistrée tout de suite : son id est repris par les lots.
+                await _unitOfWork.SaveChangesAsync(ct);
+
+                analysisId = newAnalyse.Id;
             }
+
+            foreach (var item in request.Stocks)
+            {
+                var lotReference = await _documentNumberService.GenerateAsync(
+                    DocumentTypes.OliveLot,
+                    DocumentPrefixes.OliveLot,
+                    now.Year,
+                    ct);
+
+                await _oliveLotRepository.AddAsync(new OliveLot
+                {
+                    Reference = lotReference,
+                    SeasonId = harvest.SeasonId,
+                    SourceType = InputSourceType.Harvest,
+                    HarvestId = harvest.Id,
+                    VarietyId = item.VarietyId,
+                    QuantityKg = item.Quantitykg,
+                    RemainingKg = item.Quantitykg,
+                    Status = OliveLotStatus.Available,
+                    NeedAnalysis = request.ProceedAnalyse,
+                    OliveAnalysisId = analysisId,
+                    CreatedAt = now,
+                    UpdatedAt = now
+                }, ct);
+            }
+
+            await _oliveLotRepository.SaveChangesAsync(ct);
         }, cancellationToken);
 
         return Unit.Value;

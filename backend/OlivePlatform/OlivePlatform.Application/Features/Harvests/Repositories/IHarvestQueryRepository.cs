@@ -11,9 +11,6 @@ public interface IHarvestQueryRepository
     Task<PagedResult<HarvestForListResponse>> GetHarvests(
         HarvestsRequestFilter filter);
 
-    Task<List<HarvestStockDetailsResponse>> GetHarvestStocks(int id,
-        CancellationToken cancellationToken = default);
-
     Task<OliveAnalysisDetailsResponse?> GetAnalysisDetails(int id, 
         CancellationToken cancellationToken = default);
 

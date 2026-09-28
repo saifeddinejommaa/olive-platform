@@ -22,7 +22,9 @@ export default function PressingOperationOliveCardWidget({
 }: Props) {
   const sourceLabel = input.sourceType === "harvest" ? "Récolte" : "Achat";
 
-  const title = `${sourceLabel} — ${input.sourceReference || "-"}`;
+  const title = `${sourceLabel} — ${input.sourceReference || "-"}${
+    input.lotReference ? ` · ${input.lotReference}` : ""
+  }`;
 
   return (
     <CollapsibleCard title={title}>

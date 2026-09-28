@@ -10,7 +10,10 @@ export type OliveAnalysesFilters = PaginationFilter & {
 
   harvestReference?: string;
 
-  plannedDate?: string;
+  // Du : début de l'analyse (start_time) ; Au : fin (end_time). Format "YYYY-MM-DD".
+  fromDate?: string;
 
-  status?: ProductionStatus;
+  toDate?: string;
+
+  status?: ProductionStatus | null;
 };

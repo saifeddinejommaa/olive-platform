@@ -1,4 +1,3 @@
-// domain/entities/DashboardSummary.ts
 export interface ProductionPipeline {
   plannedCount: number;
   inProgressCount: number;
@@ -10,11 +9,6 @@ export interface TreesCoverage {
   harvestedTrees: number;
   plannedTrees: number;
   notHarvestedTrees: number;
-}
-
-export interface HarvestYieldPoint {
-  date: string;
-  quantityKg: number;
 }
 
 export interface PressingComparisonPoint {
@@ -30,29 +24,38 @@ export interface TankOccupancy {
   occupancyPercentage: number;
 }
 
-export interface DashboardSummary {
-  harvestPipeline: ProductionPipeline;
-  pressingPipeline: ProductionPipeline;
-  treesCoverage: TreesCoverage;
-  harvestYield: HarvestYieldPoint[];
-  pressingComparison: PressingComparisonPoint[];
-  tankOccupancy: TankOccupancy;
-}
-
 export interface ChargesCoverage {
   totalAmount: number;
   paidAmount: number;
   unpaidAmount: number;
 }
 
-// dans DashboardSummary
+// Lots d'olives de la campagne, répartis par état (en kg).
+export interface OliveLotsOverview {
+  totalLots: number;
+  totalKg: number;
+  harvestKg: number;
+  purchaseKg: number;
+  // Pressions terminées.
+  pressedKg: number;
+  pressedLots: number;
+  // Réservé par une pression planifiée ou en cours.
+  inPressingKg: number;
+  inPressingLots: number;
+  // Restant pressable (analyse terminée ou non requise).
+  readyKg: number;
+  readyLots: number;
+  // Restant bloqué : analyse requise mais non terminée.
+  pendingAnalysisKg: number;
+  pendingAnalysisLots: number;
+}
+
 export interface DashboardSummary {
   harvestPipeline: ProductionPipeline;
   pressingPipeline: ProductionPipeline;
   treesCoverage: TreesCoverage;
-  harvestYield: HarvestYieldPoint[];
+  oliveLots: OliveLotsOverview;
   pressingComparison: PressingComparisonPoint[];
   tankOccupancy: TankOccupancy;
-  chargesCoverage: ChargesCoverage; // nouveau
+  chargesCoverage: ChargesCoverage;
 }
-
