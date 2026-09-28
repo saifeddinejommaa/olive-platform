@@ -25,6 +25,9 @@ import HarvestsPage from "./features/harvests/ui/pages/HarvestsPage";
 import CreateHarvestPage from "./features/harvests/ui/pages/NewHarvestPage";
 import HarvestDetailsPage from "./features/harvests/ui/pages/HarvestDetailsPage";
 
+// Stock d'olives (lots)
+import OliveLotsPage from "./features/oliveLots/ui/pages/OliveLotsPage";
+
 // Production (pressions)
 import PressingOperationsPage from "./features/production/ui/pages/PressingOperationsPage";
 import NewPressingOperationPage from "./features/production/ui/pages/NewPressingOperationPage";
@@ -76,6 +79,9 @@ function App() {
               <Route path="/harvests" element={<HarvestsPage />} />
               <Route path="/harvests/new" element={<CreateHarvestPage />} />
               <Route path="/harvests/harvest-operation/:id" element={<HarvestDetailsPage />} />
+
+              {/* Stock d'olives */}
+              <Route path="/olive-lots" element={<OliveLotsPage />} />
 
               {/* Production */}
               <Route path="/production" element={<PressingOperationsPage />} />
