@@ -10,6 +10,7 @@ const menuItems: MenuItem[] = [
   { label: "Parcelles", icon: "ti-map-2", path: "/plots" },
   { label: "Achats d'olives", icon: "ti-shopping-cart", path: "/olive-purchases" },
   { label: "Récoltes", icon: "ti-basket", path: "/harvests" },
+  { label: "Stock d'olives", icon: "ti-packages", path: "/olive-lots" },
   { label: "Production", icon: "ti-droplet", path: "/production" },
   { label: "Analyses d'olive", icon: "ti-flask", path: "/Olive-analyses" },
   { label: "Analyses d'huile", icon: "ti-flask-2", path: "/Oil-analyses" },
