@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 
 import DataTable from "../../../../common/widgets/tables/OrdersTable";
-import ActionCard from "../../../../common/widgets/actionCard/ActionCard";
 
 import { usePendingPaymentsStore } from "@olive-platform/core/features/payments/stores/UsePendingPaymentsStore";
 
@@ -90,24 +89,6 @@ export default function PendingPaymentTab() {
         item.paymentSources.length,
     },
 
-    {
-      key: "paymentSources" as keyof PendingPayment,
-      label: "Actions",
-      render: (item: PendingPayment) => (
-        <div
-          style={{
-            display: "flex",
-            gap: "4px",
-          }}
-        >
-          <ActionCard
-            type="edit"
-            title="Détails"
-            onClick={() => handleOpenDetails(item)}
-          />
-        </div>
-      ),
-    },
   ];
 
   return (
@@ -135,6 +116,7 @@ export default function PendingPaymentTab() {
       <DataTable
         data={payments.items}
         columns={columns}
+        onRowClick={handleOpenDetails}
         pageNumber={payments.pageNumber}
         pageSize={payments.pageSize}
         totalCount={payments.totalCount}

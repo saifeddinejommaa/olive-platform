@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 import Button from "../../../../common/widgets/button/Button";
 
@@ -17,6 +17,7 @@ import { productionStatusConfig } from "../../../../common/status/ProductionStat
 
 export default function HarvestDetailsPage() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
 
   const [closeDrawerOpen, setCloseDrawerOpen] = useState(false);
   const [activeTab, setActiveTab] =
@@ -128,6 +129,16 @@ export default function HarvestDetailsPage() {
             disabled={saving}
           >
             Clôturer la récolte
+          </Button>
+        )}
+
+        {/* Récolte terminée avec des lots à presser : ouvre « Nouvelle pression ». */}
+        {harvest?.canBePressed && (
+          <Button
+            variant="primary"
+            onClick={() => navigate(`/production/new?harvestId=${harvest.id}`)}
+          >
+            Lancer la pression
           </Button>
         )}
       </div>

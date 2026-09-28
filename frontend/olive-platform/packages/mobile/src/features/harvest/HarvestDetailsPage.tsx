@@ -113,6 +113,21 @@ export function HarvestDetailsPage({ harvestId }: Props) {
           />
         )}
 
+        {/* Récolte terminée avec des lots à presser : ouvre « Nouvelle pression ». */}
+        {harvest.canBePressed && (
+          <ActionCard
+            icon="⚙"
+            title="Lancer la pression"
+            subtitle="Presser les lots de cette récolte"
+            onPress={() =>
+              router.push({
+                pathname: "/production/new",
+                params: { harvestId: String(harvest.id) },
+              })
+            }
+          />
+        )}
+
         <View style={styles.tabs}>
           <HarvestTabs
             activeTab={activeTab}

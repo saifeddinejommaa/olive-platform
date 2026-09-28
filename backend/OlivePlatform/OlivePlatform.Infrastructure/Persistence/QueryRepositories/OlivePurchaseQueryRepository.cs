@@ -14,13 +14,6 @@ public class OlivePurchaseQueryRepository : IOlivePurchaseQueryRepository
 {
     private readonly IDbConnection _dbConnection;
 
-    private const string PressableLotSql = $"""
-                SELECT 1
-                FROM olive_lots pl
-                WHERE pl.purchase_id = op.id
-                  AND {OliveLotSql.PressableCondition}
-        """;
-
     private const string SelectableLotSql = $"""
                 SELECT 1
                 FROM olive_lots pl
@@ -94,7 +87,7 @@ public class OlivePurchaseQueryRepository : IOlivePurchaseQueryRepository
 
         (
             op.status_id = 3 -- Approved
-            AND EXISTS ({PressableLotSql})
+            AND EXISTS ({SelectableLotSql})
         ) AS {nameof(OlivePurchaseForListResponse.CanLaunchPression)}
 
     FROM olive_purchases op
@@ -339,7 +332,7 @@ public class OlivePurchaseQueryRepository : IOlivePurchaseQueryRepository
 
         (
             op.status_id = 3 -- Approved
-            AND EXISTS ({PressableLotSql})
+            AND EXISTS ({SelectableLotSql})
         ) AS {nameof(OlivePurchaseDetailsResponse.CanLaunchPression)}
 
     FROM olive_purchases op

@@ -6,7 +6,13 @@ type Column<T> = {
   key: keyof T;
   label: string;
   render?: (item: T) => React.ReactNode;
+  // Alignement ; la colonne « Actions » est toujours à droite.
+  align?: "left" | "right";
 };
+
+const isRightAligned = <T,>(column: Column<T>) =>
+  column.align === "right" ||
+  (column.align === undefined && column.label.toLowerCase() === "actions");
 
 type Props<T> = {
   data: T[];
@@ -38,7 +44,12 @@ export default function DataTable<T>({
           <thead>
             <tr>
               {columns.map((col) => (
-                <th key={String(col.key)}>{col.label}</th>
+                <th
+                  key={String(col.key)}
+                  className={isRightAligned(col) ? "cell-right" : undefined}
+                >
+                  {col.label}
+                </th>
               ))}
             </tr>
           </thead>
@@ -53,7 +64,10 @@ export default function DataTable<T>({
                 }}
               >
                 {columns.map((col) => (
-                  <td key={String(col.key)}>
+                  <td
+                    key={String(col.key)}
+                    className={isRightAligned(col) ? "cell-right" : undefined}
+                  >
                     {col.render
                       ? col.render(item)
                       : String(item[col.key] ?? "")}

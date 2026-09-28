@@ -6,7 +6,6 @@ import type { OliveAnalysis } from "@olive-platform/core/features/analyses/olive
 import { useOliveAnalysesStore } from "@olive-platform/core/features/analyses/oliveAnalyses/store/OliveAnalysesStore";
 import DataTable from "../../../../../common/widgets/tables/OrdersTable";
 import Button from "../../../../../common/widgets/button/Button";
-import ActionCard from "../../../../../common/widgets/actionCard/ActionCard";
 import OliveAnalysesFilterComponent from "../components/OliveAnalysesFilterComponent";
 import { usePageTitle } from "../../../../../common/hooks/usePageTitle";
 import { renderStatus } from "../../../../../common/status/StatusUtils";
@@ -74,17 +73,6 @@ export default function OliveAnalysesPage() {
           productionStatusConfig,
         ),
     },
-    {
-      key: "id" as keyof OliveAnalysis,
-      label: "Actions",
-      render: (item: OliveAnalysis) => (
-        <ActionCard
-          type="edit"
-          title="Détails"
-          onClick={() => handleOpenDetails(item.id)}
-        />
-      ),
-    },
   ];
 
   return (
@@ -118,6 +106,7 @@ export default function OliveAnalysesPage() {
       <DataTable
         data={analyses}
         columns={columns}
+        onRowClick={(item) => handleOpenDetails(item.id)}
         pageNumber={filter.pageNumber}
         pageSize={filter.pageSize}
         totalCount={total}

@@ -58,10 +58,12 @@ export default function PlotsPage() {
       label: "Actions",
       render: (item: PlotForList) => (
         <div style={{ display: "flex", gap: "4px" }}>
-          <ActionCard title="Détails" type="edit" onClick={() => handleOpenDetails(item.id)}></ActionCard>
-          
           {item.canLaunchHarvest && (
-            <ActionCard type="launch" title="Lancer Récolte" onClick={() => {}}></ActionCard>
+            <ActionCard
+              type="harvest"
+              title="Lancer une récolte"
+              onClick={() => navigate(`/harvests/new?plotId=${item.id}`)}
+            />
           )}
         </div>
       ),
@@ -75,6 +77,7 @@ export default function PlotsPage() {
       <DataTable
         data={Plots?.items ?? []}
         columns={columns}
+        onRowClick={(item) => handleOpenDetails(item.id)}
         pageNumber={Plots?.pageNumber ?? 1}
         pageSize={Plots?.pageSize ?? 10}
         totalCount={Plots?.totalCount ?? 0}

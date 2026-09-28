@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
+  ActivityIndicator,
   Keyboard,
   KeyboardAvoidingView,
   Platform,
@@ -17,6 +18,7 @@ import { IconPlus } from "@tabler/icons-react-native";
 import { CreatePressingOperation } from "@olive-platform/core/features/production/domain/useCases/CreatePressingOperation";
 import { ProductionStatus } from "@olive-platform/core/features/production/domain/entities/ProductionStatus";
 import type { CreatePressingOperationInputParams } from "@olive-platform/core/features/production/domain/params/CreatePressingOperationInputParams";
+import { GetHarvestDetails } from "@olive-platform/core/features/harvests/domain/usecases/GetHarvestDetails";
 
 import { Screen } from "../../components/Screen";
 import { DetailsHeader } from "../../components/DetailsHeader";
@@ -43,7 +45,12 @@ const newBlock = (): PressingSourceBlock => ({
 
 const formatKg = (value: number) => `${value.toLocaleString("fr-FR")} kg`;
 
-export function NewPressingOperationPage() {
+type Props = {
+  // Récolte présélectionnée (« Lancer la pression » du détail d'une récolte).
+  initialHarvestId?: number;
+};
+
+export function NewPressingOperationPage({ initialHarvestId }: Props) {
   const selectedSeason = useSeasonStore((state) =>
     state.seasons.find((season) => season.id === state.selectedSeasonId),
   );
@@ -54,9 +61,45 @@ export function NewPressingOperationPage() {
   );
   const [blocks, setBlocks] = useState<PressingSourceBlock[]>(() => [newBlock()]);
   const [notes, setNotes] = useState("");
+  const [preparing, setPreparing] = useState(!!initialHarvestId);
 
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+
+  // Récolte présélectionnée : le premier bloc la reprend, ses lots pressables cochés.
+  useEffect(() => {
+    if (!initialHarvestId) return;
+
+    let cancelled = false;
+
+    GetHarvestDetails(initialHarvestId)
+      .then((harvest) => {
+        if (cancelled) return;
+
+        setBlocks([
+          {
+            ...newBlock(),
+            sourceType: "harvest",
+            source: {
+              id: initialHarvestId,
+              reference: harvest.reference,
+              subtitle: "Récolte",
+            },
+            autoSelect: true,
+          },
+        ]);
+      })
+      .catch(() => {
+        if (!cancelled) setError("Impossible de charger la récolte sélectionnée.");
+      })
+      .finally(() => {
+        if (!cancelled) setPreparing(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [initialHarvestId]);
 
   // Une entrée de pression par lot coché, pour tout son restant.
   const inputs: CreatePressingOperationInputParams[] = blocks.flatMap((block) =>
@@ -178,7 +221,11 @@ export function NewPressingOperationPage() {
           </View>
 
           {/* SOURCES */}
-          {blocks.map((block, index) => (
+          {preparing && (
+            <ActivityIndicator style={styles.preparing} color={semanticColors.primary} />
+          )}
+
+          {!preparing && blocks.map((block, index) => (
             <PressingSourceCard
               key={block.key}
               index={index}
@@ -286,6 +333,10 @@ const styles = StyleSheet.create({
   notes: {
     minHeight: 90,
     textAlignVertical: "top",
+  },
+
+  preparing: {
+    paddingVertical: spacing.xl,
   },
 
   addSource: {

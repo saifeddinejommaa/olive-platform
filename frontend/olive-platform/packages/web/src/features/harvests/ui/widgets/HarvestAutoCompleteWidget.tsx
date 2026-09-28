@@ -1,8 +1,9 @@
 import ListSlot from "../../../../common/widgets/ListSlot";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Autocomplete } from "../../../../common/widgets/autoComplete/AutoComplete";
 import { useHarvestsAutocomplete } from "@olive-platform/core/features/harvests/hooks/UseHarvestsAutoComplete";
 import type { SourceOption } from "../../../production/ui/widgets/SourceReference";
+import type { InitialSource } from "../../../production/ui/widgets/InputTypes";
 import { useHarvestStocks } from "@olive-platform/core/features/harvests/hooks/UseHarvestStock";
 import { HarvestStockStatus } from "@olive-platform/core/features/harvests/domain/entities/HarvestStockStatus";
 import { SkipOliveLotAnalysis } from "@olive-platform/core/features/oliveLots/domain/usecases/SkipOliveLotAnalysis";
@@ -16,13 +17,23 @@ type Props = {
   onSelect: (source: SourceOption) => void;
   // Emplacement de la liste (ex. pleine largeur de la carte). Absent : sous la recherche.
   listContainer?: HTMLElement | null;
+  // Récolte présélectionnée : ses lots pressables sont cochés au chargement.
+  initialSource?: InitialSource;
 };
 
-export default function HarvestAutoCompleteWidget({ onSelect, listContainer }: Props) {
+export default function HarvestAutoCompleteWidget({
+  onSelect,
+  listContainer,
+  initialSource,
+}: Props) {
   const [selectedHarvestId, setSelectedHarvestId] = useState<number | null>(
-    null,
+    initialSource?.id ?? null,
   );
-  const [selectedHarvestReference, setSelectedHarvestReference] = useState("");
+  const [selectedHarvestReference, setSelectedHarvestReference] = useState(
+    initialSource?.reference ?? "",
+  );
+  // Cochage automatique fait une seule fois, au premier chargement des lots.
+  const autoSelectDone = useRef(!initialSource);
   const [selectedStockIds, setSelectedStockIds] = useState<number[]>([]);
   const [skippingId, setSkippingId] = useState<number | null>(null);
 
@@ -93,6 +104,19 @@ export default function HarvestAutoCompleteWidget({ onSelect, listContainer }: P
     emitSelection(next);
   };
 
+  // Récolte présélectionnée : tous ses lots pressables sont cochés.
+  useEffect(() => {
+    if (autoSelectDone.current || loadingStocks || !HarvestStock) return;
+
+    autoSelectDone.current = true;
+    const ids = pressableStocks.map((stock) => stock.id);
+
+    setSelectedStockIds(ids);
+    emitSelection(ids);
+    // Déclenché uniquement à l'arrivée des lots.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [HarvestStock, loadingStocks]);
+
   // « Passer sans analyse » : le lot devient sélectionnable.
   const handleSkipAnalysis = async (stockId: number) => {
     setSkippingId(stockId);
@@ -111,6 +135,7 @@ export default function HarvestAutoCompleteWidget({ onSelect, listContainer }: P
         useSearch={useHarvestsAutocomplete}
         getLabel={(harvest) => harvest.reference}
         onSelect={handleSelectHarvest}
+        defaultLabel={initialSource?.reference}
         placeholder="Rechercher une récolte..."
         width="100%"
       />
@@ -286,6 +311,7 @@ export default function HarvestAutoCompleteWidget({ onSelect, listContainer }: P
                 {stocks.length} stock{stocks.length > 1 ? "s" : ""}
               </span>
 
+              {pressableStocks.length > 0 ? (
               <button
                 type="button"
                 onClick={handleSelectAll}
@@ -301,6 +327,9 @@ export default function HarvestAutoCompleteWidget({ onSelect, listContainer }: P
                   ? "Tout désélectionner"
                   : "Tout sélectionner"}
               </button>
+              ) : (
+                <span />
+              )}
 
               <strong>
                 {selectedStockIds.length} sélectionné

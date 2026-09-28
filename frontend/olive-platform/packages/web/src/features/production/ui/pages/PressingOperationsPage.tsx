@@ -2,7 +2,6 @@ import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 
 import DataTable from "../../../../common/widgets/tables/OrdersTable";
-import ActionCard from "../../../../common/widgets/actionCard/ActionCard";
 import PressingOperationsFilterComponent from "../components/PressingOperationsFilterComponent";
 import { usePageTitle } from "../../../../common/hooks/usePageTitle";
 
@@ -62,17 +61,6 @@ export default function PressingOperationsPage() {
           ? `${item.oilQuantityLiters.toLocaleString()} L`
           : "—",
     },
-    {
-      key: "id" as keyof PressingOperationForList,
-      label: "Actions",
-      render: (item: PressingOperationForList) => (
-        <ActionCard
-          type="edit"
-          title="Détails"
-          onClick={() => handleOpenDetails(item.id)}
-        />
-      ),
-    },
   ];
 
   const handleCreate = () => {
@@ -95,6 +83,7 @@ export default function PressingOperationsPage() {
       <DataTable
         data={PressingOperations?.items ?? []}
         columns={columns}
+        onRowClick={(item) => handleOpenDetails(item.id)}
         pageNumber={PressingOperations?.pageNumber ?? 1}
         pageSize={PressingOperations?.pageSize ?? 10}
         totalCount={PressingOperations?.totalCount ?? 0}

@@ -1,9 +1,10 @@
 import ListSlot from "../../../../common/widgets/ListSlot";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Autocomplete } from "../../../../common/widgets/autoComplete/AutoComplete";
 import { UseOlivePurchaseAutoComplete } from "@olive-platform/core/features/olivePurchases/hooks/UseOlivePurchaseAutoComplete";
 import { GetOlivePurchaseItems } from "@olive-platform/core/features/olivePurchases/domain/usecases/GetOlivePurchaseItems";
 import type { SourceOption } from "../../../production/ui/widgets/SourceReference";
+import type { InitialSource } from "../../../production/ui/widgets/InputTypes";
 import type { OlivePurchaseItemDetails } from "@olive-platform/core/features/olivePurchases/domain/entities/OlivePurchaseItemDetails";
 import { getOliveVarietyLabel } from "@olive-platform/core/features/appConstants/helper/AppConstantsHelper";
 import { SkipOliveLotAnalysis } from "@olive-platform/core/features/oliveLots/domain/usecases/SkipOliveLotAnalysis";
@@ -17,14 +18,23 @@ type Props = {
   onSelect: (source: SourceOption) => void;
   // Emplacement de la liste (ex. pleine largeur de la carte). Absent : sous la recherche.
   listContainer?: HTMLElement | null;
+  // Achat présélectionné : ses lots pressables sont cochés au chargement.
+  initialSource?: InitialSource;
 };
 
-export default function OlivePurchaseAutoCompleteWidget({ onSelect, listContainer }: Props) {
+export default function OlivePurchaseAutoCompleteWidget({
+  onSelect,
+  listContainer,
+  initialSource,
+}: Props) {
   const [selectedPurchaseId, setSelectedPurchaseId] = useState<number | null>(
-    null,
+    initialSource?.id ?? null,
   );
-  const [selectedPurchaseReference, setSelectedPurchaseReference] =
-    useState("");
+  const [selectedPurchaseReference, setSelectedPurchaseReference] = useState(
+    initialSource?.reference ?? "",
+  );
+  // Cochage automatique fait une seule fois, au premier chargement des lots.
+  const autoSelectDone = useRef(!initialSource);
   const [purchaseItems, setPurchaseItems] = useState<
     OlivePurchaseItemDetails[]
   >([]);
@@ -123,6 +133,19 @@ export default function OlivePurchaseAutoCompleteWidget({ onSelect, listContaine
     emitSelection(next);
   };
 
+  // Achat présélectionné : tous ses lots pressables sont cochés.
+  useEffect(() => {
+    if (autoSelectDone.current || loadingItems || purchaseItems.length === 0) return;
+
+    autoSelectDone.current = true;
+    const ids = pressableLots.map((item) => item.id);
+
+    setSelectedItemIds(ids);
+    emitSelection(ids);
+    // Déclenché uniquement à l'arrivée des lots.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [purchaseItems, loadingItems]);
+
   // « Passer sans analyse » : le lot devient sélectionnable.
   const handleSkipAnalysis = async (itemId: number) => {
     setSkippingId(itemId);
@@ -141,6 +164,7 @@ export default function OlivePurchaseAutoCompleteWidget({ onSelect, listContaine
         useSearch={UseOlivePurchaseAutoComplete}
         getLabel={(purchase) => purchase.reference}
         onSelect={handleSelectPurchase}
+        defaultLabel={initialSource?.reference}
         placeholder="Rechercher un achat..."
         width="100%"
       />
@@ -338,6 +362,7 @@ export default function OlivePurchaseAutoCompleteWidget({ onSelect, listContaine
                 {lots.length} lot{lots.length > 1 ? "s" : ""}
               </span>
 
+              {pressableLots.length > 0 ? (
               <button
                 type="button"
                 onClick={handleSelectAll}
@@ -353,6 +378,9 @@ export default function OlivePurchaseAutoCompleteWidget({ onSelect, listContaine
                   ? "Tout désélectionner"
                   : "Tout sélectionner"}
               </button>
+              ) : (
+                <span />
+              )}
 
               <strong>
                 {selectedItemIds.length} sélectionné

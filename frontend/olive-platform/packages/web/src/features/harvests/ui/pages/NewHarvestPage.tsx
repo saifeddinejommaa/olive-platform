@@ -1,5 +1,5 @@
-import { useCallback, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "react-toastify";
 
 import Button from "../../../../common/widgets/button/Button";
@@ -163,6 +163,32 @@ export default function NewHarvestPage() {
     [selectVariety],
   );
 
+  // Ouverture depuis la liste des parcelles (« Lancer une récolte ») :
+  // la parcelle est présélectionnée et ses variétés chargées.
+  const [searchParams] = useSearchParams();
+  const initialPlotId = Number(searchParams.get("plotId")) || null;
+  const [initialPlotLabel, setInitialPlotLabel] = useState<string | undefined>();
+
+  useEffect(() => {
+    if (!initialPlotId) return;
+
+    let cancelled = false;
+
+    GetPlotDetails(initialPlotId)
+      .then((plot) => {
+        if (cancelled) return;
+        setInitialPlotLabel(`${plot.reference} - ${plot.name}`);
+        handlePlotSelect({ id: initialPlotId } as PlotForList);
+      })
+      .catch(() => {
+        if (!cancelled) toast.error("Impossible de charger la parcelle sélectionnée.");
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [initialPlotId, handlePlotSelect]);
+
   const handleSubmit = useCallback(async () => {
     const validationErrors = getValidationErrors();
     if (Object.keys(validationErrors).length > 0) {
@@ -215,6 +241,9 @@ export default function NewHarvestPage() {
             <label>Parcelle</label>
             <div style={{ width: "100%", minWidth: 0 }}>
               <Autocomplete
+                // Remonté quand la parcelle présélectionnée est connue.
+                key={initialPlotLabel ?? "plot"}
+                defaultLabel={initialPlotLabel}
                 useSearch={usePlotsAutocomplete}
                 getLabel={(plot) => `${plot.reference} - ${plot.name}`}
                 onSelect={handlePlotSelect}

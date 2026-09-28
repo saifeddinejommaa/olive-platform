@@ -18,6 +18,8 @@ type Props<T> = {
   width?: number | string;
   getLabel: (item: T) => string;
   onSelect: (item: T) => void;
+  // Libellé affiché à l'ouverture (élément déjà choisi, ex. récolte présélectionnée).
+  defaultLabel?: string;
 } & (SearchModeProps<T> | LocalModeProps<T>);
 
 export function Autocomplete<T>({
@@ -25,6 +27,7 @@ export function Autocomplete<T>({
   width = "100%",
   getLabel,
   onSelect,
+  defaultLabel,
   ...props
 }: Props<T>) {
   const [query, setQuery] = useState("");
@@ -52,6 +55,11 @@ export function Autocomplete<T>({
         placeholder={placeholder}
         isLoading={searchResult.loading}
         options={options}
+        defaultValue={
+          defaultLabel
+            ? { label: defaultLabel, value: undefined as unknown as T }
+            : undefined
+        }
         filterOption={() => true}
         isClearable
         onInputChange={(value) => {

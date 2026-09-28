@@ -2,10 +2,6 @@ import { create } from "zustand";
 import type { OlivePurchaseDetails } from "../domain/entities/OlivePurchaseDetails";
 import { GetOlivePurchaseDetails } from "../domain/usecases/GetOlivePurchaseDetails";
 import { ValidateOlivePurchase } from "../domain/usecases/ValidateOlivePurchase";
-import { CreatePressingOperation } from "../../production/domain/useCases/CreatePressingOperation";
-import { GetOlivePurchaseItems } from "../domain/usecases/GetOlivePurchaseItems";
-import type { CreatePressingOperationParams } from "../../production/domain/params/CreatePressingOperationParams";
-import { ProductionStatus } from "../../production/domain/entities/ProductionStatus";
 
 type OlivePurchaseDetailsState = {
   details?: OlivePurchaseDetails;
@@ -16,7 +12,6 @@ type OlivePurchaseDetailsState = {
 
   fetchPurchase: (id: number) => Promise<void>;
   validate: (id: number) => Promise<void>;
-  launchPressing: (purchaseId: number) => Promise<void>;
   clear: () => void;
 };
 
@@ -26,49 +21,6 @@ export const useOlivePurchaseDetailsStore = create<OlivePurchaseDetailsState>(
     loading: false,
     saving: false,
     error: null,
-    launchPressing: async (purchaseId: number) => {
-      try {
-        set({ loading: true, error: null });
-        const items = await GetOlivePurchaseItems(purchaseId);
-
-        // Uniquement les lots pressables (restant, analyse terminée ou non requise).
-        const pressable = items.filter((item) => item.isPressable);
-
-        if (pressable.length === 0) {
-          throw new Error(
-            items.some((item) => item.toAnalysis && item.remainingQuantityKg > 0)
-              ? "Les lots de cet achat sont en attente d'analyse."
-              : "Aucune quantité restante à presser pour cet achat.",
-          );
-        }
-
-        const inputs = pressable.map((item) => ({
-          lotId: item.id,
-          quantityKg: item.remainingQuantityKg,
-        }));
-
-        const request: CreatePressingOperationParams = {
-          plannedDate: new Date().toISOString(),
-          status: ProductionStatus.Planned,
-          notes: null,
-          startTime: null,
-          endTime: null,
-          oliveQuantityKg: pressable.reduce((total, item) => total + item.remainingQuantityKg, 0),
-          oilQuantityLiters: null,
-          inputs,
-        };
-
-        await CreatePressingOperation(request);
-      } catch (error: any) {
-        const message =
-          error?.message ?? "Impossible de créer l'opération de pression.";
-
-        set({ error: message });
-        throw error;
-      } finally {
-        set({ loading: false });
-      }
-    },
 
     fetchPurchase: async (id: number) => {
       set({ loading: true, error: null });

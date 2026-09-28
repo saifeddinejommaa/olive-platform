@@ -1,6 +1,6 @@
 // src/features/production/olivePurchases/presentation/pages/OlivePurchaseDetailsPage.tsx
 
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import type { PurchaseTab } from "../types/PurchaseTab";
 import { useEffect, useState } from "react";
 import { useOlivePurchaseDetailsStore } from "@olive-platform/core/features/olivePurchases/stores/OlivePurchaseDetailsStore";
@@ -20,13 +20,16 @@ export default function OlivePurchaseDetailsPage() {
   const [activeTab, setActiveTab] = useState<PurchaseTab>("general");
   const [closeDrawerOpen, setCloseDrawerOpen] = useState(false);
 
-  const { details, saving, fetchPurchase, validate, clear, launchPressing } =
+  const navigate = useNavigate();
+
+  const { details, saving, fetchPurchase, validate, clear } =
     useOlivePurchaseDetailsStore();
 
   const { fetchItems, clear: clearItems, items } = useOlivePurchaseItemsStore();
 
   const isDraft = details?.status === PurchaseStatus.Draft;
   const isPending = details?.status === PurchaseStatus.Pending;
+  const isApproved = details?.status === PurchaseStatus.Approved;
 
   usePageTitle(
     details ? `Achat d'olives ${details.reference}` : undefined,
@@ -83,13 +86,14 @@ export default function OlivePurchaseDetailsPage() {
             </Button>
           )}
 
-          {details?.canBePressed && (
+          {/* Achat validé avec des lots à presser : ouvre « Nouvelle pression ». */}
+          {isApproved && details?.canBePressed && (
             <Button
               variant="primary"
-              onClick={() => launchPressing(Number(id))}
+              onClick={() => navigate(`/production/new?purchaseId=${id}`)}
               disabled={saving}
             >
-              {saving ? "Lancement..." : "Lancer une pression"}
+              Lancer une pression
             </Button>
           )}
         </div>

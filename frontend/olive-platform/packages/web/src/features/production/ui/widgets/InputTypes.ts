@@ -10,8 +10,17 @@ export type LotSelection = {
   reference?: string;
 };
 
+// Source présélectionnée à l'ouverture (bouton « Lancer la pression » d'une
+// récolte ou d'un achat) : ses lots pressables sont cochés automatiquement.
+export type InitialSource = {
+  id: number;
+  reference: string;
+};
+
 export type PressingOperationInput = {
   id: string;
+
+  initialSource?: InitialSource;
 
   sourceType: InputSourceType;
 

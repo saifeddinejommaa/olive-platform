@@ -2,7 +2,6 @@
 
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
 
 import DataTable from "../../../../common/widgets/tables/OrdersTable";
 import ActionCard from "../../../../common/widgets/actionCard/ActionCard";
@@ -31,7 +30,6 @@ export default function OlivePurchasesPage() {
     loading,
     error,
     fetchOlivePurchases,
-    launchPressing,
   } = useOlivePurchasesStore();
 
   const { loading: constantsLoading, fetchConstants } = useConstantsStore();
@@ -53,14 +51,9 @@ export default function OlivePurchasesPage() {
     navigate(`/olive-purchases/${id}`);
   };
 
-  const handleLaunchPressing = async (purchaseId: number) => {
-    try {
-      const id = await launchPressing(purchaseId);
-      toast.success("Opération de pression créée avec succès.");
-      navigate(`/production/pressing-operations/${id}`);
-    } catch {
-      toast.error("Impossible de créer l'opération de pression.");
-    }
+  // Ouvre « Nouvelle pression » avec l'achat et ses lots pressables présélectionnés.
+  const handleLaunchPressing = (purchaseId: number) => {
+    navigate(`/production/new?purchaseId=${purchaseId}`);
   };
 
   const columns = [
@@ -105,15 +98,9 @@ export default function OlivePurchasesPage() {
       label: "Actions",
       render: (item: OlivePurchaseForList) => (
         <div style={{ display: "flex", gap: "4px" }}>
-          <ActionCard
-            type="edit"
-            title="Détails"
-            onClick={() => handleOpenDetails(item.id)}
-          />
-
           {item.canBePressed && (
             <ActionCard
-              type="launch"
+              type="press"
               title="Lancer la pression"
               onClick={() => handleLaunchPressing(item.id)}
             />
@@ -146,6 +133,7 @@ export default function OlivePurchasesPage() {
       <DataTable
         data={olivePurchases.items}
         columns={columns}
+        onRowClick={(item) => handleOpenDetails(item.id)}
         pageNumber={olivePurchases.pageNumber}
         pageSize={olivePurchases.pageSize}
         totalCount={olivePurchases.totalCount}

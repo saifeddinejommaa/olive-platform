@@ -21,6 +21,9 @@ namespace OlivePlatform.Application.Features.Harvests.Responses
         public int HarvestedTrees { get; set; }
         public string? Notes { get; set; }
         public ProductionStatus Status { get; set; }
+
+        // Récolte terminée avec des lots restant à presser (analyse en attente comprise).
+        public bool CanBePressed { get; set; }
         public DateTime? StartTime { get; set; }
         public DateTime? EndTime { get; set; }
         public DateTime CreatedAt { get; set; }

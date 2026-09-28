@@ -32,6 +32,7 @@ export function HarvestDetailsMapper(
     createdAt: response.createdAt,
 
     status: response.status as ProductionStatus,
+    canBePressed: response.canBePressed ?? false,
 
     startTime: response.startTime,
 

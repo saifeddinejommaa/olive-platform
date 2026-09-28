@@ -17,6 +17,8 @@ export interface HarvestDetailsResponse {
   createdAt: string;
   updatedAt: string | null;
   status: ProductionStatus;
+  // Récolte terminée avec des lots restant à presser.
+  canBePressed?: boolean;
   startTime: string | null;
   endTime: string | null;
   oliveAnalysis?: OliveAnalysisDetailsResponse;

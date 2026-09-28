@@ -39,6 +39,8 @@ export type PressingSourceBlock = {
   source: PressingSource | null;
   lots: PressingLot[];
   selectedLotIds: number[];
+  // Source présélectionnée : ses lots pressables sont cochés au premier chargement.
+  autoSelect?: boolean;
 };
 
 type Props = {
@@ -128,9 +130,10 @@ export function PressingSourceCard({
           onChange({
             ...block,
             lots,
-            selectedLotIds: block.selectedLotIds.filter((id) =>
-              pressableIds.includes(id),
-            ),
+            selectedLotIds: block.autoSelect
+              ? pressableIds
+              : block.selectedLotIds.filter((id) => pressableIds.includes(id)),
+            autoSelect: false,
           });
         }
       } catch {

@@ -1,5 +1,7 @@
-import { useCallback, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { GetHarvestDetails } from "@olive-platform/core/features/harvests/domain/usecases/GetHarvestDetails";
+import { GetOlivePurchaseDetails } from "@olive-platform/core/features/olivePurchases/domain/usecases/GetOlivePurchaseDetails";
 import { toast } from "react-toastify";
 
 import Button from "../../../../common/widgets/button/Button";
@@ -39,6 +41,67 @@ export default function NewPressingOperationPage() {
   const [form, setForm] = useState<NewPressingOperationForm>(initialForm);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
+
+  // Ouverture depuis une récolte ou un achat (« Lancer la pression ») :
+  // la source est présélectionnée et ses lots pressables cochés.
+  const [searchParams] = useSearchParams();
+  const initialHarvestId = Number(searchParams.get("harvestId")) || null;
+  const initialPurchaseId = Number(searchParams.get("purchaseId")) || null;
+  const [preparingSource, setPreparingSource] = useState(
+    !!(initialHarvestId || initialPurchaseId),
+  );
+
+  useEffect(() => {
+    const sourceId = initialHarvestId ?? initialPurchaseId;
+    if (!sourceId) return;
+
+    const isHarvest = !!initialHarvestId;
+    let cancelled = false;
+
+    const prepare = async () => {
+      try {
+        const details = isHarvest
+          ? await GetHarvestDetails(sourceId)
+          : await GetOlivePurchaseDetails(sourceId);
+        const reference = details?.reference ?? "";
+
+        if (cancelled) return;
+
+        setForm((previous) => ({
+          ...previous,
+          inputs: [
+            {
+              id: crypto.randomUUID(),
+              sourceType: isHarvest ? "harvest" : "purchase",
+              harvestId: isHarvest ? sourceId : null,
+              purchaseId: isHarvest ? null : sourceId,
+              initialSource: { id: sourceId, reference },
+              lots: [],
+              reference,
+              quantityKg: "",
+              notes: "",
+            },
+          ],
+        }));
+      } catch {
+        if (!cancelled) {
+          toast.error(
+            isHarvest
+              ? "Impossible de charger la récolte sélectionnée."
+              : "Impossible de charger l'achat sélectionné.",
+          );
+        }
+      } finally {
+        if (!cancelled) setPreparingSource(false);
+      }
+    };
+
+    prepare();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [initialHarvestId, initialPurchaseId]);
 
   usePageTitle(
     "Nouvelle opération de pression",
@@ -311,15 +374,19 @@ export default function NewPressingOperationPage() {
         </Card>
       </div>
 
-      <NewPressingOperationInputsWidget
-        inputs={form.inputs}
-        errors={errors}
-        onAdd={addInput}
-        onRemove={removeInput}
-        onUpdate={updateInput}
-        onChangeSource={changeInputSource}
-        onSelectSource={handleSelectSource}
-      />
+      {preparingSource ? (
+        <div className="filter-item-value">Chargement de la source…</div>
+      ) : (
+        <NewPressingOperationInputsWidget
+          inputs={form.inputs}
+          errors={errors}
+          onAdd={addInput}
+          onRemove={removeInput}
+          onUpdate={updateInput}
+          onChangeSource={changeInputSource}
+          onSelectSource={handleSelectSource}
+        />
+      )}
 
       {errors.general && (
         <div className="field-error" style={{ marginTop: "15px" }}>

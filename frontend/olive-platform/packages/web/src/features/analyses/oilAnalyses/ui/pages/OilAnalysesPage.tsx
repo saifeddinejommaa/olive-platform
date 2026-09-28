@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 
 import Button from "../../../../../common/widgets/button/Button";
 import DataTable from "../../../../../common/widgets/tables/OrdersTable";
-import ActionCard from "../../../../../common/widgets/actionCard/ActionCard";
 
 import { usePageTitle } from "../../../../../common/hooks/usePageTitle";
 
@@ -93,24 +92,6 @@ export default function OilAnalysesPage() {
         ),
     },
 
-    {
-      key: "id" as keyof OilAnalysisForList,
-      label: "Actions",
-      render: (item: OilAnalysisForList) => (
-        <div
-          style={{
-            display: "flex",
-            gap: "4px",
-          }}
-        >
-          <ActionCard
-            type="edit"
-            title="Détails"
-            onClick={() => handleOpenDetails(item.id)}
-          />
-        </div>
-      ),
-    },
   ];
 
   // ============================================================
@@ -149,6 +130,7 @@ export default function OilAnalysesPage() {
       <DataTable
         data={items}
         columns={columns}
+        onRowClick={(item) => handleOpenDetails(item.id)}
         pageNumber={pageNumber}
         pageSize={pageSize}
         totalCount={totalCount}

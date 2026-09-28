@@ -3,8 +3,6 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { toast } from "react-toastify";
-
 import DataTable from "../../../../common/widgets/tables/OrdersTable";
 import ActionCard from "../../../../common/widgets/actionCard/ActionCard";
 import HarvestsFilterComponent from "../components/HarvestsFilterComponent";
@@ -25,8 +23,7 @@ export default function HarvestsPage() {
     "Gestion des récoltes d'olives et suivi de leur qualité.",
   );
 
-  const { harvests, loading, error, fetchHarvests, launchPressingOperation } =
-    useHarvestsStore();
+  const { harvests, loading, error, fetchHarvests } = useHarvestsStore();
 
   const { fetchConstants } = useConstantsStore();
 
@@ -44,14 +41,9 @@ export default function HarvestsPage() {
     navigate(`/harvests/harvest-operation/${id}`);
   };
 
-  const handleLaunchPressing = async (id: number) => {
-    try {
-      await launchPressingOperation(id);
-      toast.success("La pression a été lancée avec succès.");
-      await fetchHarvests();
-    } catch {
-      toast.error("Une erreur est survenue lors du lancement de la pression.");
-    }
+  // Ouvre « Nouvelle pression » avec la récolte et ses lots pressables présélectionnés.
+  const handleLaunchPressing = (id: number) => {
+    navigate(`/production/new?harvestId=${id}`);
   };
 
   const columns = [
@@ -108,15 +100,9 @@ export default function HarvestsPage() {
       label: "Actions",
       render: (item: HarvestForList) => (
         <div style={{ display: "flex", gap: "4px" }}>
-          <ActionCard
-            type="edit"
-            title="Détails"
-            onClick={() => handleOpenDetails(item.id)}
-          />
-
           {item.canBePressed && (
             <ActionCard
-              type="launch"
+              type="press"
               title="Lancer la pression"
               onClick={() => handleLaunchPressing(item.id)}
             />
@@ -149,6 +135,7 @@ export default function HarvestsPage() {
       <DataTable
         data={harvests.items}
         columns={columns}
+        onRowClick={(item) => handleOpenDetails(item.id)}
         pageNumber={harvests.pageNumber}
         pageSize={harvests.pageSize}
         totalCount={harvests.totalCount}

@@ -32,6 +32,8 @@ export interface HarvestDetails {
   updatedAt: string | null;
 
   status: ProductionStatus;
+  // Récolte terminée avec des lots restant à presser.
+  canBePressed: boolean;
 
   startTime: string | null;
 

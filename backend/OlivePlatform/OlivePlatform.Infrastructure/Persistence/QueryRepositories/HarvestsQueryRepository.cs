@@ -75,7 +75,7 @@ public class HarvestQueryRepository : IHarvestQueryRepository
                     SELECT 1
                     FROM olive_lots pl
                     WHERE pl.harvest_id = h.id
-                      AND {OliveLotSql.PressableCondition}
+                      AND {OliveLotSql.SelectableCondition}
                 )
                 AND h.status = {(int)ProductionStatus.Completed} AS {nameof(HarvestForListResponse.CanBePressed)}
 
@@ -285,6 +285,15 @@ public class HarvestQueryRepository : IHarvestQueryRepository
             COALESCE(h.harvested_trees, 0) AS "{nameof(HarvestDetailsResponse.HarvestedTrees)}",
             h.notes AS "{nameof(HarvestDetailsResponse.Notes)}",
             h.status AS "{nameof(HarvestDetailsResponse.Status)}",
+            (
+                h.status = 3 -- Terminée
+                AND EXISTS (
+                    SELECT 1
+                    FROM olive_lots pl
+                    WHERE pl.harvest_id = h.id
+                      AND {OliveLotSql.SelectableCondition}
+                )
+            ) AS "{nameof(HarvestDetailsResponse.CanBePressed)}",
             h.start_time AS "{nameof(HarvestDetailsResponse.StartTime)}",
             h.harvest_type_id AS "{nameof(HarvestDetailsResponse.HarvestType)}",
             h.end_time AS "{nameof(HarvestDetailsResponse.EndTime)}",

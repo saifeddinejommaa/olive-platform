@@ -1,6 +1,6 @@
 import HarvestAutoCompleteWidget from "../../../harvests/ui/widgets/HarvestAutoCompleteWidget";
 import OlivePurchaseAutoCompleteWidget from "../../../olivePurchases/ui/widgets/OlivePurchaseAutCompleteWidget";
-import type { LotSelection, InputSourceType } from "./InputTypes";
+import type { InitialSource, LotSelection, InputSourceType } from "./InputTypes";
 
 export type SourceOption = {
   id: number;
@@ -18,6 +18,8 @@ type SourceReferenceProps = {
   onSelect: (source: SourceOption) => void;
   // Où afficher la liste des stocks / lignes d'achat (pleine largeur).
   listContainer?: HTMLElement | null;
+  // Source présélectionnée : ses lots pressables sont cochés à l'ouverture.
+  initialSource?: InitialSource;
 };
 
 export default function SourceReference({
@@ -25,6 +27,7 @@ export default function SourceReference({
   error,
   onSelect,
   listContainer,
+  initialSource,
 }: SourceReferenceProps) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
@@ -32,11 +35,13 @@ export default function SourceReference({
         <HarvestAutoCompleteWidget
           onSelect={onSelect}
           listContainer={listContainer}
+          initialSource={initialSource}
         />
       ) : (
         <OlivePurchaseAutoCompleteWidget
           onSelect={onSelect}
           listContainer={listContainer}
+          initialSource={initialSource}
         />
       )}
 

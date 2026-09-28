@@ -53,6 +53,39 @@
 
 
 /* =========================
+   ICÔNE SEULE (pression, récolte) - vert de la marque
+   ========================= */
+
+.action-card--icon {
+  min-width: 0;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border-radius: 50%;
+  background: var(--color-olive-100);
+  border-color: transparent;
+  color: var(--color-olive-700);
+}
+
+.action-card--icon .action-card__icon {
+  color: var(--color-olive-700);
+}
+
+.action-card--icon:hover {
+  background: var(--color-olive-700);
+  color: var(--color-white);
+  box-shadow: var(--shadow-sm);
+}
+
+.action-card--icon:hover .action-card__icon {
+  color: var(--color-white);
+}
+
+.action-card--icon:active {
+  transform: translateY(1px);
+}
+
+/* =========================
    EDIT - BLEU
    ========================= */
 

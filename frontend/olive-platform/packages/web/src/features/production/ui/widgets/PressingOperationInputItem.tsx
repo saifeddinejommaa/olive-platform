@@ -104,6 +104,7 @@ export default function PressingOperationInputItem({
             error={sourceError}
             onSelect={handleSelectSource}
             listContainer={listContainer}
+            initialSource={input.initialSource}
           />
         </div>
 

@@ -519,6 +519,15 @@ textarea {
   border-bottom: none;
 }
 
+/* Colonnes alignées à droite (ex. « Actions »), y compris leurs conteneurs flex. */
+.modern-table .cell-right {
+  text-align: right;
+}
+
+.modern-table td.cell-right > div {
+  justify-content: flex-end;
+}
+
 .pagination {
   display: flex;
   align-items: center;
