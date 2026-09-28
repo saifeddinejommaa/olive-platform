@@ -1,3 +1,4 @@
+import ListSlot from "../../../../common/widgets/ListSlot";
 import { useEffect, useState } from "react";
 import { Autocomplete } from "../../../../common/widgets/autoComplete/AutoComplete";
 import { UseOlivePurchaseAutoComplete } from "@olive-platform/core/features/olivePurchases/hooks/UseOlivePurchaseAutoComplete";
@@ -5,6 +6,7 @@ import { GetOlivePurchaseItems } from "@olive-platform/core/features/olivePurcha
 import type { SourceOption } from "../../../production/ui/widgets/SourceReference";
 import type { OlivePurchaseItemDetails } from "@olive-platform/core/features/olivePurchases/domain/entities/OlivePurchaseItemDetails";
 import { getOliveVarietyLabel } from "@olive-platform/core/features/appConstants/helper/AppConstantsHelper";
+import { SkipOliveLotAnalysis } from "@olive-platform/core/features/oliveLots/domain/usecases/SkipOliveLotAnalysis";
 
 type PurchaseOption = {
   id: number;
@@ -13,9 +15,11 @@ type PurchaseOption = {
 
 type Props = {
   onSelect: (source: SourceOption) => void;
+  // Emplacement de la liste (ex. pleine largeur de la carte). Absent : sous la recherche.
+  listContainer?: HTMLElement | null;
 };
 
-export default function OlivePurchaseAutoCompleteWidget({ onSelect }: Props) {
+export default function OlivePurchaseAutoCompleteWidget({ onSelect, listContainer }: Props) {
   const [selectedPurchaseId, setSelectedPurchaseId] = useState<number | null>(
     null,
   );
@@ -26,6 +30,16 @@ export default function OlivePurchaseAutoCompleteWidget({ onSelect }: Props) {
   >([]);
   const [selectedItemIds, setSelectedItemIds] = useState<number[]>([]);
   const [loadingItems, setLoadingItems] = useState(false);
+  const [skippingId, setSkippingId] = useState<number | null>(null);
+  // Incrémenté pour recharger les lots (ex. après « Passer sans analyse »).
+  const [version, setVersion] = useState(0);
+
+  // Lots avec du restant (statut Disponible / Partiellement utilisé). Ceux dont
+  // l'analyse n'est pas terminée sont affichés grisés (non sélectionnables).
+  const lots = purchaseItems.filter(
+    (item) => item.remainingQuantityKg > 0 && (item.status === 1 || item.status === 2),
+  );
+  const pressableLots = lots.filter((item) => item.isPressable);
 
   useEffect(() => {
     if (!selectedPurchaseId) return;
@@ -50,7 +64,7 @@ export default function OlivePurchaseAutoCompleteWidget({ onSelect }: Props) {
     return () => {
       cancelled = true;
     };
-  }, [selectedPurchaseId]);
+  }, [selectedPurchaseId, version]);
 
   const handleSelectPurchase = (purchase: PurchaseOption) => {
     setSelectedPurchaseId(purchase.id);
@@ -61,16 +75,16 @@ export default function OlivePurchaseAutoCompleteWidget({ onSelect }: Props) {
     onSelect({
       id: purchase.id,
       reference: purchase.reference,
-      purchaseItemIds: [],
+      lots: [],
     });
   };
 
   const emitSelection = (itemIds: number[]) => {
-    const selectedItems = purchaseItems.filter((item) =>
+    const selectedItems = pressableLots.filter((item) =>
       itemIds.includes(item.id),
     );
     const quantityKg = selectedItems.reduce(
-      (total, item) => total + Number(item.agreedQuantityKg ?? 0),
+      (total, item) => total + Number(item.remainingQuantityKg ?? 0),
       0,
     );
 
@@ -78,7 +92,11 @@ export default function OlivePurchaseAutoCompleteWidget({ onSelect }: Props) {
       onSelect({
         id: selectedPurchaseId,
         reference: selectedPurchaseReference,
-        purchaseItemIds: itemIds,
+        lots: selectedItems.map((item) => ({
+          id: item.id,
+          reference: item.reference,
+          quantityKg: Number(item.remainingQuantityKg ?? 0),
+        })),
         quantityKg,
       });
     }
@@ -97,12 +115,24 @@ export default function OlivePurchaseAutoCompleteWidget({ onSelect }: Props) {
 
   const handleSelectAll = () => {
     const next =
-      selectedItemIds.length === purchaseItems.length
+      selectedItemIds.length === pressableLots.length
         ? []
-        : purchaseItems.map((item) => item.id);
+        : pressableLots.map((item) => item.id);
 
     setSelectedItemIds(next);
     emitSelection(next);
+  };
+
+  // « Passer sans analyse » : le lot devient sélectionnable.
+  const handleSkipAnalysis = async (itemId: number) => {
+    setSkippingId(itemId);
+
+    try {
+      await SkipOliveLotAnalysis(itemId);
+      setVersion((current) => current + 1);
+    } finally {
+      setSkippingId(null);
+    }
   };
 
   return (
@@ -112,9 +142,10 @@ export default function OlivePurchaseAutoCompleteWidget({ onSelect }: Props) {
         getLabel={(purchase) => purchase.reference}
         onSelect={handleSelectPurchase}
         placeholder="Rechercher un achat..."
-        width={400}
+        width="100%"
       />
 
+      <ListSlot container={listContainer}>
       {selectedPurchaseId && (
         <div
           style={{
@@ -153,23 +184,25 @@ export default function OlivePurchaseAutoCompleteWidget({ onSelect }: Props) {
             </div>
           )}
 
-          {!loadingItems && purchaseItems.length === 0 && (
+          {!loadingItems && lots.length === 0 && (
             <div
               style={{ padding: "20px", textAlign: "center", color: "#666" }}
             >
-              Aucun lot trouvé pour cet achat.
+              Aucun lot disponible pour cet achat.
             </div>
           )}
 
-          {!loadingItems && purchaseItems.length > 0 && (
+          {!loadingItems && lots.length > 0 && (
             <div>
-              {purchaseItems.map((item) => {
+              {lots.map((item) => {
                 const isSelected = selectedItemIds.includes(item.id);
+                const isBlocked = !item.isPressable;
                 const varietyLabel = getOliveVarietyLabel(item.variety);
 
                 return (
                   <label
                     key={item.id}
+                    title={isBlocked ? "En attente d'analyse" : undefined}
                     style={{
                       display: "grid",
                       gridTemplateColumns: "50px 70px minmax(0, 1fr) 120px",
@@ -177,19 +210,25 @@ export default function OlivePurchaseAutoCompleteWidget({ onSelect }: Props) {
                       gap: "12px",
                       padding: "14px 16px",
                       borderBottom: "1px solid #eee",
-                      cursor: "pointer",
-                      background: isSelected ? "#f5f5f5" : "#fff",
+                      cursor: isBlocked ? "not-allowed" : "pointer",
+                      background: isBlocked
+                        ? "#fafafa"
+                        : isSelected
+                          ? "#f5f5f5"
+                          : "#fff",
+                      color: isBlocked ? "#999" : undefined,
                     }}
                   >
                     <div style={{ display: "flex", justifyContent: "center" }}>
                       <input
                         type="checkbox"
                         checked={isSelected}
+                        disabled={isBlocked}
                         onChange={() => handleToggleItem(item.id)}
                         style={{
                           width: "18px",
                           height: "18px",
-                          cursor: "pointer",
+                          cursor: isBlocked ? "not-allowed" : "pointer",
                         }}
                       />
                     </div>
@@ -220,6 +259,51 @@ export default function OlivePurchaseAutoCompleteWidget({ onSelect }: Props) {
                           {varietyLabel}
                         </span>
                       )}
+
+                      {isBlocked && (
+                        <span
+                          style={{
+                            display: "flex",
+                            flexWrap: "wrap",
+                            alignItems: "center",
+                            gap: "8px",
+                          }}
+                        >
+                          <span
+                            style={{
+                              fontSize: "12px",
+                              padding: "2px 8px",
+                              borderRadius: "999px",
+                              background: "#fff4e5",
+                              color: "#b26a00",
+                            }}
+                          >
+                            En attente d'analyse
+                          </span>
+
+                          <button
+                            type="button"
+                            disabled={skippingId === item.id}
+                            onClick={(event) => {
+                              event.preventDefault();
+                              handleSkipAnalysis(item.id);
+                            }}
+                            style={{
+                              border: "1px solid #ccc",
+                              borderRadius: "6px",
+                              background: "#fff",
+                              padding: "2px 8px",
+                              fontSize: "12px",
+                              cursor: "pointer",
+                              color: "#333",
+                            }}
+                          >
+                            {skippingId === item.id
+                              ? "..."
+                              : "Passer sans analyse"}
+                          </button>
+                        </span>
+                      )}
                     </div>
 
                     <div
@@ -229,7 +313,9 @@ export default function OlivePurchaseAutoCompleteWidget({ onSelect }: Props) {
                         textAlign: "right",
                       }}
                     >
-                      {item.agreedQuantityKg} kg
+                      {item.remainingQuantityKg < item.agreedQuantityKg
+                        ? `${item.remainingQuantityKg} / ${item.agreedQuantityKg} kg`
+                        : `${item.agreedQuantityKg} kg`}
                     </div>
                   </label>
                 );
@@ -237,7 +323,7 @@ export default function OlivePurchaseAutoCompleteWidget({ onSelect }: Props) {
             </div>
           )}
 
-          {!loadingItems && purchaseItems.length > 0 && (
+          {!loadingItems && lots.length > 0 && (
             <div
               style={{
                 padding: "12px 16px",
@@ -249,7 +335,7 @@ export default function OlivePurchaseAutoCompleteWidget({ onSelect }: Props) {
               }}
             >
               <span style={{ fontSize: "13px", color: "#666" }}>
-                {purchaseItems.length} lot{purchaseItems.length > 1 ? "s" : ""}
+                {lots.length} lot{lots.length > 1 ? "s" : ""}
               </span>
 
               <button
@@ -263,7 +349,7 @@ export default function OlivePurchaseAutoCompleteWidget({ onSelect }: Props) {
                   fontWeight: 500,
                 }}
               >
-                {selectedItemIds.length === purchaseItems.length
+                {selectedItemIds.length === pressableLots.length
                   ? "Tout désélectionner"
                   : "Tout sélectionner"}
               </button>
@@ -276,6 +362,7 @@ export default function OlivePurchaseAutoCompleteWidget({ onSelect }: Props) {
           )}
         </div>
       )}
+      </ListSlot>
     </div>
   );
 }

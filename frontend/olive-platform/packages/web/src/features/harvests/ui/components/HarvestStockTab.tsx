@@ -1,4 +1,6 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
+import { SkipOliveLotAnalysis } from "@olive-platform/core/features/oliveLots/domain/usecases/SkipOliveLotAnalysis";
 
 import CollapsibleCard from "../../../../common/widgets/collapsibleCard/CollapsibleCard";
 
@@ -37,6 +39,22 @@ export default function HarvestStocksTab({ harvestId }: Props) {
             fetchAnalysis(harvestId);
         }
     }, [harvestId, stocks.length, fetchAnalysis]);
+
+    const [skippingId, setSkippingId] = useState<number | null>(null);
+
+    // « Passer sans analyse » : le lot devient pressable.
+    const handleSkipAnalysis = async (stockId: number) => {
+        setSkippingId(stockId);
+
+        try {
+            await SkipOliveLotAnalysis(stockId);
+            await fetchStocksList(harvestId);
+        } catch (error: any) {
+            toast.error(error?.message ?? "Impossible de passer le lot sans analyse.");
+        } finally {
+            setSkippingId(null);
+        }
+    };
 
     const hasStocks = stocks.length > 0;
 
@@ -96,16 +114,22 @@ export default function HarvestStocksTab({ harvestId }: Props) {
                         </div>
                     )}
 
-                    {!stocksLoading &&
-                        !stocksError &&
-                        stocks.map((stock) => (
-                            <CollapsibleCard
-                                key={stock.id}
-                                title={stock.reference}
-                            >
-                                <HarvestStockInfo stock={stock} />
-                            </CollapsibleCard>
-                        ))}
+                    {!stocksLoading && !stocksError && hasStocks && (
+                        <div className="harvest-stock-list">
+                            {stocks.map((stock) => (
+                                <CollapsibleCard
+                                    key={stock.id}
+                                    title={stock.reference}
+                                >
+                                    <HarvestStockInfo
+                                        stock={stock}
+                                        onSkipAnalysis={handleSkipAnalysis}
+                                        skipping={skippingId === stock.id}
+                                    />
+                                </CollapsibleCard>
+                            ))}
+                        </div>
+                    )}
 
                     {!stocksLoading &&
                         !stocksError &&
@@ -154,9 +178,17 @@ export default function HarvestStocksTab({ harvestId }: Props) {
                     {!analysisLoading &&
                         !analysisError &&
                         analysis && (
-                            <OliveAnalysisInfoWidget
-                                analysis={analysis}
-                            />
+                            <div className="harvest-stock-list">
+                                <CollapsibleCard
+                                    title={`Analyse — ${analysis.reference}`}
+                                    defaultExpanded
+                                >
+                                    <OliveAnalysisInfoWidget
+                                        analysis={analysis}
+                                        hideTitle
+                                    />
+                                </CollapsibleCard>
+                            </div>
                         )}
 
                     {!analysisLoading &&

@@ -25,12 +25,14 @@ import { useConstantsStore } from "../../../stores/ConstantsStore";
 type Props = {
   harvest: {
     id: number;
-    reference: string;
     status: ProductionStatus;
     plannedDate?: string | null;
     plannedTrees: number;
+    harvestedTrees?: number | null;
+    quantityKg?: number | null;
     notes?: string | null;
     harvestType: number;
+    variety?: number | null;
   };
 };
 
@@ -68,6 +70,14 @@ export function HarvestGeneralInfoCard({
     harvest.notes ?? "",
   );
 
+  const [harvestedTrees, setHarvestedTrees] = useState(
+    String(harvest.harvestedTrees ?? 0),
+  );
+
+  const [quantityKg, setQuantityKg] = useState(
+    String(harvest.quantityKg ?? 0),
+  );
+
   const [harvestType, setHarvestType] =
     useState<number>(harvest.harvestType);
 
@@ -80,6 +90,10 @@ export function HarvestGeneralInfoCard({
   const selectedHarvestType = harvestTypes.find(
     (type) => type.id === harvest.harvestType,
   );
+
+  const varietyLabel = Appconstants.oliveVarieties.find(
+    (variety) => variety.id === harvest.variety,
+  )?.label;
 
   const isPlanned =
     harvest.status === ProductionStatus.Planned;
@@ -103,6 +117,10 @@ export function HarvestGeneralInfoCard({
     setNotes(harvest.notes ?? "");
 
     setHarvestType(harvest.harvestType);
+
+    setHarvestedTrees(String(harvest.harvestedTrees ?? 0));
+
+    setQuantityKg(String(harvest.quantityKg ?? 0));
 
     setIsEditing(true);
   };
@@ -139,17 +157,35 @@ export function HarvestGeneralInfoCard({
       }
 
       if (isInProgress) {
+        const parsedTrees = Number(harvestedTrees.trim() || "0");
+        const parsedQuantity = Number(
+          quantityKg.replace(",", ".").trim() || "0",
+        );
+
+        if (
+          !Number.isInteger(parsedTrees) || parsedTrees < 0 ||
+          Number.isNaN(parsedQuantity) || parsedQuantity < 0
+        ) {
+          Alert.alert(
+            "Erreur",
+            "La quantité et le nombre d'arbres récoltés doivent être des nombres positifs.",
+          );
+          return;
+        }
+
         await update(harvest.id, {
           notes,
+          harvestedTrees: parsedTrees,
+          quantityKg: parsedQuantity,
         });
       }
 
       setIsEditing(false);
       setShowDatePicker(false);
-    } catch {
+    } catch (e: any) {
       Alert.alert(
         "Erreur",
-        "Impossible de mettre à jour les informations.",
+        e?.message ?? "Impossible de mettre à jour les informations.",
       );
     }
   };
@@ -167,27 +203,6 @@ export function HarvestGeneralInfoCard({
 
   return (
     <View style={styles.card}>
-      {/* Référence */}
-      <View style={styles.row}>
-        <Text
-          style={[
-            typography.caption,
-            styles.field,
-          ]}
-        >
-          Référence
-        </Text>
-
-        <Text
-          style={[
-            typography.bodyStrong,
-            styles.value,
-          ]}
-        >
-          {harvest.reference}
-        </Text>
-      </View>
-
       {/* Date */}
       <View style={styles.row}>
         <Text
@@ -282,6 +297,27 @@ export function HarvestGeneralInfoCard({
         )}
       </View>
 
+      {/* Variété */}
+      <View style={styles.row}>
+        <Text
+          style={[
+            typography.caption,
+            styles.field,
+          ]}
+        >
+          Variété
+        </Text>
+
+        <Text
+          style={[
+            typography.bodyStrong,
+            styles.value,
+          ]}
+        >
+          {varietyLabel ?? "—"}
+        </Text>
+      </View>
+
       {/* Arbres prévus */}
       <View style={styles.row}>
         <Text
@@ -311,6 +347,72 @@ export function HarvestGeneralInfoCard({
             ]}
           >
             {harvest.plannedTrees}
+          </Text>
+        )}
+      </View>
+
+      {/* Arbres récoltés (modifiable pendant la récolte) */}
+      <View style={styles.row}>
+        <Text
+          style={[
+            typography.caption,
+            styles.field,
+          ]}
+        >
+          Arbres récoltés
+        </Text>
+
+        {isEditing && isInProgress ? (
+          <TextInput
+            style={[
+              typography.body,
+              styles.input,
+            ]}
+            keyboardType="number-pad"
+            value={harvestedTrees}
+            onChangeText={setHarvestedTrees}
+          />
+        ) : (
+          <Text
+            style={[
+              typography.bodyStrong,
+              styles.value,
+            ]}
+          >
+            {harvest.harvestedTrees ?? 0}
+          </Text>
+        )}
+      </View>
+
+      {/* Quantité (modifiable pendant la récolte) */}
+      <View style={styles.row}>
+        <Text
+          style={[
+            typography.caption,
+            styles.field,
+          ]}
+        >
+          Quantité (kg)
+        </Text>
+
+        {isEditing && isInProgress ? (
+          <TextInput
+            style={[
+              typography.body,
+              styles.input,
+            ]}
+            keyboardType="decimal-pad"
+            value={quantityKg}
+            onChangeText={setQuantityKg}
+          />
+        ) : (
+          <Text
+            style={[
+              typography.bodyStrong,
+              styles.value,
+            ]}
+          >
+            {(harvest.quantityKg ?? 0).toLocaleString("fr-FR")}
           </Text>
         )}
       </View>

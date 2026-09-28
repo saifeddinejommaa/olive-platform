@@ -1,4 +1,4 @@
-﻿
+
 using OlivePlatform.Domain.Enums;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -13,11 +13,9 @@ public class PressingOperationInput
     [Column("pressing_operation_id")]
     public int PressingOperationId { get;  set; }
 
-    [Column("harvest_id")]
-    public int? HarvestId { get;  set; }
-
-    [Column("purchase_item_id")]
-    public int? PurchaseItemId { get;  set; }
+    // Lot d'olives pressé (récolte ou achat) : réservé puis consommé.
+    [Column("lot_id")]
+    public long LotId { get; set; }
 
     [Column("quantity_kg")]
     public decimal QuantityKg { get;  set; }

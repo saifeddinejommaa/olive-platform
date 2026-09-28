@@ -18,12 +18,6 @@ public class OliveAnalysis
     [Column("reference")]
     public required string Reference { get; set; }
 
-    [Column("source_type")]
-    public InputSourceType SourceType { get; set; }
-
-    [Column("source_id")]
-    public int SourceId { get; set; }
-
     [Column("humidity_percentage", TypeName = "numeric(10,3)")]
     public decimal? HumidityPercentage { get; set; }
 

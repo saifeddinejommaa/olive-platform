@@ -33,22 +33,23 @@ public class CreateProductionBatchCommandHandler
     : IRequestHandler<CreatePressingOperationCommand, Unit>
 {
     private readonly IPressingOperationsRepository _repository;
-    private readonly IOliveAnalysisRepository _oliveAnalysisRepository;
     private readonly IDocumentNumberService _documentNumberService;
     private readonly ISeasonService _seasonService;
-
-    private const decimal OliveOilDensityKgPerLiter = 0.916m;
+    private readonly IOliveLotService _oliveLotService;
+    private readonly IUnitOfWork _unitOfWork;
 
     public CreateProductionBatchCommandHandler(
         IPressingOperationsRepository repository,
         IDocumentNumberService documentNumberService,
-        IOliveAnalysisRepository oliveAnalysisRepository,
-        ISeasonService seasonService)
+        ISeasonService seasonService,
+        IOliveLotService oliveLotService,
+        IUnitOfWork unitOfWork)
     {
         _repository = repository;
         _documentNumberService = documentNumberService;
-        _oliveAnalysisRepository = oliveAnalysisRepository;
         _seasonService = seasonService;
+        _oliveLotService = oliveLotService;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<Unit> Handle(
@@ -60,120 +61,54 @@ public class CreateProductionBatchCommandHandler
             SeasonCalendar.ToBusinessDate(request.PlannedDate),
             cancellationToken);
 
-        await _seasonService.EnsureSourcesInSeasonAsync(
-            seasonId,
-            request.Inputs.Select(input => input.ToSource()),
-            cancellationToken);
-
         var year = request.PlannedDate.Year;
-        var operationNumber =
-           await _documentNumberService.GenerateAsync(
-               DocumentTypes.Pressing,
-               DocumentPrefixes.Pressing,
-               year,
-               cancellationToken);
-
-        var expectedOilLiters = await CalculateExpectedOilLitersAsync(
-            request.Inputs,
-            cancellationToken);
-
         var utcNow = DateTime.UtcNow;
 
-        var pressingOperation = new PressingOperation
+        // Transaction : un lot refusé annule la réservation et la création.
+        await _unitOfWork.ExecuteInTransactionAsync(async ct =>
         {
-            OperationNumber = operationNumber,
-            SeasonId = seasonId,
-            Status = (ProductionStatus)request.Status,
-            OilQuantityLiters = request.OilQuantityLiters,
-            CreatedAt = utcNow,
-            Notes = request.Notes,
-            PlannedDate = request.PlannedDate.ToUtc(),
-            ExpectedOilLiters = expectedOilLiters
-        };
+            var quantities = await _oliveLotService.ReserveAsync(
+                seasonId,
+                request.Inputs,
+                ct);
 
-        await _repository.AddAsync(
-           pressingOperation,
-           cancellationToken);
+            var operationNumber = await _documentNumberService.GenerateAsync(
+                DocumentTypes.Pressing,
+                DocumentPrefixes.Pressing,
+                year,
+                ct);
 
-        var operationId = pressingOperation.Id;
+            var pressingOperation = new PressingOperation
+            {
+                OperationNumber = operationNumber,
+                SeasonId = seasonId,
+                Status = (ProductionStatus)request.Status,
+                OilQuantityLiters = request.OilQuantityLiters,
+                CreatedAt = utcNow,
+                UpdatedAt = utcNow,
+                Notes = request.Notes,
+                PlannedDate = request.PlannedDate.ToUtc(),
+                ExpectedOilLiters = await _oliveLotService.CalculateExpectedOilLitersAsync(
+                    quantities,
+                    ct)
+            };
 
-        var inputs = request.Inputs
-           .Select(input => new PressingOperationInput
-           {
-               PressingOperationId = operationId,
-               HarvestId = input.HarvestId,
-               PurchaseItemId = input.PurchaseItemId,
-               QuantityKg = input.QuantityKg,
-               CreatedAt = utcNow,
-           })
-           .ToList();
+            await _repository.AddAsync(pressingOperation, ct);
 
-        await _repository.AddInputsAsync(
-            inputs,
-            cancellationToken);
+            var inputs = quantities
+                .Select(entry => new PressingOperationInput
+                {
+                    PressingOperationId = pressingOperation.Id,
+                    LotId = entry.Key,
+                    QuantityKg = entry.Value,
+                    CreatedAt = utcNow,
+                    Status = PressingOperationInputStatus.Reserved
+                })
+                .ToList();
+
+            await _repository.AddInputsAsync(inputs, ct);
+        }, cancellationToken);
 
         return Unit.Value;
-    }
-
-    private async Task<decimal?> CalculateExpectedOilLitersAsync(
-       List<NewPressingOperationInputRequest> inputs,
-       CancellationToken cancellationToken)
-    {
-        var sources = inputs
-            .Select(input => input.HarvestId is not null
-                ? (SourceType: InputSourceType.Harvest, SourceId: input.HarvestId.Value)
-                : (SourceType: InputSourceType.Purchase, SourceId: input.PurchaseItemId!.Value))
-            .Distinct()
-            .ToList();
-
-        if (sources.Count == 0)
-        {
-            return null;
-        }
-
-        var analyses = new List<OliveAnalysis>();
-
-        foreach (var source in sources)
-        {
-            var analysis = await _oliveAnalysisRepository.GetBySourceAsync(
-                (int)source.SourceType,
-                source.SourceId,
-                cancellationToken);
-
-            if (analysis is not null)
-            {
-                analyses.Add(analysis);
-            }
-        }
-
-        decimal expectedOilKg = 0;
-        var hasAnyAnalysis = false;
-
-        foreach (var input in inputs)
-        {
-            var sourceType = input.HarvestId is not null
-                ? InputSourceType.Harvest
-                : InputSourceType.Purchase;
-
-            var sourceId = input.HarvestId ?? input.PurchaseItemId!.Value;
-
-            var analysis = analyses.FirstOrDefault(a =>
-                a.SourceType == sourceType && a.SourceId == sourceId);
-
-            if (analysis?.OilPercentage is null)
-            {
-                continue;
-            }
-
-            expectedOilKg += input.QuantityKg * (analysis.OilPercentage.Value / 100m);
-            hasAnyAnalysis = true;
-        }
-
-        if (!hasAnyAnalysis)
-        {
-            return null;
-        }
-
-        return expectedOilKg / OliveOilDensityKgPerLiter;
     }
 }

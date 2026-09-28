@@ -1246,15 +1246,159 @@ textarea {
   gap: var(--space-3);
 }
 
-.harvest-general-actions {
-  position: sticky;
+/* Nouvelle récolte : variétés de la parcelle sélectionnée. */
+.variety-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--space-3);
+}
+
+.variety-option {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 12px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-raised);
+  color: var(--color-olive-900);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.variety-option span {
+  font-size: var(--fs-xs);
+  color: var(--color-muted);
+}
+
+.variety-option:hover:not(:disabled) {
+  border-color: var(--color-olive-500);
+}
+
+.variety-option--selected {
+  border-color: var(--color-olive-500);
+  background: var(--color-olive-100);
+}
+
+.variety-option:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.variety-options-hint {
+  font-size: var(--fs-xs);
+  color: var(--color-muted);
+}
+
+/* Stocks d'une récolte : cartes espacées, détails en grille. */
+.harvest-stock-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.harvest-stock-grid {
+  padding-top: var(--space-3);
+  row-gap: var(--space-5);
+}
+
+/* Barre d'actions fixée en bas de l'écran, à droite de la sidebar. */
+.fixed-actions-bar {
+  position: fixed;
+  left: var(--sidebar-width);
+  right: 0;
   bottom: 0;
   display: flex;
   justify-content: flex-end;
-  padding: 16px 0;
-  margin-top: 24px;
-  background: var(--background-color);
-  z-index: 10;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 32px;
+  background: var(--color-surface-raised);
+  border-top: 1px solid var(--color-border);
+  box-shadow: 0 -4px 16px rgba(31, 42, 24, 0.06);
+  z-index: 40;
+}
+
+/* Réserve la place de la barre pour que la fin du contenu reste visible. */
+.fixed-actions-spacer {
+  height: 80px;
+}
+
+/* Liste de cartes de formulaire (ex. lignes d'olives d'une pression). */
+.form-card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Ligne de formulaire à deux champs côte à côte (un seul sur petit écran). */
+.form-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+@media (max-width: 720px) {
+  .form-grid-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Liste des stocks / lignes d'achat d'une ligne d'olives (pleine largeur).
+   Masquée tant qu'aucune source n'est sélectionnée. */
+.source-items-list:empty {
+  display: none;
+}
+
+/* Choix de la source d'olives (récolte / achat) : contrôle segmenté. */
+.source-type-selector {
+  display: inline-flex;
+  gap: 6px;
+  margin-top: 8px;
+  padding: 4px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+}
+
+.source-type-option {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  color: var(--color-muted);
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+
+/* Le vrai bouton radio reste accessible (clavier, lecteur d'écran). */
+.source-type-option input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.source-type-option:hover {
+  color: var(--color-olive-900);
+}
+
+.source-type-option--selected {
+  background: var(--color-surface-raised);
+  color: var(--color-olive-700);
+  box-shadow: var(--shadow-sm);
+}
+
+.source-type-option:has(input:focus-visible) {
+  outline: 2px solid var(--color-olive-500);
+  outline-offset: 2px;
 }
 
 /* ============================================================
@@ -1273,6 +1417,11 @@ textarea {
 
   .page-content {
     padding: 24px;
+  }
+
+  .fixed-actions-bar {
+    left: 210px;
+    padding: 14px 24px;
   }
 
   .topbar {
@@ -1296,6 +1445,10 @@ textarea {
   .main-layout {
     width: calc(100% - 64px);
     margin-left: 64px;
+  }
+
+  .fixed-actions-bar {
+    left: 64px;
   }
 
   .sidebar-brand {

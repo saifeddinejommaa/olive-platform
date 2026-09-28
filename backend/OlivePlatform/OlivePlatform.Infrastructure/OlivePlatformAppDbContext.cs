@@ -16,14 +16,12 @@ public class OlivePlatformAppDbContext : DbContext
     public DbSet<OliveVariety> OliveVarieties => Set<OliveVariety>();
     public DbSet<PlotVariety> PlotVarieties => Set<PlotVariety>();
     public DbSet<Harvest> Harvests => Set<Harvest>();
-    public DbSet<HarvestStock> HarvestStocks => Set<HarvestStock>();
 
     public DbSet<HarvestCostLine> HarvestCostLine => Set<HarvestCostLine>();
 
     public DbSet<FinancialPayment> FinancialPayment => Set<FinancialPayment>();
 
     public DbSet<OlivePurchase> OlivePurchases => Set<OlivePurchase>();
-    public DbSet<OlivePurchaseItem> OlivePurchaseItems => Set<OlivePurchaseItem>();
 
     public DbSet<OliveSample> OliveSamples => Set<OliveSample>();
     public DbSet<OliveAnalysis> OliveAnalysis => Set<OliveAnalysis>();
@@ -48,6 +46,8 @@ public class OlivePlatformAppDbContext : DbContext
     public DbSet<DocumentCounter> DocumentCounters { get; set; }
 
     public DbSet<Season> Seasons => Set<Season>();
+
+    public DbSet<OliveLot> OliveLots => Set<OliveLot>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

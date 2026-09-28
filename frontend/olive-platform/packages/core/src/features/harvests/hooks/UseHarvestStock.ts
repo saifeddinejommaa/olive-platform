@@ -5,6 +5,8 @@ import type { HarvestStockDetails } from "../domain/entities/HarvestStockDetails
 export function useHarvestStocks(harvestId: number | null) {
   const [HarvestStock, setStock] = useState<HarvestStockDetails[] | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
+  // Incrémenté pour recharger les stocks (ex. après « Passer sans analyse »).
+  const [version, setVersion] = useState(0);
 
   useEffect(() => {
     if (!harvestId) {
@@ -32,7 +34,9 @@ export function useHarvestStocks(harvestId: number | null) {
     return () => {
       cancelled = true;
     };
-  }, [harvestId]);
+  }, [harvestId, version]);
 
-  return { HarvestStock, loading };
+  const reload = () => setVersion((current) => current + 1);
+
+  return { HarvestStock, loading, reload };
 }

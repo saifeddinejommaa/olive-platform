@@ -6,13 +6,11 @@ public static class DocumentPrefixes
 
     public const string Harvest = "HARV";
 
-    public const string HarvestStock = "HARV_STOCK";
-
     public const string OliveAnalyse = "OLIV_ANALYSE";
 
     public const string OlivePurchase = "ACH";
 
-    public const string OlivePurchaseItem = "ACH_ITEM";
+    public const string OliveLot = "LOT";
 
     public const string OilAnalysis = "OIL_ANALYSIS";
 

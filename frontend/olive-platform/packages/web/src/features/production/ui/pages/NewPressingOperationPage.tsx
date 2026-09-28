@@ -13,32 +13,37 @@ import type {
   PressingOperationInput,
 } from "../widgets/InputTypes";
 import NewPressingOperationInputsWidget from "../widgets/NewPressingOperationInputsWidget";
-import { useCreatePressingOperation } from "../hooks/UseCreatePressingOperation";
+import { CreatePressingOperation } from "@olive-platform/core/features/production/domain/useCases/CreatePressingOperation";
 import type { CreatePressingOperationParams } from "@olive-platform/core/features/production/domain/params/CreatePressingOperationParams";
-import ProductionStatusSelector from "../../../../common/widgets/ProductionStatusSelector";
+import type { CreatePressingOperationInputParams } from "@olive-platform/core/features/production/domain/params/CreatePressingOperationInputParams";
+import { ProductionStatus } from "@olive-platform/core/features/production/domain/entities/ProductionStatus";
+import Card from "../../../../common/widgets/card/Card";
+import { usePageTitle } from "../../../../common/hooks/usePageTitle";
 
 type NewPressingOperationForm = {
   plannedDate: string;
-  statusId: number;
   notes: string;
   inputs: PressingOperationInput[];
 };
 
 const initialForm: NewPressingOperationForm = {
   plannedDate: new Date().toISOString().split("T")[0],
-  statusId: 0,
   notes: "",
   inputs: [],
 };
 
 export default function NewPressingOperationPage() {
   const navigate = useNavigate();
-  const { createPressingOperationAction, error } = useCreatePressingOperation();
   const { loading: constantsLoading } = useConstantsStore();
 
   const [form, setForm] = useState<NewPressingOperationForm>(initialForm);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
+
+  usePageTitle(
+    "Nouvelle opération de pression",
+    "Créer une nouvelle opération de pression et définir les olives utilisées",
+  );
 
   const getValidationErrors = useCallback((): Record<string, string> => {
     const validationErrors: Record<string, string> = {};
@@ -47,22 +52,20 @@ export default function NewPressingOperationPage() {
       validationErrors.plannedDate = "La date de pression est obligatoire.";
     }
 
-    if (!form.statusId) {
-      validationErrors.statusId = "Le statut est obligatoire.";
-    }
-
     if (form.inputs.length === 0) {
       validationErrors.inputs = "Ajoutez au moins une source d’olives.";
     }
 
     form.inputs.forEach((input) => {
-      if (input.sourceType === "harvest") {
-        if (!input.harvestId) {
-          validationErrors[`input-${input.id}`] =
-            "Sélectionnez une récolte valide.";
-        }
-      } else if (!input.purchaseItemId) {
-        validationErrors[`input-${input.id}`] = "Sélectionnez un achat valide.";
+      const isHarvest = input.sourceType === "harvest";
+
+      if (isHarvest ? !input.harvestId : !input.purchaseId) {
+        validationErrors[`input-${input.id}`] = isHarvest
+          ? "Sélectionnez une récolte valide."
+          : "Sélectionnez un achat valide.";
+      } else if (!input.lots?.length) {
+        validationErrors[`input-${input.id}`] =
+          "Sélectionnez au moins un lot disponible.";
       }
 
       if (!input.quantityKg || Number(input.quantityKg) <= 0) {
@@ -101,7 +104,7 @@ export default function NewPressingOperationPage() {
       id: crypto.randomUUID(),
       sourceType: "harvest",
       harvestId: null,
-      purchaseItemId: null,
+      purchaseId: null,
       reference: "",
       quantityKg: "",
       notes: "",
@@ -165,7 +168,8 @@ export default function NewPressingOperationPage() {
                 ...input,
                 sourceType,
                 harvestId: null,
-                purchaseItemId: null,
+                lots: [],
+                purchaseId: null,
                 reference: "",
                 quantityKg: "",
               }
@@ -193,7 +197,8 @@ export default function NewPressingOperationPage() {
           return {
             ...input,
             harvestId: source.id,
-            purchaseItemId: null,
+            lots: source.lots ?? [],
+            purchaseId: null,
             reference: source.reference,
           };
         }
@@ -201,7 +206,8 @@ export default function NewPressingOperationPage() {
         return {
           ...input,
           harvestId: null,
-          purchaseItemId: source.id,
+          purchaseId: source.id,
+          lots: source.lots ?? [],
           reference: source.reference,
         };
       }),
@@ -228,7 +234,8 @@ export default function NewPressingOperationPage() {
 
       const request: CreatePressingOperationParams = {
         plannedDate: new Date(`${form.plannedDate}T00:00:00`).toISOString(),
-        status: form.statusId,
+        // Une nouvelle opération est toujours planifiée.
+        status: ProductionStatus.Planned,
         notes: form.notes || null,
         startTime: null,
         endTime: null,
@@ -237,38 +244,29 @@ export default function NewPressingOperationPage() {
           0,
         ),
         oilQuantityLiters: null,
-        inputs: form.inputs.map((input) => ({
-          harvestId: input.sourceType === "harvest" ? input.harvestId : null,
-          purchaseItemId:
-            input.sourceType === "purchase" ? input.purchaseItemId : null,
-          quantityKg: Number(input.quantityKg),
-        })),
+        // Une entrée par lot coché : la pression réserve exactement ces lots.
+        inputs: form.inputs.flatMap<CreatePressingOperationInputParams>((input) =>
+          (input.lots ?? []).map((lot) => ({
+            lotId: lot.id,
+            quantityKg: lot.quantityKg,
+          })),
+        ),
       };
 
-      const success = await createPressingOperationAction(request);
+      // Appel direct : une erreur de l'API remonte avec son message.
+      await CreatePressingOperation(request);
 
-      if (success) {
-        toast.success("Opération créée avec succès.");
-        navigate("/production");
-        return;
-      }
-
-      toast.error(error ?? "Impossible de créer l’opération de pression.");
-    } catch {
-      toast.error(
-        "Une erreur est survenue lors de la création de l’opération.",
-      );
-      setErrors({ general: "Impossible de créer l’opération de pression." });
+      toast.success("Opération créée avec succès.");
+      navigate("/production");
+    } catch (e: any) {
+      const message =
+        e?.message ?? "Impossible de créer l’opération de pression.";
+      toast.error(message);
+      setErrors({ general: message });
     } finally {
       setSaving(false);
     }
-  }, [
-    form,
-    getValidationErrors,
-    createPressingOperationAction,
-    error,
-    navigate,
-  ]);
+  }, [form, getValidationErrors, navigate]);
 
   const handleCancel = useCallback(() => {
     if (!saving) navigate("/production");
@@ -276,16 +274,6 @@ export default function NewPressingOperationPage() {
 
   return (
     <div className="feature-page">
-      <div className="page-header">
-        <div className="page-header-content">
-          <h1 className="page-title">Nouvelle opération de pression</h1>
-          <p className="page-description">
-            Créer une nouvelle opération de pression et définir les olives
-            utilisées.
-          </p>
-        </div>
-      </div>
-
       <div className="filters">
         <div className="filters-header">
           <div>
@@ -294,38 +282,33 @@ export default function NewPressingOperationPage() {
           </div>
         </div>
 
-        <div className="filters-content">
-          <div className="filter-item">
-            <TextInput
-              label="Date de pression"
-              type="date"
-              value={form.plannedDate}
-              onChange={(event) =>
-                updateForm("plannedDate", event.target.value)
-              }
-            />
-            {errors.plannedDate && (
-              <span className="field-error">{errors.plannedDate}</span>
-            )}
-          </div>
+        {/* Même grille que les autres formulaires */}
+        <Card>
+          <div className="info-grid">
+            <div className="filter-item">
+              <TextInput
+                label="Date de pression"
+                type="date"
+                value={form.plannedDate}
+                onChange={(event) =>
+                  updateForm("plannedDate", event.target.value)
+                }
+              />
+              {errors.plannedDate && (
+                <span className="field-error">{errors.plannedDate}</span>
+              )}
+            </div>
 
-          <div className="filter-item">
-            <ProductionStatusSelector
-            label="Statut"
-              value={form.statusId || null}
-              onChange={(statusId) => updateForm("statusId", statusId ?? 0)}
-            />
+            <div className="filter-item" style={{ gridColumn: "1 / -1" }}>
+              <label>Notes</label>
+              <TextEditor
+                value={form.notes}
+                placeholder="Notes concernant l'opération..."
+                onChange={(value) => updateForm("notes", value)}
+              />
+            </div>
           </div>
-
-          <div className="filter-item" style={{ gridColumn: "1 / -1" }}>
-            <label>Notes</label>
-            <TextEditor
-              value={form.notes}
-              placeholder="Notes concernant l'opération..."
-              onChange={(value) => updateForm("notes", value)}
-            />
-          </div>
-        </div>
+        </Card>
       </div>
 
       <NewPressingOperationInputsWidget
@@ -344,7 +327,10 @@ export default function NewPressingOperationPage() {
         </div>
       )}
 
-      <div className="filters-footer">
+      {/* Barre d'actions fixée en bas de l'écran */}
+      <div className="fixed-actions-spacer" />
+
+      <div className="fixed-actions-bar">
         <Button variant="secondary" onClick={handleCancel} disabled={saving}>
           Annuler
         </Button>

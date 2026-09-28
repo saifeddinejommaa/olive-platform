@@ -7,7 +7,8 @@ import { CreatePressingOperationMapper } from "../mappers/requests/CreatePressin
 import type { PressingOperationDetails } from "../../domain/entities/PressingOperationDetails";
 import type { StartPressingOperationRequest } from "../requests/StartPressingOperationRequest";
 import type { ClosePressingOperationRequest } from "../requests/ClosePressingOperationRequest";
-import type { PressingOperationInputDetails } from "../../domain/entities/PressingOperationInputDetails";
+import type { PressingOperationInputDetailsResponse } from "../responses/PressingOperationInputDetailsResponse";
+import { PressingOperationInputDetailsMapper } from "../mappers/PressingOperationInputDetailsMapper";
 import type { UpdatePressingOperationParams } from "../../domain/params/UpdatePressingOperationParams";
 import type { PressingOperationForList } from "../../domain/entities/PressingOperationForList";
 
@@ -45,11 +46,11 @@ export const PressingOperationRepository = {
   },
 
   getPressingOperationInputs: async (operationId: number) => {
-    const response = await http<ApiResponse<PressingOperationInputDetails[]>>(
+    const response = await http<ApiResponse<PressingOperationInputDetailsResponse[]>>(
       `pressingoperations/${operationId}/inputs`,
       {},
     );
-    return response.Response;
+    return response.Response.map(PressingOperationInputDetailsMapper);
   },
 
   updatePressingOperation: async (params: UpdatePressingOperationParams) => {

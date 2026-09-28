@@ -119,17 +119,43 @@ namespace OlivePlatform.Infrastructure.Persistence.QueryRepositories
                     $"%{filter.Reference.Trim()}%");
             }
 
-            // Filtre par date d'analyse
-            if (filter.PlannedDate.HasValue)
+            // Filtre par référence de la pression source
+            if (!string.IsNullOrWhiteSpace(filter.PressingReference))
             {
                 where.Append("""
 
-                     AND oa.planned_date::date = @PlannedDate
-                     """);
+                    AND po.operation_number ILIKE @PressingReference
+                    """);
 
                 parameters.Add(
-                    "PlannedDate",
-                    filter.PlannedDate.Value);
+                    "PressingReference",
+                    $"%{filter.PressingReference.Trim()}%");
+            }
+
+            // Du : début de l'analyse (start_time)
+            if (filter.FromDate.HasValue)
+            {
+                where.Append("""
+
+                    AND oa.start_time::date >= @FromDate
+                    """);
+
+                parameters.Add(
+                    "FromDate",
+                    filter.FromDate.Value.ToDateTime(TimeOnly.MinValue));
+            }
+
+            // Au : fin de l'analyse (end_time)
+            if (filter.ToDate.HasValue)
+            {
+                where.Append("""
+
+                    AND oa.end_time::date <= @ToDate
+                    """);
+
+                parameters.Add(
+                    "ToDate",
+                    filter.ToDate.Value.ToDateTime(TimeOnly.MinValue));
             }
 
             // ----------------------------------------------------

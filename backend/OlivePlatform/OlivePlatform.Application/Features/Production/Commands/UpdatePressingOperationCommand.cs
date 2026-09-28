@@ -4,6 +4,7 @@ using OlivePlatform.Application.Features.Production.Requests;
 using OlivePlatform.Application.Features.Seasons;
 using OlivePlatform.Application.Services;
 using OlivePlatform.Domain.Entities;
+using OlivePlatform.Domain.Enums;
 using OlivePlatform.Domain.Interfaces.Repositories;
 using OlivePlatform.Domain.Repositories;
 
@@ -29,17 +30,23 @@ public class UpdatePressingOperationCommandHandler
     private readonly IPressingOperationInputsRepository _inputRepository;
     private readonly IPressingParametersRepository _parametersRepository;
     private readonly ISeasonService _seasonService;
+    private readonly IOliveLotService _oliveLotService;
+    private readonly IUnitOfWork _unitOfWork;
 
     public UpdatePressingOperationCommandHandler(
         IPressingOperationsRepository repository,
         IPressingOperationInputsRepository inputRepository,
         IPressingParametersRepository parametersRepository,
-        ISeasonService seasonService)
+        ISeasonService seasonService,
+        IOliveLotService oliveLotService,
+        IUnitOfWork unitOfWork)
     {
         _repository = repository;
         _inputRepository = inputRepository;
         _parametersRepository = parametersRepository;
         _seasonService = seasonService;
+        _oliveLotService = oliveLotService;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<Unit> Handle(
@@ -68,14 +75,6 @@ public class UpdatePressingOperationCommandHandler
                 cancellationToken);
         }
 
-        if (request.Inputs is not null)
-        {
-            await _seasonService.EnsureSourcesInSeasonAsync(
-                pressingOperation.SeasonId,
-                request.Inputs.Select(input => input.ToSource()),
-                cancellationToken);
-        }
-
         if (request.PlannedDate.HasValue)
         {
             pressingOperation.PlannedDate =
@@ -92,29 +91,48 @@ public class UpdatePressingOperationCommandHandler
             cancellationToken);
 
         // Si Inputs est fourni, on remplace complètement les inputs existants.
+        // Transaction : si un nouveau lot est refusé, rien n'est modifié.
         if (request.Inputs is not null)
         {
-            await _inputRepository.DeleteByPressingOperationIdAsync(
-                request.Id,
-                cancellationToken);
-
-            var inputs = request.Inputs
-            .Select(input => new PressingOperationInput
+            await _unitOfWork.ExecuteInTransactionAsync(async ct =>
             {
-                PressingOperationId = request.Id,
-                HarvestId = input.HarvestId,
-                PurchaseItemId = input.PurchaseItemId,
-                QuantityKg = input.QuantityKg,
-                CreatedAt = DateTime.UtcNow
-            })
-            .ToList();
+                // Les lots des anciennes entrées récupèrent leurs quantités…
+                var existingInputs = await _inputRepository.GetByPressingOperationIdAsync(
+                    request.Id,
+                    ct);
 
-            if (inputs.Count > 0)
-            {
-                await _repository.AddInputsAsync(
-                    inputs,
-                    cancellationToken);
-            }
+                await _oliveLotService.ReleaseAsync(existingInputs, ct);
+
+                await _inputRepository.DeleteByPressingOperationIdAsync(
+                    request.Id,
+                    ct);
+
+                // …puis ceux des nouvelles entrées sont réservés.
+                var quantities = await _oliveLotService.ReserveAsync(
+                    pressingOperation.SeasonId,
+                    request.Inputs,
+                    ct);
+
+                var utcNow = DateTime.UtcNow;
+
+                var inputs = quantities
+                    .Select(entry => new PressingOperationInput
+                    {
+                        PressingOperationId = request.Id,
+                        LotId = entry.Key,
+                        QuantityKg = entry.Value,
+                        CreatedAt = utcNow,
+                        Status = PressingOperationInputStatus.Reserved
+                    })
+                    .ToList();
+
+                pressingOperation.ExpectedOilLiters =
+                    await _oliveLotService.CalculateExpectedOilLitersAsync(quantities, ct);
+
+                await _repository.UpdateAsync(pressingOperation, ct);
+
+                await _repository.AddInputsAsync(inputs, ct);
+            }, cancellationToken);
         }
 
         if (request.Parameters is not null)

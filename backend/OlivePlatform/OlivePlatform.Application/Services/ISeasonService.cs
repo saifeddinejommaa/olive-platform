@@ -31,12 +31,6 @@ public interface ISeasonService
         int sourceId,
         CancellationToken cancellationToken = default);
 
-    // Vérifie que toutes les sources (entrées d'une pression) appartiennent à la campagne.
-    Task EnsureSourcesInSeasonAsync(
-        int seasonId,
-        IEnumerable<(InputSourceType SourceType, int SourceId)> sources,
-        CancellationToken cancellationToken = default);
-
     Task EnsureDateInSeasonAsync(
         int seasonId,
         DateOnly date,

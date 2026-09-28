@@ -22,5 +22,9 @@ namespace OlivePlatform.Application.Features.AppConstants.Responses
         public IReadOnlyList<AppConstantItemResponse> CostLineType { get; init; } = [];
 
         public IReadOnlyList<AppConstantItemResponse> HarvestTypes { get; init; } = [];
+
+        public IReadOnlyList<AppConstantItemResponse> PlotHarvestStates { get; init; } = [];
+
+        public IReadOnlyList<AppConstantItemResponse> OliveLotStatuses { get; init; } = [];
     }
 }

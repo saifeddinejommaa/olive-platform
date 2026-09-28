@@ -31,13 +31,13 @@ public class OliveAnalysisQueryRepository : IOliveAnalysisQueryRepository
 
                  oa.season_id AS {nameof(OliveAnalysisDetailsResponse.SeasonId)},
 
-                 oa.source_type AS {nameof(OliveAnalysisDetailsResponse.SourceTypeId)},
+                 opi.source_type_id AS {nameof(OliveAnalysisDetailsResponse.SourceTypeId)},
 
                  oa.reference AS {nameof(OliveAnalysisDetailsResponse.Reference)},
 
                  CASE
-                     WHEN oa.source_type = 1 THEN h.reference
-                     WHEN oa.source_type = 2 THEN opi.reference
+                     WHEN opi.source_type_id = 1 THEN h.reference
+                     WHEN opi.source_type_id = 2 THEN opi.reference
                  END AS {nameof(OliveAnalysisDetailsResponse.SourceReference)},
 
                  oa.humidity_percentage AS {nameof(OliveAnalysisDetailsResponse.HumidityPercentage)},
@@ -55,28 +55,30 @@ public class OliveAnalysisQueryRepository : IOliveAnalysisQueryRepository
                  oa.end_time AS {nameof(OliveAnalysisDetailsResponse.EndTime)},
 
                  CASE
-                     WHEN oa.source_type = 1 THEN h.variety_id
-                     WHEN oa.source_type = 2 THEN opi.variety_id
+                     WHEN opi.source_type_id = 1 THEN h.variety_id
+                     WHEN opi.source_type_id = 2 THEN opi.variety_id
                  END AS {nameof(OliveAnalysisDetailsResponse.VarietyId)},
 
                  oa.status AS {nameof(OliveAnalysisDetailsResponse.Status)}
 
              FROM public.olive_analyses oa
 
+             -- Lot rattaché à l'analyse (récolte : lots partagés ; achat : un lot)
+             LEFT JOIN LATERAL (
+                 SELECT l.*
+                 FROM public.olive_lots l
+                 WHERE l.olive_analysis_id = oa.id
+                 ORDER BY l.id
+                 LIMIT 1
+             ) opi ON TRUE
+
              -- Source = Harvest
              LEFT JOIN public.harvests h
-                 ON oa.source_type = 1
-                 AND h.id = oa.source_id
-
-             -- Source = Olive Purchase Item
-             LEFT JOIN public.olive_purchase_items opi
-                 ON oa.source_type = 2
-                 AND opi.id = oa.source_id
+                 ON h.id = opi.harvest_id
 
              -- Parent Olive Purchase
              LEFT JOIN public.olive_purchases op
-                 ON oa.source_type = 2
-                 AND op.id = opi.purchase_id
+                 ON op.id = opi.purchase_id
 
              WHERE oa.id = @Id
 
@@ -115,8 +117,8 @@ public class OliveAnalysisQueryRepository : IOliveAnalysisQueryRepository
              oa.season_id AS {nameof(OliveAnalysisForListResponse.SeasonId)},
 
              CASE
-                 WHEN oa.source_type = 1 THEN h.reference
-                 WHEN oa.source_type = 2 THEN opi.reference
+                 WHEN opi.source_type_id = 1 THEN h.reference
+                 WHEN opi.source_type_id = 2 THEN opi.reference
              END AS {nameof(OliveAnalysisForListResponse.SourceReference)},
 
              oa.reference AS {nameof(OliveAnalysisForListResponse.Reference)},
@@ -133,25 +135,26 @@ public class OliveAnalysisQueryRepository : IOliveAnalysisQueryRepository
 
          FROM public.olive_analyses oa
 
+         -- Lot rattaché à l'analyse (récolte : lots partagés ; achat : un lot)
+         LEFT JOIN LATERAL (
+             SELECT l.*
+             FROM public.olive_lots l
+             WHERE l.olive_analysis_id = oa.id
+             ORDER BY l.id
+             LIMIT 1
+         ) opi ON TRUE
+
          -- Source = Harvest
          LEFT JOIN public.harvests h
-             ON oa.source_type = 1
-             AND h.id = oa.source_id
+             ON h.id = opi.harvest_id
 
-         -- Source = Purchase Item
-         LEFT JOIN public.olive_purchase_items opi
-             ON oa.source_type = 2
-             AND opi.id = oa.source_id
-
-         -- Purchase parent
+         -- Parent Olive Purchase
          LEFT JOIN public.olive_purchases op
-             ON oa.source_type = 2
-             AND op.id = opi.purchase_id
+             ON op.id = opi.purchase_id
 
          -- Plot uniquement pour les récoltes
          LEFT JOIN public.plots pl
-             ON oa.source_type = 1
-             AND h.plot_id = pl.id
+             ON h.plot_id = pl.id
 
          WHERE 1 = 1
          """);
@@ -186,10 +189,7 @@ public class OliveAnalysisQueryRepository : IOliveAnalysisQueryRepository
             sql.Append(
                 """
 
-                AND (
-                    h.reference ILIKE @Reference
-                    OR op.reference ILIKE @Reference
-                )
+                AND oa.reference ILIKE @Reference
                 """);
 
             parameters.Add(
@@ -253,20 +253,37 @@ public class OliveAnalysisQueryRepository : IOliveAnalysisQueryRepository
 
 
         // ========================================================
-        // ANALYSIS DATE
+        // DU : début de l'analyse (start_time)
         // ========================================================
 
-        if (filter.PlannedDate.HasValue)
+        if (filter.FromDate.HasValue)
         {
             sql.Append(
                 """
 
-                AND oa.planned_date::date = @PlannedDate
+                AND oa.start_time::date >= @FromDate
                 """);
 
             parameters.Add(
-                "PlannedDate",
-                filter.PlannedDate.Value);
+                "FromDate",
+                filter.FromDate.Value.ToDateTime(TimeOnly.MinValue));
+        }
+
+        // ========================================================
+        // AU : fin de l'analyse (end_time)
+        // ========================================================
+
+        if (filter.ToDate.HasValue)
+        {
+            sql.Append(
+                """
+
+                AND oa.end_time::date <= @ToDate
+                """);
+
+            parameters.Add(
+                "ToDate",
+                filter.ToDate.Value.ToDateTime(TimeOnly.MinValue));
         }
 
 
@@ -290,7 +307,7 @@ public class OliveAnalysisQueryRepository : IOliveAnalysisQueryRepository
         // STATUS
         // ========================================================
 
-        if (filter.Status != default)
+        if (filter.Status.HasValue)
         {
             sql.Append(
                 """
@@ -300,7 +317,7 @@ public class OliveAnalysisQueryRepository : IOliveAnalysisQueryRepository
 
             parameters.Add(
                 "Status",
-                filter.Status);
+                (int)filter.Status.Value);
         }
 
 

@@ -11,9 +11,6 @@ public interface IHarvestQueryRepository
     Task<PagedResult<HarvestForListResponse>> GetHarvests(
         HarvestsRequestFilter filter);
 
-    Task<List<HarvestStockDetailsResponse>> GetHarvestStocks(int id,
-        CancellationToken cancellationToken = default);
-
     Task<OliveAnalysisDetailsResponse?> GetAnalysisDetails(int id, 
         CancellationToken cancellationToken = default);
 
@@ -23,5 +20,11 @@ public interface IHarvestQueryRepository
 
     Task<IReadOnlyList<Harvest>> GetByPlotIdAsync(
         int plotId,
+        CancellationToken cancellationToken = default);
+
+    // Ouvriers déjà saisis sur les lignes de coût, filtrés par nom ou identifiant.
+    Task<IReadOnlyList<WorkerSuggestionResponse>> SearchWorkers(
+        string? search,
+        int limit,
         CancellationToken cancellationToken = default);
 }

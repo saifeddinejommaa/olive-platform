@@ -1,5 +1,4 @@
 
-
 import type { ProductionStatus } from "@olive-platform/core/features/production/domain/entities/ProductionStatus";
 import Button from "../../../../../common/widgets/button/Button";
 import Card from "../../../../../common/widgets/card/Card";
@@ -56,12 +55,38 @@ export default function OilAnalysesFilter() {
 
                     <div className="filter-item">
                         <TextInput
-                            label="Date d'analyse"
-                            type="date"
-                            value={filters.plannedDate}
+                            label="Réf. pression"
+                            placeholder="PRESS-2026-001"
+                            value={filters.pressingReference}
                             onChange={(event) =>
                                 setFilters({
-                                    plannedDate: event.target.value,
+                                    pressingReference: event.target.value,
+                                })
+                            }
+                        />
+                    </div>
+
+                    <div className="filter-item">
+                        <TextInput
+                            label="Début à partir du"
+                            type="date"
+                            value={filters.fromDate}
+                            onChange={(event) =>
+                                setFilters({
+                                    fromDate: event.target.value,
+                                })
+                            }
+                        />
+                    </div>
+
+                    <div className="filter-item">
+                        <TextInput
+                            label="Fin jusqu'au"
+                            type="date"
+                            value={filters.toDate}
+                            onChange={(event) =>
+                                setFilters({
+                                    toDate: event.target.value,
                                 })
                             }
                         />

@@ -19,11 +19,8 @@ export function CreatePressingOperationMapper(
     notes: data.notes,
 
     inputs: data.inputs.map((input) => ({
-      harvestId: input.harvestId,
-
-      purchaseItemId: input.purchaseItemId,
-
-      quantityKg: Number(input.quantityKg),
+      lotId: input.lotId,
+      quantityKg: input.quantityKg != null ? Number(input.quantityKg) : null,
     })),
   };
 }

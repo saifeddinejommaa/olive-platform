@@ -3,6 +3,8 @@ export type AppConstants = {
   costLineTypes: { id: number; label: string }[];
   harvestTypes: { id: number; label: string }[];
   paymentMethods: { id: number; label: string }[];
+  plotHarvestStates?: { id: number; label: string }[];
+  oliveLotStatuses?: { id: number; label: string }[];
 };
 
 let constants: AppConstants | null = null;
@@ -32,4 +34,12 @@ export function getHarvestTypeLabel(id: number): string {
 
 export function getPaymentMethodLabel(id: number): string {
   return getLabel(constants?.paymentMethods ?? [], id);
+}
+
+export function getPlotHarvestStates(): { id: number; label: string }[] {
+  return constants?.plotHarvestStates ?? [];
+}
+
+export function getOliveLotStatusLabel(id: number): string {
+  return getLabel(constants?.oliveLotStatuses ?? [], id);
 }

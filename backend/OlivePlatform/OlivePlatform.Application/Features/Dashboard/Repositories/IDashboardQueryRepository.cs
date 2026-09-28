@@ -1,11 +1,12 @@
-﻿using OlivePlatform.Application.Features.Dashboard.Responses;
+using OlivePlatform.Application.Features.Dashboard.Responses;
 
 namespace OlivePlatform.Domain.Interfaces.Repositories;
 
 public interface IDashboardQueryRepository
 {
+    // seasonId absent : toutes campagnes confondues.
     Task<DashboardSummaryResponse> GetDashboardSummary(
-        DateTime harvestYieldFromDate,
+        int? seasonId,
         int pressingComparisonLimit,
         CancellationToken cancellationToken = default);
 }

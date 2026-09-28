@@ -19,9 +19,18 @@ type Props = {
   value: Date;
   editable: boolean;
   onChange: (date: Date) => void;
+  // Bornes optionnelles (ex. la campagne sélectionnée).
+  minimumDate?: Date;
+  maximumDate?: Date;
 };
 
-export function DatePickerField({ value, editable, onChange }: Props) {
+export function DatePickerField({
+  value,
+  editable,
+  onChange,
+  minimumDate,
+  maximumDate,
+}: Props) {
   const [showPicker, setShowPicker] = useState(false);
 
   const handleChange = (_event: any, selectedDate?: Date) => {
@@ -55,6 +64,8 @@ export function DatePickerField({ value, editable, onChange }: Props) {
           value={value}
           mode="date"
           display={Platform.OS === "ios" ? "spinner" : "default"}
+          minimumDate={minimumDate}
+          maximumDate={maximumDate}
           onChange={handleChange}
         />
       )}

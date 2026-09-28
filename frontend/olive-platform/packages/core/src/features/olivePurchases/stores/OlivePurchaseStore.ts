@@ -97,17 +97,21 @@ export const useOlivePurchasesStore = create<OlivePurchasesStore>(
       try {
         const items = await GetOlivePurchaseItems(purchaseId);
 
-        const inputs = items
-          .filter((item) => item.agreedQuantityKg > 0)
-          .map((item) => ({
-            harvestId: null,
-            purchaseItemId: item.id,
-            quantityKg: item.agreedQuantityKg,
-          }));
+        // Uniquement les lots pressables (restant, analyse terminée ou non requise).
+        const pressable = items.filter((item) => item.isPressable);
 
-        if (inputs.length === 0) {
-          throw new Error("Aucune quantité restante à presser pour cet achat.");
+        if (pressable.length === 0) {
+          throw new Error(
+            items.some((item) => item.toAnalysis && item.remainingQuantityKg > 0)
+              ? "Les lots de cet achat sont en attente d'analyse."
+              : "Aucune quantité restante à presser pour cet achat.",
+          );
         }
+
+        const inputs = pressable.map((item) => ({
+          lotId: item.id,
+          quantityKg: item.remainingQuantityKg,
+        }));
 
         const request: CreatePressingOperationParams = {
           plannedDate: new Date().toISOString(),
@@ -115,7 +119,7 @@ export const useOlivePurchasesStore = create<OlivePurchasesStore>(
           notes: null,
           startTime: null,
           endTime: null,
-          oliveQuantityKg: inputs.reduce((total, input) => total + input.quantityKg, 0),
+          oliveQuantityKg: pressable.reduce((total, item) => total + item.remainingQuantityKg, 0),
           oilQuantityLiters: null,
           inputs,
         };

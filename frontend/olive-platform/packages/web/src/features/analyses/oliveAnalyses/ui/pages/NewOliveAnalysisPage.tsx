@@ -248,7 +248,7 @@ export default function NewOliveAnalysisPage() {
                 form.sourceTypeId === 1
                   ? "ID de la récolte"
                   : form.sourceTypeId === 2
-                    ? "ID de l'achat"
+                    ? "ID du lot d'achat"
                     : "ID de la source"
               }
               placeholder={

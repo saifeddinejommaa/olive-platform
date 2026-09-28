@@ -21,14 +21,12 @@ namespace OlivePlatform.Api.Controllers
 
         [HttpGet("summary")]
         public async Task<IActionResult> GetSummary(
-                [FromQuery] DateTime? harvestYieldFromDate,
+                [FromQuery] int? seasonId,
                 [FromQuery] int pressingComparisonLimit = 10,
                 CancellationToken cancellationToken = default)
         {
-            var fromDate = harvestYieldFromDate ?? DateTime.UtcNow.AddDays(-30);
-
             var summary = await _dashboardQueryRepository.GetDashboardSummary(
-                fromDate,
+                seasonId,
                 pressingComparisonLimit,
                 cancellationToken);
 

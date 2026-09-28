@@ -9,7 +9,14 @@ namespace OlivePlatform.Application.Features.Analysis.Requests
 
         public string? Reference { get; set; }
 
-        public DateOnly? PlannedDate { get; set; }
+        // Référence de l'opération de pression source.
+        public string? PressingReference { get; set; }
+
+        // Début de l'analyse (start_time) à partir de cette date.
+        public DateOnly? FromDate { get; set; }
+
+        // Fin de l'analyse (end_time) jusqu'à cette date.
+        public DateOnly? ToDate { get; set; }
 
         public ProductionStatus? Status { get; set; }
     }

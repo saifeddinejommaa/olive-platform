@@ -3,10 +3,19 @@ import type { InputSourceType } from "./InputSourceType";
 
 export type PressingOperationInputDetails = {
   id: number;
+  // Lot d'olives pressé.
+  lotId: number;
+  lotReference: string;
   sourceType: InputSourceType;
+  // Récolte ou achat d'origine du lot.
   sourceReference: string;
+  // Quantité de cette entrée (olives pressées).
   quantityKg: number;
+  // Quantité totale et restant du lot.
+  lotQuantityKg: number;
+  lotRemainingKg: number;
   harvestId: number | null;
-  purchaseItemId: number | null;
+  purchaseId: number | null;
+  oliveVarietyId: number | null;
   analysis: OliveAnalysisDetails | null;
 };

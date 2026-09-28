@@ -10,7 +10,9 @@ import Card from "../../../../common/widgets/card/Card";
 import {
   formatDate,
   formatStringToDateTime,
+  toDateOnlyString,
 } from "@olive-platform/core/features/shared/utils/DatesUtils";
+import { useSeasonStore } from "../../../../stores/SeasonStore";
 
 import { ProductionStatus } from "@olive-platform/core/features/production/domain/entities/ProductionStatus";
 
@@ -40,6 +42,12 @@ export default function HarvestGeneralTab({
   const [quantityKg, setQuantityKg] = useState("");
   const [harvestedTrees, setHarvestedTrees] = useState("");
   const [harvestType, setHarvestType] = useState(0);
+  const [plannedDate, setPlannedDate] = useState("");
+
+  // Bornes du sélecteur de date : la campagne de la récolte.
+  const season = useSeasonStore((state) =>
+    state.seasons.find((item) => item.id === harvest?.seasonId),
+  );
 
   useEffect(() => {
     if (!harvestId) {
@@ -65,12 +73,51 @@ export default function HarvestGeneralTab({
     );
 
     setHarvestType(harvest.harvestType);
+
+    setPlannedDate(
+      harvest.plannedDate
+        ? toDateOnlyString(new Date(harvest.plannedDate))
+        : "",
+    );
   }, [harvest]);
+
+  const isPlanned =
+    harvest?.status === ProductionStatus.Planned;
 
   const isInProgress =
     harvest?.status === ProductionStatus.InProgress;
 
+  // Récolte non lancée : seule la date prévue est modifiable.
+  const handleSavePlannedDate = async () => {
+    if (!harvest || !isPlanned) {
+      return;
+    }
+
+    if (!plannedDate) {
+      toast.error("La date de récolte est obligatoire.");
+      return;
+    }
+
+    try {
+      await update(harvest.id, {
+        plannedDate: new Date(`${plannedDate}T00:00:00`).toISOString(),
+      });
+
+      toast.success("La date de récolte a été mise à jour.");
+    } catch (e: any) {
+      toast.error(
+        e?.message ??
+          "Une erreur est survenue lors de la mise à jour de la récolte.",
+      );
+    }
+  };
+
   const handleSave = async () => {
+    if (isPlanned) {
+      await handleSavePlannedDate();
+      return;
+    }
+
     if (!harvest || !isInProgress) {
       return;
     }
@@ -107,18 +154,20 @@ export default function HarvestGeneralTab({
     }
 
     try {
+      // Le store recharge la récolte après la mise à jour.
       await update(harvest.id, {
         harvestType: harvestType,
+        quantityKg: parsedQuantityKg ?? 0,
+        harvestedTrees: parsedHarvestedTrees,
       });
-
-      await fetchHarvest(harvest.id);
 
       toast.success(
         "Les informations de la récolte ont été mises à jour avec succès.",
       );
-    } catch {
+    } catch (e: any) {
       toast.error(
-        "Une erreur est survenue lors de la mise à jour de la récolte.",
+        e?.message ??
+          "Une erreur est survenue lors de la mise à jour de la récolte.",
       );
     }
   };
@@ -153,7 +202,9 @@ export default function HarvestGeneralTab({
     );
   }
 
-  if (error) {
+  // Erreur de chargement uniquement : une erreur d'enregistrement
+  // est affichée en toast et ne doit pas masquer le formulaire.
+  if (error && !harvest) {
     return (
       <div className="filters">
         <div className="filters-header">
@@ -227,10 +278,23 @@ export default function HarvestGeneralTab({
               value={getOliveVarietyLabel(harvest.variety)}
             />
 
-            <InfoFieldWidget
-              label="Date de récolte"
-              value={formatDate(harvest.plannedDate)}
-            />
+            {isPlanned ? (
+              <TextInput
+                label="Date de récolte"
+                type="date"
+                value={plannedDate}
+                min={season?.startDate}
+                max={season?.endDate}
+                onChange={(event) =>
+                  setPlannedDate(event.target.value)
+                }
+              />
+            ) : (
+              <InfoFieldWidget
+                label="Date de récolte"
+                value={formatDate(harvest.plannedDate)}
+              />
+            )}
 
             <InfoFieldWidget
               label="Arbres prévus"
@@ -335,8 +399,12 @@ export default function HarvestGeneralTab({
         costs={harvest.costs}
       />
 
-      {isInProgress && (
-        <div className="harvest-general-actions">
+      {(isPlanned || isInProgress) && (
+        <div className="fixed-actions-spacer" />
+      )}
+
+      {(isPlanned || isInProgress) && (
+        <div className="fixed-actions-bar">
           <Button
             variant="primary"
             onClick={handleSave}

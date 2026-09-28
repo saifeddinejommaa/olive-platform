@@ -1,13 +1,14 @@
 import React, { useEffect } from "react";
 import styles from "../../styles/dashboard.module.css";
-import ProductionPipelineCard from "../../widgets/ProductionPipelineCard";
-import HarvestYieldChart from "../../widgets/HarvestYieldChart";
+import ActivityStrip from "../../widgets/ActivityStrip";
+import OliveLotsChart from "../../widgets/OliveLotsChart";
 import PressingComparisonChart from "../../widgets/PressingComparisonChart";
 import TreesCoverageDonut from "../../widgets/TreesCoverageDonut";
 import TankOccupancyGauge from "../../widgets/TankOccupancyGauge";
+import ChargesCoverageDonut from "../../widgets/ChargesCoverageDonut";
 import { useDashboardStore } from "@olive-platform/core/features/dashboard/stores/useDahsbordStore";
 import { usePageTitle } from "../../../../../common/hooks/usePageTitle";
-import ChargesCoverageDonut from "../../widgets/ChargesCoverageDonut";
+import { useSeasonStore } from "../../../../../stores/SeasonStore";
 
 export const DashboardPage: React.FC = () => {
   const {
@@ -17,11 +18,21 @@ export const DashboardPage: React.FC = () => {
     fetchSummary,
   } = useDashboardStore();
 
+  // La page est remontée à chaque changement de campagne (Layout) :
+  // le résumé est donc rechargé pour la campagne sélectionnée.
+  const selectedSeason = useSeasonStore((state) =>
+    state.seasons.find((season) => season.id === state.selectedSeasonId),
+  );
+
   useEffect(() => {
     fetchSummary();
   }, [fetchSummary]);
 
-  usePageTitle("Tableau de bord", "Campagne 2026/2027")
+  usePageTitle(
+    "Tableau de bord",
+    selectedSeason ? `Campagne ${selectedSeason.label}` : "",
+  );
+
   if (loading && !summary) {
     return (
       <div className={styles.loading}>
@@ -58,24 +69,15 @@ export const DashboardPage: React.FC = () => {
         </div>
       )}
 
-      <div className={styles.kpiRow}>
-        <ProductionPipelineCard
-          title="Récolte"
-          data={summary.harvestPipeline}
-        />
-
-        <ProductionPipelineCard
-          title="Pression"
-          data={summary.pressingPipeline}
-        />
-      </div>
+      <ActivityStrip
+        harvests={summary.harvestPipeline}
+        pressings={summary.pressingPipeline}
+      />
 
       <div className={styles.grid}>
         <div className={styles.column}>
           <div className="filters">
-            <HarvestYieldChart
-              data={summary.harvestYield}
-            />
+            <OliveLotsChart data={summary.oliveLots} />
 
             <PressingComparisonChart
               data={summary.pressingComparison}
@@ -88,8 +90,9 @@ export const DashboardPage: React.FC = () => {
             <TreesCoverageDonut
               data={summary.treesCoverage}
             />
-            <ChargesCoverageDonut 
-            data={summary.chargesCoverage} />
+            <ChargesCoverageDonut
+              data={summary.chargesCoverage}
+            />
             <TankOccupancyGauge
               data={summary.tankOccupancy}
             />

@@ -33,6 +33,7 @@ public class CreateOlivePurchaseCommandHandler
     private readonly IDocumentNumberService _documentNumberService;
     private readonly IOliveAnalysisRepository _oliveAnalysisRepository;
     private readonly ISeasonService _seasonService;
+    private readonly IOliveLotRepository _oliveLotRepository;
 
     public CreateOlivePurchaseCommandHandler(
         IUnitOfWork unitOfWork,
@@ -40,7 +41,8 @@ public class CreateOlivePurchaseCommandHandler
         ISupplierRepository supplierRepository,
         IDocumentNumberService documentNumberService,
         IOliveAnalysisRepository oliveAnalysisRepository,
-        ISeasonService seasonService)
+        ISeasonService seasonService,
+        IOliveLotRepository oliveLotRepository)
     {
         _unitOfWork = unitOfWork;
         _repository = repository;
@@ -48,6 +50,7 @@ public class CreateOlivePurchaseCommandHandler
         _documentNumberService = documentNumberService;
         _oliveAnalysisRepository = oliveAnalysisRepository;
         _seasonService = seasonService;
+        _oliveLotRepository = oliveLotRepository;
     }
 
     public async Task<int> Handle(
@@ -134,39 +137,9 @@ public class CreateOlivePurchaseCommandHandler
 
             };
 
-            var itemsForAnalysis =
-                new List<OlivePurchaseItem>();
-
-            foreach (var item in request.Items)
-            {
-                var itemReference =
-                    await _documentNumberService.GenerateAsync(
-                        DocumentTypes.OlivePurchaseItem,
-                        DocumentPrefixes.OlivePurchaseItem,
-                        now.Year,
-                        ct);
-
-                var itemEntity = new OlivePurchaseItem
-                {
-                    Reference = itemReference,
-                    VarietyId = item.VarietyId,
-                    AgreedQuantityKg = item.AgreedQuantityKg,
-                    PricePerKg = item.PricePerKg,
-                    CreatedAt = now,
-                    UpdatedAt = now
-                };
-
-                purchase.UnpaidAmount += item.AgreedQuantityKg * item.PricePerKg;
-                purchase.PaidAmount = 0;
-                purchase.IsPaid = false;
-
-                purchase.Items.Add(itemEntity);
-
-                if (item.GoesToAnalysis)
-                {
-                    itemsForAnalysis.Add(itemEntity);
-                }
-            }
+            purchase.UnpaidAmount = request.Items.Sum(item => item.AgreedQuantityKg * item.PricePerKg);
+            purchase.PaidAmount = 0;
+            purchase.IsPaid = false;
 
             await _repository.AddAsync(
                 purchase,
@@ -175,29 +148,62 @@ public class CreateOlivePurchaseCommandHandler
 
             purchaseId = purchase.Id;
 
-            foreach (var itemEntity in itemsForAnalysis)
+            // Une ligne d'achat = un lot d'olives, avec sa propre analyse éventuelle.
+            foreach (var item in request.Items)
             {
-                var analysisReference =
+                int? analysisId = null;
+
+                if (item.GoesToAnalysis)
+                {
+                    var analysisReference =
+                        await _documentNumberService.GenerateAsync(
+                            DocumentTypes.OliveAnalyse,
+                            DocumentPrefixes.OliveAnalyse,
+                            now.Year,
+                            ct);
+
+                    var analysisEntity = new OliveAnalysis
+                    {
+                        Reference = analysisReference,
+                        SeasonId = seasonId,
+                        CreatedAt = now,
+                        UpdatedAt = now,
+                        Status = ProductionStatus.Planned
+                    };
+
+                    await _oliveAnalysisRepository.AddAsync(
+                        analysisEntity,
+                        ct);
+
+                    // Enregistrée tout de suite : son id est repris par le lot.
+                    await _unitOfWork.SaveChangesAsync(ct);
+
+                    analysisId = analysisEntity.Id;
+                }
+
+                var lotReference =
                     await _documentNumberService.GenerateAsync(
-                        DocumentTypes.OliveAnalyse,
-                        DocumentPrefixes.OliveAnalyse,
+                        DocumentTypes.OliveLot,
+                        DocumentPrefixes.OliveLot,
                         now.Year,
                         ct);
 
-                var analysisEntity = new OliveAnalysis
+                await _oliveLotRepository.AddAsync(new OliveLot
                 {
-                    Reference = analysisReference,
+                    Reference = lotReference,
                     SeasonId = seasonId,
                     SourceType = InputSourceType.Purchase,
-                    SourceId = itemEntity.Id,
+                    PurchaseId = purchase.Id,
+                    VarietyId = item.VarietyId,
+                    QuantityKg = item.AgreedQuantityKg,
+                    RemainingKg = item.AgreedQuantityKg,
+                    PricePerKg = item.PricePerKg,
+                    Status = OliveLotStatus.Available,
+                    NeedAnalysis = item.GoesToAnalysis,
+                    OliveAnalysisId = analysisId,
                     CreatedAt = now,
-                    UpdatedAt = now,
-                    Status = ProductionStatus.Planned
-                };
-
-                await _oliveAnalysisRepository.AddAsync(
-                    analysisEntity,
-                    ct);
+                    UpdatedAt = now
+                }, ct);
             }
 
             await _unitOfWork.SaveChangesAsync(ct);

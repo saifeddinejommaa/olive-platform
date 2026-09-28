@@ -9,6 +9,8 @@ import type { HarvestFilters } from "../../domain/entities/HarvestsFilters";
 import type { CompleteHarvestParams } from "../../domain/params/CompleteHarvestParams";
 import type { CreateHarvestParams } from "../../domain/params/CreateHarvestParams";
 import type { UpdateHarvestParams } from "../../domain/params/UpdateHarvestParams";
+import type { AddHarvestCostLineParams } from "../../domain/params/AddHarvestCostLineParams";
+import type { WorkerSuggestion } from "../../domain/entities/WorkerSuggestion";
 import { HarvestDetailsMapper } from "../mappers/HarvestDetailsMapper";
 import { HarvestForListMapper } from "../mappers/HarvestForListMapper";
 import { HarvestStockDetailsMapper } from "../mappers/HarvestStockDetailsMapper";
@@ -91,6 +93,35 @@ export const HarvestRepository = {
         body: params,
       },
     );
+  },
+
+  addCostLine: async (
+    harvestId: number,
+    params: AddHarvestCostLineParams,
+  ): Promise<number> => {
+    const response = await http<ApiResponse<number>>(
+      `harvests/${harvestId}/cost-lines`,
+      {
+        method: "POST",
+        body: params,
+      },
+    );
+
+    return response.Response;
+  },
+
+  searchWorkers: async (
+    search: string,
+    limit: number,
+  ): Promise<WorkerSuggestion[]> => {
+    const params = buildQueryParams({ search, limit });
+
+    const response = await http<ApiResponse<WorkerSuggestion[]>>(
+      `harvests/cost-lines/workers?${params}`,
+      { withSeason: false },
+    );
+
+    return response.Response ?? [];
   },
 
   cancel: async (id: number): Promise<void> => {

@@ -3,9 +3,12 @@ import type { ProductionStatus } from "../../../production/domain/entities/Produ
 import type { OilAnalysisForList } from "../domain/entities/OilAnalysisForList";
 import { GetOilAnalyses } from "../domain/usecases/GetOilAnalysis";
 
+// "" = pas de filtre. Du : début de l'analyse ; Au : fin de l'analyse.
 type Filters = {
   reference: string;
-  plannedDate: string; // "" = pas de filtre
+  pressingReference: string;
+  fromDate: string;
+  toDate: string;
   status: ProductionStatus | null;
 };
 
@@ -28,7 +31,9 @@ type OilAnalysesListState = {
 
 const initialFilters: Filters = {
   reference: "",
-  plannedDate: "",
+  pressingReference: "",
+  fromDate: "",
+  toDate: "",
   status: null,
 };
 
@@ -52,7 +57,9 @@ export const useOilAnalysesListStore = create<OilAnalysesListState>(
 
         const result = await GetOilAnalyses({
           reference: filters.reference || undefined,
-          plannedDate: filters.plannedDate || undefined,
+          pressingReference: filters.pressingReference || undefined,
+          fromDate: filters.fromDate || undefined,
+          toDate: filters.toDate || undefined,
           status: filters.status ?? undefined,
           pageNumber,
           pageSize,

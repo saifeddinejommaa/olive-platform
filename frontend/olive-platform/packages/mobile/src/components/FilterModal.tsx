@@ -1,14 +1,18 @@
 
 import { ReactNode } from 'react';
 import {
+  KeyboardAvoidingView,
   Modal,
+  Platform,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
 import { IconX } from '@tabler/icons-react-native';
+import { semanticColors } from '../consts/Colors';
 
 type FilterModalProps = {
   visible: boolean;
@@ -32,7 +36,10 @@ export function FilterModal({
       animationType="slide"
       onRequestClose={onClose}
     >
-      <View style={styles.overlay}>
+      <KeyboardAvoidingView
+        style={styles.overlay}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
         <Pressable style={styles.backdrop} onPress={onClose} />
 
         <View style={styles.container}>
@@ -48,10 +55,15 @@ export function FilterModal({
             </TouchableOpacity>
           </View>
 
-          {/* Contenu */}
-          <View style={styles.content}>
+          {/* Contenu : défilant, taps conservés clavier ouvert */}
+          <ScrollView
+            style={styles.scroll}
+            contentContainerStyle={styles.content}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+          >
             {children}
-          </View>
+          </ScrollView>
 
           {/* Actions */}
           <View style={styles.footer}>
@@ -72,7 +84,7 @@ export function FilterModal({
             </TouchableOpacity>
           </View>
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }
@@ -121,8 +133,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
 
+  scroll: {
+    flexGrow: 0,
+  },
+
   content: {
     padding: 20,
+    gap: 16,
   },
 
   footer: {
@@ -152,7 +169,7 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 48,
     borderRadius: 12,
-    backgroundColor: '#171717',
+    backgroundColor: semanticColors.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },

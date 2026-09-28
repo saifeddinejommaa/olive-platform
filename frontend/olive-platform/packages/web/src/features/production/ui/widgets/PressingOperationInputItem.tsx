@@ -1,4 +1,7 @@
+import { useState } from "react";
 import TextInput from "../../../../common/widgets/textInput/TextInput";
+import Card from "../../../../common/widgets/card/Card";
+import Button from "../../../../common/widgets/button/Button";
 
 import SourceReference from "./SourceReference";
 import type { SourceOption } from "./SourceReference";
@@ -23,6 +26,8 @@ type PressingOperationInputItemProps = {
   onChangeSource: (id: string, sourceType: InputSourceType) => void;
 
   onSelectSource: (id: string, source: SourceOption) => void;
+
+  onRemove?: (id: string) => void;
 };
 
 export default function PressingOperationInputItem({
@@ -32,6 +37,7 @@ export default function PressingOperationInputItem({
   onUpdate,
   onChangeSource,
   onSelectSource,
+  onRemove,
 }: PressingOperationInputItemProps) {
 
   const handleChangeSource = (sourceType: InputSourceType) => {
@@ -40,7 +46,7 @@ export default function PressingOperationInputItem({
 
     onUpdate(input.id, "harvestId", null);
 
-    onUpdate(input.id, "purchaseItemId", null);
+    onUpdate(input.id, "purchaseId", null);
 
     onUpdate(input.id, "quantityKg", "");
 
@@ -55,47 +61,71 @@ export default function PressingOperationInputItem({
     }
   };
 
+  // Ligne pleine largeur sous la grille : la liste des stocks / lignes d'achat
+  // y est affichée, alignée sur le début de la carte.
+  const [listContainer, setListContainer] = useState<HTMLDivElement | null>(
+    null,
+  );
+
+  const sourceError = errors[`input-${input.id}`] ?? errors[`input-${index}`];
+  const quantityError =
+    errors[`quantity-${input.id}`] ?? errors[`quantity-${index}`];
+
   return (
-    <div
-      style={{
-        gridColumn: "1 / -1",
-        border: "1px solid #ddd",
-        borderRadius: "8px",
-        padding: "20px",
-        display: "flex",
-        flexDirection: "column",
-        gap: "16px",
-      }}
+    <Card
+      headerAction={
+        <>
+          <span className="card-title">Olives n°{index + 1}</span>
+
+          {onRemove && (
+            <Button variant="secondary" onClick={() => onRemove(input.id)}>
+              Supprimer
+            </Button>
+          )}
+        </>
+      }
     >
-
-      <SourceTypeSelector
-        value={input.sourceType}
-        onChange={handleChangeSource}
-      />
-
-      <SourceReference
-        sourceType={input.sourceType}
-        error={errors[`input-${input.id}`] ?? errors[`input-${index}`]}
-        onSelect={handleSelectSource}
-      />
-
-      <div>
-        <TextInput
-          label="Quantité d'olives (kg)"
-          type="number"
-          placeholder="500"
-          value={input.quantityKg}
-          onChange={(event) =>
-            onUpdate(input.id, "quantityKg", event.target.value)
-          }
+      {/* 1. Source */}
+      <div className="filter-item">
+        <SourceTypeSelector
+          value={input.sourceType}
+          onChange={handleChangeSource}
         />
-
-        {(errors[`quantity-${input.id}`] ?? errors[`quantity-${index}`]) && (
-          <span className="field-error">
-            {errors[`quantity-${input.id}`] ?? errors[`quantity-${index}`]}
-          </span>
-        )}
       </div>
-    </div>
+
+      {/* 2. Récolte / achat et quantité sur la même ligne */}
+      <div className="form-grid-2">
+        <div className="filter-item" style={{ minWidth: 0 }}>
+          <label>
+            {input.sourceType === "harvest" ? "Récolte" : "Achat"}
+          </label>
+          <SourceReference
+            sourceType={input.sourceType}
+            error={sourceError}
+            onSelect={handleSelectSource}
+            listContainer={listContainer}
+          />
+        </div>
+
+        <div className="filter-item">
+          <TextInput
+            label="Quantité d'olives (kg)"
+            type="number"
+            placeholder="500"
+            value={input.quantityKg}
+            onChange={(event) =>
+              onUpdate(input.id, "quantityKg", event.target.value)
+            }
+          />
+
+          {quantityError && (
+            <span className="field-error">{quantityError}</span>
+          )}
+        </div>
+      </div>
+
+      {/* 3. Stocks de la récolte / lignes de l'achat */}
+      <div ref={setListContainer} className="source-items-list" />
+    </Card>
   );
 }

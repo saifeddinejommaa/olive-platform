@@ -1,5 +1,6 @@
 export type CreatePressingOperationInputParams = {
-  harvestId: number | null;
-  purchaseItemId: number | null;
-  quantityKg: number;
+  // Lot d'olives pressé (stock de récolte ou ligne d'achat).
+  lotId: number;
+  // Quantité prélevée ; absente = tout le restant du lot.
+  quantityKg?: number | null;
 };

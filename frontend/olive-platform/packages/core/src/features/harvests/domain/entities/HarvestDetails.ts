@@ -15,6 +15,8 @@ export interface HarvestDetails {
 
   variety: OliveVarieties;
 
+  seasonId: number;
+
   harvestedTrees: number;
 
   plannedTrees: number;

@@ -45,50 +45,54 @@ export default function OliveAnalysesFilterComponent() {
           <div className="filter-item">
             <TextInput
               label="Référence"
-              placeholder="ANA-2026-001"
+              placeholder="OLIV_ANALYSE-2026-001"
               value={filter.reference ?? ""}
               onChange={(event) =>
-                setParams({
-                  reference: event.target.value,
-                })
+                setParams({ reference: event.target.value })
               }
             />
           </div>
 
           <div className="filter-item">
             <TextInput
-              label="Ref de la Récolte"
-              placeholder="Ref de la Récolte"
-              min="1"
-              value={
-                filter.harvestReference !== null &&
-                filter.harvestReference !== undefined
-                  ? String(filter.harvestReference)
-                  : ""
-              }
+              label="Réf. récolte"
+              placeholder="HARV-2026-001"
+              value={filter.harvestReference ?? ""}
               onChange={(event) =>
-                setParams({
-                  harvestReference: event.target.value
-                })
+                setParams({ harvestReference: event.target.value })
               }
             />
           </div>
 
           <div className="filter-item">
             <TextInput
-              label="Ref de la Parcelle"
-              placeholder="Ref de la Parcelle"
-              min="1"
-              value={
-                filter.plotReference !== null &&
-                filter.plotReference !== undefined
-                  ? String(filter.plotReference)
-                  : ""
-              }
+              label="Réf. achat"
+              placeholder="Réf. de l'achat"
+              value={filter.purchaseReference ?? ""}
               onChange={(event) =>
-                setParams({
-                  plotReference: event.target.value
-                })
+                setParams({ purchaseReference: event.target.value })
+              }
+            />
+          </div>
+
+          <div className="filter-item">
+            <TextInput
+              label="Début à partir du"
+              type="date"
+              value={filter.fromDate ?? ""}
+              onChange={(event) =>
+                setParams({ fromDate: event.target.value })
+              }
+            />
+          </div>
+
+          <div className="filter-item">
+            <TextInput
+              label="Fin jusqu'au"
+              type="date"
+              value={filter.toDate ?? ""}
+              onChange={(event) =>
+                setParams({ toDate: event.target.value })
               }
             />
           </div>
@@ -96,11 +100,9 @@ export default function OliveAnalysesFilterComponent() {
           <div className="filter-item">
             <ProductionStatusSelector
               label="Statut"
-              value={filter.status}
-              onChange={(event) =>
-                setParams({
-                  status: event as ProductionStatus,
-                })
+              value={filter.status ?? null}
+              onChange={(value) =>
+                setParams({ status: value as ProductionStatus | null })
               }
             />
           </div>

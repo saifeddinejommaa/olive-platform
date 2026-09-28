@@ -70,6 +70,18 @@ public class ReferenceDataQueryRepository
             FROM harvest_type
             WHERE is_active = TRUE
             ORDER BY name;
+
+            SELECT id AS {nameof(AppConstantItemResponse.Id)},
+                label AS {nameof(AppConstantItemResponse.Name)}
+            FROM plot_harvest_state
+            WHERE is_active = TRUE
+            ORDER BY id;
+
+            SELECT id AS {nameof(AppConstantItemResponse.Id)},
+                label AS {nameof(AppConstantItemResponse.Name)}
+            FROM olive_lot_status
+            WHERE is_active = TRUE
+            ORDER BY id;
             """;
 
         using var connection = _dbConnection;
@@ -111,6 +123,14 @@ public class ReferenceDataQueryRepository
                 (await multi.ReadAsync<AppConstantItemResponse>())
                 .ToList(),
             HarvestTypes = (await multi.ReadAsync<AppConstantItemResponse>())
+                .ToList(),
+
+            PlotHarvestStates =
+                (await multi.ReadAsync<AppConstantItemResponse>())
+                .ToList(),
+
+            OliveLotStatuses =
+                (await multi.ReadAsync<AppConstantItemResponse>())
                 .ToList()
         };
     }

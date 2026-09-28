@@ -53,30 +53,29 @@ public class HarvestQueryRepository : IHarvestQueryRepository
                     FROM pressing_operation_inputs poi
                     INNER JOIN pressing_operations po
                         ON po.id = poi.pressing_operation_id
-                    WHERE poi.harvest_id = h.id
+                    INNER JOIN olive_lots lot
+                        ON lot.id = poi.lot_id
+                    WHERE lot.harvest_id = h.id
                     ORDER BY po.created_at DESC
                     LIMIT 1
                 ) AS {nameof(HarvestForListResponse.Pressing)},
                 (
                     SELECT oa.status
                     FROM olive_analyses oa
-                    WHERE oa.source_id = h.id
-                      AND oa.source_type = 1
+                    WHERE oa.id IN (
+                        SELECT lot.olive_analysis_id
+                        FROM olive_lots lot
+                        WHERE lot.harvest_id = h.id
+                    )
                     ORDER BY oa.created_at DESC
                     LIMIT 1
                 ) AS {nameof(HarvestForListResponse.Analysis)},
 
-                NOT EXISTS (
+                EXISTS (
                     SELECT 1
-                    FROM pressing_operation_inputs poi
-                    INNER JOIN pressing_operations po
-                        ON po.id = poi.pressing_operation_id
-                    WHERE poi.harvest_id = h.id
-                      AND po.status_id IN (
-                          {(int)ProductionStatus.Planned},
-                          {(int)ProductionStatus.InProgress},
-                          {(int)ProductionStatus.Completed}
-                      )
+                    FROM olive_lots pl
+                    WHERE pl.harvest_id = h.id
+                      AND {OliveLotSql.PressableCondition}
                 )
                 AND h.status = {(int)ProductionStatus.Completed} AS {nameof(HarvestForListResponse.CanBePressed)}
 
@@ -148,7 +147,41 @@ public class HarvestQueryRepository : IHarvestQueryRepository
         }
 
         // ----------------------------------------------------
-        // Harvest Date From
+        // Plot Reference
+        // ----------------------------------------------------
+
+        if (!string.IsNullOrWhiteSpace(filter.PlotReference))
+        {
+            sql.Append(
+                """
+
+                AND p.reference ILIKE @PlotReference
+                """);
+
+            parameters.Add(
+                "PlotReference",
+                $"%{filter.PlotReference.Trim()}%");
+        }
+
+        // ----------------------------------------------------
+        // Status
+        // ----------------------------------------------------
+
+        if (filter.Status.HasValue)
+        {
+            sql.Append(
+                """
+
+                AND h.status = @Status
+                """);
+
+            parameters.Add(
+                "Status",
+                (int)filter.Status.Value);
+        }
+
+        // ----------------------------------------------------
+        // Du : début de la récolte (start_time)
         // ----------------------------------------------------
 
         if (filter.FromDate.HasValue)
@@ -156,7 +189,7 @@ public class HarvestQueryRepository : IHarvestQueryRepository
             sql.Append(
                 """
 
-                AND h.planned_date::date >= @HarvestDateFrom
+                AND h.start_time::date >= @HarvestDateFrom
                 """);
 
             parameters.Add(
@@ -165,7 +198,7 @@ public class HarvestQueryRepository : IHarvestQueryRepository
         }
 
         // ----------------------------------------------------
-        // Harvest Date To
+        // Au : fin de la récolte (end_time)
         // ----------------------------------------------------
 
         if (filter.ToDate.HasValue)
@@ -173,7 +206,7 @@ public class HarvestQueryRepository : IHarvestQueryRepository
             sql.Append(
                 """
 
-                AND h.planned_date::date <= @HarvestDateTo
+                AND h.end_time::date <= @HarvestDateTo
                 """);
 
             parameters.Add(
@@ -187,26 +220,16 @@ public class HarvestQueryRepository : IHarvestQueryRepository
 
         if (filter.ToPressing == true)
         {
-            sql.Append(
-                """
-        
-        AND h.status = 3
+            sql.Append($"""
 
-        AND (
-            h.quantity_kg
-            - COALESCE(
-                (
-                    SELECT SUM(poi.quantity_kg)
-                    FROM pressing_operation_inputs poi
-                    INNER JOIN pressing_operations po
-                        ON po.id = poi.pressing_operation_id
-                    WHERE poi.harvest_id = h.id
-                      AND poi.status = 0
-                ),
-                0
-            )
-        ) > 0
-        """);
+                AND h.status = 3
+                AND EXISTS (
+                    SELECT 1
+                    FROM olive_lots pl
+                    WHERE pl.harvest_id = h.id
+                      AND {OliveLotSql.SelectableCondition}
+                )
+                """);
         }
 
         // ----------------------------------------------------
@@ -257,6 +280,9 @@ public class HarvestQueryRepository : IHarvestQueryRepository
             p.reference AS "{nameof(HarvestDetailsResponse.PlotReference)}",
             h.planned_date AS "{nameof(HarvestDetailsResponse.PlannedDate)}",
             h.quantity_kg AS "{nameof(HarvestDetailsResponse.QuantityKg)}",
+            h.variety_id AS "{nameof(HarvestDetailsResponse.VarietyId)}",
+            h.planned_trees AS "{nameof(HarvestDetailsResponse.PlannedTrees)}",
+            COALESCE(h.harvested_trees, 0) AS "{nameof(HarvestDetailsResponse.HarvestedTrees)}",
             h.notes AS "{nameof(HarvestDetailsResponse.Notes)}",
             h.status AS "{nameof(HarvestDetailsResponse.Status)}",
             h.start_time AS "{nameof(HarvestDetailsResponse.StartTime)}",
@@ -329,14 +355,14 @@ public class HarvestQueryRepository : IHarvestQueryRepository
         INNER JOIN public.plots p
             ON p.id = h.plot_id
 
-        LEFT JOIN public.harvest_stock hs
-            ON hs.harvest_id = h.id
-
         WHERE h.id = @Id
 
         GROUP BY
             h.id,
             h.season_id,
+            h.variety_id,
+            h.planned_trees,
+            h.harvested_trees,
             h.reference,
             p.reference,
             h.planned_date,
@@ -412,39 +438,6 @@ public class HarvestQueryRepository : IHarvestQueryRepository
         return result.ToList();
     }
 
-    public async Task<List<HarvestStockDetailsResponse>> GetHarvestStocks(
-        int id,
-        CancellationToken cancellationToken = default)
-    {
-        const string sql = """
-        SELECT
-            hs.id AS Id,
-            hs.reference AS Reference,
-            hs.quantity_kg AS QuantityKg,
-            hs.status AS Status,
-            hs.created_at AS CreatedAt,
-            hs.updated_at AS UpdatedAt
-        FROM harvest_stock hs
-        WHERE hs.harvest_id = @HarvestId
-        ORDER BY hs.created_at DESC;
-        """;
-
-        using var connection = _dbConnection;
-
-        var command = new CommandDefinition(
-            sql,
-            new
-            {
-                HarvestId = id
-            },
-            cancellationToken: cancellationToken);
-
-        var stocks = await connection.QueryAsync<HarvestStockDetailsResponse>(
-            command);
-
-        return stocks.ToList();
-    }
-
     public async Task<OliveAnalysisDetailsResponse?> GetAnalysisDetails(int id, CancellationToken cancellationToken = default)
     {
         const string sql = $"""
@@ -452,7 +445,7 @@ public class HarvestQueryRepository : IHarvestQueryRepository
                 oa.id AS {nameof(OliveAnalysisDetailsResponse.Id)},
                 oa.season_id AS {nameof(OliveAnalysisDetailsResponse.SeasonId)},
                 oa.reference AS {nameof(OliveAnalysisDetailsResponse.Reference)},
-                oa.source_type AS {nameof(OliveAnalysisDetailsResponse.SourceTypeId)},
+                1 AS {nameof(OliveAnalysisDetailsResponse.SourceTypeId)},
                 oa.humidity_percentage AS {nameof(OliveAnalysisDetailsResponse.HumidityPercentage)},
                 oa.water_percentage AS {nameof(OliveAnalysisDetailsResponse.WaterPercentage)},
                 oa.oil_percentage AS {nameof(OliveAnalysisDetailsResponse.OilPercentage)},
@@ -462,8 +455,11 @@ public class HarvestQueryRepository : IHarvestQueryRepository
                 oa.end_time AS {nameof(OliveAnalysisDetailsResponse.EndTime)},
                 oa.status AS {nameof(OliveAnalysisDetailsResponse.Status)}
             FROM olive_analyses oa
-            WHERE oa.source_type = 1
-              AND oa.source_id = @HarvestId
+            WHERE oa.id IN (
+                SELECT lot.olive_analysis_id
+                FROM olive_lots lot
+                WHERE lot.harvest_id = @HarvestId
+            )
             ORDER BY oa.created_at DESC
             LIMIT 1;
             """;
@@ -480,5 +476,69 @@ public class HarvestQueryRepository : IHarvestQueryRepository
 
         return await connection.QueryFirstOrDefaultAsync<OliveAnalysisDetailsResponse>(
             command);
+    }
+
+    // ============================================================
+    // SEARCH WORKERS (from cost lines)
+    // ============================================================
+
+    public async Task<IReadOnlyList<WorkerSuggestionResponse>> SearchWorkers(
+        string? search,
+        int limit,
+        CancellationToken cancellationToken = default)
+    {
+        var sql = new StringBuilder(
+            $"""
+            SELECT
+                btrim(hcl.worker_name) AS {nameof(WorkerSuggestionResponse.WorkerName)},
+                NULLIF(btrim(hcl.worker_identifier), '') AS {nameof(WorkerSuggestionResponse.WorkerIdentifier)}
+
+            FROM harvest_cost_line hcl
+
+            WHERE hcl.worker_name IS NOT NULL
+              AND btrim(hcl.worker_name) <> ''
+            """);
+
+        var parameters = new DynamicParameters();
+
+        parameters.Add("Limit", limit);
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            sql.Append(
+                """
+
+                AND (
+                    hcl.worker_name ILIKE @Search
+                    OR hcl.worker_identifier ILIKE @Search
+                )
+                """);
+
+            parameters.Add("Search", $"%{search.Trim()}%");
+        }
+
+        sql.Append(
+            """
+
+            GROUP BY
+                btrim(hcl.worker_name),
+                NULLIF(btrim(hcl.worker_identifier), '')
+
+            ORDER BY
+                MAX(hcl.date) DESC,
+                1
+
+            LIMIT @Limit
+            """);
+
+        using var connection = _dbConnection;
+
+        var result = await connection.QueryAsync<WorkerSuggestionResponse>(
+            new CommandDefinition(
+                sql.ToString(),
+                parameters,
+                cancellationToken: cancellationToken));
+
+        return result.ToList();
     }
 }

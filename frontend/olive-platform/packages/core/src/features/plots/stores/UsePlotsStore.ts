@@ -11,13 +11,18 @@ interface PlotsStoreState {
   filters: PlotsRequestFilter;
   loading: boolean;
   error: string | null;
-  setFilter: (field: keyof PlotsRequestFilter, value: string | number) => void;
+  setFilter: <K extends keyof PlotsRequestFilter>(
+    field: K,
+    value: PlotsRequestFilter[K],
+  ) => void;
+  clearFilters: () => void;
   fetchPlots: () => Promise<void>;
 }
 
 const initialFilters: PlotsRequestFilter = {
   reference: "",
   name: "",
+  harvestState: null,
   pageNumber: 1,
   pageSize: 10,
 };
@@ -32,6 +37,10 @@ export const usePlotsStore = create<PlotsStoreState>((set, get) => ({
     set((state) => ({
       filters: { ...state.filters, [field]: value },
     }));
+  },
+
+  clearFilters: () => {
+    set({ filters: initialFilters });
   },
 
   fetchPlots: async () => {

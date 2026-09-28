@@ -30,6 +30,8 @@ const initialConstants: AppConstants = {
   purchaseStatus: [],
   costLineTypes: [],
   harvestTypes: [],
+  plotHarvestStates: [],
+  oliveLotStatuses: [],
 };
 
 export function createConstantsStore(
@@ -73,6 +75,9 @@ export function createConstantsStore(
       }),
       {
         name: "olive-platform-constants",
+
+        // Seules les valeurs sont gardées : elles sont rechargées à chaque démarrage.
+        partialize: (state) => ({ Appconstants: state.Appconstants }),
 
         storage: createJSONStorage(
           () => storage,

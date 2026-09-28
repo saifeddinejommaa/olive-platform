@@ -6,6 +6,8 @@ import type { HarvestDetails } from "../domain/entities/HarvestDetails";
 import type { UpdateHarvestParams } from "../domain/params/UpdateHarvestParams";
 import type { HarvestStockParams } from "../domain/params/HarvestStockParams";
 import type { CompleteHarvestParams } from "../domain/params/CompleteHarvestParams";
+import type { AddHarvestCostLineParams } from "../domain/params/AddHarvestCostLineParams";
+import { addHarvestCostLine } from "../domain/usecases/AddHarvestCostLine";
 
 import { updateHarvest } from "../domain/usecases/UpdateHarvest";
 import { startHarvest } from "../domain/usecases/StartHarvest";
@@ -38,6 +40,11 @@ type HarvestDetailsState = {
   ) => Promise<void>;
 
   cancel: (id: number) => Promise<void>;
+
+  addCostLine: (
+    id: number,
+    params: AddHarvestCostLineParams,
+  ) => Promise<void>;
 
   clear: () => void;
 };
@@ -196,6 +203,34 @@ export const useHarvestDetailsStore = create<HarvestDetailsState>(
       } catch (error) {
         set({
           error: "Impossible d'annuler la récolte.",
+        });
+
+        throw error;
+      } finally {
+        set({
+          saving: false,
+        });
+      }
+    },
+
+    addCostLine: async (id, params) => {
+      try {
+        set({
+          saving: true,
+          error: null,
+        });
+
+        await addHarvestCostLine(id, params);
+
+        // On recharge la récolte pour mettre à jour le résumé des coûts.
+        const harvest = await GetHarvestDetails(id);
+
+        set({
+          harvest,
+        });
+      } catch (error) {
+        set({
+          error: "Impossible d'ajouter le coût.",
         });
 
         throw error;

@@ -1,10 +1,12 @@
-﻿using OlivePlatform.Application.Features.Analysis.Responses;
+using OlivePlatform.Application.Features.Analysis.Responses;
+using OlivePlatform.Domain.Enums;
 
 namespace OlivePlatform.Application.Features.OlivePurchases.Responses
 {
+    // Ligne d'achat = un lot d'olives (olive_lots) rattaché à l'achat.
     public class OlivePurchaseItemDetailsResponse
     {
-        public int Id { get; set; }
+        public long Id { get; set; }
 
         public required string Reference { get; set; }
 
@@ -14,9 +16,21 @@ namespace OlivePlatform.Application.Features.OlivePurchases.Responses
 
         public decimal RemainingQuantityKg { get; set; }
 
+        public OliveLotStatus Status { get; set; }
+
+        public bool NeedAnalysis { get; set; }
+
+        // Analyse terminée.
+        public bool IsAnalyzed { get; set; }
+
+        // Analyse requise mais non terminée : le lot ne peut pas être pressé.
+        public bool ToAnalysis { get; set; }
+
+        public bool IsPressable { get; set; }
+
         public decimal PricePerKg { get; set; }
 
-        public int TotalAmount { get; set; }
+        public decimal TotalAmount { get; set; }
 
         public OliveAnalysisInfoResponse? Analysis { get; set; }
     }

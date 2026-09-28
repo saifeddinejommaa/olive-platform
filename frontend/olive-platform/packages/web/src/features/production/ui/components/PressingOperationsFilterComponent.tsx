@@ -7,7 +7,7 @@ import { usePressingOperationsStore } from "@olive-platform/core/features/produc
 import type { PressingOperationFilters } from "@olive-platform/core/features/production/domain/entities/PressingOperationFilters";
 
 export default function PressingOperationsFilterComponent() {
-  const { filters, loading, setFilter, fetchPressingOperations } =
+  const { filters, loading, setFilter, clearFilters, fetchPressingOperations } =
     usePressingOperationsStore();
 
   const updateFilter = (
@@ -18,14 +18,12 @@ export default function PressingOperationsFilterComponent() {
   };
 
   const handleSearch = async () => {
+    setFilter("pageNumber", 1);
     await fetchPressingOperations();
   };
 
   const handleReset = async () => {
-    setFilter("pressingNumber", "");
-    setFilter("plannedDate", "");
-    setFilter("harvestNumber", "");
-    setFilter("purchaseNumber", "");
+    clearFilters();
     await fetchPressingOperations();
   };
 
@@ -44,9 +42,9 @@ export default function PressingOperationsFilterComponent() {
         <div className="filters-content filters-content-row">
           <div className="filter-item">
             <TextInput
-              label="N° Pression"
+              label="Référence"
               placeholder="PRESS-2026-001"
-              value={filters.operationNumber}
+              value={filters.operationNumber ?? ""}
               onChange={(event) =>
                 updateFilter("operationNumber", event.target.value)
               }
@@ -55,20 +53,31 @@ export default function PressingOperationsFilterComponent() {
 
           <div className="filter-item">
             <TextInput
-              label="Date de pression"
+              label="Début à partir du"
               type="date"
-              value={filters.plannedDate}
+              value={filters.fromDate ?? ""}
               onChange={(event) =>
-                updateFilter("plannedDate", event.target.value)
+                updateFilter("fromDate", event.target.value)
               }
             />
           </div>
 
           <div className="filter-item">
             <TextInput
-              label="N° Récolte"
+              label="Fin jusqu'au"
+              type="date"
+              value={filters.toDate ?? ""}
+              onChange={(event) =>
+                updateFilter("toDate", event.target.value)
+              }
+            />
+          </div>
+
+          <div className="filter-item">
+            <TextInput
+              label="Réf. récolte"
               placeholder="HARV-2026-001"
-              value={filters.harvestNumber}
+              value={filters.harvestNumber ?? ""}
               onChange={(event) =>
                 updateFilter("harvestNumber", event.target.value)
               }
@@ -77,9 +86,9 @@ export default function PressingOperationsFilterComponent() {
 
           <div className="filter-item">
             <TextInput
-              label="N° Achat"
+              label="Réf. achat"
               placeholder="ACH-2026-001"
-              value={filters.purchaseNumber}
+              value={filters.purchaseNumber ?? ""}
               onChange={(event) =>
                 updateFilter("purchaseNumber", event.target.value)
               }

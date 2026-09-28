@@ -1,4 +1,4 @@
-﻿// Application/Features/Dashboard/Responses/DashboardSummaryResponse.cs
+// Application/Features/Dashboard/Responses/DashboardSummaryResponse.cs
 namespace OlivePlatform.Application.Features.Dashboard.Responses
 {
     public class ProductionPipelineResponse
@@ -17,12 +17,6 @@ namespace OlivePlatform.Application.Features.Dashboard.Responses
         // calculé en C#, jamais négatif
         public int NotHarvestedTrees =>
             Math.Max(TotalTrees - HarvestedTrees - PlannedTrees, 0);
-    }
-
-    public class HarvestYieldPointResponse
-    {
-        public DateOnly Date { get; set; }
-        public decimal QuantityKg { get; set; }
     }
 
     public class PressingComparisonPointResponse
@@ -44,16 +38,40 @@ namespace OlivePlatform.Application.Features.Dashboard.Responses
                 : Math.Round(CurrentLevelLiters * 100m / TotalCapacityLiters, 2);
     }
 
+    // Lots d'olives de la campagne, répartis par état (en kg).
+    public class OliveLotsOverviewResponse
+    {
+        public int TotalLots { get; set; }
+        public decimal TotalKg { get; set; }
+        public decimal HarvestKg { get; set; }
+        public decimal PurchaseKg { get; set; }
+
+        // Quantités pressées (pressions terminées).
+        public decimal PressedKg { get; set; }
+        public int PressedLots { get; set; }
+
+        // Quantités réservées par une pression planifiée ou en cours.
+        public decimal InPressingKg { get; set; }
+        public int InPressingLots { get; set; }
+
+        // Restant pressable (analyse terminée ou non requise).
+        public decimal ReadyKg { get; set; }
+        public int ReadyLots { get; set; }
+
+        // Restant bloqué : analyse requise mais non terminée.
+        public decimal PendingAnalysisKg { get; set; }
+        public int PendingAnalysisLots { get; set; }
+    }
+
     public class DashboardSummaryResponse
     {
         public ProductionPipelineResponse HarvestPipeline { get; set; } = null!;
         public ProductionPipelineResponse PressingPipeline { get; set; } = null!;
         public TreesCoverageResponse TreesCoverage { get; set; } = null!;
-        public List<HarvestYieldPointResponse> HarvestYield { get; set; } = new();
+        public OliveLotsOverviewResponse OliveLots { get; set; } = null!;
         public List<PressingComparisonPointResponse> PressingComparison { get; set; } = new();
         public TankOccupancyResponse TankOccupancy { get; set; } = null!;
-        public ChargesCoverageResponse ChargesCoverage { get; set; } = null!; // nouveau
-
+        public ChargesCoverageResponse ChargesCoverage { get; set; } = null!;
     }
 
     public class ChargesCoverageResponse

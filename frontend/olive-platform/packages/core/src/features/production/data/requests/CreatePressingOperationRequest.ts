@@ -10,7 +10,6 @@ export type CreatePressingOperationRequest = {
 };
 
 export type CreatePressingOperationInputRequest = {
-  harvestId: number | null;
-  purchaseItemId: number | null;
-  quantityKg: number;
+  lotId: number;
+  quantityKg: number | null;
 };
