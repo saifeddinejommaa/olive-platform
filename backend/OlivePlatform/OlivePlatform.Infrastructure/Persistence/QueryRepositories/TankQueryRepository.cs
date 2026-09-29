@@ -47,10 +47,8 @@ public class TankQueryRepository : ITankQueryRepository
             pending.operation_number AS {nameof(TankForListResponse.PendingPressingNumber)},
             pending_analysis.id AS {nameof(TankForListResponse.PendingOilAnalysisId)},
             pending_analysis.status AS {nameof(TankForListResponse.PendingOilAnalysisStatus)},
-            pending_analysis.acidity_percentage AS {nameof(TankForListResponse.PendingAcidityPercentage)},
-            pending_analysis.peroxide_index AS {nameof(TankForListResponse.PendingPeroxideIndex)},
-            pending_analysis.k232 AS {nameof(TankForListResponse.PendingK232)},
-            pending_analysis.k270 AS {nameof(TankForListResponse.PendingK270)}
+            pending_analysis.oil_category_id AS {nameof(TankForListResponse.PendingOilCategory)},
+            pending_analysis.category_label AS {nameof(TankForListResponse.PendingOilCategoryLabel)}
 
         FROM tanks t
         INNER JOIN tank_type tt
@@ -85,8 +83,9 @@ public class TankQueryRepository : ITankQueryRepository
 
         -- Analyse d'huile de cette pression (la plus récente) : l'huile est-elle déjà analysée ?
         LEFT JOIN LATERAL (
-            SELECT a.id, a.status, a.acidity_percentage, a.peroxide_index, a.k232, a.k270
+            SELECT a.id, a.status, a.oil_category_id, ac.label AS category_label
             FROM oil_analyses a
+            LEFT JOIN oil_category ac ON ac.id = a.oil_category_id
             WHERE a.source_type_id = 1
               AND a.source_id = pending.pressing_operation_id
             ORDER BY a.id DESC
@@ -112,7 +111,9 @@ public class TankQueryRepository : ITankQueryRepository
             oa.acidity_percentage AS {nameof(TankContentResponse.AcidityPercentage)},
             oa.peroxide_index AS {nameof(TankContentResponse.PeroxideIndex)},
             oa.k232 AS {nameof(TankContentResponse.K232)},
-            oa.k270 AS {nameof(TankContentResponse.K270)}
+            oa.k270 AS {nameof(TankContentResponse.K270)},
+            oa.oil_category_id AS {nameof(TankContentResponse.OilAnalysisCategory)},
+            oa.category_label AS {nameof(TankContentResponse.OilAnalysisCategoryLabel)}
 
         FROM oil_movements m
         INNER JOIN oil_batches b
@@ -120,8 +121,10 @@ public class TankQueryRepository : ITankQueryRepository
         LEFT JOIN pressing_operations po
             ON po.id = b.production_batch_id
         LEFT JOIN LATERAL (
-            SELECT a.id, a.reference, a.status, a.acidity_percentage, a.peroxide_index, a.k232, a.k270
+            SELECT a.id, a.reference, a.status, a.acidity_percentage, a.peroxide_index, a.k232, a.k270,
+                   a.oil_category_id, ac.label AS category_label
             FROM oil_analyses a
+            LEFT JOIN oil_category ac ON ac.id = a.oil_category_id
             WHERE a.source_type_id = 1
               AND a.source_id = b.production_batch_id
             ORDER BY a.id DESC
@@ -133,7 +136,8 @@ public class TankQueryRepository : ITankQueryRepository
 
         GROUP BY
             b.id, po.id,
-            oa.id, oa.reference, oa.status, oa.acidity_percentage, oa.peroxide_index, oa.k232, oa.k270
+            oa.id, oa.reference, oa.status, oa.acidity_percentage, oa.peroxide_index, oa.k232, oa.k270,
+            oa.oil_category_id, oa.category_label
 
         HAVING SUM(CASE WHEN m.destination_tank_id = @Id THEN m.quantity_liters ELSE -m.quantity_liters END) > 0
 

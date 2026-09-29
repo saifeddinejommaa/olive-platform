@@ -1,3 +1,4 @@
+import type { OilCategory } from "../../../../tanks/domain/entities/Tank";
 import type { ProductionStatus } from "../../../../production/domain/entities/ProductionStatus";
 import type { OilAnalysisSourceType } from "./OilAnalysisSourceType";
 import type { OilLocation } from "./OilLocation";
@@ -22,4 +23,7 @@ export interface OilAnalysisDetails {
   createdAt: string;
   updatedAt?: string;
   status: ProductionStatus;
+  // Catégorie officielle, fixée par l'API à la clôture (null avant).
+  oilCategory: OilCategory | null;
+  oilCategoryLabel: string | null;
 }

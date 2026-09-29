@@ -4,24 +4,24 @@ import { toast } from "react-toastify";
 import Button from "../../../../../common/widgets/button/Button";
 import Card from "../../../../../common/widgets/card/Card";
 import TankPicker from "../../../../../common/widgets/tankPicker/TankPicker";
-import OilGradeBadge from "../../../../../common/widgets/oilGradeBadge/OilGradeBadge";
+import OilCategoryBadge from "../../../../../common/widgets/oilCategoryBadge/OilCategoryBadge";
 import TextInput from "../../../../../common/widgets/textInput/TextInput";
 import { formatLiters } from "../../../../tanks/ui/TankFormat";
 
-import {
-  classifyOil,
-  OIL_GRADE_LABELS,
-  type OilTestResults,
-} from "@olive-platform/core/features/oilQuality/OilGrade";
 import type { OilLocation } from "@olive-platform/core/features/analyses/oilAnalyses/domain/entities/OilLocation";
-import { TankType, type Tank } from "@olive-platform/core/features/tanks/domain/entities/Tank";
+import {
+  OIL_CATEGORY_LABELS,
+  TankType,
+  type OilCategory,
+  type Tank,
+} from "@olive-platform/core/features/tanks/domain/entities/Tank";
 import { GetTanks } from "@olive-platform/core/features/tanks/domain/usecases/GetTanks";
-import { GRADE_CATEGORIES } from "@olive-platform/core/features/tanks/domain/OilType";
 import { TransferOilToStorage } from "@olive-platform/core/features/oilMovements/domain/usecases/OilMovementUseCases";
 
 type Props = {
   oilAnalysisId: number;
-  results: OilTestResults;
+  // Catégorie officielle de l'huile, fixée par l'API à la clôture de l'analyse.
+  category: OilCategory | null;
   // Citernes contenant l'huile analysée.
   locations: OilLocation[];
   // Rechargement de l'analyse après le transfert.
@@ -36,11 +36,10 @@ type StorageTank = Tank & { levelLiters: number };
  */
 export default function OilStorageTransferCard({
   oilAnalysisId,
-  results,
+  category,
   locations,
   onTransferred,
 }: Props) {
-  const grade = classifyOil(results);
 
   // Huile encore en citerne tampon : c'est elle qui est transférée.
   const bufferLocations = locations.filter(
@@ -59,7 +58,7 @@ export default function OilStorageTransferCard({
 
   // Citernes de stockage actives de la catégorie de l'huile.
   useEffect(() => {
-    if (!grade || quantity <= 0) return;
+    if (!category || quantity <= 0) return;
 
     let cancelled = false;
 
@@ -67,7 +66,7 @@ export default function OilStorageTransferCard({
 
     GetTanks({
       tankType: TankType.Storage,
-      oilCategory: GRADE_CATEGORIES[grade],
+      oilCategory: category,
       status: "active",
     })
       .then((items) => {
@@ -85,7 +84,7 @@ export default function OilStorageTransferCard({
     return () => {
       cancelled = true;
     };
-  }, [grade, quantity]);
+  }, [category, quantity]);
 
   const unavailableReason = (tank: StorageTank) =>
     Number(tank.availableCapacityLiters) < quantity ? "place insuffisante" : null;
@@ -154,14 +153,14 @@ export default function OilStorageTransferCard({
             </span>
           </div>
 
-          <OilGradeBadge grade={grade}>
-            {grade ? `Catégorie : ${OIL_GRADE_LABELS[grade]}` : "Catégorie inconnue"}
-          </OilGradeBadge>
+          <OilCategoryBadge category={category}>
+            {category ? `Catégorie : ${OIL_CATEGORY_LABELS[category]}` : "Catégorie inconnue"}
+          </OilCategoryBadge>
         </div>
 
-        {!grade ? (
+        {!category ? (
           <div className="close-step__note close-step__note--warning">
-            L'acidité est nécessaire pour classer l'huile et choisir sa citerne.
+            Cette analyse n'a pas de catégorie d'huile : elle doit être clôturée avec son acidité.
           </div>
         ) : loading ? (
           <div className="close-step__note">Chargement des citernes de stockage...</div>
@@ -170,8 +169,8 @@ export default function OilStorageTransferCard({
             {!suggested && (
               <div className="close-step__note close-step__note--warning">
                 {tanks.length === 0
-                  ? `Aucune citerne de stockage « ${OIL_GRADE_LABELS[grade]} » active.`
-                  : `Aucune citerne « ${OIL_GRADE_LABELS[grade]} » ne peut recevoir ${formatLiters(quantity)}.`}
+                  ? `Aucune citerne de stockage « ${OIL_CATEGORY_LABELS[category]} » active.`
+                  : `Aucune citerne « ${OIL_CATEGORY_LABELS[category]} » ne peut recevoir ${formatLiters(quantity)}.`}
               </div>
             )}
 

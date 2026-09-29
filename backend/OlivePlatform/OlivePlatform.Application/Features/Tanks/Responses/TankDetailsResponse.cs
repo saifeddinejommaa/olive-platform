@@ -44,6 +44,11 @@ public class TankContentResponse
     public decimal? K232 { get; set; }
 
     public decimal? K270 { get; set; }
+
+    // Catégorie officielle de l'huile, fixée à la clôture de l'analyse.
+    public OilCategory? OilAnalysisCategory { get; set; }
+
+    public string? OilAnalysisCategoryLabel { get; set; }
 }
 
 // Mouvement d'huile, vu depuis la citerne (entrée ou sortie).

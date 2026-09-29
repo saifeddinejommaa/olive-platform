@@ -8,7 +8,7 @@ import Card from "../../../../common/widgets/card/Card";
 import Select from "../../../../common/widgets/select/Select";
 import TextInput from "../../../../common/widgets/textInput/TextInput";
 import InfoFieldWidget from "../../../../common/widgets/InfoFieldWidget";
-import OilGradeBadge from "../../../../common/widgets/oilGradeBadge/OilGradeBadge";
+import OilCategoryBadge from "../../../../common/widgets/oilCategoryBadge/OilCategoryBadge";
 import { usePageTitle } from "../../../../common/hooks/usePageTitle";
 import CustomerDrawer from "../../../customers/ui/components/CustomerDrawer";
 import { formatAmount, formatQuantity } from "../OilSaleFormat";
@@ -29,7 +29,7 @@ import {
 } from "@olive-platform/core/features/oilSales/domain/OilSaleAmounts";
 import { TankType, type Tank } from "@olive-platform/core/features/tanks/domain/entities/Tank";
 import { GetTanks } from "@olive-platform/core/features/tanks/domain/usecases/GetTanks";
-import { tankGrade } from "@olive-platform/core/features/tanks/domain/OilType";
+import { tankCategory } from "@olive-platform/core/features/tanks/domain/OilType";
 
 type LineForm = {
   key: number;
@@ -373,7 +373,7 @@ export default function NewOilSalePage() {
               <div key={line.key} className="sale-line">
                 <div className="sale-line__header">
                   <strong>Citerne {index + 1}</strong>
-                  {tank && <OilGradeBadge grade={tankGrade(tank)} />}
+                  {tank && <OilCategoryBadge category={tankCategory(tank)} />}
                   {lines.length > 1 && (
                     <button
                       type="button"

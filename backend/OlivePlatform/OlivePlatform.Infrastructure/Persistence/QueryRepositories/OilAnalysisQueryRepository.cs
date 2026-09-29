@@ -117,13 +117,20 @@ namespace OlivePlatform.Infrastructure.Persistence.QueryRepositories
 
             oa.updated_at AS {nameof(OilAnalysisDetailsResponse.UpdatedAt)},
 
-            oa.status AS {nameof(OilAnalysisDetailsResponse.Status)}
+            oa.status AS {nameof(OilAnalysisDetailsResponse.Status)},
+
+            oa.oil_category_id AS {nameof(OilAnalysisDetailsResponse.OilCategory)},
+
+            category.label AS {nameof(OilAnalysisDetailsResponse.OilCategoryLabel)}
 
         FROM oil_analyses oa
 
         LEFT JOIN pressing_operations po
             ON oa.source_type_id = 1
             AND po.id = oa.source_id
+
+        LEFT JOIN oil_category category
+            ON category.id = oa.oil_category_id
 
         LEFT JOIN tanks t
             ON oa.source_type_id = 2

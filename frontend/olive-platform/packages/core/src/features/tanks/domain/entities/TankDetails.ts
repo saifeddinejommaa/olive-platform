@@ -1,5 +1,5 @@
 import type { ProductionStatus } from "../../../production/domain/entities/ProductionStatus";
-import type { Tank } from "./Tank";
+import type { OilCategory, Tank } from "./Tank";
 
 // Lot d'huile présent dans la citerne.
 export type TankContent = {
@@ -19,6 +19,9 @@ export type TankContent = {
   peroxideIndex: number | null;
   k232: number | null;
   k270: number | null;
+  // Catégorie officielle de l'huile, fixée par l'API à la clôture de l'analyse.
+  oilAnalysisCategory: OilCategory | null;
+  oilAnalysisCategoryLabel: string | null;
 };
 
 // Mouvement d'huile vu depuis la citerne.

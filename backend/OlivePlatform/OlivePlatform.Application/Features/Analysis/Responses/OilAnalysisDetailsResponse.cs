@@ -23,6 +23,11 @@ namespace OlivePlatform.Application.Features.Analysis.Responses
         public DateTime? UpdatedAt { get; set; }
         public ProductionStatus Status { get; set; }
 
+        // Catégorie officielle, fixée à la clôture (null avant).
+        public OilCategory? OilCategory { get; set; }
+
+        public string? OilCategoryLabel { get; set; }
+
         // Huile produite par la pression source (L).
         public decimal? OilQuantityLiters { get; set; }
 

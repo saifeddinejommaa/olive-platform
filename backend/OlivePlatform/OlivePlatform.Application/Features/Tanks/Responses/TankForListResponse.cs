@@ -38,11 +38,8 @@ public class TankForListResponse
 
     public ProductionStatus? PendingOilAnalysisStatus { get; set; }
 
-    public decimal? PendingAcidityPercentage { get; set; }
+    // Catégorie officielle de l'huile, fixée à la clôture de l'analyse.
+    public OilCategory? PendingOilCategory { get; set; }
 
-    public decimal? PendingPeroxideIndex { get; set; }
-
-    public decimal? PendingK232 { get; set; }
-
-    public decimal? PendingK270 { get; set; }
+    public string? PendingOilCategoryLabel { get; set; }
 }

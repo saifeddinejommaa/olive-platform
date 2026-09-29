@@ -51,6 +51,10 @@ namespace OlivePlatform.Domain.Entities
         [Column("updated_at")]
         public DateTime? UpdatedAt { get; set; }
 
+        // Catégorie officielle, fixée par l'API à la clôture (seuils COI).
+        [Column("oil_category_id")]
+        public OilCategory? OilCategory { get; set; }
+
         [Column("status")]
         public ProductionStatus Status { get; set; }
     }

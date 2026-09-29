@@ -4,7 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import Card from "../../../../common/widgets/card/Card";
 import DataTable from "../../../../common/widgets/tables/OrdersTable";
 import InfoFieldWidget from "../../../../common/widgets/InfoFieldWidget";
-import OilGradeBadge from "../../../../common/widgets/oilGradeBadge/OilGradeBadge";
+import OilCategoryBadge from "../../../../common/widgets/oilCategoryBadge/OilCategoryBadge";
 import { usePageTitle } from "../../../../common/hooks/usePageTitle";
 import { renderStatus } from "../../../../common/status/StatusUtils";
 import { productionStatusConfig } from "../../../../common/status/ProductionStatusConfig";
@@ -20,7 +20,7 @@ import type {
 } from "@olive-platform/core/features/tanks/domain/entities/TankDetails";
 import { GetTankDetails } from "@olive-platform/core/features/tanks/domain/usecases/GetTankDetails";
 import { bufferOilState, oilTypeOf } from "@olive-platform/core/features/tanks/domain/OilType";
-import { OIL_GRADE_LABELS } from "@olive-platform/core/features/oilQuality/OilGrade";
+import { OIL_CATEGORY_LABELS } from "@olive-platform/core/features/tanks/domain/entities/Tank";
 
 const formatDate = (value: string) => new Date(value).toLocaleDateString("fr-FR");
 
@@ -105,7 +105,7 @@ export default function TankDetailsPage() {
     bufferState.kind === "empty"
       ? "Libre"
       : bufferState.kind === "analysed"
-        ? `Analysée${bufferState.grade ? ` : ${OIL_GRADE_LABELS[bufferState.grade]}` : ""} · à transférer`
+        ? `Analysée${bufferState.category ? ` : ${OIL_CATEGORY_LABELS[bufferState.category]}` : ""} · à transférer`
         : bufferState.label;
 
   const contentColumns = [
@@ -139,7 +139,7 @@ export default function TankDetailsPage() {
 
         return (
           <div className="tank-cell">
-            <OilGradeBadge grade={oilType.grade} />
+            <OilCategoryBadge category={oilType.category} />
             {oilType.source === "analysis" && (
               <span className="tank-cell__sub">
                 Selon l'analyse

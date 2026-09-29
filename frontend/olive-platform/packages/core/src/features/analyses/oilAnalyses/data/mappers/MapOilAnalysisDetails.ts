@@ -23,5 +23,7 @@ export function mapOilAnalysisDetails(
     createdAt: response.createdAt,
     updatedAt: response.updatedAt ?? undefined,
     status: response.status,
+    oilCategory: response.oilCategory ?? null,
+    oilCategoryLabel: response.oilCategoryLabel ?? null,
   };
 }

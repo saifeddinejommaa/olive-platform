@@ -5,7 +5,8 @@ namespace OlivePlatform.Domain.OilQuality;
 /// <summary>
 /// Catégorie commerciale d'une huile d'olive (normes COI) d'après son analyse.
 /// Un critère non mesuré n'est pas vérifié ; un seul critère dépassé suffit à
-/// déclasser l'huile. Mêmes seuils que core/features/oilQuality/OilGrade.ts.
+/// déclasser l'huile. Seule source de la règle : appelée à la clôture de
+/// l'analyse, la catégorie est ensuite enregistrée (oil_analyses.oil_category_id).
 /// </summary>
 public static class OilClassifier
 {

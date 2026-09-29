@@ -14,14 +14,11 @@ import { ProductionStatus } from "@olive-platform/core/features/production/domai
 import { renderStatus } from "../../../../../common/status/StatusUtils";
 import { productionStatusConfig } from "../../../../../common/status/ProductionStatusConfig";
 import Card from "../../../../../common/widgets/card/Card";
-import OilGradeBadge from "../../../../../common/widgets/oilGradeBadge/OilGradeBadge";
+import OilCategoryBadge from "../../../../../common/widgets/oilCategoryBadge/OilCategoryBadge";
 import { usePageTitle } from "../../../../../common/hooks/usePageTitle";
 import OilLocationCard from "../components/OilLocationCard";
 import { IconBan, IconCheck, IconPlayerPlay } from "@tabler/icons-react";
-import {
-  classifyOil,
-  OIL_GRADE_LABELS,
-} from "@olive-platform/core/features/oilQuality/OilGrade";
+import { OIL_CATEGORY_LABELS } from "@olive-platform/core/features/tanks/domain/entities/Tank";
 import { formatOilQuantity } from "@olive-platform/core/features/shared/utils/formatter";
 import { formatStringToDateTime } from "@olive-platform/core/features/shared/utils/DatesUtils";
 
@@ -363,14 +360,6 @@ export default function OilAnalysisDetailsPage() {
 
   const hasInvalidId = !id || Number.isNaN(Number(id)) || Number(id) <= 0;
 
-  // Catégorie de l'huile d'après les résultats saisis (normes COI).
-  const grade = classifyOil({
-    acidity: form.acidityPercentage,
-    peroxide: form.peroxideIndex,
-    k232: form.k232,
-    k270: form.k270,
-  });
-
   const showResults = isInProgress || isCompleted;
 
   if (hasInvalidId || (!loading && (error || !analysis))) {
@@ -487,12 +476,19 @@ export default function OilAnalysisDetailsPage() {
               <span>Résultats du contrôle physico-chimique de l'huile.</span>
             </div>
 
-            {showResults && (
-              <OilGradeBadge grade={grade}>
-                {grade
-                  ? `Catégorie : ${OIL_GRADE_LABELS[grade]}`
-                  : "Catégorie : saisissez l'acidité"}
-              </OilGradeBadge>
+            {/* Catégorie officielle : fixée par l'API à la clôture de l'analyse. */}
+            {isCompleted ? (
+              <OilCategoryBadge category={analysis.oilCategory}>
+                {analysis.oilCategory
+                  ? `Catégorie : ${OIL_CATEGORY_LABELS[analysis.oilCategory]}`
+                  : "Catégorie non déterminée"}
+              </OilCategoryBadge>
+            ) : (
+              isInProgress && (
+                <span className="tank-cell__sub">
+                  La catégorie sera déterminée à la clôture de l'analyse.
+                </span>
+              )
             )}
           </div>
 
@@ -585,12 +581,7 @@ export default function OilAnalysisDetailsPage() {
       {isCompleted && analysis.sourceTypeId === OilAnalysisSourceType.PressingOperation && (
         <OilStorageTransferCard
           oilAnalysisId={analysis.id}
-          results={{
-            acidity: analysis.acidityPercentage,
-            peroxide: analysis.peroxideIndex,
-            k232: analysis.k232,
-            k270: analysis.k270,
-          }}
+          category={analysis.oilCategory}
           locations={analysis.oilLocations}
           onTransferred={() => fetchAnalysis(analysis.id)}
         />

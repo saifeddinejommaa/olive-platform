@@ -5,7 +5,6 @@ using OlivePlatform.Domain;
 using OlivePlatform.Domain.Entities;
 using OlivePlatform.Domain.Enums;
 using OlivePlatform.Domain.Interfaces.Repositories;
-using OlivePlatform.Domain.OilQuality;
 using OlivePlatform.Domain.Repositories;
 using YourProject.Application.Constants;
 using YourProject.Application.Services;
@@ -87,14 +86,10 @@ public class TransferOilToStorageCommandHandler
                 "L'analyse d'huile doit être terminée avant de stocker l'huile.");
         }
 
-        // Catégorie de l'huile d'après l'analyse : elle décide de la citerne.
-        var category = OilClassifier.Classify(
-            analysis.AcidityPercentage,
-            analysis.PeroxideIndex,
-            analysis.K232,
-            analysis.K270)
+        // Catégorie officielle, fixée à la clôture de l'analyse : elle décide de la citerne.
+        var category = analysis.OilCategory
             ?? throw new BusinessException(
-                "L'acidité de l'analyse est nécessaire pour classer l'huile.");
+                "L'analyse n'a pas de catégorie d'huile : elle doit être clôturée avec son acidité.");
 
         var destination = await _tankRepository.GetByIdAsync(
             request.DestinationTankId,

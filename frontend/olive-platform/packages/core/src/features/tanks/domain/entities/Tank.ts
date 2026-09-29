@@ -18,6 +18,14 @@ export const OilCategory = {
 
 export type OilCategory = (typeof OilCategory)[keyof typeof OilCategory];
 
+// Libellés courts des catégories commerciales (affichage des badges).
+export const OIL_CATEGORY_LABELS: Record<OilCategory, string> = {
+  [OilCategory.ExtraVirgin]: "Extra vierge",
+  [OilCategory.Virgin]: "Vierge",
+  [OilCategory.Lampante]: "Lampante",
+  [OilCategory.PendingAnalysis]: "En attente d'analyse",
+};
+
 export type Tank = {
   id: number;
   code: string;
@@ -37,10 +45,9 @@ export type Tank = {
   // Analyse d'huile de cette pression : planifiée, en cours ou terminée.
   pendingOilAnalysisId: number | null;
   pendingOilAnalysisStatus: ProductionStatus | null;
-  pendingAcidityPercentage: number | null;
-  pendingPeroxideIndex: number | null;
-  pendingK232: number | null;
-  pendingK270: number | null;
+  // Catégorie officielle de l'huile, fixée par l'API à la clôture de l'analyse.
+  pendingOilCategory: OilCategory | null;
+  pendingOilCategoryLabel: string | null;
 };
 
 export type TanksFilter = {

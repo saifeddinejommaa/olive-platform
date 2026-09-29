@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using OlivePlatform.Application.Services;
 using OlivePlatform.Domain;
+using OlivePlatform.Domain.OilQuality;
 using OlivePlatform.Domain.Enums;
 using OlivePlatform.Domain.Repositories;
 
@@ -140,6 +141,16 @@ namespace OlivePlatform.Application.Features.OilAnalyses.Commands
             oilAnalysis.K232 = request.K232;
             oilAnalysis.K270 = request.K270;
             oilAnalysis.OrganolepticGrade = request.OrganolepticGrade;
+
+            // Catégorie officielle de l'huile : calculée une seule fois, ici, puis figée.
+            oilAnalysis.OilCategory = OilClassifier.Classify(
+                request.AcidityPercentage,
+                request.PeroxideIndex,
+                request.K232,
+                request.K270)
+                ?? throw new BusinessException(
+                    "L'acidité est obligatoire pour clôturer l'analyse d'huile.");
+
             oilAnalysis.Status = ProductionStatus.Completed;
             oilAnalysis.EndTime = now;
             oilAnalysis.UpdatedAt = now;

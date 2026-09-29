@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import DataTable from "../../../../common/widgets/tables/OrdersTable";
 import Card from "../../../../common/widgets/card/Card";
 import Select from "../../../../common/widgets/select/Select";
-import OilGradeBadge from "../../../../common/widgets/oilGradeBadge/OilGradeBadge";
+import OilCategoryBadge from "../../../../common/widgets/oilCategoryBadge/OilCategoryBadge";
 import { usePageTitle } from "../../../../common/hooks/usePageTitle";
 import TankGauge from "../components/TankGauge";
 import { formatLiters } from "../TankFormat";
@@ -12,13 +12,13 @@ import TransferOilDrawer from "../components/TransferOilDrawer";
 import ActionCard from "../../../../common/widgets/actionCard/ActionCard";
 
 import {
+  OIL_CATEGORY_LABELS,
   OilCategory,
   TankType,
   type Tank,
 } from "@olive-platform/core/features/tanks/domain/entities/Tank";
 import { GetTanks } from "@olive-platform/core/features/tanks/domain/usecases/GetTanks";
-import { bufferOilState, tankGrade } from "@olive-platform/core/features/tanks/domain/OilType";
-import { OIL_GRADE_LABELS, type OilGrade } from "@olive-platform/core/features/oilQuality/OilGrade";
+import { bufferOilState, tankCategory } from "@olive-platform/core/features/tanks/domain/OilType";
 
 const PAGE_SIZE = 10;
 
@@ -35,17 +35,17 @@ const oilCategoryOptions = [
 ];
 
 // Stock d'huile par catégorie (les tampons contiennent l'huile en attente d'analyse).
-const stockCategories: { category: OilCategory; grade: OilGrade | null; label: string }[] = [
-  { category: OilCategory.ExtraVirgin, grade: "extraVirgin", label: "Extra vierge" },
-  { category: OilCategory.Virgin, grade: "virgin", label: "Vierge" },
-  { category: OilCategory.Lampante, grade: "lampante", label: "Lampante" },
-  { category: OilCategory.PendingAnalysis, grade: null, label: "En citerne tampon" },
+const stockCategories: { category: OilCategory; label: string }[] = [
+  { category: OilCategory.ExtraVirgin, label: "Extra vierge" },
+  { category: OilCategory.Virgin, label: "Vierge" },
+  { category: OilCategory.Lampante, label: "Lampante" },
+  { category: OilCategory.PendingAnalysis, label: "En citerne tampon" },
 ];
 
 // Huile d'une citerne : catégorie du stockage ; en tampon, l'état de son analyse.
 function TankOilBadge({ tank }: { tank: Tank }) {
   if (tank.tankType !== TankType.Buffer) {
-    return <OilGradeBadge grade={tankGrade(tank)} />;
+    return <OilCategoryBadge category={tankCategory(tank)} />;
   }
 
   const state = bufferOilState(tank);
@@ -54,13 +54,13 @@ function TankOilBadge({ tank }: { tank: Tank }) {
 
   if (state.kind === "analysed") {
     return (
-      <OilGradeBadge grade={state.grade}>
-        {state.grade ? `${OIL_GRADE_LABELS[state.grade]} · à transférer` : "Analysée · à transférer"}
-      </OilGradeBadge>
+      <OilCategoryBadge category={state.category}>
+        {state.category ? `${OIL_CATEGORY_LABELS[state.category]} · à transférer` : "Analysée · à transférer"}
+      </OilCategoryBadge>
     );
   }
 
-  return <OilGradeBadge grade={null}>{state.label}</OilGradeBadge>;
+  return <OilCategoryBadge category={null}>{state.label}</OilCategoryBadge>;
 }
 
 export default function TanksPage() {
@@ -196,10 +196,12 @@ export default function TanksPage() {
   return (
     <div className="feature-page">
       <div className="tank-stock-summary">
-        {stockCategories.map(({ category, grade, label }) => (
+        {stockCategories.map(({ category, label }) => (
           <Card key={category}>
             <div className="tank-stock-summary__item">
-              <OilGradeBadge grade={grade}>{label}</OilGradeBadge>
+              <OilCategoryBadge category={category === OilCategory.PendingAnalysis ? null : category}>
+                {label}
+              </OilCategoryBadge>
               <span className="tank-stock-summary__value">
                 {formatLiters(stockOf(category))}
               </span>

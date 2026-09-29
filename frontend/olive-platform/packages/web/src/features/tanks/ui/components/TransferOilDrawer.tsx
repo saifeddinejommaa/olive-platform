@@ -7,16 +7,18 @@ import Drawer from "../../../../common/widgets/drawer/Drawer";
 import DrawerInfoCard from "../../../../common/widgets/drawerInfoCard/DrawerInfoCard";
 import TextInput from "../../../../common/widgets/textInput/TextInput";
 import TankPicker from "../../../../common/widgets/tankPicker/TankPicker";
-import OilGradeBadge from "../../../../common/widgets/oilGradeBadge/OilGradeBadge";
+import OilCategoryBadge from "../../../../common/widgets/oilCategoryBadge/OilCategoryBadge";
 import { formatLiters, tankTitle } from "../TankFormat";
 
-import { OIL_GRADE_LABELS } from "@olive-platform/core/features/oilQuality/OilGrade";
-import { TankType, type Tank } from "@olive-platform/core/features/tanks/domain/entities/Tank";
+import {
+  OIL_CATEGORY_LABELS,
+  TankType,
+  type Tank,
+} from "@olive-platform/core/features/tanks/domain/entities/Tank";
 import { GetTanks } from "@olive-platform/core/features/tanks/domain/usecases/GetTanks";
 import {
   bufferOilState,
-  GRADE_CATEGORIES,
-  tankGrade,
+  tankCategory,
 } from "@olive-platform/core/features/tanks/domain/OilType";
 import {
   TransferOilBetweenTanks,
@@ -46,8 +48,12 @@ export default function TransferOilDrawer({ tank, onClose, onTransferred }: Prop
   const bufferState = tank && isBuffer ? bufferOilState(tank) : null;
 
   // Catégorie de l'huile transférée : résultat de l'analyse (tampon) ou catégorie du stockage.
-  const grade =
-    bufferState?.kind === "analysed" ? bufferState.grade : tank && !isBuffer ? tankGrade(tank) : null;
+  const category =
+    bufferState?.kind === "analysed"
+      ? bufferState.category
+      : tank && !isBuffer
+        ? tankCategory(tank)
+        : null;
 
   // En tampon, l'analyse doit être terminée.
   const blockedReason =
@@ -75,13 +81,13 @@ export default function TransferOilDrawer({ tank, onClose, onTransferred }: Prop
     setError(null);
     setDestinations([]);
 
-    if (!grade || blockedReason) return;
+    if (!category || blockedReason) return;
 
     let cancelled = false;
 
     setLoading(true);
 
-    GetTanks({ tankType: TankType.Storage, oilCategory: GRADE_CATEGORIES[grade], status: "active" })
+    GetTanks({ tankType: TankType.Storage, oilCategory: category, status: "active" })
       .then((items) => {
         if (cancelled) return;
         setDestinations(
@@ -227,11 +233,11 @@ export default function TransferOilDrawer({ tank, onClose, onTransferred }: Prop
 
           <DrawerInfoCard label="Huile">
             {blockedReason ? (
-              <OilGradeBadge grade={null}>
+              <OilCategoryBadge category={null}>
                 {bufferState?.kind === "pending" ? bufferState.label : "En attente d'analyse"}
-              </OilGradeBadge>
+              </OilCategoryBadge>
             ) : (
-              <OilGradeBadge grade={grade} />
+              <OilCategoryBadge category={category} />
             )}
             {tank.pendingPressingNumber && ` · ${tank.pendingPressingNumber}`}
           </DrawerInfoCard>
@@ -263,7 +269,7 @@ export default function TransferOilDrawer({ tank, onClose, onTransferred }: Prop
                 <div className="close-step__note">Chargement des citernes de stockage...</div>
               ) : sortedDestinations.length === 0 ? (
                 <div className="close-step__note close-step__note--warning">
-                  Aucune autre citerne de stockage « {grade ? OIL_GRADE_LABELS[grade] : "-"} »
+                  Aucune autre citerne de stockage « {category ? OIL_CATEGORY_LABELS[category] : "-"} »
                   active.
                 </div>
               ) : (
