@@ -1,18 +1,17 @@
-﻿using OlivePlatform.Application.Common;
+using OlivePlatform.Application.Common;
+using OlivePlatform.Domain.Enums;
 
 namespace OlivePlatform.Application.Features.OilMovements.Requests
 {
     public class OilMovementsRequestFilter : PaginationRequest
     {
-        public string? MovementNumber { get; set; }
+        // N° de mouvement, lot d'huile ou pression.
+        public string? Search { get; set; }
 
-        public string? MovementType { get; set; }
+        public OilMovementType? MovementType { get; set; }
 
-        public int? OilBatchId { get; set; }
-
-        public int? SourceTankId { get; set; }
-
-        public int? DestinationTankId { get; set; }
+        // Citerne d'origine ou de destination.
+        public int? TankId { get; set; }
 
         public DateTime? FromDate { get; set; }
 

@@ -32,6 +32,7 @@ export function mapOliveAnalysisDetails(
     quantityKg: response.quantityKg ?? 0,
 
     lotsCount: response.lotsCount ?? 0,
+    lots: response.lots ?? [],
 
     status: response.status,
   };

@@ -8,6 +8,7 @@ import PressingComparisonChart from "../../widgets/PressingComparisonChart";
 import TreesCoverageDonut from "../../widgets/TreesCoverageDonut";
 import TankOccupancyGauge from "../../widgets/TankOccupancyGauge";
 import ChargesCoverageDonut from "../../widgets/ChargesCoverageDonut";
+import IncomeVsExpensesChart from "../../widgets/IncomeVsExpensesChart";
 import { useDashboardStore } from "@olive-platform/core/features/dashboard/stores/useDahsbordStore";
 import { usePageTitle } from "../../../../../common/hooks/usePageTitle";
 import { useSeasonStore } from "../../../../../stores/SeasonStore";
@@ -108,6 +109,9 @@ export const DashboardPage: React.FC = () => {
             <ChargesCoverageDonut
               data={summary.chargesCoverage}
             />
+            {summary.incomeVsExpenses && (
+              <IncomeVsExpensesChart data={summary.incomeVsExpenses} />
+            )}
             <TankOccupancyGauge
               data={summary.tankOccupancy}
             />

@@ -1,4 +1,4 @@
-﻿using OlivePlatform.Domain.Enums;
+using OlivePlatform.Domain.Enums;
 
 namespace OlivePlatform.Application.Features.OilMovements.Responses;
 
@@ -12,19 +12,31 @@ public class OilMovementForListResponse
 
     public OilMovementType MovementType { get; set; }
 
-    public DateTimeOffset MovementDate { get; set; }
+    public string? MovementTypeLabel { get; set; }
+
+    public DateTime MovementDate { get; set; }
 
     public int? OilBatchId { get; set; }
 
     public string? OilBatchNumber { get; set; }
 
+    public int? PressingOperationId { get; set; }
+
+    public string? PressingNumber { get; set; }
+
     public int? SourceTankId { get; set; }
 
     public string? SourceTankCode { get; set; }
+
+    public string? SourceTankName { get; set; }
 
     public int? DestinationTankId { get; set; }
 
     public string? DestinationTankCode { get; set; }
 
+    public string? DestinationTankName { get; set; }
+
     public decimal QuantityLiters { get; set; }
+
+    public string? Notes { get; set; }
 }

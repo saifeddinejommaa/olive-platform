@@ -82,6 +82,18 @@ public class ReferenceDataQueryRepository
             FROM olive_lot_status
             WHERE is_active = TRUE
             ORDER BY id;
+
+            SELECT id AS {nameof(AppConstantItemResponse.Id)},
+                label AS {nameof(AppConstantItemResponse.Name)}
+            FROM tank_type
+            WHERE is_active = TRUE
+            ORDER BY id;
+
+            SELECT id AS {nameof(AppConstantItemResponse.Id)},
+                label AS {nameof(AppConstantItemResponse.Name)}
+            FROM oil_category
+            WHERE is_active = TRUE
+            ORDER BY id;
             """;
 
         using var connection = _dbConnection;
@@ -130,6 +142,14 @@ public class ReferenceDataQueryRepository
                 .ToList(),
 
             OliveLotStatuses =
+                (await multi.ReadAsync<AppConstantItemResponse>())
+                .ToList(),
+
+            TankTypes =
+                (await multi.ReadAsync<AppConstantItemResponse>())
+                .ToList(),
+
+            OilCategories =
                 (await multi.ReadAsync<AppConstantItemResponse>())
                 .ToList()
         };

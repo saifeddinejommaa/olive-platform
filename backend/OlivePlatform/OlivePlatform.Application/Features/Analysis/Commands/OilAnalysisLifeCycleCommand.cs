@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using OlivePlatform.Application.Services;
+using OlivePlatform.Domain;
 using OlivePlatform.Domain.Enums;
 using OlivePlatform.Domain.Repositories;
 
@@ -43,6 +44,12 @@ namespace OlivePlatform.Application.Features.OilAnalyses.Commands
             await _seasonService.EnsureSeasonOpenAsync(
                 oilAnalysis.SeasonId,
                 cancellationToken);
+
+            if (oilAnalysis.Status != ProductionStatus.Planned)
+            {
+                throw new BusinessException(
+                    "Seule une analyse planifiée peut être lancée.");
+            }
 
             oilAnalysis.CreatedAt = DateTime.SpecifyKind(
                 oilAnalysis.CreatedAt,
@@ -109,6 +116,19 @@ namespace OlivePlatform.Application.Features.OilAnalyses.Commands
                 oilAnalysis.SeasonId,
                 cancellationToken);
 
+            if (oilAnalysis.Status != ProductionStatus.InProgress)
+            {
+                throw new BusinessException(
+                    "Seule une analyse en cours peut être clôturée.");
+            }
+
+            // L'acidité est indispensable pour classer l'huile.
+            if (request.AcidityPercentage is null)
+            {
+                throw new BusinessException(
+                    "L'acidité est obligatoire pour clôturer l'analyse d'huile.");
+            }
+
             oilAnalysis.CreatedAt = DateTime.SpecifyKind(
                 oilAnalysis.CreatedAt,
                 DateTimeKind.Utc);
@@ -123,6 +143,61 @@ namespace OlivePlatform.Application.Features.OilAnalyses.Commands
             oilAnalysis.Status = ProductionStatus.Completed;
             oilAnalysis.EndTime = now;
             oilAnalysis.UpdatedAt = now;
+
+            await _repository.UpdateAsync(oilAnalysis, cancellationToken);
+
+            return Unit.Value;
+        }
+    }
+
+    // ============================================================
+    // CANCEL (abandon)
+    // ============================================================
+
+    public class CancelOilAnalysisCommand : IRequest<Unit>
+    {
+        public int Id { get; set; }
+    }
+
+    public class CancelOilAnalysisCommandHandler
+        : IRequestHandler<CancelOilAnalysisCommand, Unit>
+    {
+        private readonly IOilAnalysisRepository _repository;
+        private readonly ISeasonService _seasonService;
+
+        public CancelOilAnalysisCommandHandler(
+            IOilAnalysisRepository repository,
+            ISeasonService seasonService)
+        {
+            _repository = repository;
+            _seasonService = seasonService;
+        }
+
+        public async Task<Unit> Handle(
+            CancelOilAnalysisCommand request,
+            CancellationToken cancellationToken)
+        {
+            var oilAnalysis = await _repository.GetByIdAsync(request.Id, cancellationToken)
+                ?? throw new KeyNotFoundException(
+                    $"Oil analysis {request.Id} not found.");
+
+            await _seasonService.EnsureSeasonOpenAsync(
+                oilAnalysis.SeasonId,
+                cancellationToken);
+
+            if (oilAnalysis.Status != ProductionStatus.Planned
+                && oilAnalysis.Status != ProductionStatus.InProgress)
+            {
+                throw new BusinessException(
+                    "Seule une analyse planifiée ou en cours peut être abandonnée.");
+            }
+
+            oilAnalysis.CreatedAt = DateTime.SpecifyKind(
+                oilAnalysis.CreatedAt,
+                DateTimeKind.Utc);
+
+            oilAnalysis.Status = ProductionStatus.Cancelled;
+            oilAnalysis.UpdatedAt = DateTime.UtcNow;
 
             await _repository.UpdateAsync(oilAnalysis, cancellationToken);
 

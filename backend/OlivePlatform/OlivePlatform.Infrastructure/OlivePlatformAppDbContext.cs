@@ -36,6 +36,12 @@ public class OlivePlatformAppDbContext : DbContext
     public DbSet<Tank> Tanks => Set<Tank>();
     public DbSet<OilMovement> OilMovements => Set<OilMovement>();
 
+    public DbSet<Customer> Customers => Set<Customer>();
+    public DbSet<OilSale> OilSales => Set<OilSale>();
+    public DbSet<OilSaleLine> OilSaleLines => Set<OilSaleLine>();
+    public DbSet<OilSaleLineMovement> OilSaleLineMovements => Set<OilSaleLineMovement>();
+    public DbSet<OilSalePayment> OilSalePayments => Set<OilSalePayment>();
+
     public DbSet<ExpenseCategory> ExpenseCategories => Set<ExpenseCategory>();
     public DbSet<Invoice> Invoices => Set<Invoice>();
     public DbSet<InvoiceItem> InvoiceItems => Set<InvoiceItem>();
@@ -79,6 +85,15 @@ public class OlivePlatformAppDbContext : DbContext
             })
             .IsUnique();
         });
+
+        // Lien ligne de vente -> mouvement : clé composée.
+        modelBuilder.Entity<OilSaleLineMovement>()
+            .HasKey(x => new { x.OilSaleLineId, x.OilMovementId });
+
+        modelBuilder.Entity<OilSale>()
+            .HasMany(x => x.Lines)
+            .WithOne()
+            .HasForeignKey(x => x.OilSaleId);
 
         modelBuilder.ApplyConfigurationsFromAssembly(
             typeof(OlivePlatformAppDbContext).Assembly);

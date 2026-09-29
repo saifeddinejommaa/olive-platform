@@ -1,4 +1,6 @@
-﻿using MediatR;
+using MediatR;
+using OlivePlatform.Domain;
+using OlivePlatform.Domain.Enums;
 using OlivePlatform.Domain.Interfaces.Repositories;
 
 namespace OlivePlatform.Application.Features.Tanks.Commands;
@@ -13,9 +15,10 @@ public class UpdateTankCommand : IRequest<bool>
 
     public decimal CapacityLiters { get; set; }
 
-    public string? Location { get; set; }
+    public TankType TankType { get; set; } = TankType.Storage;
 
-    public string? TankType { get; set; }
+    // Obligatoire pour une citerne de stockage ; ignorée pour une tampon.
+    public OilCategory? OilCategory { get; set; }
 
     public string Status { get; set; } = "active";
 
@@ -44,13 +47,19 @@ public class UpdateTankCommandHandler
         if (tank is null)
             return false;
 
+        if (request.CapacityLiters <= 0)
+        {
+            throw new BusinessException("La capacité de la citerne doit être supérieure à 0.");
+        }
+
         tank.Code = request.Code;
         tank.Name = request.Name;
         tank.CapacityLiters = request.CapacityLiters;
-        tank.Location = request.Location;
         tank.TankType = request.TankType;
+        tank.OilCategory = TankCategoryRules.Resolve(request.TankType, request.OilCategory);
         tank.Status = request.Status;
         tank.Notes = request.Notes;
+        tank.UpdatedAt = DateTime.UtcNow;
 
         await _repository.UpdateAsync(
             tank,

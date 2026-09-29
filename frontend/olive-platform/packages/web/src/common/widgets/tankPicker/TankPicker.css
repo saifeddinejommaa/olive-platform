@@ -1,0 +1,183 @@
+/* POC — sélection d'une citerne avec jauge de remplissage. */
+
+.tank-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tank-picker__tank {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-raised);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.tank-picker__tank input {
+  margin-top: 3px;
+  accent-color: var(--color-olive-700);
+}
+
+.tank-picker__tank--selected {
+  border-color: var(--color-olive-500);
+  background: var(--color-olive-100);
+}
+
+.tank-picker__tank--disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.tank-picker__body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.tank-picker__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--fs-sm);
+}
+
+.tank-picker__tag {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--color-bg);
+  color: var(--color-muted);
+  font-size: var(--fs-xs);
+}
+
+.tank-picker__tag--suggested {
+  background: var(--color-olive-700);
+  color: var(--color-white);
+}
+
+/* Jauge : contenu actuel (vert) par-dessus le niveau après ajout (or). */
+.tank-picker__gauge {
+  position: relative;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--color-border);
+  overflow: hidden;
+}
+
+.tank-picker__gauge-before,
+.tank-picker__gauge-after {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  border-radius: 999px;
+}
+
+.tank-picker__gauge-after {
+  background: var(--color-gold-500);
+}
+
+.tank-picker__gauge-before {
+  background: var(--color-olive-700);
+}
+
+.tank-picker__meta {
+  font-size: var(--fs-xs);
+  color: var(--color-muted);
+}
+
+.tank-picker__meta strong {
+  color: var(--color-text);
+}
+
+.tank-picker__legend {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--fs-xs);
+  color: var(--color-muted);
+}
+
+.tank-picker__legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-left: 8px;
+}
+
+.tank-picker__legend-dot--before {
+  background: var(--color-olive-700);
+  margin-left: 0;
+}
+
+.tank-picker__legend-dot--after {
+  background: var(--color-gold-500);
+}
+
+/* Étapes numérotées d'un tiroir. */
+.close-step {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-raised);
+}
+
+.close-step__title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+  color: var(--color-olive-900);
+}
+
+.close-step__number {
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--color-olive-700);
+  color: var(--color-white);
+  font-size: var(--fs-xs);
+}
+
+.close-step__subtitle {
+  margin-top: -6px;
+  font-size: var(--fs-sm);
+  color: var(--color-muted);
+}
+
+.close-step__metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  font-size: var(--fs-sm);
+  color: var(--color-muted);
+}
+
+.close-step__metrics strong {
+  color: var(--color-text);
+}
+
+.close-step__note {
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--color-bg);
+  font-size: var(--fs-sm);
+  color: var(--color-muted);
+}
+
+.close-step__note--warning {
+  background: var(--color-warning-bg);
+  color: var(--color-warning);
+}

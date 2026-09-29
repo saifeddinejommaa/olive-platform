@@ -1,13 +1,17 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 import Button from "../../../../../common/widgets/button/Button";
 import DataTable from "../../../../../common/widgets/tables/OrdersTable";
+import ActionCard from "../../../../../common/widgets/actionCard/ActionCard";
 
 import { usePageTitle } from "../../../../../common/hooks/usePageTitle";
 
 import type { OilAnalysisForList } from "@olive-platform/core/features/analyses/oilAnalyses/domain/entities/OilAnalysisForList"
 import { useOilAnalysesListStore } from "@olive-platform/core/features/analyses/oilAnalyses/stores/UseAnalysesListStore";
+import { StartOilAnalysis } from "@olive-platform/core/features/analyses/oilAnalyses/domain/usecases/GetOilAnalysisDetails";
+import { ProductionStatus } from "@olive-platform/core/features/production/domain/entities/ProductionStatus";
 import OilAnalysesFilter from "../components/OilAnalysesFilter";
 import { IconPlus } from "@tabler/icons-react";
 import { renderStatus } from "../../../../../common/status/StatusUtils";
@@ -26,8 +30,12 @@ export default function OilAnalysesPage() {
     loading,
     error,
     fetchList,
+    setPage,
     clear,
   } = useOilAnalysesListStore();
+
+  // Analyse en cours de lancement depuis la liste.
+  const [startingId, setStartingId] = useState<number | null>(null);
 
   useEffect(() => {
     fetchList();
@@ -35,7 +43,8 @@ export default function OilAnalysesPage() {
     return () => clear();
   }, [fetchList, clear]);
 
-  const handlePageChange = async () => {
+  const handlePageChange = async (page: number) => {
+    setPage(page);
     await fetchList();
   };
 
@@ -43,10 +52,33 @@ export default function OilAnalysesPage() {
     navigate(`/oil-analyses/${id}`);
   };
 
-
-
   const handleCreate = () => {
     navigate("/oil-analyses/new");
+  };
+
+  // Lance l'analyse puis ouvre son détail pour saisir les résultats.
+  const handleStart = async (item: OilAnalysisForList) => {
+    if (startingId) return;
+
+    setStartingId(item.id);
+
+    try {
+      await StartOilAnalysis(item.id);
+
+      toast.success(`L'analyse ${item.reference} a été lancée.`);
+
+      navigate(`/oil-analyses/${item.id}`);
+    } catch (err) {
+      toast.error(
+        err instanceof Error && err.message
+          ? err.message
+          : "Impossible de lancer l'analyse d'huile.",
+      );
+
+      await fetchList();
+    } finally {
+      setStartingId(null);
+    }
   };
 
   const columns = [
@@ -54,7 +86,7 @@ export default function OilAnalysesPage() {
       key: "reference" as keyof OilAnalysisForList,
       label: "Référence",
       render: (item: OilAnalysisForList) =>
-        item.reference || "-",
+        <strong>{item.reference || "-"}</strong>,
     },
 
     {
@@ -65,20 +97,18 @@ export default function OilAnalysesPage() {
     },
 
     {
+      key: "oilLocation" as keyof OilAnalysisForList,
+      label: "Citerne",
+      render: (item: OilAnalysisForList) =>
+        item.oilLocation || "-",
+    },
+
+    {
       key: "plannedDate" as keyof OilAnalysisForList,
       label: "Date d'analyse",
       render: (item: OilAnalysisForList) =>
         item.plannedDate
           ? new Date(item.plannedDate).toLocaleDateString("fr-FR")
-          : "-",
-    },
-
-    {
-      key: "createdAt" as keyof OilAnalysisForList,
-      label: "Créé le",
-      render: (item: OilAnalysisForList) =>
-        item.createdAt
-          ? new Date(item.createdAt).toLocaleDateString("fr-FR")
           : "-",
     },
 
@@ -92,6 +122,21 @@ export default function OilAnalysesPage() {
         ),
     },
 
+    {
+      key: "id" as keyof OilAnalysisForList,
+      label: "Actions",
+      render: (item: OilAnalysisForList) => (
+        <div style={{ display: "flex", gap: "4px", justifyContent: "flex-end" }}>
+          {item.status === ProductionStatus.Planned && (
+            <ActionCard
+              type="start"
+              title={startingId === item.id ? "Lancement..." : "Lancer l'analyse"}
+              onClick={() => handleStart(item)}
+            />
+          )}
+        </div>
+      ),
+    },
   ];
 
   // ============================================================
@@ -100,7 +145,7 @@ export default function OilAnalysesPage() {
 
   return (
     <div className="feature-page">
-      
+
       <div className="page-header page-header-actions">
         <Button
           variant="primary"

@@ -11,6 +11,62 @@ namespace OlivePlatform.Infrastructure.Persistence.QueryRepositories
     public class OilAnalysisQueryRepository : IOilAnalysisQueryRepository
     {
         private readonly IDbConnection _dbConnection;
+
+        // Flux d'huile par citerne et par lot : + à l'entrée, - à la sortie.
+        private const string OilFlowsCte = """
+            oil_flows AS (
+                SELECT m.destination_tank_id AS tank_id, m.oil_batch_id, m.quantity_liters AS quantity
+                FROM oil_movements m
+                WHERE m.destination_tank_id IS NOT NULL
+
+                UNION ALL
+
+                SELECT m.source_tank_id AS tank_id, m.oil_batch_id, -m.quantity_liters AS quantity
+                FROM oil_movements m
+                WHERE m.source_tank_id IS NOT NULL
+            )
+            """;
+
+        // Citernes contenant l'huile de l'analyse @Id : les lots de la pression
+        // source, ou la citerne analysée elle-même.
+        private const string OilLocationsSql = $"""
+            WITH {OilFlowsCte},
+            analysis AS (
+                SELECT source_type_id, source_id FROM oil_analyses WHERE id = @Id
+            ),
+            located AS (
+                SELECT f.tank_id, SUM(f.quantity) AS quantity,
+                       STRING_AGG(DISTINCT b.batch_number, ', ') AS batch_numbers
+                FROM oil_flows f
+                INNER JOIN oil_batches b ON b.id = f.oil_batch_id
+                INNER JOIN analysis a ON a.source_type_id = 1 AND b.production_batch_id = a.source_id
+                GROUP BY f.tank_id
+                HAVING SUM(f.quantity) > 0
+
+                UNION ALL
+
+                SELECT f.tank_id, SUM(f.quantity), NULL
+                FROM oil_flows f
+                INNER JOIN analysis a ON a.source_type_id = 2 AND f.tank_id = a.source_id
+                GROUP BY f.tank_id
+            )
+            SELECT
+                t.id AS {nameof(OilLocationResponse.TankId)},
+                t.reference AS {nameof(OilLocationResponse.TankCode)},
+                t.name AS {nameof(OilLocationResponse.TankName)},
+                t.tank_type_id AS {nameof(OilLocationResponse.TankType)},
+                tt.label AS {nameof(OilLocationResponse.TankTypeLabel)},
+                oc.label AS {nameof(OilLocationResponse.OilCategoryLabel)},
+                l.quantity AS {nameof(OilLocationResponse.QuantityLiters)},
+                t.capacity_liters AS {nameof(OilLocationResponse.CapacityLiters)},
+                l.batch_numbers AS {nameof(OilLocationResponse.BatchNumbers)}
+            FROM located l
+            INNER JOIN tanks t ON t.id = l.tank_id
+            INNER JOIN tank_type tt ON tt.id = t.tank_type_id
+            INNER JOIN oil_category oc ON oc.id = t.oil_category_id
+            ORDER BY t.tank_type_id, t.reference
+            """;
+
         public OilAnalysisQueryRepository(IDbConnection dbConnection)
         {
             _dbConnection = dbConnection;
@@ -29,6 +85,10 @@ namespace OlivePlatform.Infrastructure.Persistence.QueryRepositories
             oa.reference AS {nameof(OilAnalysisDetailsResponse.Reference)},
 
             oa.source_type_id AS {nameof(OilAnalysisDetailsResponse.SourceTypeId)},
+
+            oa.source_id AS {nameof(OilAnalysisDetailsResponse.SourceId)},
+
+            po.oil_quantity_liters AS {nameof(OilAnalysisDetailsResponse.OilQuantityLiters)},
 
             CASE
                 WHEN oa.source_type_id = 1
@@ -84,8 +144,21 @@ namespace OlivePlatform.Infrastructure.Persistence.QueryRepositories
                 },
                 cancellationToken: cancellationToken);
 
-            return await connection.QueryFirstOrDefaultAsync<OilAnalysisDetailsResponse>(
+            var analysis = await connection.QueryFirstOrDefaultAsync<OilAnalysisDetailsResponse>(
                 command);
+
+            if (analysis is null)
+            {
+                return null;
+            }
+
+            analysis.OilLocations = (await connection.QueryAsync<OilLocationResponse>(
+                new CommandDefinition(
+                    OilLocationsSql,
+                    new { Id = id },
+                    cancellationToken: cancellationToken))).ToList();
+
+            return analysis;
         }
 
         public async Task<PagedResult<OilAnalysisForListResponse>> GetOilAnalysisList(OilAnalysesRequestFilter filter, CancellationToken cancellationToken)
@@ -208,8 +281,31 @@ namespace OlivePlatform.Infrastructure.Persistence.QueryRepositories
                 {where}
             """;
 
+            // Citernes qui contiennent l'huile de la pression source.
+            const string locationJoin = """
+                LEFT JOIN LATERAL (
+                    SELECT STRING_AGG(t2.reference || COALESCE(' · ' || t2.name, ''), ', ' ORDER BY t2.reference) AS tank_codes
+                    FROM (
+                        SELECT f.tank_id
+                        FROM oil_flows f
+                        INNER JOIN oil_batches b ON b.id = f.oil_batch_id
+                        WHERE oa.source_type_id = 1
+                          AND b.production_batch_id = oa.source_id
+                        GROUP BY f.tank_id
+                        HAVING SUM(f.quantity) > 0
+                    ) held
+                    INNER JOIN tanks t2 ON t2.id = held.tank_id
+                ) location ON TRUE
+
+                WHERE 1 = 1
+                """;
+
+            var listFrom = where.ToString().Replace("WHERE 1 = 1", locationJoin);
+
             // Liste
             var sql = $"""
+                WITH {OilFlowsCte}
+
                 SELECT
                     oa.id AS {nameof(OilAnalysisForListResponse.Id)},
 
@@ -223,7 +319,11 @@ namespace OlivePlatform.Infrastructure.Persistence.QueryRepositories
                         WHEN oa.source_type_id = 2
                             THEN t.reference
                     END AS {nameof(OilAnalysisForListResponse.SourceReference)},
-                
+
+                    oa.source_type_id AS {nameof(OilAnalysisForListResponse.SourceTypeId)},
+
+                    location.tank_codes AS {nameof(OilAnalysisForListResponse.OilLocation)},
+
                     oa.planned_date AS {nameof(OilAnalysisForListResponse.PlannedDate)},
                 
                     oa.start_time AS {nameof(OilAnalysisForListResponse.StartTime)},
@@ -233,8 +333,8 @@ namespace OlivePlatform.Infrastructure.Persistence.QueryRepositories
                     oa.created_at AS {nameof(OilAnalysisForListResponse.CreatedAt)},
                 
                     oa.status AS {nameof(OilAnalysisForListResponse.Status)}
-                
-                {where}
+
+                {listFrom}
                 
                 ORDER BY oa.created_at DESC, oa.id DESC
                 

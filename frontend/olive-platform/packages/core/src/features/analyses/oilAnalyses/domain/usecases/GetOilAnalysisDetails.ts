@@ -19,3 +19,5 @@ export const CompleteOilAnalysis = (
   id: number,
   params: UpdateOilAnalysisParams,
 ) => OilAnalysesRepository.complete(id, params);
+
+export const CancelOilAnalysis = (id: number) => OilAnalysesRepository.cancel(id);

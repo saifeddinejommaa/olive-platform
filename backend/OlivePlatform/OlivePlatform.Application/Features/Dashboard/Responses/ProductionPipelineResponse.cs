@@ -72,6 +72,15 @@ namespace OlivePlatform.Application.Features.Dashboard.Responses
         public List<PressingComparisonPointResponse> PressingComparison { get; set; } = new();
         public TankOccupancyResponse TankOccupancy { get; set; } = null!;
         public ChargesCoverageResponse ChargesCoverage { get; set; } = null!;
+        public IncomeVsExpensesResponse IncomeVsExpenses { get; set; } = null!;
+    }
+
+    // Dépenses (charges de récolte + achats d'olives) contre gains (ventes livrées HT).
+    public class IncomeVsExpensesResponse
+    {
+        public decimal ExpensesAmount { get; set; }
+        public decimal IncomeAmount { get; set; }
+        public decimal ResultAmount => IncomeAmount - ExpensesAmount;
     }
 
     public class ChargesCoverageResponse

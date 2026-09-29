@@ -1,0 +1,32 @@
+.grade-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.grade-badge--extraVirgin {
+  background: var(--color-olive-100);
+  color: var(--color-olive-800);
+}
+
+.grade-badge--virgin {
+  background: var(--color-gold-100);
+  color: var(--color-gold-700);
+}
+
+.grade-badge--lampante {
+  background: var(--color-rust-100);
+  color: var(--color-rust-600);
+}
+
+.grade-badge--unknown {
+  background: var(--color-border);
+  color: var(--color-muted);
+}
+

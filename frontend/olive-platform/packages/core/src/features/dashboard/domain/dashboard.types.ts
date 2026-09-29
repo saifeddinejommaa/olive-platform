@@ -30,6 +30,13 @@ export interface ChargesCoverage {
   unpaidAmount: number;
 }
 
+// Dépenses (charges de récolte + achats d'olives) contre gains (ventes livrées HT).
+export interface IncomeVsExpenses {
+  expensesAmount: number;
+  incomeAmount: number;
+  resultAmount: number;
+}
+
 // Lots d'olives de la campagne, répartis par état (en kg).
 export interface OliveLotsOverview {
   totalLots: number;
@@ -58,4 +65,5 @@ export interface DashboardSummary {
   pressingComparison: PressingComparisonPoint[];
   tankOccupancy: TankOccupancy;
   chargesCoverage: ChargesCoverage;
+  incomeVsExpenses: IncomeVsExpenses;
 }

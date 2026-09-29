@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 
 import CompleteOilAnalysisDrawer from "../components/CompleteOilAnalysisDrawer";
+import OilStorageTransferCard from "../components/OilStorageTransferCard";
 import { useOilAnalysisDetailsStore } from "@olive-platform/core/features/analyses/oilAnalyses/stores/UseOilAnalysisDetailsStore";
 
 import Button from "../../../../../common/widgets/button/Button";
@@ -12,6 +13,17 @@ import { OilAnalysisSourceType } from "@olive-platform/core/features/analyses/oi
 import { ProductionStatus } from "@olive-platform/core/features/production/domain/entities/ProductionStatus";
 import { renderStatus } from "../../../../../common/status/StatusUtils";
 import { productionStatusConfig } from "../../../../../common/status/ProductionStatusConfig";
+import Card from "../../../../../common/widgets/card/Card";
+import OilGradeBadge from "../../../../../common/widgets/oilGradeBadge/OilGradeBadge";
+import { usePageTitle } from "../../../../../common/hooks/usePageTitle";
+import OilLocationCard from "../components/OilLocationCard";
+import { IconBan, IconCheck, IconPlayerPlay } from "@tabler/icons-react";
+import {
+  classifyOil,
+  OIL_GRADE_LABELS,
+} from "@olive-platform/core/features/oilQuality/OilGrade";
+import { formatOilQuantity } from "@olive-platform/core/features/shared/utils/formatter";
+import { formatStringToDateTime } from "@olive-platform/core/features/shared/utils/DatesUtils";
 
 type OilAnalysisForm = {
   acidityPercentage?: number;
@@ -55,7 +67,6 @@ const getSourceTypeLabel = (sourceTypeId: OilAnalysisSourceType) => {
 };
 
 export default function OilAnalysisDetailsPage() {
-  const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
 
   const {
@@ -76,6 +87,11 @@ export default function OilAnalysisDetailsPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const [completeDrawerOpen, setCompleteDrawerOpen] = useState(false);
+
+  usePageTitle(
+    analysis ? `Analyse d'huile ${analysis.reference}` : "Analyse d'huile",
+    "Contrôle de l'huile produite et position de l'huile en citerne.",
+  );
 
   const isPlanned = analysis?.status === ProductionStatus.Planned;
 
@@ -133,10 +149,6 @@ export default function OilAnalysisDetailsPage() {
     const isPercentageInvalid = (value?: number) =>
       value !== undefined && (value < 0 || value > 100);
 
-    if (!form.plannedDate) {
-      validationErrors.plannedDate = "La date d'analyse est obligatoire.";
-    }
-
     if (isPercentageInvalid(form.acidityPercentage)) {
       validationErrors.acidityPercentage =
         "L'acidité doit être comprise entre 0 et 100 %.";
@@ -181,11 +193,8 @@ export default function OilAnalysisDetailsPage() {
 
       k270: form.k270,
 
+      // La date d'analyse est gérée par l'API.
       organolepticGrade: form.organolepticGrade,
-
-      plannedDate: form.plannedDate
-        ? new Date(`${form.plannedDate}T00:00:00`).toISOString()
-        : undefined,
     }),
     [form],
   );
@@ -266,6 +275,12 @@ export default function OilAnalysisDetailsPage() {
 
     const validationErrors = validateForm();
 
+    // L'acidité est indispensable pour classer l'huile.
+    if (form.acidityPercentage === undefined) {
+      validationErrors.acidityPercentage =
+        "L'acidité est obligatoire pour clôturer l'analyse.";
+    }
+
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
 
@@ -278,7 +293,7 @@ export default function OilAnalysisDetailsPage() {
 
     setErrors({});
     setCompleteDrawerOpen(true);
-  }, [analysis, isInProgress, saving, validateForm]);
+  }, [analysis, isInProgress, saving, validateForm, form.acidityPercentage]);
 
   /**
    * Fermer le drawer
@@ -346,136 +361,69 @@ export default function OilAnalysisDetailsPage() {
     }
   }, [analysis, saving, abandon]);
 
-  /**
-   * Retour à la liste
-   */
-  const handleBack = useCallback(() => {
-    if (!saving) {
-      navigate("/oil-analyses");
-    }
-  }, [saving, navigate]);
-
   const hasInvalidId = !id || Number.isNaN(Number(id)) || Number(id) <= 0;
 
-  const headerReference = analysis?.reference ? ` ${analysis.reference}` : "";
+  // Catégorie de l'huile d'après les résultats saisis (normes COI).
+  const grade = classifyOil({
+    acidity: form.acidityPercentage,
+    peroxide: form.peroxideIndex,
+    k232: form.k232,
+    k270: form.k270,
+  });
 
-  /**
-   * ID invalide
-   */
-  if (hasInvalidId) {
+  const showResults = isInProgress || isCompleted;
+
+  if (hasInvalidId || (!loading && (error || !analysis))) {
     return (
       <div className="feature-page">
-        <div className="page-header">
-          <div className="page-header-content">
-            <h1 className="page-title">
-              Analyse d'huile
-              {headerReference}
-            </h1>
-          </div>
-        </div>
-
-        <div className="error-message">Identifiant de l'analyse invalide.</div>
-
-        <div className="filters-footer">
-          <Button variant="secondary" onClick={handleBack}>
-            Retour
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
-  /**
-   * Chargement
-   */
-  if (loading) {
-    return (
-      <div className="feature-page">
-        <div className="page-header">
-          <div className="page-header-content">
-            <h1 className="page-title">
-              Analyse d'huile
-              {headerReference}
-            </h1>
-          </div>
-        </div>
-
-        <div className="loading">Chargement de l'analyse d'huile...</div>
-      </div>
-    );
-  }
-
-  /**
-   * Erreur
-   */
-  if (error || !analysis) {
-    return (
-      <div className="feature-page">
-        <div className="page-header">
-          <div className="page-header-content">
-            <h1 className="page-title">
-              Analyse d'huile
-              {headerReference}
-            </h1>
-          </div>
-        </div>
-
         <div className="error-message">
-          {error ?? "Analyse d'huile introuvable."}
+          {hasInvalidId
+            ? "Identifiant de l'analyse invalide."
+            : error ?? "Analyse d'huile introuvable."}
         </div>
+      </div>
+    );
+  }
 
-        <div className="filters-footer">
-          <Button variant="secondary" onClick={handleBack}>
-            Retour
-          </Button>
-        </div>
+  if (loading || !analysis) {
+    return (
+      <div className="feature-page">
+        <div className="loading">Chargement de l'analyse d'huile...</div>
       </div>
     );
   }
 
   return (
     <div className="feature-page">
-      {/* ==================== HEADER ==================== */}
+      {/* ==================== STATUT ET ACTIONS ==================== */}
 
       <div className="page-header">
         <div className="page-header-content">
-          <h1 className="page-title">Analyse d'huile {analysis.reference}</h1>
-
-          <div>{renderStatus(analysis.status, productionStatusConfig)}</div>
+          {renderStatus(analysis.status, productionStatusConfig)}
         </div>
 
-        <div
-          style={{
-            display: "flex",
-            gap: "10px",
-            alignItems: "center",
-          }}
-        >
-          {/* Abandonner */}
+        <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
           {(isPlanned || isInProgress) && (
-            <Button
-              variant="secondary"
-              onClick={handleAbandon}
-              disabled={saving}
-            >
-              {saving ? "Abandon..." : "Abandonner"}
+            <Button variant="secondary" onClick={handleAbandon} disabled={saving}>
+              <IconBan size={16} />
+              Abandonner l'analyse
             </Button>
           )}
 
-          {/* Lancer */}
           {isPlanned && (
             <Button variant="primary" onClick={handleStart} disabled={saving}>
+              <IconPlayerPlay size={16} />
               {saving ? "Lancement..." : "Lancer l'analyse"}
             </Button>
           )}
 
-          {/* Clôturer */}
           {isInProgress && (
             <Button
               variant="primary"
               onClick={handleOpenCompleteDrawer}
               disabled={saving}
             >
+              <IconCheck size={16} />
               Clôturer l'analyse
             </Button>
           )}
@@ -484,190 +432,188 @@ export default function OilAnalysisDetailsPage() {
 
       {/* ==================== INFORMATIONS GÉNÉRALES ==================== */}
 
-      <div className="filters">
-        <div className="filters-header">
-          <div>
-            <h3>Informations générales</h3>
+      <Card>
+        <div className="filters">
+          <div className="filters-header">
+            <div>
+              <h3>Informations générales</h3>
+              <span>Informations relatives à l'analyse</span>
+            </div>
+          </div>
 
-            <span>Informations relatives à l'analyse</span>
+          <div className="info-grid">
+            <InfoFieldWidget
+              label="Type de source"
+              value={getSourceTypeLabel(analysis.sourceTypeId)}
+            />
+            <InfoFieldWidget
+              label="Référence de la source"
+              value={analysis.sourceReference ?? "-"}
+            />
+            <InfoFieldWidget
+              label="Huile produite"
+              value={formatOilQuantity(analysis.oilQuantityLiters)}
+            />
+            <InfoFieldWidget
+              label="Date d'analyse"
+              value={formatPlannedDate(form.plannedDate)}
+            />
+            <InfoFieldWidget
+              label="Début"
+              value={formatStringToDateTime(analysis.startTime)}
+            />
+            <InfoFieldWidget
+              label="Fin"
+              value={formatStringToDateTime(analysis.endTime)}
+            />
           </div>
         </div>
+      </Card>
 
-        <div className="filters-content">
-          <InfoFieldWidget
-            label="Type de source"
-            value={getSourceTypeLabel(analysis.sourceTypeId)}
-          />
+      {/* ==================== POSITION DE L'HUILE ==================== */}
 
-          <InfoFieldWidget
-            label="Référence de la source"
-            value={analysis.sourceReference ?? "-"}
-          />
-
-          <InfoFieldWidget
-            label="Date d'analyse"
-            value={formatPlannedDate(form.plannedDate)}
-          />
-
-          <InfoFieldWidget
-            label="Référence de l'analyse"
-            value={analysis.reference}
-          />
-        </div>
-      </div>
+      <OilLocationCard
+        locations={analysis.oilLocations}
+        oilQuantityLiters={analysis.oilQuantityLiters}
+      />
 
       {/* ==================== RÉSULTATS ==================== */}
 
-      <div
-        className="filters"
-        style={{
-          marginTop: "20px",
-        }}
-      >
-        <div className="filters-header">
-          <div>
-            <h3>Résultats de l'analyse</h3>
+      <Card>
+        <div className="filters">
+          <div className="filters-header">
+            <div>
+              <h3>Résultats de l'analyse</h3>
+              <span>Résultats du contrôle physico-chimique de l'huile.</span>
+            </div>
 
-            <span>Résultats du contrôle physico-chimique de l'huile.</span>
-          </div>
-        </div>
-
-        <div className="filters-content">
-          {/* Acidité */}
-
-          <div className="filter-item">
-            <TextInput
-              label="Acidité (%)"
-              type="number"
-              min="0"
-              max="100"
-              step="0.01"
-              value={form.acidityPercentage ?? ""}
-              onChange={(event) =>
-                updateForm(
-                  "acidityPercentage",
-                  toOptionalNumber(event.target.value),
-                )
-              }
-              disabled={fieldsDisabled}
-            />
-
-            {errors.acidityPercentage && (
-              <span className="field-error">{errors.acidityPercentage}</span>
+            {showResults && (
+              <OilGradeBadge grade={grade}>
+                {grade
+                  ? `Catégorie : ${OIL_GRADE_LABELS[grade]}`
+                  : "Catégorie : saisissez l'acidité"}
+              </OilGradeBadge>
             )}
           </div>
 
-          {/* Indice de peroxyde */}
-
-          <div className="filter-item">
-            <TextInput
-              label="Indice de peroxyde"
-              type="number"
-              step="0.01"
-              value={form.peroxideIndex ?? ""}
-              onChange={(event) =>
-                updateForm(
-                  "peroxideIndex",
-                  toOptionalNumber(event.target.value),
-                )
+          {!showResults ? (
+            <InfoFieldWidget
+              label="Résultats"
+              value={
+                isCancelled
+                  ? "Analyse abandonnée."
+                  : "Les résultats se saisissent une fois l'analyse lancée."
               }
-              disabled={fieldsDisabled}
             />
-          </div>
+          ) : (
+            <div className="info-grid">
+              <div className="filter-item">
+                <TextInput
+                  label="Acidité (%)"
+                  type="number"
+                  min="0"
+                  max="100"
+                  step="0.01"
+                  value={form.acidityPercentage ?? ""}
+                  onChange={(event) =>
+                    updateForm("acidityPercentage", toOptionalNumber(event.target.value))
+                  }
+                  disabled={fieldsDisabled}
+                />
+                {errors.acidityPercentage && (
+                  <span className="field-error">{errors.acidityPercentage}</span>
+                )}
+              </div>
 
-          {/* K232 */}
+              <div className="filter-item">
+                <TextInput
+                  label="Indice de peroxyde (meq O₂/kg)"
+                  type="number"
+                  step="0.01"
+                  value={form.peroxideIndex ?? ""}
+                  onChange={(event) =>
+                    updateForm("peroxideIndex", toOptionalNumber(event.target.value))
+                  }
+                  disabled={fieldsDisabled}
+                />
+              </div>
 
-          <div className="filter-item">
-            <TextInput
-              label="K232"
-              type="number"
-              step="0.001"
-              value={form.k232 ?? ""}
-              onChange={(event) =>
-                updateForm("k232", toOptionalNumber(event.target.value))
-              }
-              disabled={fieldsDisabled}
-            />
-          </div>
+              <div className="filter-item">
+                <TextInput
+                  label="K232"
+                  type="number"
+                  step="0.001"
+                  value={form.k232 ?? ""}
+                  onChange={(event) =>
+                    updateForm("k232", toOptionalNumber(event.target.value))
+                  }
+                  disabled={fieldsDisabled}
+                />
+              </div>
 
-          {/* K270 */}
+              <div className="filter-item">
+                <TextInput
+                  label="K270"
+                  type="number"
+                  step="0.001"
+                  value={form.k270 ?? ""}
+                  onChange={(event) =>
+                    updateForm("k270", toOptionalNumber(event.target.value))
+                  }
+                  disabled={fieldsDisabled}
+                />
+              </div>
 
-          <div className="filter-item">
-            <TextInput
-              label="K270"
-              type="number"
-              step="0.001"
-              value={form.k270 ?? ""}
-              onChange={(event) =>
-                updateForm("k270", toOptionalNumber(event.target.value))
-              }
-              disabled={fieldsDisabled}
-            />
-          </div>
-
-          {/* Classification organoleptique */}
-
-          <div className="filter-item">
-            <TextInput
-              label="Classification organoleptique"
-              type="number"
-              value={form.organolepticGrade ?? ""}
-              onChange={(event) =>
-                updateForm(
-                  "organolepticGrade",
-                  toOptionalNumber(event.target.value),
-                )
-              }
-              disabled={fieldsDisabled}
-            />
-          </div>
-
-          {/* Date d'analyse */}
-
-          <div className="filter-item">
-            <TextInput
-              label="Date d'analyse"
-              type="date"
-              value={form.plannedDate ?? ""}
-              onChange={(event) =>
-                updateForm("plannedDate", event.target.value)
-              }
-              disabled={fieldsDisabled}
-            />
-
-            {errors.plannedDate && (
-              <span className="field-error">{errors.plannedDate}</span>
-            )}
-          </div>
+              <div className="filter-item">
+                <TextInput
+                  label="Classification organoleptique"
+                  type="number"
+                  value={form.organolepticGrade ?? ""}
+                  onChange={(event) =>
+                    updateForm("organolepticGrade", toOptionalNumber(event.target.value))
+                  }
+                  disabled={fieldsDisabled}
+                />
+              </div>
+            </div>
+          )}
         </div>
-      </div>
+      </Card>
 
-      {/* ==================== ERREUR GÉNÉRALE ==================== */}
-
-      {errors.general && (
-        <div
-          className="field-error"
-          style={{
-            marginTop: "15px",
+      {/* ==================== STOCKAGE ==================== */}
+      {/* Analyse terminée d'une pression : son huile passe de la tampon au stockage. */}
+      {isCompleted && analysis.sourceTypeId === OilAnalysisSourceType.PressingOperation && (
+        <OilStorageTransferCard
+          oilAnalysisId={analysis.id}
+          results={{
+            acidity: analysis.acidityPercentage,
+            peroxide: analysis.peroxideIndex,
+            k232: analysis.k232,
+            k270: analysis.k270,
           }}
-        >
-          {errors.general}
-        </div>
+          locations={analysis.oilLocations}
+          onTransferred={() => fetchAnalysis(analysis.id)}
+        />
       )}
 
-      {/* ==================== FOOTER ==================== */}
+      {errors.general && (
+        <div className="field-error">{errors.general}</div>
+      )}
 
-      <div className="filters-footer">
-        <Button variant="secondary" onClick={handleBack} disabled={saving}>
-          Retour
-        </Button>
+      {/* ==================== BARRE D'ACTIONS ==================== */}
+      {/* Saisie des résultats : seulement pendant l'analyse. */}
 
-        {isInProgress && (
-          <Button variant="primary" onClick={handleSubmit} disabled={saving}>
-            {saving ? "Enregistrement..." : "Enregistrer les modifications"}
-          </Button>
-        )}
-      </div>
+      {isInProgress && (
+        <>
+          <div className="fixed-actions-spacer" />
+
+          <div className="fixed-actions-bar">
+            <Button variant="primary" onClick={handleSubmit} disabled={saving}>
+              {saving ? "Enregistrement..." : "Enregistrer"}
+            </Button>
+          </div>
+        </>
+      )}
 
       {/* ==================== DRAWER CLÔTURE ==================== */}
 

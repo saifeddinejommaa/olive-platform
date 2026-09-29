@@ -4,11 +4,13 @@ import {
   IconBasketPlus,
   IconEdit,
   IconPlayerPlay,
+  IconArrowsExchange,
+  IconFlask,
 } from "@tabler/icons-react";
 
 // launch / edit : bouton avec libellé.
-// press / harvest : bouton icône seule (libellé en infobulle).
-type ActionType = "launch" | "edit" | "press" | "harvest";
+// press / harvest / start / move / analysis : bouton icône seule (libellé en infobulle).
+type ActionType = "launch" | "edit" | "press" | "harvest" | "start" | "move" | "analysis";
 
 interface ActionCardProps {
   type: ActionType;
@@ -30,6 +32,24 @@ const ACTIONS = {
   // Lancer une pression : une goutte d'huile « + ».
   press: {
     icon: IconDropletPlus,
+    className: "action-card--icon",
+    iconOnly: true,
+  },
+  // Lancer une opération planifiée (analyse...) : lecture.
+  start: {
+    icon: IconPlayerPlay,
+    className: "action-card--icon",
+    iconOnly: true,
+  },
+  // Ouvrir une analyse d'olive : l'icône du menu « Analyses d'olive ».
+  analysis: {
+    icon: IconFlask,
+    className: "action-card--icon",
+    iconOnly: true,
+  },
+  // Transférer de l'huile : l'icône du menu « Mouvements d'huile ».
+  move: {
+    icon: IconArrowsExchange,
     className: "action-card--icon",
     iconOnly: true,
   },

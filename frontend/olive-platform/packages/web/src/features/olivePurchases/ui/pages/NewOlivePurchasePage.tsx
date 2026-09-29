@@ -474,7 +474,10 @@ export default function NewOlivePurchasePage() {
         </div>
       )}
 
-      <div className="filters-footer">
+      {/* Barre d'actions fixée en bas de l'écran */}
+      <div className="fixed-actions-spacer" />
+
+      <div className="fixed-actions-bar">
         <Button variant="secondary" onClick={handleCancel} disabled={saving}>
           Annuler
         </Button>

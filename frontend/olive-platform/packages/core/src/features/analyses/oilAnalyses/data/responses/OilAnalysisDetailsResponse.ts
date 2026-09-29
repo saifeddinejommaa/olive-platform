@@ -1,5 +1,6 @@
 import type { ProductionStatus } from "../../../../production/domain/entities/ProductionStatus";
 import type { OilAnalysisSourceType } from "../../domain/entities/OilAnalysisSourceType";
+import type { OilLocation } from "../../domain/entities/OilLocation";
 
 export type OilAnalysisDetailsResponse = {
   id: number;
@@ -9,6 +10,12 @@ export type OilAnalysisDetailsResponse = {
   sourceTypeId: OilAnalysisSourceType;
 
   sourceId: number;
+
+  // Huile produite par la pression source (L).
+  oilQuantityLiters: number | null;
+
+  // Où se trouve l'huile analysée aujourd'hui.
+  oilLocations: OilLocation[] | null;
 
   sourceReference: string | null;
 

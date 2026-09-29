@@ -2,8 +2,10 @@ import TextEditor from "../../../../common/widgets/textEditor/TextEditor";
 import InfoFieldWidget from "../../../../common/widgets/InfoFieldWidget";
 import TextInput from "../../../../common/widgets/textInput/TextInput";
 import type { PressingOperationDetails } from "@olive-platform/core/features/production/domain/entities/PressingOperationDetails";
-import type { PressingParametersDetails } from "@olive-platform/core/features/production/domain/entities/PressingParametersDetails";
-import { formatDate, formatStringToDateTime } from "@olive-platform/core/features/shared/utils/DatesUtils";
+import {
+  DEFAULT_PRESSING_PARAMETERS,
+  type PressingParametersDetails,
+} from "@olive-platform/core/features/production/domain/entities/PressingParametersDetails";import { formatDate, formatStringToDateTime } from "@olive-platform/core/features/shared/utils/DatesUtils";
 import Card from "../../../../common/widgets/card/Card";
 import {
   formatDeviation,
@@ -25,22 +27,6 @@ type Props = {
   onParametersChange: (parameters: PressingParametersDetails) => void;
 };
 
-const emptyParameters: PressingParametersDetails = {
-  id: 0,
-  processTypeId: null,
-  malaxingTemperatureC: null,
-  malaxingDurationMinutes: null,
-  malaxingSpeedRpm: null,
-  feedRateKgH: null,
-  decanterSpeedRpm: null,
-  decanterDifferentialRpm: null,
-  centrifugeSpeedRpm: null,
-  addedWaterLiters: null,
-  waterTemperatureC: null,
-  waitingTimeBeforeExtractionMinutes: null,
-  notes: null,
-};
-
 export default function PressingOperationGeneralTab({
   operation,
   yieldPercentage,
@@ -53,11 +39,10 @@ export default function PressingOperationGeneralTab({
 
   const isPlanned = operation.status === ProductionStatus.Planned;
 
-  // Pendant la pression, une configuration vide est proposée si aucune n'existe.
+  // Pendant la pression, les réglages par défaut sont proposés si aucune configuration n'existe.
   const parameters: PressingParametersDetails | null =
     operation.parameters ??
-    (isEditingConfiguration ? emptyParameters : null);
-
+    (isEditingConfiguration ? DEFAULT_PRESSING_PARAMETERS : null);
   const updateParameter = <K extends keyof PressingParametersDetails>(
     field: K,
     value: PressingParametersDetails[K],

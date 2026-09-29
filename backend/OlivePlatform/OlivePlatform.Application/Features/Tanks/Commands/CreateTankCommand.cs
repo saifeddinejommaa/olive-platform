@@ -1,5 +1,7 @@
-﻿using MediatR;
+using MediatR;
+using OlivePlatform.Domain;
 using OlivePlatform.Domain.Entities;
+using OlivePlatform.Domain.Enums;
 using OlivePlatform.Domain.Interfaces.Repositories;
 
 namespace OlivePlatform.Application.Features.Tanks.Commands;
@@ -12,9 +14,10 @@ public class CreateTankCommand : IRequest<int>
 
     public decimal CapacityLiters { get; set; }
 
-    public string? Location { get; set; }
+    public TankType TankType { get; set; } = TankType.Storage;
 
-    public string? TankType { get; set; }
+    // Obligatoire pour une citerne de stockage ; ignorée pour une tampon.
+    public OilCategory? OilCategory { get; set; }
 
     public string Status { get; set; } = "active";
 
@@ -36,15 +39,23 @@ public class CreateTankCommandHandler
         CreateTankCommand request,
         CancellationToken cancellationToken)
     {
+        if (request.CapacityLiters <= 0)
+        {
+            throw new BusinessException("La capacité de la citerne doit être supérieure à 0.");
+        }
+
+        var now = DateTime.UtcNow;
+
         var tank = new Tank
         {
             Code = request.Code,
             Name = request.Name,
             CapacityLiters = request.CapacityLiters,
-            Location = request.Location,
             TankType = request.TankType,
+            OilCategory = TankCategoryRules.Resolve(request.TankType, request.OilCategory),
             Status = request.Status,
-            Notes = request.Notes
+            Notes = request.Notes,
+            UpdatedAt = now
         };
 
         await _repository.AddAsync(

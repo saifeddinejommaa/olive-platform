@@ -19,6 +19,7 @@ import {
 import Button from "../../../../common/widgets/button/Button";
 
 import { ProductionStatus } from "@olive-platform/core/features/production/domain/entities/ProductionStatus";
+import { DEFAULT_PRESSING_PARAMETERS } from "@olive-platform/core/features/production/domain/entities/PressingParametersDetails";
 
 import type { PressingOperationDetails } from "@olive-platform/core/features/production/domain/entities/PressingOperationDetails";
 import type { PressingOperationInputDetails } from "@olive-platform/core/features/production/domain/entities/PressingOperationInputDetails";
@@ -188,6 +189,19 @@ export default function PressingOperationDetailsPage() {
     setOriginalOperation(storeOperation);
     setDirty(false);
     setError(null);
+
+    // Pression en cours sans configuration : réglages par défaut préremplis,
+    // modifiables, à enregistrer.
+    if (
+      storeOperation.status === ProductionStatus.InProgress &&
+      !storeOperation.parameters
+    ) {
+      setOperation({
+        ...storeOperation,
+        parameters: { ...DEFAULT_PRESSING_PARAMETERS },
+      });
+      setDirty(true);
+    }
   }, [storeOperation]);
 
   useEffect(() => {
@@ -635,7 +649,7 @@ export default function PressingOperationDetailsPage() {
     useCallback(
       async (
         oilQuantityLiters: number,
-        proceedOilAnalysis: boolean,
+        bufferTankId: number,
       ) => {
         if (!operation) {
           return;
@@ -646,19 +660,20 @@ export default function PressingOperationDetailsPage() {
 
           await completeOperationStore({
             id: operation.id,
-            proceedOilAnalysis:
-              proceedOilAnalysis,
-            oilQuantity: oilQuantityLiters
+            oilQuantity: oilQuantityLiters,
+            bufferTankId,
           });
 
           setFinishDrawerOpen(false);
 
           toast.success(
-            "La pression a été clôturée.",
+            "La pression a été clôturée : huile en citerne tampon, analyse d'huile planifiée.",
           );
-        } catch {
+        } catch (error) {
           toast.error(
-            "Impossible de clôturer l'opération de pression.",
+            error instanceof Error && error.message
+              ? error.message
+              : "Impossible de clôturer l'opération de pression.",
           );
         }
       },
@@ -880,8 +895,11 @@ export default function PressingOperationDetailsPage() {
         />
       )}
 
+      {/* Barre d'actions fixée en bas de l'écran */}
+      {canEditOperation && <div className="fixed-actions-spacer" />}
+
       {canEditOperation && (
-        <div className="filters-footer">
+        <div className="fixed-actions-bar">
           <Button
             variant="secondary"
             onClick={handleCancel}

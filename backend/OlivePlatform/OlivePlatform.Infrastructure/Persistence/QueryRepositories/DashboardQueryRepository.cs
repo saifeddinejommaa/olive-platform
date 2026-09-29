@@ -176,6 +176,28 @@ public class DashboardQueryRepository : IDashboardQueryRepository
             FROM public.olive_purchases
             WHERE season_id = COALESCE(@SeasonId, season_id)
         ) purchase_totals;
+
+        -- 8) Dépenses vs gains : charges (récolte + achats d'olives)
+        --    contre ventes d'huile livrées (HT : la TVA n'est pas un gain).
+        SELECT
+            COALESCE((
+                SELECT SUM(hcl.total_amount)
+                FROM public.harvest_cost_line hcl
+                INNER JOIN public.harvests h ON h.id = hcl.harvest_id
+                WHERE h.season_id = COALESCE(@SeasonId, h.season_id)
+            ), 0)
+            + COALESCE((
+                SELECT SUM(op.paid_amount + op.unpaid_amount)
+                FROM public.olive_purchases op
+                WHERE op.season_id = COALESCE(@SeasonId, op.season_id)
+            ), 0) AS {nameof(IncomeVsExpensesResponse.ExpensesAmount)},
+
+            COALESCE((
+                SELECT SUM(s.subtotal)
+                FROM public.oil_sales s
+                WHERE s.status_id = 2
+                  AND s.season_id = COALESCE(@SeasonId, s.season_id)
+            ), 0) AS {nameof(IncomeVsExpensesResponse.IncomeAmount)};
         """;
 
         using var connection = _dbConnection;
@@ -197,6 +219,7 @@ public class DashboardQueryRepository : IDashboardQueryRepository
         var pressingComparison = (await multi.ReadAsync<PressingComparisonPointResponse>()).AsList();
         var tankOccupancy = await multi.ReadSingleAsync<TankOccupancyResponse>();
         var chargesCoverage = await multi.ReadSingleAsync<ChargesCoverageResponse>();
+        var incomeVsExpenses = await multi.ReadSingleAsync<IncomeVsExpensesResponse>();
 
         return new DashboardSummaryResponse
         {
@@ -207,6 +230,7 @@ public class DashboardQueryRepository : IDashboardQueryRepository
             PressingComparison = pressingComparison,
             TankOccupancy = tankOccupancy,
             ChargesCoverage = chargesCoverage,
+            IncomeVsExpenses = incomeVsExpenses,
         };
     }
 }

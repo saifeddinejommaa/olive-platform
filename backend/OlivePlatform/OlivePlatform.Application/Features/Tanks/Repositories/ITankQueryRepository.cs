@@ -10,6 +10,10 @@ public interface ITankQueryRepository
     Task<PagedResult<TankForListResponse>> GetTanks(
         TanksRequestFilter filter);
 
+    Task<TankDetailsResponse?> GetDetailsAsync(
+        int id,
+        CancellationToken cancellationToken = default);
+
     Task<Tank?> GetByIdAsync(
         int id,
         CancellationToken cancellationToken = default);

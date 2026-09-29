@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 
 import type { UpdateOliveAnalysisParams } from "@olive-platform/core/features/analyses/oliveAnalyses/domain/params/UpdateOliveAnalysisParams";
@@ -16,6 +16,7 @@ import Card from "../../../../../common/widgets/card/Card";
 import { renderStatus } from "../../../../../common/status/StatusUtils";
 import { productionStatusConfig } from "../../../../../common/status/ProductionStatusConfig";
 import { getOliveVarietyLabel } from "@olive-platform/core/features/appConstants/helper/AppConstantsHelper";
+import { formatStringToDateTime } from "@olive-platform/core/features/shared/utils/DatesUtils";
 
 type OliveAnalysisForm = {
   reference: string;
@@ -71,7 +72,6 @@ const getSourceReferenceLabel = (sourceTypeId: number) =>
       : "Référence de la source";
 
 export default function OliveAnalysisDetailsPage() {
-  const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
 
   const {
@@ -302,9 +302,6 @@ export default function OliveAnalysisDetailsPage() {
     fetchAnalysis,
   ]);
 
-  const handleBack = useCallback(() => {
-    if (!saving) navigate("/Olive-analyses");
-  }, [saving, navigate]);
 
   const sourceTypeLabel = getSourceTypeLabel(form.sourceTypeId);
   const sourceReferenceLabel = getSourceReferenceLabel(form.sourceTypeId);
@@ -323,12 +320,6 @@ export default function OliveAnalysisDetailsPage() {
         </div>
 
         <div className="error-message">Identifiant de l'analyse invalide.</div>
-
-        <div className="filters-footer">
-          <Button variant="secondary" onClick={handleBack}>
-            Retour
-          </Button>
-        </div>
       </div>
     );
   }
@@ -361,12 +352,6 @@ export default function OliveAnalysisDetailsPage() {
         </div>
 
         <div className="error-message">{error}</div>
-
-        <div className="filters-footer">
-          <Button variant="secondary" onClick={handleBack}>
-            Retour
-          </Button>
-        </div>
       </div>
     );
   }
@@ -382,12 +367,6 @@ export default function OliveAnalysisDetailsPage() {
         </div>
 
         <div className="error-message">Analyse d'olive introuvable.</div>
-
-        <div className="filters-footer">
-          <Button variant="secondary" onClick={handleBack}>
-            Retour
-          </Button>
-        </div>
       </div>
     );
   }
@@ -434,7 +413,27 @@ export default function OliveAnalysisDetailsPage() {
               label="Quantité d'olives"
               value={formatOliveQuantity(analysis?.quantityKg, analysis?.lotsCount)}
             />
-            <InfoFieldWidget label="Date d'analyse" value={formatPlannedDate(form.plannedDate)} />
+            <InfoFieldWidget label="Date prévue" value={formatPlannedDate(form.plannedDate)} />
+            <InfoFieldWidget label="Début" value={formatStringToDateTime(analysis?.startTime)} />
+            <InfoFieldWidget label="Fin" value={formatStringToDateTime(analysis?.endTime)} />
+            {/* Références des lots analysés, pour les retrouver dans le stock. */}
+            <div className="filter-item" style={{ gridColumn: "1 / -1" }}>
+              <span className="filter-item-label">
+                Lots d'olives{analysis?.lots?.length ? ` (${analysis.lots.length})` : ""}
+              </span>
+
+              {analysis?.lots?.length ? (
+                <div className="lot-chips">
+                  {analysis.lots.map((lot) => (
+                    <span key={lot.id} className="lot-chip">
+                      {lot.reference}
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <span className="filter-item-value">-</span>
+              )}
+            </div>
           </div>
         </div>
       </Card>
@@ -525,17 +524,18 @@ export default function OliveAnalysisDetailsPage() {
         </div>
       )}
 
-      <div className="filters-footer">
-        <Button variant="secondary" onClick={handleBack} disabled={saving}>
-          Retour
-        </Button>
+      {/* Saisie des résultats : seulement pendant l'analyse. */}
+      {isInProgress && (
+        <>
+          <div className="fixed-actions-spacer" />
 
-        {isInProgress && (
-          <Button variant="primary" onClick={handleSubmit} disabled={saving}>
-            {saving ? "Enregistrement..." : "Enregistrer les modifications"}
-          </Button>
-        )}
-      </div>
+          <div className="fixed-actions-bar">
+            <Button variant="primary" onClick={handleSubmit} disabled={saving}>
+              {saving ? "Enregistrement..." : "Enregistrer"}
+            </Button>
+          </div>
+        </>
+      )}
 
       <CompleteOliveAnalysisDrawer
         open={completeDrawerOpen}

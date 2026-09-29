@@ -131,11 +131,11 @@ namespace OlivePlatform.Api.Controllers
             int id,
             CancellationToken cancellationToken)
         {
-            var analysis = await _oilAnalysisRepository.GetByIdAsync(
+            var analysis = await _oilAnalysisQueryRepository.GetOilAnalysisDetails(
                 id,
                 cancellationToken);
 
-            return Ok(analysis);
+            return analysis is null ? NotFound() : Ok(analysis);
         }
 
         [HttpPost("oil")]
@@ -164,6 +164,15 @@ namespace OlivePlatform.Api.Controllers
             CancellationToken cancellationToken)
         {
             await _mediator.Send(new StartOilAnalysisCommand { Id = id }, cancellationToken);
+            return NoContent();
+        }
+
+        [HttpPost("oil/{id:int}/cancel")]
+        public async Task<IActionResult> CancelOilAnalysis(
+            int id,
+            CancellationToken cancellationToken)
+        {
+            await _mediator.Send(new CancelOilAnalysisCommand { Id = id }, cancellationToken);
             return NoContent();
         }
 

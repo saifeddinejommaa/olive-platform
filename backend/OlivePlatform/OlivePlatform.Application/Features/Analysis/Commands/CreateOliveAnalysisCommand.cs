@@ -94,7 +94,6 @@ namespace OlivePlatform.Application.Features.Analysis.Commands
                 Reference = string.Empty,
                 PlannedDate = request.PlannedDate.ToUtc(),
                 Status = ProductionStatus.Planned,
-                CreatedAt = now,
                 UpdatedAt = now,
             };
 

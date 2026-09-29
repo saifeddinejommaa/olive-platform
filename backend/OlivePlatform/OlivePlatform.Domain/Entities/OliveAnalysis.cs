@@ -33,9 +33,6 @@ public class OliveAnalysis
     [Column("planned_date", TypeName = "timestamp with time zone")]
     public DateTime? PlannedDate { get; set; }
 
-    [Column("created_at", TypeName = "timestamp with time zone")]
-    public DateTime CreatedAt { get; set; }
-
     [Column("start_time", TypeName = "timestamp with time zone")]
     public DateTime? StartTime { get; set; }
 

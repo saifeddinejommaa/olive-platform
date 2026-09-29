@@ -31,7 +31,7 @@ public class TanksController : ControllerBase
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetById(int id)
     {
-        var result = await _queryRepository.GetByIdAsync(id);
+        var result = await _queryRepository.GetDetailsAsync(id);
 
         return result is null ? NotFound() : Ok(result);
     }
