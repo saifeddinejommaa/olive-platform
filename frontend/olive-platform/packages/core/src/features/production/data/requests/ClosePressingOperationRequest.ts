@@ -1,5 +1,6 @@
 export type ClosePressingOperationRequest = {
   id: number;
   oilQuantity: number;
-  proceedOilAnalysis: boolean
+  // Citerne tampon qui reçoit l'huile en attendant son analyse.
+  bufferTankId?: number;
 };

@@ -26,5 +26,10 @@ namespace OlivePlatform.Application.Features.AppConstants.Responses
         public IReadOnlyList<AppConstantItemResponse> PlotHarvestStates { get; init; } = [];
 
         public IReadOnlyList<AppConstantItemResponse> OliveLotStatuses { get; init; } = [];
+
+        public IReadOnlyList<AppConstantItemResponse> TankTypes { get; init; } = [];
+
+        // Catégories d'huile (dont « En attente d'analyse », non commerciale : id 4).
+        public IReadOnlyList<AppConstantItemResponse> OilCategories { get; init; } = [];
     }
 }

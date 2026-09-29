@@ -1,30 +1,36 @@
-﻿
 using OlivePlatform.Domain.Enums;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace OlivePlatform.Domain.Entities;
 
+// Mouvement d'huile : entrée, transfert ou sortie d'une citerne.
+[Table("oil_movements")]
 public class OilMovement
 {
+    [Column("id")]
     public int Id { get; set; }
-    public string MovementNumber { get; private set; } = null!;
 
-    public OilMovementType MovementType { get; private set; }
+    [Column("movement_number")]
+    public string MovementNumber { get; set; } = null!;
 
-    public DateTimeOffset MovementDate { get;  set; }
+    [Column("movement_type_id")]
+    public OilMovementType MovementType { get; set; }
 
-    public int? OilBatchId { get;  set; }
+    [Column("movement_date", TypeName = "timestamp with time zone")]
+    public DateTimeOffset MovementDate { get; set; }
 
-    public int? SourceTankId { get;  set; }
+    [Column("oil_batch_id")]
+    public int? OilBatchId { get; set; }
 
-    public int? DestinationTankId { get;  set; }
+    [Column("source_tank_id")]
+    public int? SourceTankId { get; set; }
 
-    public decimal QuantityLiters { get;  set; }
+    [Column("destination_tank_id")]
+    public int? DestinationTankId { get; set; }
 
-    public string? ReferenceType { get;  set; }
-    public int? ReferenceId { get;  set; }
+    [Column("quantity_liters")]
+    public decimal QuantityLiters { get; set; }
 
-    public string? Notes { get;  set; }
-
-   
-
+    [Column("notes")]
+    public string? Notes { get; set; }
 }

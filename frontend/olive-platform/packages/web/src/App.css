@@ -1120,3 +1120,21 @@ textarea {
     grid-template-columns: 1fr;
   }
 }
+
+/* Références de lots d'olives, une puce par lot. */
+.lot-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.lot-chip {
+  padding: 4px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  background: var(--color-olive-100);
+  color: var(--color-olive-800);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  white-space: nowrap;
+}

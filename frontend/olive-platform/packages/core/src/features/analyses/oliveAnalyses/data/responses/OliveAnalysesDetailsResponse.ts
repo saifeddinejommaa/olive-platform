@@ -1,3 +1,4 @@
+import type { OliveAnalysisLot } from "../../domain/entities/OliveAnalysisLot";
 import type { ProductionStatus } from "../../../../production/domain/entities/ProductionStatus";
 
 export type OliveAnalysisDetailsResponse = {
@@ -29,6 +30,8 @@ export type OliveAnalysisDetailsResponse = {
   quantityKg?: number;
 
   lotsCount?: number;
+  // Lots d'olives analysés.
+  lots?: OliveAnalysisLot[];
 
   oliveVarOliveVarietyId: number;
 

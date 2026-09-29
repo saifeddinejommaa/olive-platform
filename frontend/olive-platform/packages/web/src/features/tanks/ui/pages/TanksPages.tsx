@@ -1,101 +1,276 @@
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
 import DataTable from "../../../../common/widgets/tables/OrdersTable";
-import Button from "../../../../common/widgets/button/Button";
-import TextInput from "../../../../common/widgets/textInput/TextInput";
+import Card from "../../../../common/widgets/card/Card";
 import Select from "../../../../common/widgets/select/Select";
+import OilGradeBadge from "../../../../common/widgets/oilGradeBadge/OilGradeBadge";
+import { usePageTitle } from "../../../../common/hooks/usePageTitle";
+import TankGauge from "../components/TankGauge";
+import { formatLiters } from "../TankFormat";
+import TransferOilDrawer from "../components/TransferOilDrawer";
+import ActionCard from "../../../../common/widgets/actionCard/ActionCard";
 
-type Tank = {
-  id: number;
-  code: string;
-  name: string | null;
-  capacityLiters: number;
-  location: string | null;
-  tankType: string | null;
-  status: string;
-};
+import {
+  OilCategory,
+  TankType,
+  type Tank,
+} from "@olive-platform/core/features/tanks/domain/entities/Tank";
+import { GetTanks } from "@olive-platform/core/features/tanks/domain/usecases/GetTanks";
+import { bufferOilState, tankGrade } from "@olive-platform/core/features/tanks/domain/OilType";
+import { OIL_GRADE_LABELS, type OilGrade } from "@olive-platform/core/features/oilQuality/OilGrade";
 
-const mockTanks: Tank[] = [];
+const PAGE_SIZE = 10;
+
+const tankTypeOptions = [
+  { value: String(TankType.Buffer), label: "Tampon" },
+  { value: String(TankType.Storage), label: "Stockage" },
+];
+
+const oilCategoryOptions = [
+  { value: String(OilCategory.ExtraVirgin), label: "Extra vierge" },
+  { value: String(OilCategory.Virgin), label: "Vierge" },
+  { value: String(OilCategory.Lampante), label: "Lampante" },
+  { value: String(OilCategory.PendingAnalysis), label: "En citerne tampon" },
+];
+
+// Stock d'huile par catégorie (les tampons contiennent l'huile en attente d'analyse).
+const stockCategories: { category: OilCategory; grade: OilGrade | null; label: string }[] = [
+  { category: OilCategory.ExtraVirgin, grade: "extraVirgin", label: "Extra vierge" },
+  { category: OilCategory.Virgin, grade: "virgin", label: "Vierge" },
+  { category: OilCategory.Lampante, grade: "lampante", label: "Lampante" },
+  { category: OilCategory.PendingAnalysis, grade: null, label: "En citerne tampon" },
+];
+
+// Huile d'une citerne : catégorie du stockage ; en tampon, l'état de son analyse.
+function TankOilBadge({ tank }: { tank: Tank }) {
+  if (tank.tankType !== TankType.Buffer) {
+    return <OilGradeBadge grade={tankGrade(tank)} />;
+  }
+
+  const state = bufferOilState(tank);
+
+  if (state.kind === "empty") return <span className="tank-cell__sub">Libre</span>;
+
+  if (state.kind === "analysed") {
+    return (
+      <OilGradeBadge grade={state.grade}>
+        {state.grade ? `${OIL_GRADE_LABELS[state.grade]} · à transférer` : "Analysée · à transférer"}
+      </OilGradeBadge>
+    );
+  }
+
+  return <OilGradeBadge grade={null}>{state.label}</OilGradeBadge>;
+}
 
 export default function TanksPage() {
-  const [pageNumber, setPageNumber] = useState(1);
+  const navigate = useNavigate();
+
+  usePageTitle("Citernes", "Citernes tampon et de stockage, avec l'huile qu'elles contiennent.");
+
+  const [tanks, setTanks] = useState<Tank[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [tankType, setTankType] = useState("");
+  const [oilCategory, setOilCategory] = useState("");
+  // Citerne dont on transfère l'huile (tiroir ouvert).
+  const [transferTank, setTransferTank] = useState<Tank | null>(null);
+
+  const fetchTanks = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      setTanks(
+        await GetTanks({
+          tankType: tankType ? (Number(tankType) as TankType) : undefined,
+          oilCategory: oilCategory ? (Number(oilCategory) as OilCategory) : undefined,
+        }),
+      );
+      setPage(1);
+    } catch {
+      setError("Impossible de charger les citernes.");
+    } finally {
+      setLoading(false);
+    }
+  }, [tankType, oilCategory]);
+
+  useEffect(() => {
+    fetchTanks();
+  }, [fetchTanks]);
+
+  const pageItems = tanks.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+  // Transfert possible seulement s'il y a une destination :
+  // - tampon : huile analysée (elle part vers le stockage de sa catégorie) ;
+  // - stockage : une autre citerne active de la même catégorie existe.
+  const canTransfer = (tank: Tank) => {
+    if (Number(tank.currentQuantityLiters) <= 0) return false;
+
+    if (tank.tankType === TankType.Buffer) {
+      return bufferOilState(tank).kind === "analysed";
+    }
+
+    return tanks.some(
+      (other) =>
+        other.id !== tank.id &&
+        other.tankType === TankType.Storage &&
+        other.status === "active" &&
+        other.oilCategory === tank.oilCategory,
+    );
+  };
+
+  const litersOf = (items: Tank[]) =>
+    items.reduce((total, tank) => total + Number(tank.currentQuantityLiters), 0);
+
+  const stockOf = (category: OilCategory) =>
+    litersOf(tanks.filter((tank) => tank.oilCategory === category));
+
+  // Huile en tampon déjà analysée : elle n'attend plus que son transfert.
+  const analysedBufferLiters = litersOf(
+    tanks.filter(
+      (tank) =>
+        tank.tankType === TankType.Buffer && bufferOilState(tank).kind === "analysed",
+    ),
+  );
+  const awaitingAnalysisLiters = stockOf(OilCategory.PendingAnalysis) - analysedBufferLiters;
 
   const columns = [
     {
       key: "code" as keyof Tank,
-      label: "Code",
+      label: "Citerne",
+      render: (tank: Tank) => (
+        <div className="tank-cell">
+          <strong>{tank.code}</strong>
+          {tank.name && <span className="tank-cell__sub">{tank.name}</span>}
+        </div>
+      ),
     },
     {
-      key: "name" as keyof Tank,
-      label: "Nom",
-    },
-    {
-      key: "capacityLiters" as keyof Tank,
-      label: "Capacité",
-      render: (item: Tank) => `${item.capacityLiters.toLocaleString()} L`,
-    },
-    {
-      key: "location" as keyof Tank,
-      label: "Emplacement",
-    },
-    {
-      key: "tankType" as keyof Tank,
+      key: "tankTypeLabel" as keyof Tank,
       label: "Type",
+      render: (tank: Tank) => tank.tankTypeLabel,
     },
     {
-      key: "status" as keyof Tank,
-      label: "Statut",
+      key: "oilCategory" as keyof Tank,
+      label: "Huile",
+      render: (tank: Tank) => (
+        <div className="tank-cell">
+          <TankOilBadge tank={tank} />
+          {tank.pendingPressingNumber && (
+            <span className="tank-cell__sub">{tank.pendingPressingNumber}</span>
+          )}
+        </div>
+      ),
+    },
+    {
+      key: "currentQuantityLiters" as keyof Tank,
+      label: "Contenu",
+      render: (tank: Tank) => <TankGauge tank={tank} />,
+    },
+    {
+      key: "availableCapacityLiters" as keyof Tank,
+      label: "Place libre",
+      render: (tank: Tank) => (
+        <span className="tank-nowrap">{formatLiters(tank.availableCapacityLiters)}</span>
+      ),
+    },
+    {
+      key: "id" as keyof Tank,
+      label: "Actions",
+      render: (tank: Tank) => (
+        <div style={{ display: "flex", gap: "4px", justifyContent: "flex-end" }}>
+          {canTransfer(tank) && (
+            <ActionCard
+              type="move"
+              title="Transférer l'huile"
+              onClick={() => setTransferTank(tank)}
+            />
+          )}
+        </div>
+      ),
     },
   ];
 
   return (
     <div className="feature-page">
-      <div className="page-header">
-        <div className="page-header-content">
-          <h1 className="page-title">Citernes</h1>
+      <div className="tank-stock-summary">
+        {stockCategories.map(({ category, grade, label }) => (
+          <Card key={category}>
+            <div className="tank-stock-summary__item">
+              <OilGradeBadge grade={grade}>{label}</OilGradeBadge>
+              <span className="tank-stock-summary__value">
+                {formatLiters(stockOf(category))}
+              </span>
+              {category === OilCategory.PendingAnalysis && stockOf(category) > 0 && (
+                <span className="tank-cell__sub">
+                  {[
+                    awaitingAnalysisLiters > 0 &&
+                      `${formatLiters(awaitingAnalysisLiters)} en attente d'analyse`,
+                    analysedBufferLiters > 0 &&
+                      `${formatLiters(analysedBufferLiters)} analysés, à transférer`,
+                  ]
+                    .filter(Boolean)
+                    .join(" · ")}
+                </span>
+              )}
+            </div>
+          </Card>
+        ))}
+      </div>
 
-          <p className="page-description">
-            Gestion des citernes et du stockage d’huile.
-          </p>
+      <Card>
+        <div className="filters">
+          <div className="filters-header">
+            <div>
+              <h3 className="filter-title">Filtres de recherche</h3>
+              <span className="filter-subtitle">Rechercher une citerne</span>
+            </div>
+          </div>
+
+          <div className="filters-content filters-content-row">
+            <div className="filter-item">
+              <Select
+                label="Type"
+                placeholder="Tous"
+                options={tankTypeOptions}
+                value={tankType}
+                onChange={(event) => setTankType(event.target.value)}
+              />
+            </div>
+
+            <div className="filter-item">
+              <Select
+                label="Catégorie d'huile"
+                placeholder="Toutes"
+                options={oilCategoryOptions}
+                value={oilCategory}
+                onChange={(event) => setOilCategory(event.target.value)}
+              />
+            </div>
+          </div>
         </div>
-      </div>
+      </Card>
 
-      <div className="filters">
-        <TextInput placeholder="Code..." />
-
-        <TextInput placeholder="Nom..." />
-
-        <TextInput placeholder="Emplacement..." />
-
-        <TextInput placeholder="Type..." />
-
-        <Select
-          defaultValue=""
-          options={[
-            {
-              value: "",
-              label: "Tous les statuts",
-            },
-            {
-              value: "active",
-              label: "Actif",
-            },
-            {
-              value: "inactive",
-              label: "Inactif",
-            },
-          ]}
-        />
-
-        <Button variant="secondary">Rechercher</Button>
-      </div>
+      {error && <div className="error-message">{error}</div>}
 
       <DataTable
-        data={mockTanks}
+        data={pageItems}
         columns={columns}
-        pageNumber={pageNumber}
-        pageSize={10}
-        totalCount={mockTanks.length}
-        onPageChange={setPageNumber}
+        onRowClick={(tank: Tank) => navigate(`/tanks/${tank.id}`)}
+        pageNumber={page}
+        pageSize={PAGE_SIZE}
+        totalCount={tanks.length}
+        onPageChange={setPage}
+      />
+
+      {loading && <div className="loading">Chargement des citernes...</div>}
+
+      <TransferOilDrawer
+        tank={transferTank}
+        onClose={() => setTransferTank(null)}
+        onTransferred={fetchTanks}
       />
     </div>
   );

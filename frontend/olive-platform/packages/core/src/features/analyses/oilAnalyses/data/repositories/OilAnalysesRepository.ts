@@ -59,6 +59,13 @@ export const OilAnalysesRepository = {
     });
   },
 
+  // Abandon de l'analyse (planifiée ou en cours).
+  cancel: async (id: number): Promise<void> => {
+    await http<ApiResponse<null>>(`analyses/oil/${id}/cancel`, {
+      method: "POST",
+    });
+  },
+
   complete: async (
     id: number,
     params: UpdateOilAnalysisParams,

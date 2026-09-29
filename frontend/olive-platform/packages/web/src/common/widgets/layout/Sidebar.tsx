@@ -16,6 +16,8 @@ const menuItems: MenuItem[] = [
   { label: "Analyses d'huile", icon: "ti-flask-2", path: "/Oil-analyses" },
   { label: "Mouvements d'huile", icon: "ti-arrows-exchange", path: "/oil-movements" },
   { label: "Citernes", icon: "ti-building-warehouse", path: "/tanks" },
+  { label: "Ventes d'huile", icon: "ti-receipt", path: "/oil-sales" },
+  { label: "Clients", icon: "ti-users", path: "/customers" },
   { label: "Paiements", icon: "ti-cash", path: "/payments" },
 ];
 

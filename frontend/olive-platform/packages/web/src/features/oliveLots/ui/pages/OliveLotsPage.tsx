@@ -12,7 +12,7 @@ import OliveLotsFilterComponent from "../components/OliveLotsFilterComponent";
 import { useOliveLotsStore } from "@olive-platform/core/features/oliveLots/stores/OliveLotsStore";
 import type { OliveLot } from "@olive-platform/core/features/oliveLots/domain/entities/OliveLot";
 import type { HarvestStockStatus } from "@olive-platform/core/features/harvests/domain/entities/HarvestStockStatus";
-import type { ProductionStatus } from "@olive-platform/core/features/production/domain/entities/ProductionStatus";
+import { ProductionStatus } from "@olive-platform/core/features/production/domain/entities/ProductionStatus";
 
 const PAGE_SIZE = 10;
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -23,6 +23,10 @@ const formatKg = (value: number) =>
 // Lot encore à presser : du restant, statut Disponible / Partiellement pressé.
 const isToPress = (lot: OliveLot) =>
   lot.remainingKg > 0 && (lot.status === 1 || lot.status === 2);
+
+// Analyse obligatoire et pas encore terminée : le lot ne se presse pas encore.
+const awaitsAnalysis = (lot: OliveLot) =>
+  lot.needAnalysis && lot.analysisStatus !== ProductionStatus.Completed;
 
 // Ancienneté d'un lot à presser : l'olive perd en qualité après 24 à 48 h.
 function ageTone(days: number) {
@@ -117,10 +121,29 @@ export default function OliveLotsPage() {
     {
       key: "remainingKg" as keyof OliveLot,
       label: "Quantité",
-      render: (lot: OliveLot) =>
-        lot.remainingKg < lot.quantityKg
-          ? `${formatKg(lot.remainingKg)} / ${formatKg(lot.quantityKg)}`
-          : formatKg(lot.quantityKg),
+      // Quantité restante à presser ; le lot vidé indique ce qui est parti en pression.
+      render: (lot: OliveLot) => {
+        if (lot.remainingKg >= lot.quantityKg) return formatKg(lot.quantityKg);
+
+        const pressedKg = lot.quantityKg - lot.remainingKg;
+
+        return (
+          <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            <span>
+              {lot.remainingKg > 0
+                ? `${formatKg(lot.remainingKg)} restants`
+                : formatKg(lot.quantityKg)}
+            </span>
+            <span style={{ fontSize: "var(--fs-xs)", color: "var(--color-muted)" }}>
+              {lot.remainingKg > 0
+                ? `${formatKg(pressedKg)} pressés sur ${formatKg(lot.quantityKg)}`
+                : lot.status === 3
+                  ? "en cours de pression"
+                  : "entièrement pressé"}
+            </span>
+          </div>
+        );
+      },
     },
     {
       key: "analysisStatus" as keyof OliveLot,
@@ -147,7 +170,15 @@ export default function OliveLotsPage() {
       label: "Actions",
       render: (lot: OliveLot) => (
         <div style={{ display: "flex", gap: "4px" }}>
-          {isToPress(lot) && (
+          {awaitsAnalysis(lot) && lot.oliveAnalysisId && (
+            <ActionCard
+              type="analysis"
+              title={`Ouvrir l'analyse ${lot.oliveAnalysisReference ?? ""}`}
+              onClick={() => navigate(`/Olive-analyses/${lot.oliveAnalysisId}`)}
+            />
+          )}
+
+          {isToPress(lot) && !awaitsAnalysis(lot) && (
             <ActionCard
               type="press"
               title="Lancer la pression"

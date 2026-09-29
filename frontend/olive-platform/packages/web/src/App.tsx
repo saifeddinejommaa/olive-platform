@@ -44,6 +44,11 @@ import OilAnalysisDetailsPage from "./features/analyses/oilAnalyses/ui/pages/Oil
 // Huile, stockage et finance
 import OilMovementsPage from "./features/oilMovements/ui/pages/OilMovementsPage";
 import TanksPage from "./features/tanks/ui/pages/TanksPages";
+import TankDetailsPage from "./features/tanks/ui/pages/TankDetailsPage";
+import OilSalesPage from "./features/oilSales/ui/pages/OilSalesPage";
+import NewOilSalePage from "./features/oilSales/ui/pages/NewOilSalePage";
+import OilSaleDetailsPage from "./features/oilSales/ui/pages/OilSaleDetailsPage";
+import CustomersPage from "./features/customers/ui/pages/CustomersPage";
 import PaymentsPage from "./features/payments/ui/pages/PaymentsPage";
 
 // Système
@@ -104,6 +109,14 @@ function App() {
               {/* Huile, stockage et finance */}
               <Route path="/oil-movements" element={<OilMovementsPage />} />
               <Route path="/tanks" element={<TanksPage />} />
+              <Route path="/tanks/:id" element={<TankDetailsPage />} />
+
+              {/* Ventes d'huile */}
+              <Route path="/oil-sales" element={<OilSalesPage />} />
+              <Route path="/oil-sales/new" element={<NewOilSalePage />} />
+              <Route path="/oil-sales/:id/edit" element={<NewOilSalePage />} />
+              <Route path="/oil-sales/:id" element={<OilSaleDetailsPage />} />
+              <Route path="/customers" element={<CustomersPage />} />
               <Route path="/payments" element={<PaymentsPage />} />
 
               {/* Système */}

@@ -1,4 +1,6 @@
-﻿namespace OlivePlatform.Application.Features.Tanks.Responses;
+using OlivePlatform.Domain.Enums;
+
+namespace OlivePlatform.Application.Features.Tanks.Responses;
 
 public class TankForListResponse
 {
@@ -18,9 +20,29 @@ public class TankForListResponse
 
     public decimal FillPercentage { get; set; }
 
-    public string? Location { get; set; }
+    public TankType TankType { get; set; }
 
-    public string? TankType { get; set; }
+    public string TankTypeLabel { get; set; } = string.Empty;
+
+    public OilCategory OilCategory { get; set; }
+
+    public string OilCategoryLabel { get; set; } = string.Empty;
 
     public string Status { get; set; } = null!;
+
+    // Tampon occupée : pression dont l'huile attend son analyse.
+    public string? PendingPressingNumber { get; set; }
+
+    // Analyse d'huile de cette pression : planifiée, en cours ou terminée.
+    public int? PendingOilAnalysisId { get; set; }
+
+    public ProductionStatus? PendingOilAnalysisStatus { get; set; }
+
+    public decimal? PendingAcidityPercentage { get; set; }
+
+    public decimal? PendingPeroxideIndex { get; set; }
+
+    public decimal? PendingK232 { get; set; }
+
+    public decimal? PendingK270 { get; set; }
 }

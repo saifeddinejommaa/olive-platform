@@ -107,8 +107,43 @@ public class OliveAnalysisQueryRepository : IOliveAnalysisQueryRepository
             },
             cancellationToken: cancellationToken);
 
-        return await connection.QueryFirstOrDefaultAsync<OliveAnalysisDetailsResponse>(
+        var analysis = await connection.QueryFirstOrDefaultAsync<OliveAnalysisDetailsResponse>(
             command);
+
+        if (analysis is null)
+        {
+            return null;
+        }
+
+        // Lots analysés, avec leur source et ce qu'il en reste.
+        const string lotsSql = $"""
+            SELECT
+                l.id AS {nameof(OliveAnalysisLotResponse.Id)},
+                l.reference AS {nameof(OliveAnalysisLotResponse.Reference)},
+                l.source_type_id AS {nameof(OliveAnalysisLotResponse.SourceTypeId)},
+                l.harvest_id AS {nameof(OliveAnalysisLotResponse.HarvestId)},
+                l.purchase_id AS {nameof(OliveAnalysisLotResponse.PurchaseId)},
+                COALESCE(h.reference, p.reference) AS {nameof(OliveAnalysisLotResponse.SourceReference)},
+                l.quantity_kg AS {nameof(OliveAnalysisLotResponse.QuantityKg)},
+                l.remaining_kg AS {nameof(OliveAnalysisLotResponse.RemainingKg)},
+                l.status_id AS {nameof(OliveAnalysisLotResponse.Status)},
+                s.label AS {nameof(OliveAnalysisLotResponse.StatusLabel)},
+                l.created_at AS {nameof(OliveAnalysisLotResponse.CreatedAt)}
+            FROM public.olive_lots l
+            LEFT JOIN public.harvests h ON h.id = l.harvest_id
+            LEFT JOIN public.olive_purchases p ON p.id = l.purchase_id
+            LEFT JOIN public.olive_lot_status s ON s.id = l.status_id
+            WHERE l.olive_analysis_id = @Id
+            ORDER BY l.created_at, l.id
+            """;
+
+        analysis.Lots = (await connection.QueryAsync<OliveAnalysisLotResponse>(
+            new CommandDefinition(
+                lotsSql,
+                new { Id = id },
+                cancellationToken: cancellationToken))).ToList();
+
+        return analysis;
     }
 
     // ============================================================

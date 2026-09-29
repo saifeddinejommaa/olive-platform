@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import type { UpdateOilAnalysisParams } from "../domain/params/UpdateOilAnalysisParams";
 import {
+  CancelOilAnalysis,
   CompleteOilAnalysis,
   GetOilAnalysisDetails,
   StartOilAnalysis,
@@ -29,8 +30,22 @@ export const useOilAnalysisDetailsStore = create<OilAnalysisDetailsState>(
     loading: false,
     saving: false,
     error: null,
-    abandon: async () => {
+    abandon: async (id) => {
       set({ saving: true, error: null });
+
+      try {
+        await CancelOilAnalysis(id);
+        await get().fetchAnalysis(id);
+      } catch (error) {
+        const message =
+          error instanceof Error
+            ? error.message
+            : "Impossible d'abandonner l'analyse d'huile.";
+        set({ error: message });
+        throw error;
+      } finally {
+        set({ saving: false });
+      }
     },
     fetchAnalysis: async (id: number) => {
       set({ loading: true, error: null });

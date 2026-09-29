@@ -172,7 +172,11 @@ export const usePressingOperationDetailsStore =
       });
 
       try {
-        const result = await ClosePressingOperation({id:params.id,oilQuantity:params.oilQuantity,proceedOilAnalysis:params.proceedOilAnalysis});
+        const result = await ClosePressingOperation({
+          id: params.id,
+          oilQuantity: params.oilQuantity,
+          bufferTankId: params.bufferTankId,
+        });
 
         if (result.Code !== 200) {
           set({

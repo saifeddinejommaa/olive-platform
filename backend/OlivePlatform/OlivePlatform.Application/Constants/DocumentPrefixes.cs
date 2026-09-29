@@ -14,5 +14,13 @@ public static class DocumentPrefixes
 
     public const string OilAnalysis = "OIL_ANALYSIS";
 
+    public const string OilBatch = "HUILE";
+
+    public const string OilMovement = "MVT";
+
+    public const string Customer = "CLT";
+
+    public const string OilSale = "VTE";
+
     public const string Supplier = "SUPPLIER";
 }

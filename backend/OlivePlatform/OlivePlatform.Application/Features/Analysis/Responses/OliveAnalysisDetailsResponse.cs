@@ -37,5 +37,35 @@ namespace OlivePlatform.Application.Features.Analysis.Responses
         public DateTime? EndTime { get; set; }
 
         public ProductionStatus Status { get; set; }
+
+        // Lots d'olives analysés (pour les retrouver dans le stock).
+        public List<OliveAnalysisLotResponse> Lots { get; set; } = [];
+    }
+
+    // Lot d'olives rattaché à une analyse.
+    public class OliveAnalysisLotResponse
+    {
+        public long Id { get; set; }
+
+        public string Reference { get; set; } = null!;
+
+        // 1 : récolte, 2 : achat.
+        public int SourceTypeId { get; set; }
+
+        public int? HarvestId { get; set; }
+
+        public int? PurchaseId { get; set; }
+
+        public string? SourceReference { get; set; }
+
+        public decimal QuantityKg { get; set; }
+
+        public decimal RemainingKg { get; set; }
+
+        public int Status { get; set; }
+
+        public string? StatusLabel { get; set; }
+
+        public DateTime CreatedAt { get; set; }
     }
 }

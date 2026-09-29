@@ -31,8 +31,6 @@ public class HarvestForListResponse
 
     public int PlannedTrees { get; set; }
 
-    public DateTime CreatedAt { get; set; }
-
     public DateTime? StartTime { get; set; }
 
     public DateTime? EndTime { get; set; }

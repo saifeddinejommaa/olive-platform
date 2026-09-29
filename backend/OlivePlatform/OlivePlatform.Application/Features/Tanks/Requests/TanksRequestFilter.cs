@@ -1,4 +1,5 @@
-﻿using OlivePlatform.Application.Common;
+using OlivePlatform.Application.Common;
+using OlivePlatform.Domain.Enums;
 
 namespace OlivePlatform.Application.Features.Tanks.Requests
 {
@@ -8,9 +9,9 @@ namespace OlivePlatform.Application.Features.Tanks.Requests
 
         public string? Name { get; set; }
 
-        public string? Location { get; set; }
+        public TankType? TankType { get; set; }
 
-        public string? TankType { get; set; }
+        public OilCategory? OilCategory { get; set; }
 
         public string? Status { get; set; }
     }

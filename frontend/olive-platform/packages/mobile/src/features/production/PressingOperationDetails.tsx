@@ -50,8 +50,6 @@ export function PressingOperationDetailsPage({ operationId }: Props) {
       await completeOperation({
         id: operation.id,
         oilQuantity: oilQuantityLiters,
-        // Non pris en charge par l'API pour l'instant (aucune analyse créée).
-        proceedOilAnalysis: false,
       });
 
       setCloseSheetOpen(false);

@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using OlivePlatform.Application.Features.OilMovements.Commands;
 using OlivePlatform.Application.Features.OilMovements.Requests;
 using OlivePlatform.Domain.QueryRepositories;
 
@@ -34,6 +35,22 @@ public class OilMovementsController : ControllerBase
 
         return result is null ? NotFound() : Ok(result);
     }
+    // Transfert entre deux citernes de stockage de la même catégorie.
+    [HttpPost("transfer")]
+    public async Task<IActionResult> Transfer(
+        [FromBody] TransferOilBetweenTanksCommand command)
+    {
+        return Ok(await _mediator.Send(command));
+    }
+
+    // Après l'analyse : huile de la citerne tampon vers la citerne de stockage.
+    [HttpPost("transfer-to-storage")]
+    public async Task<IActionResult> TransferToStorage(
+        [FromBody] TransferOilToStorageCommand command)
+    {
+        return Ok(await _mediator.Send(command));
+    }
+
     /*
 
     [HttpPost]

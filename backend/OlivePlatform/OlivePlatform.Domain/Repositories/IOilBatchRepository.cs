@@ -10,6 +10,11 @@ public interface IOilBatchRepository
         string batchNumber,
         CancellationToken cancellationToken = default);
 
+    // Lots d'huile produits par une pression.
+    Task<IReadOnlyList<OilBatch>> GetByPressingOperationIdAsync(
+        int pressingOperationId,
+        CancellationToken cancellationToken = default);
+
     Task<bool> ExistsByNumberAsync(
         string batchNumber,
         int? excludeId = null,

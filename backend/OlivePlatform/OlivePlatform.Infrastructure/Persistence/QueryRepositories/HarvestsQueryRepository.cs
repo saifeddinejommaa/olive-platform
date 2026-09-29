@@ -46,7 +46,6 @@ public class HarvestQueryRepository : IHarvestQueryRepository
                 h.status AS {nameof(HarvestForListResponse.Status)},
                 h.start_time AS {nameof(HarvestForListResponse.StartTime)},
                 h.end_time AS {nameof(HarvestForListResponse.EndTime)},
-                h.created_at AS {nameof(HarvestForListResponse.CreatedAt)},
                 h.updated_at AS {nameof(HarvestForListResponse.UpdatedAt)},
                 (
                     SELECT po.status_id
@@ -67,7 +66,7 @@ public class HarvestQueryRepository : IHarvestQueryRepository
                         FROM olive_lots lot
                         WHERE lot.harvest_id = h.id
                     )
-                    ORDER BY oa.created_at DESC
+                    ORDER BY oa.id DESC
                     LIMIT 1
                 ) AS {nameof(HarvestForListResponse.Analysis)},
 
@@ -469,7 +468,7 @@ public class HarvestQueryRepository : IHarvestQueryRepository
                 FROM olive_lots lot
                 WHERE lot.harvest_id = @HarvestId
             )
-            ORDER BY oa.created_at DESC
+            ORDER BY oa.id DESC
             LIMIT 1;
             """;
 
