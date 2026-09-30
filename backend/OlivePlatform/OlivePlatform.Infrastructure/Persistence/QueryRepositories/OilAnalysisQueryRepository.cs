@@ -339,7 +339,17 @@ namespace OlivePlatform.Infrastructure.Persistence.QueryRepositories
                 
                     oa.created_at AS {nameof(OilAnalysisForListResponse.CreatedAt)},
                 
-                    oa.status AS {nameof(OilAnalysisForListResponse.Status)}
+                    oa.status AS {nameof(OilAnalysisForListResponse.Status)},
+
+                    oa.acidity_percentage AS {nameof(OilAnalysisForListResponse.AcidityPercentage)},
+
+                    oa.peroxide_index AS {nameof(OilAnalysisForListResponse.PeroxideIndex)},
+
+                    oa.k232 AS {nameof(OilAnalysisForListResponse.K232)},
+
+                    oa.k270 AS {nameof(OilAnalysisForListResponse.K270)},
+
+                    oa.oil_category_id AS {nameof(OilAnalysisForListResponse.OilCategory)}
 
                 {listFrom}
                 

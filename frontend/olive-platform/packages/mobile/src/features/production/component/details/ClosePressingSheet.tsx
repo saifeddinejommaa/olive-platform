@@ -16,6 +16,8 @@ import {
 import type { PressingOperationDetails } from "@olive-platform/core/features/production/domain/entities/PressingOperationDetails";
 import type { PressingParametersDetails } from "@olive-platform/core/features/production/domain/entities/PressingParametersDetails";
 import { usePressingOperationInputsStore } from "@olive-platform/core/features/production/stores/PressingOperationInputsStore";
+import type { Tank } from "@olive-platform/core/features/tanks/domain/entities/Tank";
+import { GetBufferTanks } from "@olive-platform/core/features/tanks/domain/usecases/GetBufferTanks";
 import { colors, semanticColors } from "../../../../consts/Colors";
 import { typography } from "../../../../consts/Typography";
 import { radius, shadow, spacing } from "../../../../consts/spacing";
@@ -25,7 +27,8 @@ type Props = {
   saving?: boolean;
   operation: PressingOperationDetails;
   onClose: () => void;
-  onConfirm: (oilQuantityLiters: number) => Promise<void> | void;
+  // Huile produite et citerne tampon qui la reçoit en attendant son analyse.
+  onConfirm: (oilQuantityLiters: number, bufferTankId: number) => Promise<void> | void;
 };
 
 type ConfigKey = Exclude<keyof PressingParametersDetails, "id" | "processTypeId" | "notes">;
@@ -76,14 +79,60 @@ export function ClosePressingSheet({
   const [oilLiters, setOilLiters] = useState("");
   const [error, setError] = useState<string | null>(null);
 
+  // Citernes tampon réelles ; null = en cours de chargement.
+  const [bufferTanks, setBufferTanks] = useState<Tank[] | null>(null);
+  const [tanksError, setTanksError] = useState<string | null>(null);
+  // Choix de l'utilisateur ; à défaut, la citerne conseillée.
+  const [pickedTankId, setPickedTankId] = useState<number | null>(null);
+
   // Lots de l'opération (déjà en cache si l'onglet Intrants a été ouvert).
   useEffect(() => {
     if (visible) fetchInputs(operation.id).catch(() => undefined);
   }, [visible, operation.id, fetchInputs]);
 
+  // Citernes tampon avec leur contenu actuel.
+  useEffect(() => {
+    if (!visible) return;
+
+    let cancelled = false;
+
+    GetBufferTanks()
+      .then((tanks) => {
+        if (!cancelled) setBufferTanks(tanks);
+      })
+      .catch(() => {
+        if (!cancelled) setTanksError("Impossible de charger les citernes tampon.");
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [visible]);
+
   const oliveKg = operation.oliveQuantityKg ?? 0;
   const oil = parseNumber(oilLiters);
   const hasOil = oilLiters.trim() !== "" && !Number.isNaN(oil) && oil > 0;
+
+  // Une seule pression par citerne tampon : seule une citerne vide et assez grande convient.
+  const unavailableReason = (tank: Tank) => {
+    if (Number(tank.currentQuantityLiters) > 0) {
+      return tank.pendingPressingNumber
+        ? `occupée : ${tank.pendingPressingNumber}`
+        : "occupée";
+    }
+    if (hasOil && Number(tank.capacityLiters) < oil) return "trop petite";
+    return null;
+  };
+
+  const sortedTanks = [...(bufferTanks ?? [])].sort(
+    (a, b) =>
+      Number(!!unavailableReason(a)) - Number(!!unavailableReason(b)) ||
+      a.code.localeCompare(b.code),
+  );
+  const suggestedTank = sortedTanks.find((tank) => !unavailableReason(tank)) ?? null;
+  const pickedTank = sortedTanks.find((tank) => tank.id === pickedTankId);
+  const selectedTank =
+    pickedTank && !unavailableReason(pickedTank) ? pickedTank : suggestedTank;
 
   // Rendement en litres d'huile pour 100 kg d'olives.
   const yieldPercentage = hasOil && oliveKg > 0 ? (oil / oliveKg) * 100 : null;
@@ -104,10 +153,15 @@ export function ClosePressingSheet({
       return;
     }
 
+    if (!selectedTank) {
+      setError("Aucune citerne tampon vide : libérez-en une avant de clôturer.");
+      return;
+    }
+
     setError(null);
 
     try {
-      await onConfirm(oil);
+      await onConfirm(oil, selectedTank.id);
     } catch (e: any) {
       setError(e?.message ?? "Impossible de clôturer la pression.");
     }
@@ -246,10 +300,69 @@ export function ClosePressingSheet({
               </View>
             </View>
 
+            {/* CITERNE TAMPON */}
+            <Text style={styles.sectionTitle}>Citerne tampon</Text>
+            <View style={styles.block}>
+              <Text style={styles.empty}>
+                L&apos;huile attend ici son analyse, sans être mélangée à une autre pression.
+              </Text>
+
+              {tanksError ? (
+                <Text style={[styles.empty, styles.warning]}>{tanksError}</Text>
+              ) : bufferTanks === null ? (
+                <Text style={styles.empty}>Chargement des citernes tampon...</Text>
+              ) : sortedTanks.length === 0 ? (
+                <Text style={[styles.empty, styles.warning]}>
+                  Aucune citerne tampon active.
+                </Text>
+              ) : (
+                sortedTanks.map((tank) => {
+                  const reason = unavailableReason(tank);
+                  const selected = !reason && tank.id === selectedTank?.id;
+
+                  return (
+                    <TouchableOpacity
+                      key={tank.id}
+                      style={[
+                        styles.tank,
+                        selected && styles.tankSelected,
+                        !!reason && styles.tankDisabled,
+                      ]}
+                      disabled={!!reason || saving}
+                      onPress={() => setPickedTankId(tank.id)}
+                    >
+                      <View style={[styles.radio, selected && styles.radioSelected]} />
+
+                      <View style={styles.tankBody}>
+                        <Text style={[styles.rowLabel, styles.strong]}>
+                          {tank.code}
+                          {tank.name ? ` · ${tank.name}` : ""}
+                          {tank.id === suggestedTank?.id && !reason ? "  (conseillée)" : ""}
+                        </Text>
+                        <Text style={styles.tankMeta}>
+                          {formatNumber(Number(tank.currentQuantityLiters), 0)} /{" "}
+                          {formatNumber(Number(tank.capacityLiters), 0)} L
+                          {reason ? ` · ${reason}` : " · libre"}
+                        </Text>
+                      </View>
+                    </TouchableOpacity>
+                  );
+                })
+              )}
+
+              {bufferTanks !== null && sortedTanks.length > 0 && !suggestedTank && (
+                <Text style={[styles.empty, styles.warning]}>
+                  Aucune citerne tampon vide{hasOil ? " assez grande" : ""} : transférez
+                  d&apos;abord l&apos;huile d&apos;une pression analysée.
+                </Text>
+              )}
+            </View>
+
             <View style={styles.notice}>
               <Text style={styles.noticeText}>
                 Une fois clôturée, la pression ne pourra plus être modifiée et les
-                lots entièrement pressés seront vidés.
+                lots entièrement pressés seront vidés. Une analyse d&apos;huile est
+                planifiée automatiquement.
               </Text>
             </View>
           </ScrollView>
@@ -389,6 +502,49 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     color: semanticColors.textPrimary,
     textAlign: "right",
+  },
+
+  tank: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.md,
+    padding: spacing.md,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+  },
+
+  tankSelected: {
+    borderColor: semanticColors.primary,
+    backgroundColor: semanticColors.primarySoft,
+  },
+
+  tankDisabled: {
+    opacity: 0.5,
+  },
+
+  tankBody: {
+    flex: 1,
+    gap: 2,
+  },
+
+  tankMeta: {
+    ...typography.caption,
+    color: semanticColors.textSecondary,
+  },
+
+  radio: {
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    borderWidth: 2,
+    borderColor: colors.border,
+  },
+
+  radioSelected: {
+    borderColor: semanticColors.primary,
+    backgroundColor: semanticColors.primary,
   },
 
   notice: {

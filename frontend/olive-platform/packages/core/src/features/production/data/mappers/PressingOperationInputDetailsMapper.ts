@@ -21,5 +21,6 @@ export function PressingOperationInputDetailsMapper(
     purchaseId: isHarvest ? null : response.sourceId,
     oliveVarietyId: response.oliveVarietyId ?? null,
     analysis: response.analysis,
+    needAnalysis: response.needAnalysis ?? false,
   };
 }

@@ -5,6 +5,7 @@ import {
 } from "react";
 
 import {
+  useNavigate,
   useParams,
 } from "react-router-dom";
 
@@ -76,6 +77,7 @@ const hasConfiguration = (
 
 export default function PressingOperationDetailsPage() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
 
   const [
     activeTab,
@@ -242,6 +244,15 @@ export default function PressingOperationDetailsPage() {
     operation?.status === ProductionStatus.Cancelled;
 
   const canEditInputs = isPlanned;
+
+  // Lots dont l'analyse est obligatoire et pas encore terminée : la pression
+  // ne se lance ni ne se clôture (l'API le refuse aussi).
+  const lotsAwaitingAnalysis = inputs.filter(
+    (input) =>
+      input.needAnalysis &&
+      input.analysis?.status !== ProductionStatus.Completed,
+  );
+  const awaitsAnalysis = lotsAwaitingAnalysis.length > 0;
 
   const canEditOperation =
     !isCompleted && !isAbandoned;
@@ -425,6 +436,8 @@ export default function PressingOperationDetailsPage() {
         purchaseId: newInput.purchaseId,
         oliveVarietyId: null,
         analysis: null,
+        // Lot choisi parmi les lots pressables : pas d'analyse en attente.
+        needAnalysis: false,
       }));
 
     convertedInputs.forEach((input) => addInputToStore(input));
@@ -757,7 +770,8 @@ export default function PressingOperationDetailsPage() {
                 disabled={
                   saving ||
                   starting ||
-                  cancelling
+                  cancelling ||
+                  awaitsAnalysis
                 }
               >
                 <IconPlayerPlay size={16} />
@@ -776,7 +790,7 @@ export default function PressingOperationDetailsPage() {
                 handleOpenFinishDrawer
               }
               disabled={
-                saving || completing
+                saving || completing || awaitsAnalysis
               }
             >
               <IconCheck size={16} />
@@ -786,6 +800,34 @@ export default function PressingOperationDetailsPage() {
           )}
         </div>
       </div>
+
+      {/* Analyse d'olive obligatoire non terminée : lancement et clôture bloqués. */}
+      {(isPlanned || isInProgress) && awaitsAnalysis && (
+        <div className="close-step__note close-step__note--warning">
+          {isPlanned ? "La pression ne peut pas être lancée" : "La pression ne peut pas être clôturée"} :{" "}
+          {lotsAwaitingAnalysis.length > 1 ? "ces lots attendent" : "ce lot attend"} la fin de{" "}
+          {lotsAwaitingAnalysis.length > 1 ? "leur" : "son"} analyse d'olive —{" "}
+          {lotsAwaitingAnalysis.map((input, index) => (
+            <span key={input.id}>
+              {index > 0 && ", "}
+              {input.analysis?.id ? (
+                <a
+                  href={`/Olive-analyses/${input.analysis.id}`}
+                  onClick={(event) => {
+                    event.preventDefault();
+                    navigate(`/Olive-analyses/${input.analysis!.id}`);
+                  }}
+                >
+                  <strong>{input.lotReference}</strong>
+                </a>
+              ) : (
+                <strong>{input.lotReference}</strong>
+              )}
+            </span>
+          ))}
+          .
+        </div>
+      )}
 
       <PressingOperationTabs
         activeTab={activeTab}

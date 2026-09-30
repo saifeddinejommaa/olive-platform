@@ -49,6 +49,7 @@ import OilSalesPage from "./features/oilSales/ui/pages/OilSalesPage";
 import NewOilSalePage from "./features/oilSales/ui/pages/NewOilSalePage";
 import OilSaleDetailsPage from "./features/oilSales/ui/pages/OilSaleDetailsPage";
 import CustomersPage from "./features/customers/ui/pages/CustomersPage";
+import IndicatorsPage from "./features/indicators/ui/pages/IndicatorsPage";
 import PaymentsPage from "./features/payments/ui/pages/PaymentsPage";
 
 // Système
@@ -117,6 +118,7 @@ function App() {
               <Route path="/oil-sales/:id/edit" element={<NewOilSalePage />} />
               <Route path="/oil-sales/:id" element={<OilSaleDetailsPage />} />
               <Route path="/customers" element={<CustomersPage />} />
+              <Route path="/indicators" element={<IndicatorsPage />} />
               <Route path="/payments" element={<PaymentsPage />} />
 
               {/* Système */}

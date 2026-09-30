@@ -1,9 +1,12 @@
 import { useCallback, useEffect, useState } from "react";
-import { Alert, ScrollView, StyleSheet, View } from "react-native";
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { usePressingOperationDetailsStore } from "@olive-platform/core/features/production/stores/PressingOperationDetailsStore";
 import { ProductionStatus } from "@olive-platform/core/features/production/domain/entities/ProductionStatus";
 import { Screen } from "../../components/Screen";
-import { spacing } from "../../consts/spacing";
+import { radius, spacing } from "../../consts/spacing";
+import { semanticColors } from "../../consts/Colors";
+import { typography } from "../../consts/Typography";
+import { usePressingOperationInputsStore } from "@olive-platform/core/features/production/stores/PressingOperationInputsStore";
 import { PressingMobileTab, PressingTabs } from "./component/details/PressingTabs";
 import { PressingSummaryCard } from "./component/details/PressingSummaryCard";
 import { PressingGeneralSection } from "./component/details/PressingGeneralSection";
@@ -23,13 +26,25 @@ export function PressingOperationDetailsPage({ operationId }: Props) {
   const { operation, saving, completing, fetchOperation, startOperation, completeOperation, clear } =
     usePressingOperationDetailsStore();
 
+  const { inputs, fetchInputs } = usePressingOperationInputsStore();
+
   useEffect(() => {
     fetchOperation(operationId);
+    // Lots de la pression : on vérifie qu'aucun n'attend son analyse.
+    fetchInputs(operationId).catch(() => undefined);
     return () => clear();
-  }, [operationId, fetchOperation, clear]);
+  }, [operationId, fetchOperation, fetchInputs, clear]);
 
   const isPlanned = operation?.status === ProductionStatus.Planned;
   const isInProgress = operation?.status === ProductionStatus.InProgress;
+
+  // Analyse obligatoire et pas encore terminée : la pression ne se lance ni ne
+  // se clôture (l'API le refuse aussi).
+  const lotsAwaitingAnalysis = inputs.filter(
+    (input) =>
+      input.needAnalysis && input.analysis?.status !== ProductionStatus.Completed,
+  );
+  const awaitsAnalysis = lotsAwaitingAnalysis.length > 0;
 
   const handleStart = useCallback(async () => {
     if (!operation) return;
@@ -44,12 +59,13 @@ export function PressingOperationDetailsPage({ operationId }: Props) {
 
   // Une erreur remonte au récapitulatif, qui l'affiche.
   const handleClose = useCallback(
-    async (oilQuantityLiters: number) => {
+    async (oilQuantityLiters: number, bufferTankId: number) => {
       if (!operation) return;
 
       await completeOperation({
         id: operation.id,
         oilQuantity: oilQuantityLiters,
+        bufferTankId,
       });
 
       setCloseSheetOpen(false);
@@ -98,8 +114,9 @@ export function PressingOperationDetailsPage({ operationId }: Props) {
           <ActionCard
             icon="▶"
             title="Lancer le pressurage"
-            subtitle="Commencer les opérations"
+            subtitle={awaitsAnalysis ? "Analyse d'olive en attente" : "Commencer les opérations"}
             loading={saving}
+            disabled={awaitsAnalysis}
             onPress={handleStart}
           />
         )}
@@ -108,10 +125,46 @@ export function PressingOperationDetailsPage({ operationId }: Props) {
           <ActionCard
             icon="✓"
             title="Clôturer le pressurage"
-            subtitle="Enregistrer les résultats"
+            subtitle={awaitsAnalysis ? "Analyse d'olive en attente" : "Enregistrer les résultats"}
             loading={saving}
+            disabled={awaitsAnalysis}
             onPress={handleOpenCloseSheet}
           />
+        )}
+
+        {/* Lots qui bloquent : un appui ouvre leur analyse d'olive. */}
+        {(isPlanned || isInProgress) && awaitsAnalysis && (
+          <View style={styles.warning}>
+            <Text style={[typography.caption, styles.warningText]}>
+              {isPlanned
+                ? "La pression ne peut pas être lancée"
+                : "La pression ne peut pas être clôturée"}{" "}
+              : {lotsAwaitingAnalysis.length > 1 ? "ces lots attendent" : "ce lot attend"} la
+              fin de {lotsAwaitingAnalysis.length > 1 ? "leur" : "son"} analyse d&apos;olive.
+            </Text>
+
+            <View style={styles.warningLots}>
+              {lotsAwaitingAnalysis.map((input) => (
+                <Pressable
+                  key={input.id}
+                  style={styles.lotChip}
+                  disabled={!input.analysis?.id}
+                  onPress={() =>
+                    input.analysis?.id &&
+                    router.push({
+                      pathname: "/analyses/[id]",
+                      params: { id: String(input.analysis.id) },
+                    })
+                  }
+                >
+                  <Text style={[typography.caption, styles.lotChipText]}>
+                    {input.lotReference}
+                    {input.analysis?.id ? "  ›" : ""}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+          </View>
         )}
 
         <View style={styles.tabs}>
@@ -150,6 +203,34 @@ const styles = StyleSheet.create({
   },
   tabs: {
     marginBottom: spacing.xxl,
+  },
+  warning: {
+    marginTop: -spacing.md,
+    marginBottom: spacing.xl,
+    padding: spacing.md,
+    borderRadius: radius.md,
+    backgroundColor: semanticColors.warningSoft,
+    gap: spacing.sm,
+  },
+  warningText: {
+    color: semanticColors.warning,
+  },
+  warningLots: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.sm,
+  },
+  lotChip: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    borderRadius: radius.pill,
+    backgroundColor: semanticColors.surface,
+    borderWidth: 1,
+    borderColor: semanticColors.warning,
+  },
+  lotChipText: {
+    color: semanticColors.warning,
+    fontWeight: "700",
   },
   bottomSpace: {
     height: spacing.xxl,

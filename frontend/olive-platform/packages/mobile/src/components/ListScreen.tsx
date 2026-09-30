@@ -30,6 +30,8 @@ type ListScreenProps<T> = {
   createLabel?: string;
   canCreate?: boolean
   filterContent?: ReactNode;
+  // Contenu en tête de la carte d'actions (ex. choix de vue).
+  headerContent?: ReactNode;
   onApplyFilters?: () => void;
   onResetFilters?: () => void;
   activeFilterCount?: number;
@@ -48,6 +50,7 @@ export function ListScreen<T>({
   createLabel = 'Nouveau',
   canCreate = true,
   filterContent,
+  headerContent,
   onApplyFilters,
   onResetFilters,
   activeFilterCount = 0,
@@ -71,6 +74,8 @@ export function ListScreen<T>({
 
       {/* Carte flottante — chevauche le bas du bandeau */}
       <View style={styles.actionsCard}>
+        {headerContent && <View style={styles.headerContent}>{headerContent}</View>}
+
         <View style={styles.actionsCardTop}>
           <Text style={styles.resultsCount}>
             {data.length} {data.length > 1 ? 'résultats' : 'résultat'}
@@ -186,6 +191,10 @@ const styles = StyleSheet.create({
     borderRadius: radius.xl,
     padding: spacing.lg,
     ...shadow.raised,
+  },
+
+  headerContent: {
+    marginBottom: spacing.md,
   },
 
   actionsCardTop: {

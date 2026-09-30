@@ -45,6 +45,14 @@ export default function Sidebar() {
           <span>Tableau de bord</span>
         </NavLink>
 
+        <NavLink
+          to="/indicators"
+          className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
+        >
+          <i className="ti ti-chart-bar nav-icon" aria-hidden="true"></i>
+          <span>Indicateurs</span>
+        </NavLink>
+
         <div className="nav-section-title">GESTION</div>
 
         {menuItems.map((item) => (

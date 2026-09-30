@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Keyboard,
@@ -17,6 +17,7 @@ import { router } from "expo-router";
 import type { PlotForList } from "@olive-platform/core/features/plots/domain/entities/PlotForList";
 import type { PlotVarietyDetail } from "@olive-platform/core/features/plots/domain/entities/PlotVarietyDetail";
 import { GetPlotDetails } from "@olive-platform/core/features/plots/domain/usecases/GetPlotsDetails";
+import { GetPlots } from "@olive-platform/core/features/plots/domain/usecases/GetPlots";
 import { createHarvestUseCase } from "@olive-platform/core/features/harvests/domain/usecases/createHarvest";
 import { toDateOnlyString } from "@olive-platform/core/features/shared/utils/DatesUtils";
 
@@ -34,7 +35,12 @@ import { radius, shadow, spacing } from "../../consts/spacing";
 // Valeur par défaut acceptée par l'API (1 = Manuelle).
 const DEFAULT_HARVEST_TYPE = 1;
 
-export function NewHarvestPage() {
+type Props = {
+  // Parcelle présélectionnée (« Lancer une récolte » depuis son détail).
+  initialPlotId?: number | null;
+};
+
+export function NewHarvestPage({ initialPlotId = null }: Props) {
   const selectedSeason = useSeasonStore((state) =>
     state.seasons.find((season) => season.id === state.selectedSeasonId),
   );
@@ -96,6 +102,28 @@ export function NewHarvestPage() {
     setPlannedTrees(String(variety.remainingTreesToHarvest));
     setError(null);
   };
+
+  // Parcelle présélectionnée : on la choisit comme si l'utilisateur l'avait fait.
+  useEffect(() => {
+    if (!initialPlotId) return;
+
+    let cancelled = false;
+
+    GetPlots({ pageNumber: 1, pageSize: 100 })
+      .then((result) => {
+        const initialPlot = result.items.find((item) => item.id === initialPlotId);
+        if (!cancelled && initialPlot) handlePlotChange(initialPlot);
+      })
+      .catch(() => {
+        if (!cancelled) setError("Impossible de charger la parcelle sélectionnée.");
+      });
+
+    return () => {
+      cancelled = true;
+    };
+    // Une seule fois, à l'ouverture.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialPlotId]);
 
   const validate = (): string | null => {
     if (!plot) return "La parcelle est obligatoire.";

@@ -13,11 +13,15 @@ import { typography } from '../../../consts/Typography';
 import { formatDateOnly } from '../../../utils/formatter';
 import { ListItemCard } from '../../../components/ListItemCard';
 import { ListItemHeader } from '../../../components/ListItemHeader';
+import { AnalysisStatsGrid } from '../../../components/AnalysisStatsGrid';
 
 type OliveAnalysisListItemProps = {
   analysis: OliveAnalysis;
   onPress?: (analysis: OliveAnalysis) => void;
 };
+
+const formatPercentage = (value?: number | null) =>
+  value != null ? `${value.toFixed(1)}%` : null;
 
 export function OliveAnalysisListItem({
   analysis,
@@ -57,54 +61,15 @@ export function OliveAnalysisListItem({
       </View>
 
       {/* Résultats */}
-      <View style={styles.statsGrid}>
-        <StatCell
-          icon={IconDroplet}
-          label="Huile"
-          value={analysis.oilPercentage}
-          color={colors.olive[700]}
-        />
-        <StatCell
-          icon={IconWaveSquare}
-          label="Acidité"
-          value={analysis.acidityPercentage}
-          color={colors.gold[700]}
-        />
-        <StatCell
-          icon={IconDroplet}
-          label="Humidité"
-          value={analysis.humidityPercentage}
-          color={colors.teal[700]}
-        />
-        <StatCell
-          icon={IconDroplet}
-          label="Eau"
-          value={analysis.waterPercentage}
-          color={colors.textMuted}
-        />
-      </View>
+      <AnalysisStatsGrid
+        stats={[
+          { icon: IconDroplet, label: "Huile", value: formatPercentage(analysis.oilPercentage), color: colors.olive[700] },
+          { icon: IconWaveSquare, label: "Acidité", value: formatPercentage(analysis.acidityPercentage), color: colors.gold[700] },
+          { icon: IconDroplet, label: "Humidité", value: formatPercentage(analysis.humidityPercentage), color: colors.teal[700] },
+          { icon: IconDroplet, label: "Eau", value: formatPercentage(analysis.waterPercentage), color: colors.textMuted },
+        ]}
+      />
     </ListItemCard>
-  );
-}
-
-type StatCellProps = {
-  icon: React.ComponentType<{ size?: number; color?: string }>;
-  label: string;
-  value?: number;
-  color: string;
-};
-
-function StatCell({ icon: Icon, label, value, color }: StatCellProps) {
-  return (
-    <View style={styles.statCell}>
-      <Icon size={16} color={color} />
-      <View>
-        <Text style={styles.statLabel}>{label}</Text>
-        <Text style={[styles.statValue, { color }]}>
-          {value != null ? `${value.toFixed(1)}%` : '—'}
-        </Text>
-      </View>
-    </View>
   );
 }
 
@@ -129,28 +94,5 @@ const styles = StyleSheet.create({
     height: 3,
     borderRadius: radius.pill,
     backgroundColor: colors.textMuted,
-  },
-  statsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginTop: spacing.lg,
-    padding: spacing.md,
-    borderRadius: radius.md,
-    backgroundColor: colors.background,
-    gap: spacing.md,
-  },
-  statCell: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-    minWidth: '45%',
-  },
-  statLabel: {
-    ...typography.caption,
-    color: colors.textMuted,
-  },
-  statValue: {
-    ...typography.label,
-    fontWeight: '600',
   },
 });
