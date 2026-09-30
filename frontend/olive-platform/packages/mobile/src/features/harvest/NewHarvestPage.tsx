@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   Keyboard,
   KeyboardAvoidingView,
   Platform,
@@ -26,8 +27,10 @@ import { DetailsHeader } from "../../components/DetailsHeader";
 import HarvestTypeSelector from "../../components/HarvestTypeSelector";
 import { DatePickerField } from "../../widgets/DatePickerField";
 import { PlotSelector } from "./components/new/PlotSelector";
+import { HarvestWeatherAdvice } from "./components/HarvestWeatherAdvice";
+import type { HarvestWeatherAdvice as HarvestWeatherAdviceData } from "@olive-platform/core/features/weather/domain/entities/WeatherForecast";
 import { useSeasonStore } from "../../stores/SeasonStore";
-import { defaultDateInSeason, seasonDateRange } from "../../utils/seasonDates";
+import { defaultHarvestDate, harvestDateRange } from "../../utils/seasonDates";
 import { colors, semanticColors } from "../../consts/Colors";
 import { typography } from "../../consts/Typography";
 import { radius, shadow, spacing } from "../../consts/spacing";
@@ -44,7 +47,7 @@ export function NewHarvestPage({ initialPlotId = null }: Props) {
   const selectedSeason = useSeasonStore((state) =>
     state.seasons.find((season) => season.id === state.selectedSeasonId),
   );
-  const { minimumDate, maximumDate } = seasonDateRange(selectedSeason);
+  const { minimumDate, maximumDate } = harvestDateRange(selectedSeason);
 
   const [plot, setPlot] = useState<PlotForList | null>(null);
   const [varieties, setVarieties] = useState<PlotVarietyDetail[]>([]);
@@ -52,7 +55,7 @@ export function NewHarvestPage({ initialPlotId = null }: Props) {
   const [varietyId, setVarietyId] = useState<number | null>(null);
 
   const [plannedDate, setPlannedDate] = useState(() =>
-    defaultDateInSeason(selectedSeason),
+    defaultHarvestDate(selectedSeason),
   );
   const [harvestType, setHarvestType] = useState(DEFAULT_HARVEST_TYPE);
   const [plannedTrees, setPlannedTrees] = useState("");
@@ -60,6 +63,8 @@ export function NewHarvestPage({ initialPlotId = null }: Props) {
 
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  // Conseil météo de la parcelle et de la date choisies (confirmation si déconseillé).
+  const [weatherAdvice, setWeatherAdvice] = useState<HarvestWeatherAdviceData | null>(null);
 
   const selectedVariety = varieties.find(
     (variety) => variety.varietyId === varietyId,
@@ -143,7 +148,7 @@ export function NewHarvestPage({ initialPlotId = null }: Props) {
     return null;
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     Keyboard.dismiss();
 
     const validationError = validate();
@@ -153,6 +158,27 @@ export function NewHarvestPage({ initialPlotId = null }: Props) {
       return;
     }
 
+    // Date déconseillée (ex. gel) : on laisse faire, mais après confirmation.
+    const isCurrentAdvice =
+      weatherAdvice?.plotId === plot?.id &&
+      weatherAdvice?.date === toDateOnlyString(plannedDate);
+
+    if (isCurrentAdvice && weatherAdvice?.level === "danger") {
+      Alert.alert(
+        "Météo défavorable",
+        `${weatherAdvice.warnings.map((warning) => `• ${warning.message}`).join("\n")}\n\nPlanifier la récolte quand même ?`,
+        [
+          { text: "Annuler", style: "cancel" },
+          { text: "Planifier", style: "destructive", onPress: () => createHarvest() },
+        ],
+      );
+      return;
+    }
+
+    createHarvest();
+  };
+
+  const createHarvest = async () => {
     setSaving(true);
     setError(null);
 
@@ -263,6 +289,18 @@ export function NewHarvestPage({ initialPlotId = null }: Props) {
               }}
             />
 
+            {/* Conseil météo pour la parcelle et la date choisies */}
+            {plot && (
+              <View style={styles.weather}>
+                <HarvestWeatherAdvice
+                  plotId={plot.id}
+                  date={toDateOnlyString(plannedDate)}
+                  onPickDate={(date) => setPlannedDate(new Date(`${date}T12:00:00`))}
+                  onAdviceChange={setWeatherAdvice}
+                />
+              </View>
+            )}
+
             {/* TYPE */}
             <Text style={styles.label}>Type de récolte *</Text>
             <HarvestTypeSelector
@@ -362,6 +400,9 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xs,
   },
 
+  weather: {
+    marginTop: spacing.md,
+  },
   loader: {
     paddingVertical: spacing.md,
   },

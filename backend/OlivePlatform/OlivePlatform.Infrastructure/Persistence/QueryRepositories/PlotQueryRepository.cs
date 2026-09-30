@@ -17,8 +17,12 @@ public class PlotQueryRepository : IPlotQueryRepository
         _dbConnection = dbConnection;
     }
 
-    public async Task<PlotDetailResponse?> GetDetailAsync(int id)
+    public async Task<PlotDetailResponse?> GetDetailAsync(int id, int? seasonId = null)
     {
+        // Avancement calculé sur la campagne sélectionnée uniquement (comme la liste).
+        var seasonJoin = seasonId.HasValue ? "AND h.season_id = @SeasonId" : string.Empty;
+        var varietySeasonJoin = seasonId.HasValue ? "AND hh.season_id = @SeasonId" : string.Empty;
+
         string sql = $"""
         SELECT
             p.id AS {nameof(PlotDetailResponse.Id)},
@@ -58,7 +62,7 @@ public class PlotQueryRepository : IPlotQueryRepository
             MAX(COALESCE(v.varieties_json, '[]'::json)::text) AS {nameof(PlotDetailResponse.Varieties)}
 
         FROM public.plots p
-        LEFT JOIN public.harvests h ON h.plot_id = p.id
+        LEFT JOIN public.harvests h ON h.plot_id = p.id {seasonJoin}
         LEFT JOIN LATERAL (
             SELECT json_agg(variety_row) AS varieties_json
             FROM (
@@ -95,7 +99,7 @@ public class PlotQueryRepository : IPlotQueryRepository
                 FROM public.plot_varieties pv
                 INNER JOIN public.olive_varieties ov ON ov.id = pv.variety_id
                 LEFT JOIN public.harvests hh
-                    ON hh.plot_id = pv.plot_id AND hh.variety_id = pv.variety_id
+                    ON hh.plot_id = pv.plot_id AND hh.variety_id = pv.variety_id {varietySeasonJoin}
                 WHERE pv.plot_id = p.id
                 GROUP BY pv.variety_id, ov.label, pv.number_of_trees
                 ORDER BY ov.label
@@ -107,7 +111,9 @@ public class PlotQueryRepository : IPlotQueryRepository
                  p.planting_year, p.location, p.notes, p.created_at
         """;
 
-        return await _dbConnection.QueryFirstOrDefaultAsync<PlotDetailResponse>(sql, new { Id = id });
+        return await _dbConnection.QueryFirstOrDefaultAsync<PlotDetailResponse>(
+            sql,
+            new { Id = id, SeasonId = seasonId });
     }
 
     public async Task<PagedResult<PlotForListResponse>> GetPagedListAsync(PlotsRequestFilter request)
@@ -274,8 +280,11 @@ public class PlotQueryRepository : IPlotQueryRepository
         };
     }
 
-    public async Task<PlotVarietyDetail?> GetPlotVarieties(int plotId, int varietyId)
+    public async Task<PlotVarietyDetail?> GetPlotVarieties(int plotId, int varietyId, int? seasonId = null)
     {
+        // Arbres restants à récolter sur la campagne (une récolte par an).
+        var seasonJoin = seasonId.HasValue ? "AND hh.season_id = @SeasonId" : string.Empty;
+
          string sql = $"""
     SELECT
         pv.variety_id AS "{nameof(PlotVarietyDetail.VarietyId)}",
@@ -310,7 +319,7 @@ public class PlotQueryRepository : IPlotQueryRepository
     FROM public.plot_varieties pv
     INNER JOIN public.olive_varieties ov ON ov.id = pv.variety_id
     LEFT JOIN public.harvests hh
-        ON hh.plot_id = pv.plot_id AND hh.variety_id = pv.variety_id
+        ON hh.plot_id = pv.plot_id AND hh.variety_id = pv.variety_id {seasonJoin}
 
     WHERE pv.plot_id = @PlotId
       AND pv.variety_id = @VarietyId
@@ -322,7 +331,7 @@ public class PlotQueryRepository : IPlotQueryRepository
 
         var result = await connection.QueryFirstOrDefaultAsync<PlotVarietyDetail>(
             sql,
-            new { PlotId = plotId, VarietyId = varietyId });
+            new { PlotId = plotId, VarietyId = varietyId, SeasonId = seasonId });
 
         return result;
     }

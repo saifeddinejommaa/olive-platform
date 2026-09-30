@@ -61,6 +61,14 @@ public class HarvestRepository : IHarvestRepository
         await _context.SaveChangesAsync(cancellationToken);
     }
 
+    // Ajoutée au suivi seulement : enregistrée avec la récolte (UpdateAsync).
+    public async Task AddStartWeatherAsync(
+        HarvestStartWeather startWeather,
+        CancellationToken cancellationToken = default)
+    {
+        await _context.HarvestStartWeather.AddAsync(startWeather, cancellationToken);
+    }
+
     public async Task<Harvest?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
         return await _context.Harvests

@@ -76,9 +76,11 @@ export const HarvestRepository = {
     );
   },
 
-  start: async (id: number): Promise<void> => {
+  // weatherAcknowledged : lancée malgré une alerte météo affichée.
+  start: async (id: number, weatherAcknowledged = false): Promise<void> => {
     await http<ApiResponse<null>>(`harvests/${id}/start`, {
       method: "POST",
+      body: { weatherAcknowledged },
     });
   },
 

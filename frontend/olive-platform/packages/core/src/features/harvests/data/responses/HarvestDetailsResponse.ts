@@ -1,6 +1,7 @@
 import type { OliveAnalysisDetailsResponse } from "../../../analyses/oliveAnalyses/data/responses/OliveAnalysesDetailsResponse";
 import type { ProductionStatus } from "../../../production/domain/entities/ProductionStatus";
 import type { HarvestCostSummary } from "../../domain/entities/HarvestCostSummary";
+import type { HarvestStartWeather } from "../../domain/entities/HarvestStartWeather";
 
 export interface HarvestDetailsResponse {
   id: number;
@@ -23,5 +24,6 @@ export interface HarvestDetailsResponse {
   endTime: string | null;
   oliveAnalysis?: OliveAnalysisDetailsResponse;
    costs: HarvestCostSummary[];
-   harvestType: number
+   harvestType: number;
+  startWeather?: HarvestStartWeather | null;
 }

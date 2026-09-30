@@ -16,6 +16,7 @@ public class OlivePlatformAppDbContext : DbContext
     public DbSet<OliveVariety> OliveVarieties => Set<OliveVariety>();
     public DbSet<PlotVariety> PlotVarieties => Set<PlotVariety>();
     public DbSet<Harvest> Harvests => Set<Harvest>();
+    public DbSet<HarvestStartWeather> HarvestStartWeather => Set<HarvestStartWeather>();
 
     public DbSet<HarvestCostLine> HarvestCostLine => Set<HarvestCostLine>();
 
@@ -63,6 +64,13 @@ public class OlivePlatformAppDbContext : DbContext
         modelBuilder.Entity<PressingOperation>()
         .HasIndex(x => x.OperationNumber)
         .IsUnique();
+
+        // Clé = la récolte : une seule météo de lancement par récolte.
+        modelBuilder.Entity<HarvestStartWeather>(entity =>
+        {
+            entity.HasKey(x => x.HarvestId);
+            entity.Property(x => x.HarvestId).ValueGeneratedNever();
+        });
 
         modelBuilder.Entity<DocumentCounter>(entity =>
         {

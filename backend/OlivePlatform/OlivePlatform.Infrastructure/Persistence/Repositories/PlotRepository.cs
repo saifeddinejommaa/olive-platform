@@ -57,6 +57,16 @@ public class PlotRepository : IPlotRepository
             cancellationToken);
     }
 
+    public async Task<Plot?> GetFirstGeolocatedAsync(
+        CancellationToken cancellationToken = default)
+    {
+        return await _context.Plots
+            .AsNoTracking()
+            .Where(x => x.Latitude != null && x.Longitude != null)
+            .OrderBy(x => x.Reference)
+            .FirstOrDefaultAsync(cancellationToken);
+    }
+
     public async Task<Plot?> GetByReferenceAsync(string refernce, CancellationToken cancellationToken = default)
     {
         return await _context.Plots

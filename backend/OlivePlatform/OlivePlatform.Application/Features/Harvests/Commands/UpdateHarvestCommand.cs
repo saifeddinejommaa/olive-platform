@@ -64,6 +64,8 @@ public class UpdateHarvestCommandHandler
                     "La date de récolte ne peut être modifiée que si la récolte n'est pas encore lancée.");
             }
 
+            SeasonCalendar.EnsureHarvestDate(SeasonCalendar.ToBusinessDate(request.PlannedDate.Value));
+
             await _seasonService.EnsureDateInSeasonAsync(
                 entity.SeasonId,
                 SeasonCalendar.ToBusinessDate(request.PlannedDate.Value),

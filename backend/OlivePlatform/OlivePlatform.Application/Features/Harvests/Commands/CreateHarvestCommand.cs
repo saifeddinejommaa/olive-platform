@@ -40,6 +40,8 @@ public class CreateHarvestCommandHandler : IRequestHandler<CreateHarvestCommand,
 
     public async Task<int> Handle(CreateHarvestCommand request, CancellationToken cancellationToken)
     {
+        SeasonCalendar.EnsureHarvestDate(SeasonCalendar.ToBusinessDate(request.PlannedDate));
+
         var seasonId = await _seasonService.ResolveForDateAsync(
             request.SeasonId,
             SeasonCalendar.ToBusinessDate(request.PlannedDate),

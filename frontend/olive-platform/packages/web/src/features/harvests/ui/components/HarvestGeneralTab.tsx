@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import HarvestWeatherAdvice from "./HarvestWeatherAdvice";
+import HarvestStartWeatherCard from "./HarvestStartWeatherCard";
 import { toast } from "react-toastify";
 
 import TextEditor from "../../../../common/widgets/textEditor/TextEditor";
@@ -13,6 +15,7 @@ import {
   toDateOnlyString,
 } from "@olive-platform/core/features/shared/utils/DatesUtils";
 import { useSeasonStore } from "../../../../stores/SeasonStore";
+import { harvestWindow } from "@olive-platform/core/features/seasons/domain/HarvestWindow";
 
 import { ProductionStatus } from "@olive-platform/core/features/production/domain/entities/ProductionStatus";
 
@@ -44,7 +47,7 @@ export default function HarvestGeneralTab({
   const [harvestType, setHarvestType] = useState(0);
   const [plannedDate, setPlannedDate] = useState("");
 
-  // Bornes du sélecteur de date : la campagne de la récolte.
+  // Bornes du sélecteur de date : la période de récolte de la campagne (1er septembre - 31 mars).
   const season = useSeasonStore((state) =>
     state.seasons.find((item) => item.id === harvest?.seasonId),
   );
@@ -284,7 +287,7 @@ export default function HarvestGeneralTab({
                 type="date"
                 value={plannedDate}
                 min={season?.startDate}
-                max={season?.endDate}
+                max={season ? harvestWindow(season).endDate : undefined}
                 onChange={(event) =>
                   setPlannedDate(event.target.value)
                 }
@@ -302,6 +305,23 @@ export default function HarvestGeneralTab({
                 "fr-FR",
               )}
             />
+
+            {/* Récolte planifiée : conseil météo, affiné à l'approche de la date. */}
+            {isPlanned && (
+              <div className="filter-item" style={{ gridColumn: "1 / -1" }}>
+                <HarvestWeatherAdvice
+                  plotId={harvest.plotId}
+                  date={plannedDate}
+                  onPickDate={setPlannedDate}
+                />
+              </div>
+            )}
+
+            {harvest.startWeather && (
+              <div className="filter-item" style={{ gridColumn: "1 / -1" }}>
+                <HarvestStartWeatherCard weather={harvest.startWeather} />
+              </div>
+            )}
 
             <InfoFieldWidget
               label="Heure de début"

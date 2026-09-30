@@ -14,6 +14,10 @@ public interface IHarvestRepository
         string harvestNumber,
         CancellationToken cancellationToken = default);
 
+    Task AddStartWeatherAsync(
+        HarvestStartWeather startWeather,
+        CancellationToken cancellationToken = default);
+
     Task<bool> ExistsByNumberAsync(
         string harvestNumber,
         int? excludeId = null,

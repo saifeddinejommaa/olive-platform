@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import HarvestWeatherAdvice from "../components/HarvestWeatherAdvice";
+import type { HarvestWeatherAdvice as HarvestWeatherAdviceData } from "@olive-platform/core/features/weather/domain/entities/WeatherForecast";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "react-toastify";
 
@@ -18,6 +20,7 @@ import { usePageTitle } from "../../../../common/hooks/usePageTitle";
 import Card from "../../../../common/widgets/card/Card";
 import HarvestTypeSelector from "../../../../common/widgets/HarvestTypeSelector";
 import { useSeasonStore } from "../../../../stores/SeasonStore";
+import { harvestWindow } from "@olive-platform/core/features/seasons/domain/HarvestWindow";
 
 // Valeur par défaut acceptée par l'API (1 = Manuelle).
 const DEFAULT_HARVEST_TYPE = 1;
@@ -31,15 +34,22 @@ type NewHarvestForm = {
   notes: string;
 };
 
-// Aujourd'hui s'il est dans la campagne sélectionnée, sinon son premier jour.
+// Aujourd'hui s'il est dans la période de récolte de la campagne
+// sélectionnée (1er septembre - 31 mars), sinon son premier jour.
 function defaultDateInSeason(season?: { startDate: string; endDate: string }) {
   const today = getTodayDate();
 
-  if (!season || (today >= season.startDate && today <= season.endDate)) {
+  if (!season) {
     return today;
   }
 
-  return season.startDate;
+  const window = harvestWindow(season);
+
+  if (today >= window.startDate && today <= window.endDate) {
+    return today;
+  }
+
+  return window.startDate;
 }
 
 export default function NewHarvestPage() {
@@ -62,6 +72,8 @@ export default function NewHarvestPage() {
 
   // Variétés de la parcelle choisie, avec les arbres restant à récolter.
   const [varieties, setVarieties] = useState<PlotVarietyDetail[]>([]);
+  // Conseil météo de la parcelle et de la date choisies (confirmation si déconseillé).
+  const [weatherAdvice, setWeatherAdvice] = useState<HarvestWeatherAdviceData | null>(null);
   const [varietiesLoading, setVarietiesLoading] = useState(false);
   const [varietiesError, setVarietiesError] = useState<string | null>(null);
 
@@ -197,6 +209,18 @@ export default function NewHarvestPage() {
       return;
     }
 
+    // Date déconseillée (ex. gel) : on laisse faire, mais après confirmation.
+    if (
+      weatherAdvice?.level === "danger" &&
+      !window.confirm(
+        `Météo défavorable le ${form.plannedDate} :\n\n${weatherAdvice.warnings
+          .map((warning) => `• ${warning.message}`)
+          .join("\n")}\n\nPlanifier la récolte quand même ?`,
+      )
+    ) {
+      return;
+    }
+
     try {
       setSaving(true);
       const request: CreateHarvestParams = {
@@ -219,7 +243,7 @@ export default function NewHarvestPage() {
     } finally {
       setSaving(false);
     }
-  }, [form, getValidationErrors, navigate]);
+  }, [form, getValidationErrors, navigate, weatherAdvice]);
 
   const handleCancel = useCallback(() => {
     if (!saving) navigate("/harvests");
@@ -262,7 +286,7 @@ export default function NewHarvestPage() {
               type="date"
               value={form.plannedDate}
               min={selectedSeason?.startDate}
-              max={selectedSeason?.endDate}
+              max={selectedSeason ? harvestWindow(selectedSeason).endDate : undefined}
               onChange={(event) =>
                 updateForm("plannedDate", event.target.value)
               }
@@ -283,6 +307,16 @@ export default function NewHarvestPage() {
             {errors.harvestType && (
               <span className="field-error">{errors.harvestType}</span>
             )}
+          </div>
+
+          {/* Conseil météo pour la parcelle et la date choisies. */}
+          <div className="filter-item" style={{ gridColumn: "1 / -1" }}>
+            <HarvestWeatherAdvice
+              plotId={form.plotId || null}
+              date={form.plannedDate}
+              onPickDate={(date) => updateForm("plannedDate", date)}
+              onAdviceChange={setWeatherAdvice}
+            />
           </div>
 
           {/* Variétés de la parcelle sélectionnée */}

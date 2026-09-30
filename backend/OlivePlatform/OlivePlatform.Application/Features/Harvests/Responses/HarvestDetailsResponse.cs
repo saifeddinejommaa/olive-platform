@@ -11,6 +11,7 @@ namespace OlivePlatform.Application.Features.Harvests.Responses
 
         public int SeasonId { get; set; }
         public string Reference { get; set; } = string.Empty;
+        public int PlotId { get; set; }
         public string PlotReference { get; set; } = string.Empty;
 
         public HarvestType HarvestType { get; set; }
@@ -29,6 +30,9 @@ namespace OlivePlatform.Application.Features.Harvests.Responses
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
         public List<HarvestCostSummaryResponse> Costs { get; set; } = new();
+
+        // Météo au lancement (null tant que la récolte n'est pas lancée).
+        public HarvestStartWeatherResponse? StartWeather { get; set; }
     }
 }
 

@@ -24,17 +24,20 @@ namespace OlivePlatform.Api.Controllers
         }
 
         [HttpGet("{id:int}")]
-        public async Task<ActionResult<PlotDetailResponse>> GetPlotDetails(int id)
+        public async Task<ActionResult<PlotDetailResponse>> GetPlotDetails(int id, [FromQuery] int? seasonId)
         {
-            var plot = await _plotQueryRepository.GetDetailAsync(id);
+            var plot = await _plotQueryRepository.GetDetailAsync(id, seasonId);
             if (plot is null) return NotFound();
             return Ok(plot);
         }
 
         [HttpGet("{plotId:int}/available-trees")]
-        public async Task<ActionResult<PlotVarietyDetail>> GetAvailableTrees(int plotId, [FromQuery] int varietyId)
+        public async Task<ActionResult<PlotVarietyDetail>> GetAvailableTrees(
+            int plotId,
+            [FromQuery] int varietyId,
+            [FromQuery] int? seasonId)
         {
-            var plot = await _plotQueryRepository.GetPlotVarieties(plotId, varietyId);
+            var plot = await _plotQueryRepository.GetPlotVarieties(plotId, varietyId, seasonId);
             return Ok(plot);
         }
     }

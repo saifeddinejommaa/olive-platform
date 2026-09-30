@@ -40,6 +40,7 @@ export function HarvestDetailsMapper(
 
     updatedAt: response.updatedAt,
     costs : response.costs,
-    harvestType: response.harvestType
+    harvestType: response.harvestType,
+    startWeather: response.startWeather ?? null,
   };
 }

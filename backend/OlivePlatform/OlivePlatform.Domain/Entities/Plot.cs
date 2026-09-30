@@ -32,5 +32,11 @@ namespace OlivePlatform.Domain.Entities
 
         [Column("created_at")]
         public DateTime CreatedAt { get; set; }
+
+        [Column("latitude")]
+        public decimal? Latitude { get; set; }
+
+        [Column("longitude")]
+        public decimal? Longitude { get; set; }
     }
 }

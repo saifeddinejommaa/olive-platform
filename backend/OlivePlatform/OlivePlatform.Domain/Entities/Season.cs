@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace OlivePlatform.Domain.Entities;
 
-// Campagne oléicole : par défaut du 1er octobre au 30 septembre.
+// Campagne oléicole : par défaut du 1er septembre au 31 août.
 [Table("seasons")]
 public class Season
 {

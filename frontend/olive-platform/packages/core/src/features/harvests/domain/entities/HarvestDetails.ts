@@ -1,6 +1,7 @@
 import type { ProductionStatus } from "../../../production/domain/entities/ProductionStatus";
 import type { OliveVarieties } from "../../../shared/entities/OliveVarieties";
 import type { HarvestCostSummary } from "./HarvestCostSummary";
+import type { HarvestStartWeather } from "./HarvestStartWeather";
 
 export interface HarvestDetails {
   id: number;
@@ -40,4 +41,7 @@ export interface HarvestDetails {
   endTime: string | null;
 
   costs: HarvestCostSummary[];
+
+  // Météo au lancement (null tant que la récolte n'est pas lancée).
+  startWeather: HarvestStartWeather | null;
 }

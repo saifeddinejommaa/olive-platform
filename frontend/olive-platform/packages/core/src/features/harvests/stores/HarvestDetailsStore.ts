@@ -28,7 +28,7 @@ type HarvestDetailsState = {
     params: UpdateHarvestParams,
   ) => Promise<Harvest>;
 
-  start: (id: number) => Promise<void>;
+  start: (id: number, weatherAcknowledged?: boolean) => Promise<void>;
 
   complete: (
     id: number,
@@ -110,7 +110,7 @@ export const useHarvestDetailsStore = create<HarvestDetailsState>(
       }
     },
 
-    start: async (id) => {
+    start: async (id, weatherAcknowledged = false) => {
       try {
         set({
           saving: true,
@@ -118,7 +118,7 @@ export const useHarvestDetailsStore = create<HarvestDetailsState>(
         });
 
         // Le backend retourne 204 No Content.
-        await startHarvest(id);
+        await startHarvest(id, weatherAcknowledged);
 
         // On recharge la récolte pour récupérer son nouveau statut
         // ainsi que les éventuelles données modifiées par le backend.

@@ -118,11 +118,13 @@ public class HarvestsController : ControllerBase
     [HttpPost("{id:int}/start")]
     public async Task<IActionResult> Start(
         int id,
+        [FromBody] StartHarvestCommand? body,
         CancellationToken cancellationToken)
     {
         var command = new StartHarvestCommand
         {
-            Id = id
+            Id = id,
+            WeatherAcknowledged = body?.WeatherAcknowledged ?? false
         };
 
         await _mediator.Send(command,cancellationToken);

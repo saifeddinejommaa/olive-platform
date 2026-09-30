@@ -1,4 +1,5 @@
 import { toDateOnlyString } from "@olive-platform/core/features/shared/utils/DatesUtils";
+import { harvestWindow } from "@olive-platform/core/features/seasons/domain/HarvestWindow";
 
 type SeasonBounds = { startDate: string; endDate: string };
 
@@ -31,4 +32,15 @@ export function seasonDateRange(season?: SeasonBounds) {
     minimumDate: toDate(season.startDate),
     maximumDate: toDate(season.endDate),
   };
+}
+
+// Période de récolte de la campagne (1er septembre - 31 mars) : bornes du sélecteur.
+export function harvestDateRange(season?: SeasonBounds) {
+  return seasonDateRange(season ? harvestWindow(season) : undefined);
+}
+
+// Date de récolte par défaut : aujourd'hui s'il est dans la période de récolte,
+// sinon son premier jour.
+export function defaultHarvestDate(season?: SeasonBounds): Date {
+  return defaultDateInSeason(season ? harvestWindow(season) : undefined);
 }

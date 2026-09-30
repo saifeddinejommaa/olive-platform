@@ -16,6 +16,14 @@ import { Loading } from "../../components/Loading";
 import { DetailsHeader } from "../../components/DetailsHeader";
 import { ActionCard } from "../../components/ActionCard";
 import { router } from 'expo-router';
+import {
+  formatDate,
+  getTodayDate,
+  toDateOnlyString,
+} from "@olive-platform/core/features/shared/utils/DatesUtils";
+import { HarvestWeatherAdvice } from "./components/HarvestWeatherAdvice";
+import { HarvestStartWeatherCard } from "./components/HarvestStartWeatherCard";
+import { WeatherRepository } from "@olive-platform/core/features/weather/data/repositories/WeatherRepository";
 
 type Props = { harvestId: number };
 
@@ -24,6 +32,7 @@ export function HarvestDetailsPage({ harvestId }: Props) {
   const [closeSheetOpen, setCloseSheetOpen] = useState(false);
   // Nouvelle clé à chaque ouverture : le récapitulatif repart des valeurs à jour.
   const [closeSheetKey, setCloseSheetKey] = useState(0);
+  const [checkingWeather, setCheckingWeather] = useState(false);
 
   const openCloseSheet = () => {
     setCloseSheetKey((key) => key + 1);
@@ -41,15 +50,53 @@ export function HarvestDetailsPage({ harvestId }: Props) {
   const isPlanned = harvest?.status === ProductionStatus.Planned;
   const isInProgress = harvest?.status === ProductionStatus.InProgress;
 
+  // Pas de lancement avant le jour prévu (règle vérifiée aussi par l'API).
+  const startsLater =
+    !!harvest?.plannedDate &&
+    toDateOnlyString(new Date(harvest.plannedDate)) > getTodayDate();
+
+  const launch = useCallback(
+    async (weatherAcknowledged: boolean) => {
+      if (!harvest) return;
+
+      try {
+        await start(harvest.id, weatherAcknowledged);
+      } catch {
+        Alert.alert("Erreur", "Impossible de lancer la récolte.");
+      }
+    },
+    [harvest, start],
+  );
+
+  // Météo du jour d'abord : si elle est défavorable, l'utilisateur confirme.
   const handleStart = useCallback(async () => {
     if (!harvest) return;
 
-    try {
-      await start(harvest.id);
-    } catch {
-      Alert.alert("Erreur", "Impossible de lancer la récolte.");
+    setCheckingWeather(true);
+
+    const advice = await WeatherRepository.getHarvestStartCheck(harvest.id)
+      // Météo indisponible : on ne bloque pas le lancement.
+      .catch(() => null)
+      .finally(() => setCheckingWeather(false));
+
+    if (advice && (advice.level === "warning" || advice.level === "danger")) {
+      Alert.alert(
+        "Météo défavorable",
+        advice.warnings.map((warning) => `• ${warning.message}`).join("\n\n"),
+        [
+          { text: "Annuler", style: "cancel" },
+          {
+            text: "Lancer quand même",
+            style: "destructive",
+            onPress: () => launch(true),
+          },
+        ],
+      );
+      return;
     }
-  }, [harvest, start]);
+
+    await launch(false);
+  }, [harvest, launch]);
 
   const handleClose = useCallback(
     async ({
@@ -97,10 +144,31 @@ export function HarvestDetailsPage({ harvestId }: Props) {
           <ActionCard
             icon="▶"
             title="Lancer la récolte"
-            subtitle="Commencer les opérations"
-            loading={saving}
+            subtitle={
+              startsLater
+                ? `Prévue le ${formatDate(harvest.plannedDate)} : lancement possible à partir de cette date`
+                : "Commencer les opérations"
+            }
+            disabled={startsLater}
+            loading={saving || checkingWeather}
             onPress={handleStart}
           />
+        )}
+
+        {/* Récolte planifiée : conseil météo, affiné à l'approche de la date. */}
+        {isPlanned && harvest.plannedDate && (
+          <View style={styles.weather}>
+            <HarvestWeatherAdvice
+              plotId={harvest.plotId}
+              date={toDateOnlyString(new Date(harvest.plannedDate))}
+            />
+          </View>
+        )}
+
+        {harvest.startWeather && (
+          <View style={styles.weather}>
+            <HarvestStartWeatherCard weather={harvest.startWeather} />
+          </View>
         )}
 
         {isInProgress && (
@@ -179,6 +247,9 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.xxxl,
   },
 
+  weather: {
+    marginBottom: spacing.xl,
+  },
   tabs: {
     marginBottom: spacing.xxl,
   },

@@ -276,6 +276,7 @@ public class HarvestQueryRepository : IHarvestQueryRepository
             h.id AS "{nameof(HarvestDetailsResponse.Id)}",
             h.season_id AS "{nameof(HarvestDetailsResponse.SeasonId)}",
             h.reference AS "{nameof(HarvestDetailsResponse.Reference)}",
+            h.plot_id AS "{nameof(HarvestDetailsResponse.PlotId)}",
             p.reference AS "{nameof(HarvestDetailsResponse.PlotReference)}",
             h.planned_date AS "{nameof(HarvestDetailsResponse.PlannedDate)}",
             h.quantity_kg AS "{nameof(HarvestDetailsResponse.QuantityKg)}",
@@ -356,7 +357,26 @@ public class HarvestQueryRepository : IHarvestQueryRepository
                     ) c
                 ),
                 '[]'::json
-            ) AS "{nameof(HarvestDetailsResponse.Costs)}"
+            ) AS "{nameof(HarvestDetailsResponse.Costs)}",
+
+            (
+                SELECT json_build_object(
+                    '{nameof(HarvestStartWeatherResponse.CheckedAt)}', sw.checked_at,
+                    '{nameof(HarvestStartWeatherResponse.WeatherDate)}', sw.weather_date,
+                    '{nameof(HarvestStartWeatherResponse.TempMin)}', sw.temp_min,
+                    '{nameof(HarvestStartWeatherResponse.TempMax)}', sw.temp_max,
+                    '{nameof(HarvestStartWeatherResponse.PrecipitationMm)}', sw.precipitation_mm,
+                    '{nameof(HarvestStartWeatherResponse.PrecipitationProbability)}', sw.precipitation_probability,
+                    '{nameof(HarvestStartWeatherResponse.WindSpeedKmh)}', sw.wind_speed_kmh,
+                    '{nameof(HarvestStartWeatherResponse.PreviousRainMm)}', sw.previous_rain_mm,
+                    '{nameof(HarvestStartWeatherResponse.Conditions)}', sw.conditions,
+                    '{nameof(HarvestStartWeatherResponse.Level)}', sw.level,
+                    '{nameof(HarvestStartWeatherResponse.Warnings)}', sw.warnings,
+                    '{nameof(HarvestStartWeatherResponse.StartedDespiteWarning)}', sw.started_despite_warning
+                )
+                FROM public.harvest_start_weather sw
+                WHERE sw.harvest_id = h.id
+            ) AS "{nameof(HarvestDetailsResponse.StartWeather)}"
 
         FROM public.harvests h
 

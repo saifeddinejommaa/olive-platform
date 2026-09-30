@@ -13,6 +13,7 @@ import { colors, semanticColors } from "../../consts/Colors";
 import { typography } from "../../consts/Typography";
 import { radius, shadow, spacing } from "../../consts/spacing";
 import { useTodos } from "./useTodos";
+import { WeatherCard } from "./WeatherCard";
 
 type Line = { label: string; count: number };
 
@@ -123,6 +124,8 @@ export function HomePage() {
             Impossible de charger les données. Tirez vers le bas pour réessayer.
           </Text>
         )}
+
+        <WeatherCard />
 
         <View style={styles.grid}>
           {tiles.map((tile) => (
