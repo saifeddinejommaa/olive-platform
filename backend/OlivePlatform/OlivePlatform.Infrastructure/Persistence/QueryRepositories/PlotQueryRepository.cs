@@ -37,6 +37,21 @@ public class PlotQueryRepository : IPlotQueryRepository
                     COALESCE(SUM(h.harvested_trees), 0) * 100.0 / p.number_of_trees, 2)
             END AS {nameof(PlotDetailResponse.HarvestedTreesPercentage)},
 
+            -- Arbres planifiés : récoltes planifiées ou en cours (même règle que la liste).
+            CASE
+                WHEN p.number_of_trees = 0 THEN 0
+                ELSE ROUND(
+                    LEAST(
+                        COALESCE(SUM(h.planned_trees) FILTER (
+                            WHERE h.status IN (
+                                {(int)ProductionStatus.Planned},
+                                {(int)ProductionStatus.InProgress}
+                            )
+                        ), 0),
+                        p.number_of_trees
+                    ) * 100.0 / p.number_of_trees, 2)
+            END AS {nameof(PlotDetailResponse.PlannedTreesPercentage)},
+
             COALESCE(SUM(h.harvested_trees), 0) < p.number_of_trees
                 AS {nameof(PlotDetailResponse.CanLaunchHarvest)},
 

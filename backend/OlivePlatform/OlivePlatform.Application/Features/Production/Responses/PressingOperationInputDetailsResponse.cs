@@ -29,5 +29,8 @@ namespace OlivePlatform.Application.Features.Production.Responses
         public int? OliveVarietyId { get; set; }
 
         public OliveAnalysisInfoResponse? Analysis { get; set; }
+
+        // Analyse obligatoire : tant qu'elle n'est pas terminée, la pression ne se lance ni ne se clôture.
+        public bool NeedAnalysis { get; set; }
     }
 }

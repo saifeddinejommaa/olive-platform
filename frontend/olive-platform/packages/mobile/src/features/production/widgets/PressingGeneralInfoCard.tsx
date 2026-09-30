@@ -14,7 +14,7 @@ import { ProductionStatus } from "@olive-platform/core/features/production/domai
 import { colors, semanticColors } from "../../../consts/Colors";
 import { typography } from "../../../consts/Typography";
 import { radius, shadow, spacing } from "../../../consts/spacing";
-import { formatDate } from "@olive-platform/core/features/shared/utils/DatesUtils";
+import { DEFAULT_PRESSING_PARAMETERS } from "@olive-platform/core/features/production/domain/entities/PressingParametersDetails";
 import { DatePickerField, safeParseDate } from "../../../widgets/DatePickerField";
 
 type PressingParameters = {
@@ -81,7 +81,14 @@ const parseParam = (value: string) => {
 };
 
 export function PressingGeneralInfoCard({ operation }: Props) {
-  const [isEditing, setIsEditing] = useState(false);
+  // Pression en cours sans configuration : saisie ouverte, préremplie avec les
+  // réglages par défaut (modifiables), à enregistrer avant la clôture.
+  const needsConfiguration =
+    operation.status === ProductionStatus.InProgress && !operation.parameters;
+  const initialParameters =
+    operation.parameters ?? (needsConfiguration ? DEFAULT_PRESSING_PARAMETERS : null);
+
+  const [isEditing, setIsEditing] = useState(needsConfiguration);
 
   const [plannedDate, setPlannedDate] = useState(
     safeParseDate(operation.plannedDate),
@@ -90,9 +97,9 @@ export function PressingGeneralInfoCard({ operation }: Props) {
   const [notes, setNotes] = useState(operation.notes ?? "");
 
   const [paramValues, setParamValues] = useState<ParamValues>(() =>
-    paramsToValues(operation.parameters),
+    paramsToValues(initialParameters),
   );
-  const [paramNotes, setParamNotes] = useState(operation.parameters?.notes ?? "");
+  const [paramNotes, setParamNotes] = useState(initialParameters?.notes ?? "");
 
   const { updateOperation, saving } = usePressingOperationDetailsStore();
 
@@ -107,8 +114,8 @@ export function PressingGeneralInfoCard({ operation }: Props) {
   const resetFromOperation = () => {
     setPlannedDate(safeParseDate(operation.plannedDate));
     setNotes(operation.notes ?? "");
-    setParamValues(paramsToValues(operation.parameters));
-    setParamNotes(operation.parameters?.notes ?? "");
+    setParamValues(paramsToValues(initialParameters));
+    setParamNotes(initialParameters?.notes ?? "");
   };
 
   const handleEdit = () => {
@@ -256,6 +263,13 @@ export function PressingGeneralInfoCard({ operation }: Props) {
 
       {!isPlanned && isEditing && canEditParameters && (
         <>
+          {needsConfiguration && (
+            <Text style={[typography.caption, styles.hint]}>
+              Préremplie avec les réglages par défaut : ajustez-les puis enregistrez
+              (obligatoire avant la clôture).
+            </Text>
+          )}
+
           {PARAM_FIELDS.map((field) => (
             <View key={field.key} style={styles.row}>
               <Text style={[typography.caption, styles.field]}>{field.label}</Text>

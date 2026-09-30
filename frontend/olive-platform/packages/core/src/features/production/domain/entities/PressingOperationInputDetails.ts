@@ -18,4 +18,6 @@ export type PressingOperationInputDetails = {
   purchaseId: number | null;
   oliveVarietyId: number | null;
   analysis: OliveAnalysisDetails | null;
+  // Analyse obligatoire : tant qu'elle n'est pas terminée, la pression ne se lance ni ne se clôture.
+  needAnalysis: boolean;
 };

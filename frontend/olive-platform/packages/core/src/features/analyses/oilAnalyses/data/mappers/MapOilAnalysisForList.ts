@@ -15,5 +15,10 @@ export function mapOilAnalysisForList(
     endTime: response.endTime,
     createdAt: response.createdAt,
     status: response.status,
+    acidityPercentage: response.acidityPercentage ?? null,
+    peroxideIndex: response.peroxideIndex ?? null,
+    k232: response.k232 ?? null,
+    k270: response.k270 ?? null,
+    oilCategory: response.oilCategory ?? null,
   };
 }

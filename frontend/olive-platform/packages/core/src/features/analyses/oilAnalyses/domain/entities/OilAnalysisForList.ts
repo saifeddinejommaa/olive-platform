@@ -1,3 +1,4 @@
+import type { OilCategory } from "../../../../tanks/domain/entities/Tank";
 import type { ProductionStatus } from "../../../../production/domain/entities/ProductionStatus";
 import type { OilAnalysisSourceType } from "./OilAnalysisSourceType";
 
@@ -13,4 +14,11 @@ export type OilAnalysisForList = {
   endTime: string | null;
   createdAt: string;
   status: ProductionStatus;
+  // Résultats (null tant qu'ils ne sont pas saisis).
+  acidityPercentage: number | null;
+  peroxideIndex: number | null;
+  k232: number | null;
+  k270: number | null;
+  // Catégorie officielle, fixée à la clôture.
+  oilCategory: OilCategory | null;
 };

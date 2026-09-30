@@ -329,6 +329,7 @@ public class PressingOperationQueryRepository : IPressiongOperationQueryReposito
             pl.quantity_kg AS {nameof(PressingOperationInputDetailsResponse.QuantityKg)},
             pl.remaining_kg AS {nameof(PressingOperationInputDetailsResponse.RemainingKg)},
             poi.quantity_kg AS {nameof(PressingOperationInputDetailsResponse.PressedQuantityKg)},
+            pl.need_analysis AS {nameof(PressingOperationInputDetailsResponse.NeedAnalysis)},
             COALESCE(pl.variety_id, h.variety_id) AS {nameof(PressingOperationInputDetailsResponse.OliveVarietyId)},
 
             CASE

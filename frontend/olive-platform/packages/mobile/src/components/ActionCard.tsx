@@ -8,6 +8,8 @@ type Props = {
   title: string;
   subtitle: string;
   loading?: boolean;
+  // Action indisponible (ex. analyse en attente) : grisée, non cliquable.
+  disabled?: boolean;
   onPress: () => void;
 };
 
@@ -16,13 +18,18 @@ export function ActionCard({
   title,
   subtitle,
   loading = false,
+  disabled = false,
   onPress,
 }: Props) {
   return (
     <Pressable
-      disabled={loading}
+      disabled={loading || disabled}
       onPress={onPress}
-      style={({ pressed }) => [styles.card, pressed && styles.pressed]}
+      style={({ pressed }) => [
+        styles.card,
+        pressed && styles.pressed,
+        disabled && styles.disabled,
+      ]}
     >
       <View style={styles.iconContainer}>
         {loading ? (
@@ -53,6 +60,9 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.md,
     marginBottom: spacing.xl,
     ...shadow.raised,
+  },
+  disabled: {
+    opacity: 0.45,
   },
   pressed: {
     backgroundColor: semanticColors.primaryPressed,

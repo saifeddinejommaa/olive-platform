@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, type ReactNode } from "react";
 import { useFocusEffect, useRouter } from "expo-router";
 
 import { useOliveAnalysesStore } from "@olive-platform/core/features/analyses/oliveAnalyses/store/OliveAnalysesStore";
@@ -12,7 +12,12 @@ import { ProductionStatusFilterField } from "../../components/filters/Production
 
 import { OliveAnalysisListItem } from "./widgets/OliveAnalysisListItem";
 
-export const OliveAnalysesPage = () => {
+type Props = {
+  // Contenu en tête de liste (bascule Olive / Huile).
+  headerContent?: ReactNode;
+};
+
+export const OliveAnalysesPage = ({ headerContent }: Props) => {
   const router = useRouter();
 
   const { analyses, loading, error, filter, setParams, fetchAnalyses, clear } =
@@ -38,6 +43,8 @@ export const OliveAnalysesPage = () => {
     <ListScreen
       title="Analyses"
       description="Suivez les analyses d'olives"
+      headerContent={headerContent}
+      canCreate={false}
       data={analyses}
       keyExtractor={(item) => item.id.toString()}
       onCreate={() => {
